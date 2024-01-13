@@ -21,7 +21,7 @@
     "test": "pnpm lint"
   },
   "resolutions": {
-    "vue": "^3.4.11"
+    "vue": "3.4.10"
   },
   "dependencies": {
     "@iconify/json": "2.2.163",
@@ -39,7 +39,7 @@
     "nuxt-og-image": "2.2.4",
     "pkg-types": "1.0.3",
     "tailwindcss": "3.4.1",
-    "vue": "^3.4.11",
+    "vue": "3.4.10",
     "vue-router": "4.2.5"
   },
   "devDependencies": {
