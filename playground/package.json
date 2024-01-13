@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "unjs-docs dev",
+    "build": "unjs-docs build"
+  },
+  "devDependencies": {
+    "unjs-docs": "latest"
+  }
+}

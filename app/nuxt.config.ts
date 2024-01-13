@@ -1,23 +1,16 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+import { defineNuxtConfig } from 'nuxt/config'
+
 export default defineNuxtConfig({
-  extends: ["@nuxt/ui-pro"],
-  modules: [
-    "@nuxt/content",
-    "@nuxt/ui",
-    "@nuxthq/studio",
-    "@nuxtjs/fontaine",
-    "@nuxtjs/google-fonts",
-    "nuxt-og-image",
-  ],
+  extends: ['@nuxt/ui-pro'],
+  modules: ['@nuxt/content', '@nuxt/ui', '@nuxthq/studio', '@nuxtjs/fontaine', '@nuxtjs/google-fonts', 'nuxt-og-image'],
   ui: {
-    icons: ["heroicons", "simple-icons", "mdi", "material-symbols", "fa", "ph"],
+    icons: ['heroicons', 'simple-icons', 'mdi', 'material-symbols', 'fa', 'ph'],
   },
-  // Fonts
   fontMetrics: {
-    fonts: ["Nunito"],
+    fonts: ['Nunito'],
   },
   googleFonts: {
-    display: "swap",
+    display: 'swap',
     download: true,
     families: {
       Nunito: [400, 500, 600, 700],
@@ -26,15 +19,17 @@ export default defineNuxtConfig({
   content: {
     highlight: {
       theme: {
-        default: "min-dark",
-        light: "min-light",
+        default: 'min-dark',
+        light: 'min-light',
       },
     },
   },
   routeRules: {
-    "/api/search.json": { prerender: true },
+    '/api/search.json': { prerender: true },
   },
-  // Devtools / Typescript
-  devtools: { enabled: true },
-  typescript: { strict: false },
-});
+  devtools: { enabled: false },
+  typescript: {
+    strict: false,
+    includeWorkspace: true,
+  },
+})

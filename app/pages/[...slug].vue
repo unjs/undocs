@@ -1,73 +1,65 @@
 <script setup lang="ts">
-import { withoutTrailingSlash } from "ufo";
+import { withoutTrailingSlash } from 'ufo'
 
 definePageMeta({
-  layout: "docs",
-});
+  layout: 'docs',
+})
 
-const appConfig = useAppConfig();
-const route = useRoute();
+const appConfig = useAppConfig()
+const route = useRoute()
 
-const { data: page } = await useAsyncData(route.path, () =>
-  queryContent(route.path).findOne(),
-);
+const { data: page } = await useAsyncData(route.path, () => queryContent(route.path).findOne())
+
 if (!page.value) {
   throw createError({
     statusCode: 404,
-    statusMessage: "Page not found",
+    statusMessage: 'Page not found',
     fatal: true,
-  });
+  })
 }
 
 const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
   queryContent()
-    .where({ _extension: "md", navigation: { $ne: false } })
-    .only(["title", "description", "_path"])
+    .where({ _extension: 'md', navigation: { $ne: false } })
+    .only(['title', 'description', '_path'])
     .findSurround(withoutTrailingSlash(route.path)),
-);
+)
 
 useSeoMeta({
-  titleTemplate: `%s · ${appConfig.name}`,
-  title: page.value?.title,
-  ogTitle: page.value?.title,
-  description: page.value?.description,
-  ogDescription: page.value?.description,
-});
+  titleTemplate: `%s · ${appConfig.docs.name}`,
+  title: page.value.title,
+  ogTitle: page.value.title,
+  description: page.value.description,
+  ogDescription: page.value.description,
+})
 
 defineOgImage({
-  component: "Docs",
+  component: 'Docs',
   title: page.value?.title,
   description: page.value?.description,
-});
+})
 
-const headline = computed(() => findPageHeadline(page.value));
+const headline = computed(() => findPageHeadline(page.value))
 
-const links = computed(() =>
-  [
-    {
-      icon: "i-heroicons-pencil-square",
-      label: "Edit this page",
-      to: `https://github.com/${appConfig.github}/edit/main/docs/content/${page?.value?._file}`,
-      target: "_blank",
-    },
-    {
-      icon: 'i-heroicons-star',
-      label: 'Star on GitHub',
-      to: `https://github.com/${appConfig.github}`,
-      target: '_blank',
-      },
-  ]
-);
+const links = computed(() => [
+  {
+    icon: 'i-heroicons-pencil-square',
+    label: 'Edit this page',
+    to: `https://github.com/${appConfig.docs.github}/edit/main/docs/content/${page.value._file}`,
+    target: '_blank',
+  },
+  {
+    icon: 'i-heroicons-star',
+    label: 'Star on GitHub',
+    to: `https://github.com/${appConfig.docs.github}`,
+    target: '_blank',
+  },
+])
 </script>
 
 <template>
   <UPage>
-    <UPageHeader
-      :title="page.title"
-      :description="page.description"
-      :links="page.links"
-      :headline="headline"
-    />
+    <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline" />
 
     <UPageBody prose>
       <ContentRenderer v-if="page.body" :value="page" />
@@ -80,10 +72,7 @@ const links = computed(() =>
     <template #right>
       <UDocsToc title="Table of Contents" :links="page.body?.toc?.links">
         <template #bottom>
-          <div
-            class="hidden lg:block space-y-6"
-            :class="{ '!mt-6': page.body?.toc?.links?.length }"
-          >
+          <div class="hidden lg:block space-y-6" :class="{ '!mt-6': page.body?.toc?.links?.length }">
             <UDivider v-if="page.body?.toc?.links?.length" type="dashed" />
 
             <UPageLinks title="Community" :links="links" />

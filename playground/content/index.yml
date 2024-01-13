@@ -1,0 +1,46 @@
+title: 'packageName'
+description: 'package decription.'
+navigation: false
+hero:
+  title: '[packageName]{.text-primary} :br [package decription.]{.text-4xl}'
+  description: 'package extended decription.'
+  orientation: horizontal
+  links:
+    - label: 'Get Started'
+      icon: 'i-heroicons-rocket-launch'
+      to: '/docs'
+      size: lg
+    - label: 'Contribute on GitHub'
+      icon: 'i-simple-icons-github'
+      color: 'white'
+      to: 'https://github.com/unjs/unstorage'
+      target: '_blank'
+      size: lg
+  code: |
+    ```ts [index.ts]
+    import { xyz } from "packageName"
+
+    xyz()
+    ```
+features:
+  title: 'Many Features'
+  links:
+    - label: 'Get started'
+      icon: 'i-heroicons-rocket-launch'
+      trailingIcon: 'i-heroicons-arrow-right-20-solid'
+      color: 'gray'
+      to: '/docs'
+      size: lg
+  items:
+    - title: 'Feature A'
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit..'
+      icon: 'i-material-symbols-lock-open-right-outline-rounded'
+    - title: 'Feature B'
+      description: 'Fusce ac elit faucibus, porttitor tortor ac, semper turpis'
+      icon: 'i-material-symbols-usb'
+    - title: 'Feature C'
+      description: 'Sed pellentesque neque nisl.'
+      icon: 'i-material-symbols-add-a-photo-outline'
+    - title: 'Feature D'
+      description: 'Aliquam molestie malesuada varius.'
+      icon: 'i-material-symbols-add-a-photo-outline'
