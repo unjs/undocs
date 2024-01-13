@@ -37,4 +37,4 @@ jobs:
           pnpm changelogen --canary nightly --publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # NPM_CONFIG_PROVENANCE: true
+          NPM_CONFIG_PROVENANCE: false
