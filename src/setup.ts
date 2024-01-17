@@ -13,7 +13,7 @@ export function setupDocs(dir: string) {
     extends: [appDir],
     modulesDir: [resolve(appDir, '../node_modules'), resolve(dir, 'node_modules')],
     build: {
-      transpile: [appDir, dir],
+      transpile: [appDir],
     },
     docs: {
       dir,
