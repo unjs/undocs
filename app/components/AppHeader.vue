@@ -36,12 +36,12 @@ const [{ data: stars }, { data: tag }] = await Promise.all([
           :to="`https://github.com/${appConfig.docs.github}`"
           target="_blank"
           aria-label="Visit repository"
-          v-bind="{ ...($ui.button?.secondary as any) }"
           square
         >
           {{ formatNumber(stars) }}
         </UButton>
       </UTooltip>
+      <UColorModeSelect v-else />
     </template>
 
     <template #panel>
