@@ -28,7 +28,7 @@ provide('navigation', navigation)
 
 <template>
   <div>
-    <Header />
+    <AppHeader />
 
     <UMain>
       <UContainer>
@@ -38,7 +38,7 @@ provide('navigation', navigation)
       </UContainer>
     </UMain>
 
-    <Footer />
+    <AppFooter />
 
     <ClientOnly>
       <LazyUDocsSearch :files="files" :navigation="navigation" />

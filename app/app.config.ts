@@ -5,22 +5,10 @@ export default defineAppConfig({
     github: '',
     logo: '/icon.svg',
     socialBackground: 'http://unjs.io/assets/header/ellipse.png',
-    socials: [
-      {
-        url: 'https://github.com/unjs',
-        rel: 'noopener',
-        target: '_blank',
-        icon: 'i-simple-icons-github',
-        name: 'GitHub',
-      },
-      {
-        url: 'https://x.com/unjsio',
-        icon: 'i-simple-icons-x',
-        rel: 'noopener',
-        target: '_blank',
-        name: 'X',
-      },
-    ],
+    socials: {
+      github: 'unjs',
+      x: 'unjsio'
+    },
     footer: {
       menu: [
         // {

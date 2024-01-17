@@ -32,7 +32,7 @@ useSeoMeta({
   ogType: 'website',
   ogSiteName: appConfig.docs.name,
   twitterCard: 'summary_large_image',
-  twitterSite: 'unjsios',
+  twitterSite: appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined,
 })
 
 provide('navigation', navigation)
@@ -40,7 +40,7 @@ provide('navigation', navigation)
 
 <template>
   <div>
-    <Header />
+    <AppHeader />
 
     <UMain>
       <NuxtLayout>
@@ -48,7 +48,7 @@ provide('navigation', navigation)
       </NuxtLayout>
     </UMain>
 
-    <Footer />
+    <AppFooter />
 
     <ClientOnly>
       <LazyUDocsSearch :files="files" :navigation="navigation" />

@@ -1,10 +1,24 @@
 <script lang="ts" setup>
 const appConfig = useAppConfig()
 
-const colorMode = useColorMode()
-const toggleTheme = () => {
-  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
-}
+const socialLinks = computed(() => {
+  return Object.entries(appConfig.docs.socials || {})
+    .map(([key, value]) => {
+      if (typeof value === 'object') {
+        return value
+      } else if (typeof value === 'string' && value) {
+        return {
+          to: /^https?:\/\//.test(value) ? value : `https://${key}.com/${value}`,
+          icon: `i-simple-icons-${key}`,
+          label: value,
+          rel: 'noopener noreferrer'
+        }
+      } else {
+        return null
+      }
+    })
+    .filter(Boolean)
+})
 
 const uiButton = {
   color: {
@@ -43,23 +57,21 @@ const uiButton = {
               variant="ghost"
               color="gray"
               size="xl"
-              :ui="{ icon: { xl: 'md:w-7 md:h-7' }, ...uiButton }"
             >
               <img src="/unjs.svg" alt="Logo of UnJS" class="w-6 h-6" />
             </UButton>
           </li>
-          <li v-for="social in appConfig.docs.socials" :key="social.name">
+          <li v-for="link of socialLinks" :key="link.label">
             <UButton
-              :rel="social.rel"
-              :target="social.target"
-              :to="social.url"
-              :icon="social.icon"
-              :aria-label="`Follow us on ${social.name}`"
+              square
+              :to="link.href"
+              :rel="link.rel"
+              target="_blank"
+              :aria-label="`Follow us on ${link.label}`"
               size="xl"
               variant="ghost"
               color="gray"
-              :ui="{ icon: { xl: 'md:w-7 md:h-7' }, ...uiButton }"
-            />
+            ><UIcon :name="link.icon" class="w-6 h-6" dynamic /></UButton>
           </li>
         </ul>
         <nav
@@ -90,22 +102,7 @@ const uiButton = {
         </nav>
 
         <div class="place-self-center md:place-self-end">
-          <ClientOnly>
-            <UTooltip :text="$colorMode.value === 'dark' ? 'Light Mode' : 'Dark Mode'">
-              <UButton
-                size="xl"
-                variant="ghost"
-                color="gray"
-                square
-                :trailing-icon="$colorMode.value === 'dark' ? 'i-heroicons-sun' : 'i-heroicons-moon'"
-                :ui="uiButton"
-                aria-label="Toggle Theme"
-                @click="toggleTheme"
-              >
-                {{ $colorMode.value === 'dark' ? 'Light' : 'Dark' }}
-              </UButton>
-            </UTooltip>
-          </ClientOnly>
+          <UColorModeSelect />
         </div>
       </div>
       <div class="text-sm dark:text-gray-400 text-center">

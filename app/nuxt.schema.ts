@@ -25,11 +25,19 @@ export default defineNuxtSchema({
         },
       }),
       socials: field({
-        type: 'array',
+        type: 'object',
         title: 'Socials',
-        description: 'Array of social object displayed in header.',
+        description: 'Social media.',
         icon: 'i-mdi-account-group',
-        default: [],
+        fields: {
+          github: field({ type: 'string', icon: 'i-simple-icons-github' }),
+          x: field({ type: 'string', icon: 'i-simple-icons-x' }),
+          facebook: field({ type: 'string', icon: 'i-simple-icons-facebook' }),
+          instagram: field({ type: 'string', icon: 'i-simple-icons-instagram' }),
+          tiktok: field({ type: 'string', icon: 'i-simple-icons-tiktok' }),
+          youtube: field({ type: 'string', icon: 'i-simple-icons-youtube' }),
+          medium: field({ type: 'string', icon: 'i-simple-icons-medium' }),
+        }
       }),
     }),
     ui: group({
