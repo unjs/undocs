@@ -27,7 +27,7 @@ export default defineNuxtConfig({
   routeRules: {
     '/api/search.json': { prerender: true },
   },
-  devtools: { enabled: true },
+  devtools: { enabled: !!process.env.NUXT_DEVTOOLS },
   typescript: {
     strict: false,
     includeWorkspace: true,
