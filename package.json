@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "build": "unbuild",
-    "dev": "NUXT_DEVTOOLS=1 JITI_ESM_RESOLVE=1 jiti ./src/cli.ts dev playground",
+    "dev": "NUXT_DOCS_DEV=1 JITI_ESM_RESOLVE=1 jiti ./src/cli.ts dev playground",
     "dev:build": "JITI_ESM_RESOLVE=1 jiti ./src/cli.ts build playground",
     "lint": "eslint --cache --ext .ts,.js,.mjs,.cjs . && prettier -c src",
     "lint:fix": "eslint --cache --ext .ts,.js,.mjs,.cjs . --fix && prettier -c src -w",

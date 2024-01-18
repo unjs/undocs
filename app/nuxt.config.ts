@@ -1,5 +1,8 @@
 import { defineNuxtConfig } from 'nuxt/config'
 
+// Flag enabled when developing docs theme
+const dev = !!process.env.NUXT_DOCS_DEV
+
 export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
   modules: ['@nuxt/content', '@nuxt/ui', '@nuxthq/studio', '@nuxtjs/fontaine', '@nuxtjs/google-fonts', 'nuxt-og-image'],
@@ -27,9 +30,15 @@ export default defineNuxtConfig({
   routeRules: {
     '/api/search.json': { prerender: true },
   },
-  devtools: { enabled: !!process.env.NUXT_DEVTOOLS },
+  devtools: {
+    enabled: dev,
+  },
   uiPro: {
     license: process.env.NUXT_UI_PRO_LICENSE || 'oss',
+  },
+  tailwindcss: {
+    viewer: dev,
+    quiet: !dev,
   },
   typescript: {
     strict: false,
