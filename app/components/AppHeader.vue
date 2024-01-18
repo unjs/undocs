@@ -41,7 +41,6 @@ const [{ data: stars }, { data: tag }] = await Promise.all([
           {{ formatNumber(stars) }}
         </UButton>
       </UTooltip>
-      <UColorModeSelect v-else />
     </template>
 
     <template #panel>
