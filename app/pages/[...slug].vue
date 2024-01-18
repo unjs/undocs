@@ -59,7 +59,8 @@ const links = computed(() => [
 
 <template>
   <UPage>
-    <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline" />
+    <!-- TODO: Find a solution to deduplicate header and description off the markdown -->
+    <!-- <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline" /> -->
 
     <UPageBody prose>
       <ContentRenderer v-if="page.body" :value="page" />

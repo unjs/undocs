@@ -1,7 +1,6 @@
----
-title: Getting Started
-description: Learn how to use this project!
----
+# Docs Playground
+
+Writing docs should be fun!
 
 ## Alerts
 
