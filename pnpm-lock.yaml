@@ -15,8 +15,8 @@ dependencies:
     specifier: ^2.12.2
     version: 2.12.2(nuxt@3.9.3)(rollup@3.29.4)(vite@5.0.11)(vue@3.3.13)
   '@nuxt/ui-pro':
-    specifier: npm:@nuxt/ui-pro-edge@0.7.1-28426550.013ea74
-    version: /@nuxt/ui-pro-edge@0.7.1-28426550.013ea74(nuxt@3.9.3)(rollup@3.29.4)(vite@5.0.11)(vue@3.3.13)
+    specifier: npm:@nuxt/ui-pro-edge@0.7.2-28426622.91539d9
+    version: /@nuxt/ui-pro-edge@0.7.2-28426622.91539d9(nuxt@3.9.3)(rollup@3.29.4)(vite@5.0.11)(vue@3.3.13)
   '@nuxthq/studio':
     specifier: ^1.0.8
     version: 1.0.8(rollup@3.29.4)
@@ -1332,10 +1332,10 @@ packages:
       - supports-color
     dev: false
 
-  /@nuxt/ui-pro-edge@0.7.1-28426550.013ea74(nuxt@3.9.3)(rollup@3.29.4)(vite@5.0.11)(vue@3.3.13):
-    resolution: {integrity: sha512-mxLbIGSZzBcFaNkCOgaKzs4G4jNq1VJSRCbR6zLJ2J/rDLjrI2qqG8xcP2oRsqtp+S2qEbO+Gg4BQUyxUH3Lrg==}
+  /@nuxt/ui-pro-edge@0.7.2-28426622.91539d9(nuxt@3.9.3)(rollup@3.29.4)(vite@5.0.11)(vue@3.3.13):
+    resolution: {integrity: sha512-jW61fVmvJFN83ZLxJW2SabMhgEWitkZkzfyMAjdOVtJzVPsW1hP2g8H+Np8xLDDbH226qxsEU8Y4w6kVX633KQ==}
     dependencies:
-      '@nuxt/ui': 2.12.2(nuxt@3.9.3)(rollup@3.29.4)(vite@5.0.11)(vue@3.3.13)
+      '@nuxt/ui': 2.12.3(nuxt@3.9.3)(rollup@3.29.4)(vite@5.0.11)(vue@3.3.13)
       '@vueuse/core': 10.7.2(vue@3.3.13)
       defu: 6.1.4
       git-url-parse: 14.0.0
@@ -1371,6 +1371,54 @@ packages:
 
   /@nuxt/ui@2.12.2(nuxt@3.9.3)(rollup@3.29.4)(vite@5.0.11)(vue@3.3.13):
     resolution: {integrity: sha512-n9/yr1httrImnDC3TwYhFQ/UVvPiFc6RpBObNf1sF3zcmxDvzAO0QPQEX+UpI+3ye5EpSizTxntFVcL96h+vxA==}
+    engines: {node: '>=v16.20.2'}
+    dependencies:
+      '@egoist/tailwindcss-icons': 1.7.2(tailwindcss@3.4.1)
+      '@headlessui/tailwindcss': 0.2.0(tailwindcss@3.4.1)
+      '@headlessui/vue': 1.7.16(vue@3.3.13)
+      '@iconify-json/heroicons': 1.1.19
+      '@nuxt/kit': 3.9.3(rollup@3.29.4)
+      '@nuxtjs/color-mode': 3.3.2(rollup@3.29.4)
+      '@nuxtjs/tailwindcss': 6.10.4(rollup@3.29.4)
+      '@popperjs/core': 2.11.8
+      '@tailwindcss/aspect-ratio': 0.4.2(tailwindcss@3.4.1)
+      '@tailwindcss/container-queries': 0.1.1(tailwindcss@3.4.1)
+      '@tailwindcss/forms': 0.5.7(tailwindcss@3.4.1)
+      '@tailwindcss/typography': 0.5.10(tailwindcss@3.4.1)
+      '@vueuse/core': 10.7.2(vue@3.3.13)
+      '@vueuse/integrations': 10.7.2(fuse.js@6.6.2)(vue@3.3.13)
+      '@vueuse/math': 10.7.2(vue@3.3.13)
+      defu: 6.1.4
+      fuse.js: 6.6.2
+      nuxt-icon: 0.6.8(nuxt@3.9.3)(rollup@3.29.4)(vite@5.0.11)(vue@3.3.13)
+      ohash: 1.1.3
+      pathe: 1.1.2
+      scule: 1.2.0
+      tailwind-merge: 2.2.0
+      tailwindcss: 3.4.1
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - async-validator
+      - axios
+      - change-case
+      - drauu
+      - focus-trap
+      - idb-keyval
+      - jwt-decode
+      - nprogress
+      - nuxt
+      - qrcode
+      - rollup
+      - sortablejs
+      - supports-color
+      - ts-node
+      - universal-cookie
+      - vite
+      - vue
+    dev: false
+
+  /@nuxt/ui@2.12.3(nuxt@3.9.3)(rollup@3.29.4)(vite@5.0.11)(vue@3.3.13):
+    resolution: {integrity: sha512-F/eoqU8pTBVCdJ1QHvWKZjXHVNNV6Q1SCgPRWJyNnfbnIi97a50/aiHVJZfvr0zp3FQKa/ogWTITF5Vxss5TtA==}
     engines: {node: '>=v16.20.2'}
     dependencies:
       '@egoist/tailwindcss-icons': 1.7.2(tailwindcss@3.4.1)
@@ -1681,6 +1729,7 @@ packages:
     dependencies:
       is-glob: 4.0.3
       micromatch: 4.0.5
+      napi-wasm: 1.1.0
     dev: false
     bundledDependencies:
       - napi-wasm
@@ -7653,6 +7702,10 @@ packages:
     resolution: {integrity: sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==}
     engines: {node: ^14 || ^16 || >=18}
     hasBin: true
+    dev: false
+
+  /napi-wasm@1.1.0:
+    resolution: {integrity: sha512-lHwIAJbmLSjF9VDRm9GoVOy9AGp3aIvkjv+Kvz9h16QR3uSVYH78PNQUnT2U4X53mhlnV2M7wrhibQ3GHicDmg==}
     dev: false
 
   /natural-compare-lite@1.4.0:
