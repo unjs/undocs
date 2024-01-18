@@ -28,6 +28,9 @@ export default defineNuxtConfig({
     '/api/search.json': { prerender: true },
   },
   devtools: { enabled: !!process.env.NUXT_DEVTOOLS },
+  uiPro: {
+    license: process.env.NUXT_UI_PRO_LICENSE || 'oss',
+  },
   typescript: {
     strict: false,
     includeWorkspace: true,
