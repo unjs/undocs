@@ -2,7 +2,7 @@
   <!-- https://ui.nuxt.com/pro/components/prose/callout -->
   <!-- https://icon-sets.iconify.design/ph -->
   <Callout :icon="icon" :color="color" :to="to" :target="target">
-    {{ title }}
+    <!-- <strong class="mr-1">{{ title }}</strong> -->
     <ContentSlot :use="$slots.default" unwrap="p" />
   </Callout>
 </template>
