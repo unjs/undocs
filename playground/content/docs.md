@@ -20,7 +20,7 @@ Crucial information necessary for users to succeed.
 Critical content demanding immediate user attention due to potential risks.
 ::
 
-::caution
+::caution{to="/"}
 Negative potential consequences of an action.
 ::
 

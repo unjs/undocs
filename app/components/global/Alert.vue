@@ -17,5 +17,5 @@ const props = defineProps({
   to: { type: String },
 })
 
-const target = computed(() => (props.to?.startsWith('https://') ? 'blank' : ''))
+const target = computed(() => (props.to?.startsWith('https://') ? '_blank' : ''))
 </script>
