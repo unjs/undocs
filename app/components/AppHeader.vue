@@ -37,6 +37,8 @@ const [{ data: stars }, { data: tag }] = await Promise.all([
           target="_blank"
           aria-label="Visit repository"
           square
+          color="gray"
+          variant="ghost"
         >
           {{ formatNumber(stars) }}
         </UButton>
