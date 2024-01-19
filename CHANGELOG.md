@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.1.3
+
+[compare changes](https://github.com/unjs/docs/compare/v0.1.2...v0.1.3)
+
+### 🚀 Enhancements
+
+- Handle GitHub flavoured markdown blockquotes ([47de414](https://github.com/unjs/docs/commit/47de414))
+
+### ❤️ Contributors
+
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v0.1.2
 
 [compare changes](https://github.com/unjs/docs/compare/v0.1.0...v0.1.2)
