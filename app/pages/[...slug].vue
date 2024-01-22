@@ -38,8 +38,7 @@ useSchemaOrg([
   })
 ])
 
-defineOgImage({
-  component: 'Docs',
+defineOgImageComponent('OgImageDocs', {
   title: page.value?.title,
   description: page.value?.description,
 })
