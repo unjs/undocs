@@ -11,14 +11,13 @@ const { data: files } = useLazyFetch<ParsedContent[]>('/api/search.json', {
   server: false,
 })
 
-// const separator = "·";
-const defaultLang = 'en'
-const dir = 'ltr'
+const site = useSiteConfig()
 
 useHead({
+  titleTemplate: title => title ? `${title} ${site.separator} ${site.name}` : `${site.name}: ${site.description}`,
   htmlAttrs: {
-    lang: defaultLang,
-    dir,
+    lang: site.defaultLang,
+    dir: 'ltr',
     class: 'scroll-smooth',
   },
   meta: [
@@ -28,11 +27,13 @@ useHead({
   link: [{ rel: 'icon', href: '/icon.svg' }],
 })
 
+const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
+
 useSeoMeta({
   ogType: 'website',
-  ogSiteName: appConfig.docs.name,
+  ogSiteName: site.name,
   twitterCard: 'summary_large_image',
-  twitterSite: appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined,
+  twitterSite: twitterSite ? `@${twitterSite}` : undefined,
 })
 
 provide('navigation', navigation)

@@ -5,7 +5,7 @@ const dev = !!process.env.NUXT_DOCS_DEV
 
 export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
-  modules: ['@nuxt/content', '@nuxt/ui', '@nuxthq/studio', '@nuxtjs/fontaine', '@nuxtjs/google-fonts', 'nuxt-og-image'],
+  modules: ['@nuxt/content', '@nuxt/ui', '@nuxthq/studio', '@nuxtjs/fontaine', '@nuxtjs/google-fonts', '@nuxtjs/seo'],
   ui: {
     icons: ['heroicons', 'simple-icons', 'mdi', 'material-symbols', 'fa', 'ph'],
   },
@@ -35,6 +35,27 @@ export default defineNuxtConfig({
   },
   uiPro: {
     license: process.env.NUXT_UI_PRO_LICENSE || 'oss',
+  },
+  ogImage: {
+    fonts: [
+      'Nunito:400',
+      'Nunito:700',
+    ],
+  },
+  schemaOrg: {
+    identity: {
+      type: 'Organization',
+      name: 'UnJS',
+      url: 'https://unjs.io',
+      logo: 'https://unjs.io/favicon.svg',
+      sameAs: [
+        'https://twitter.com/unjsio',
+        "https://github.com/unjs"
+      ],
+    }
+  },
+  linkChecker: {
+    enabled: false,
   },
   tailwindcss: {
     viewer: dev,

@@ -10,8 +10,7 @@ if (!page.value) {
 }
 
 useSeoMeta({
-  titleTemplate: '',
-  title: page.value.title,
+  title: null,
   ogTitle: page.value.title,
   description: page.value.description,
   ogDescription: page.value.description,

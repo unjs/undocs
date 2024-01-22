@@ -1,7 +1,13 @@
 export default defineAppConfig({
+  site: {
+    url: 'https://packageName.unjs.io',
+    name: 'packageName',
+    separator: '·',
+    description: 'packageDescription',
+    defaultLocal: 'en',
+    trailingSlash: false,
+  },
   docs: {
-    name: '',
-    description: '',
     github: '',
     logo: '/icon.svg',
     socialBackground: 'http://unjs.io/assets/header/ellipse.png',

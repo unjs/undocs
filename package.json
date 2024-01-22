@@ -33,7 +33,6 @@
     "is-buffer": "^2.0.5",
     "nuxi": "^3.10.0",
     "nuxt": "^3.9.3",
-    "nuxt-og-image": "^2.2.4",
     "pkg-types": "^1.0.3",
     "tailwindcss": "^3.4.1",
     "vue": "3.3",
@@ -41,6 +40,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint-config": "^0.2.0",
+    "@nuxtjs/seo": "2.0.0-rc.5",
     "@types/node": "^20.11.5",
     "changelogen": "^0.5.5",
     "eslint": "^8.56.0",

@@ -8,7 +8,7 @@ const appConfig = useAppConfig()
 </script>
 
 <template>
-  <!-- Since we use Nuxt UI which replace color by some vars, we need to explicitely set a color. -->
+  <!-- Since we use Nuxt UI which replace color by some vars, we need to explicitly set a color. -->
   <div class="w-full h-full flex justify-between relative bg-[#111827] text-white">
     <img
       v-if="appConfig.docs.socialBackground"

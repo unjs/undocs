@@ -26,12 +26,17 @@ const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
 )
 
 useSeoMeta({
-  titleTemplate: `%s · ${appConfig.docs.name}`,
-  title: page.value.title,
-  ogTitle: page.value.title,
-  description: page.value.description,
-  ogDescription: page.value.description,
+  title: page.value?.title,
+  ogTitle: page.value?.title,
+  description: page.value?.description,
+  ogDescription: page.value?.description,
 })
+
+useSchemaOrg([
+  defineArticle({
+    '@type': 'TechArticle',
+  })
+])
 
 defineOgImage({
   component: 'Docs',
