@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.1.4
+
+[compare changes](https://github.com/unjs/docs/compare/v0.1.3...v0.1.4)
+
+### 🏡 Chore
+
+- No trailing slash since it's generated ([226a81d](https://github.com/unjs/docs/commit/226a81d))
+
+### ❤️ Contributors
+
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v0.1.3
 
 [compare changes](https://github.com/unjs/docs/compare/v0.1.2...v0.1.3)
