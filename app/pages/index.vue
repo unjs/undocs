@@ -11,15 +11,10 @@ if (!page.value) {
 
 useSeoMeta({
   title: null,
-  ogTitle: page.value.title,
   description: page.value.description,
-  ogDescription: page.value.description,
 })
 
-defineOgImageComponent('OgImageDocs', {
-  title: page.value?.title,
-  description: page.value?.description,
-})
+defineOgImageComponent('OgImageDocs')
 </script>
 
 <template>

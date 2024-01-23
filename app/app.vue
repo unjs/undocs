@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { _theme } from '#tailwind-config/theme/colors'
 import type { ParsedContent } from '@nuxt/content/dist/runtime/types'
 
 const appConfig = useAppConfig()
@@ -11,28 +10,14 @@ const { data: files } = useLazyFetch<ParsedContent[]>('/api/search.json', {
   server: false,
 })
 
-const site = useSiteConfig()
-
 useHead({
-  titleTemplate: title => title ? `${title} ${site.separator} ${site.name}` : `${site.name}: ${site.description}`,
-  htmlAttrs: {
-    lang: site.defaultLang,
-    dir: 'ltr',
-    class: 'scroll-smooth',
-  },
-  meta: [
-    { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-    { name: 'theme-color', content: _theme[500] },
-  ],
+  // TODO prefer public app icons using https://nuxtseo.com/experiments/guides/app-icons
   link: [{ rel: 'icon', href: appConfig.docs.logo }],
 })
 
 const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
 
 useSeoMeta({
-  ogType: 'website',
-  ogSiteName: site.name,
-  twitterCard: 'summary_large_image',
   twitterSite: twitterSite ? `@${twitterSite}` : undefined,
 })
 

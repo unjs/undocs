@@ -7,12 +7,22 @@ export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
   modules: [
     '@nuxt/content',
-    '@nuxt/ui',
     '@nuxthq/studio',
     '@nuxtjs/fontaine',
     '@nuxtjs/google-fonts',
     '@nuxtjs/seo',
-    '@nuxtjs/plausible'
+    '@nuxtjs/plausible',
+    (_, nuxt) => {
+      // need to register the hook before tailwind module
+      // TODO upstream tailwind module should fire this once modules are loaded
+      nuxt.hook('tailwindcss:config', (tailwindConfig) => {
+        if (tailwindConfig.theme?.extend?.colors?.theme?.['500']) {
+          nuxt.options.app.seoMeta = nuxt.options.app.seoMeta || {}
+          nuxt.options.app.seoMeta.themeColor = tailwindConfig.theme.extend.colors.theme['500']
+        }
+      })
+    },
+    '@nuxt/ui',
   ],
   ui: {
     icons: ['heroicons', 'simple-icons', 'mdi', 'material-symbols', 'fa', 'ph'],
@@ -26,6 +36,17 @@ export default defineNuxtConfig({
     families: {
       Nunito: [400, 500, 600, 700],
     },
+  },
+  app: {
+    head: {
+      htmlAttrs: {
+        dir: 'ltr',
+        class: 'scroll-smooth',
+      },
+      templateParams: {
+        separator: '·',
+      }
+    }
   },
   content: {
     highlight: {
@@ -55,6 +76,12 @@ export default defineNuxtConfig({
       'Nunito:700',
     ],
   },
+  site: {
+    url: 'https://packageName.unjs.io',
+  },
+  seo: {
+    splash: false,
+  },
   schemaOrg: {
     identity: {
       type: 'Organization',
@@ -66,9 +93,6 @@ export default defineNuxtConfig({
         "https://github.com/unjs"
       ],
     }
-  },
-  linkChecker: {
-    enabled: false,
   },
   tailwindcss: {
     viewer: dev,

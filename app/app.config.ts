@@ -2,10 +2,7 @@ export default defineAppConfig({
   site: {
     url: 'https://packageName.unjs.io',
     name: 'packageName',
-    separator: '·',
     description: 'packageDescription',
-    defaultLocal: 'en',
-    trailingSlash: false,
   },
   docs: {
     github: '',
