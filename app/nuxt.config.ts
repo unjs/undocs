@@ -5,7 +5,7 @@ const dev = !!process.env.NUXT_DOCS_DEV
 
 export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
-  modules: ['@nuxt/content', '@nuxt/ui', '@nuxthq/studio', '@nuxtjs/fontaine', '@nuxtjs/google-fonts', '@nuxtjs/seo'],
+  modules: ['@nuxt/content', '@nuxt/ui', '@nuxthq/studio', '@nuxtjs/fontaine', '@nuxtjs/google-fonts', '@nuxtjs/seo', '@nuxtjs/plausible'],
   ui: {
     icons: ['heroicons', 'simple-icons', 'mdi', 'material-symbols', 'fa', 'ph'],
   },
@@ -29,6 +29,11 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/api/search.json': { prerender: true },
+  },
+  nitro: {
+    prerender: {
+      autoSubfolderIndex: false
+    }
   },
   devtools: {
     enabled: dev,

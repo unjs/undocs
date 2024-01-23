@@ -24,7 +24,7 @@ useHead({
     { name: 'viewport', content: 'width=device-width, initial-scale=1' },
     { name: 'theme-color', content: _theme[500] },
   ],
-  link: [{ rel: 'icon', href: '/icon.svg' }],
+  link: [{ rel: 'icon', href: appConfig.docs.logo }],
 })
 
 const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
