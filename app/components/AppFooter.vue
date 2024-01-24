@@ -21,14 +21,7 @@ const socialLinks = computed(() => {
     .filter(Boolean)
 })
 
-const uiButton = {
-  color: {
-    gray: {
-      ghost:
-        'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-primary/60 dark:hover:bg-primary/40',
-    },
-  },
-}
+const unjsLogo = '/unjs.svg'
 </script>
 
 <template>
@@ -49,7 +42,7 @@ const uiButton = {
         <ul class="flex gap-2">
           <li>
             <UButton square to="https://unjs.io" rel="noopener" variant="ghost" color="gray" size="xl">
-              <img src="/unjs.svg" alt="Logo of UnJS" class="w-6 h-6" />
+              <img :src="unjsLogo" alt="Logo of UnJS" class="w-6 h-6" />
             </UButton>
           </li>
           <li v-for="link of socialLinks" :key="link.label">

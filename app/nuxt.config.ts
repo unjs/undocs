@@ -3,6 +3,18 @@ import { defineNuxtConfig } from 'nuxt/config'
 // Flag enabled when developing docs theme
 const dev = !!process.env.NUXT_DOCS_DEV
 
+// https://github.com/unjs/std-env/issues/59
+process.env.NUXT_PUBLIC_SITE_URL =
+  process.env.NUXT_PUBLIC_SITE_URL ||
+  (process.env.NEXT_PUBLIC_VERCEL_URL && `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`) || // Vercel
+  process.env.URL || // Netlify
+  process.env.CI_PAGES_URL || // Gitlab Pages
+  process.env.CF_PAGES_URL // Cloudflare Pages
+
+if (!dev && !process.env.NUXT_PUBLIC_SITE_URL) {
+  console.warn('NUXT_PUBLIC_SITE_URL env variable is not set!')
+}
+
 export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
   modules: [
@@ -61,8 +73,8 @@ export default defineNuxtConfig({
   },
   nitro: {
     prerender: {
-      autoSubfolderIndex: false
-    }
+      autoSubfolderIndex: false,
+    },
   },
   devtools: {
     enabled: dev,
