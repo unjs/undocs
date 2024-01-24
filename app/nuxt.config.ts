@@ -26,11 +26,16 @@ export default defineNuxtConfig({
     '@nuxtjs/plausible',
     (_, nuxt) => {
       // need to register the hook before tailwind module
-      // TODO upstream tailwind module should fire this once modules are loaded
+      // TODO: upstream tailwind module should fire this once modules are loaded
       nuxt.hook('tailwindcss:config', (tailwindConfig) => {
         if (tailwindConfig.theme?.extend?.colors?.theme?.['500']) {
-          nuxt.options.app.seoMeta = nuxt.options.app.seoMeta || {}
-          nuxt.options.app.seoMeta.themeColor = tailwindConfig.theme.extend.colors.theme['500']
+          nuxt.options.app.head = nuxt.options.app.head || {}
+          nuxt.options.app.head.meta = nuxt.options.app.head.meta || []
+          const themeColor = {
+            name: 'theme-color',
+            content: tailwindConfig.theme.extend.colors.theme['500'],
+          }
+          nuxt.options.app.head.meta.push(themeColor)
         }
       })
     },
@@ -88,23 +93,20 @@ export default defineNuxtConfig({
       'Nunito:700',
     ],
   },
-  site: {
-    url: 'https://packageName.unjs.io',
-  },
   seo: {
     splash: false,
   },
-  schemaOrg: {
+  site: {
     identity: {
       type: 'Organization',
       name: 'UnJS',
       url: 'https://unjs.io',
       logo: 'https://unjs.io/favicon.svg',
       sameAs: [
-        'https://twitter.com/unjsio',
-        "https://github.com/unjs"
+        'https://github.com/unjs',
+        'https://x.com/unjsio',
       ],
-    }
+    },
   },
   tailwindcss: {
     viewer: dev,

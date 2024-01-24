@@ -9,8 +9,11 @@ if (!page.value) {
   })
 }
 
+useHead({
+  titleTemplate: '%s %separator UnJS',
+})
 useSeoMeta({
-  title: null,
+  title: page.value.title,
   description: page.value.description,
 })
 

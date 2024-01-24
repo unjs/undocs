@@ -10,13 +10,7 @@ const { data: files } = useLazyFetch<ParsedContent[]>('/api/search.json', {
   server: false,
 })
 
-useHead({
-  // TODO prefer public app icons using https://nuxtseo.com/experiments/guides/app-icons
-  link: [{ rel: 'icon', href: appConfig.docs.logo }],
-})
-
 const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
-
 useSeoMeta({
   twitterSite: twitterSite ? `@${twitterSite}` : undefined,
 })

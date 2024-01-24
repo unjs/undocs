@@ -1,5 +1,5 @@
-title: 'packageName'
-description: 'package decription.'
+title: 'Docs Theme'
+description: 'Default documentation for UnJS package.'
 navigation: false
 hero:
   title: '[packageName]{.text-primary} :br [package decription.]{.text-4xl}'

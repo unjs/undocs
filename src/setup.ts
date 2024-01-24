@@ -29,6 +29,10 @@ export async function setupDocs(dir: string) {
         github: config.github || '',
       },
     },
+    site: {
+      name: config.name || '',
+      description: config.description || '',
+    },
     routeRules: {
       ...Object.fromEntries(Object.entries(config.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
     },
