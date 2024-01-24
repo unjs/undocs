@@ -4,10 +4,10 @@ export default defineAppConfig({
     description: '',
     github: '',
     logo: '/icon.svg',
-    socialBackground: 'http://unjs.io/assets/header/ellipse.png',
+    socialBackground: 'https://github.com/unjs/docs/blob/main/assets/ellipse.png?raw=true',
     socials: {
       github: 'unjs',
-      x: 'unjsio'
+      x: 'unjsio',
     },
     footer: {
       menu: [
