@@ -96,7 +96,7 @@ export default defineNuxtConfig({
   seo: {
     splash: false,
   },
-  site: {
+  schemaOrg: {
     identity: {
       type: 'Organization',
       name: 'UnJS',

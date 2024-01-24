@@ -22,7 +22,6 @@ const socialLinks = computed(() => {
 })
 
 const iconLogo = '/icon.svg'
-const unjsLogo = '/unjs.svg'
 </script>
 
 <template>
@@ -43,7 +42,7 @@ const unjsLogo = '/unjs.svg'
         <ul class="flex gap-2">
           <li>
             <UButton square to="https://unjs.io" rel="noopener" variant="ghost" color="gray" size="xl">
-              <img :src="unjsLogo" alt="Logo of UnJS" class="w-6 h-6" />
+              <img src="https://unjs.io/favicon.svg" alt="Logo of UnJS" class="w-6 h-6" />
             </UButton>
           </li>
           <li v-for="link of socialLinks" :key="link.label">
