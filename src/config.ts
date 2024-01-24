@@ -1,14 +1,39 @@
 import { loadConfig, createDefineConfig } from 'c12'
 
-type ColorVariant = 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950
 type Color = `#${string}`
 
 export interface DocsConfig {
+  /**
+   * The name of the documentation site.
+   *
+   * @example 'UnJS Docs'
+   */
   name?: string
+  /**
+   * The description of the documentation site.
+   *
+   * @example 'Default documentation for UnJS package.'
+   */
   description?: string
+  /**
+   * The GitHub repository for the documentation site.
+   *
+   * @example 'unjs/docs'
+   */
   github?: string
+  /**
+   * Redirects for the documentation site.
+   *
+   * @example { '/foo': '/bar' }
+   */
   redirects?: Record<string, string>
-  theme?: Record<ColorVariant, Color>
+  /**
+   * The theme color of the documentation site.
+   * It will be used as the `theme-color` meta tag and a full palette of colors will be generated from it.
+   *
+   * @example '#ECDC5A'
+   */
+  theme?: Color
 }
 
 export const defineDocsConfig = createDefineConfig<DocsConfig>()
