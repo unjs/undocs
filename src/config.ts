@@ -25,6 +25,14 @@ export interface DocsConfig {
    * @example { '/foo': '/bar' }
    */
   redirects?: Record<string, string>
+  /**
+   * The theme color of the documentation site.
+   * It will be used as the `theme-color` meta tag and a full palette of colors will be generated from it.
+   *
+   * @example '#ECDC5A'
+   * @example 'rgb(236, 220, 90)'
+   */
+  themeColor?: string
 }
 
 export const defineDocsConfig = createDefineConfig<DocsConfig>()
