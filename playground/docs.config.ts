@@ -7,6 +7,5 @@ export default defineDocsConfig({
   redirects: {
     '/foo': '/bar',
   },
-  // theme: '#ECDC5A',
   themeColor: '#f98007',
 })
