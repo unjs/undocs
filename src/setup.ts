@@ -24,9 +24,9 @@ export async function setupDocs(dir: string) {
     },
     appConfig: {
       docs: {
-        name: config.name,
-        description: config.description,
-        github: config.github,
+        name: config.name || '',
+        description: config.description || '',
+        github: config.github || '',
       },
     },
     routeRules: {
