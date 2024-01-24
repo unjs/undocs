@@ -38,11 +38,11 @@ export async function setupDocs(dir: string) {
           extend: {
             colors: {
               theme: config.theme || {},
-            }
-          }
-        }
-      }
-    }
+            },
+          },
+        },
+      },
+    },
   }
 
   return {
