@@ -32,6 +32,17 @@ export async function setupDocs(dir: string) {
     routeRules: {
       ...Object.fromEntries(Object.entries(config.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
     },
+    tailwindcss: {
+      config: {
+        theme: {
+          extend: {
+            colors: {
+              theme: config.theme || {},
+            }
+          }
+        }
+      }
+    }
   }
 
   return {
