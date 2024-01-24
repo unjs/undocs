@@ -108,6 +108,12 @@ export default defineNuxtConfig({
       ],
     },
   },
+  sitemap: {
+    strictNuxtContentPaths: true,
+  },
+  linkChecker: {
+    strictNuxtContentPaths: true,
+  },
   tailwindcss: {
     viewer: dev,
     quiet: !dev,
