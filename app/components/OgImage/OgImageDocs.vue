@@ -10,12 +10,14 @@ const appConfig = useAppConfig()
 <template>
   <!-- Since we use Nuxt UI which replace color by some vars, we need to explicitly set a color. -->
   <div class="w-full h-full flex justify-between relative bg-[#111827] text-white">
-    <img
+    {{ title }}
+    {{ description }}
+    <!-- <img
       v-if="appConfig.docs.socialBackground"
       :src="appConfig.docs.socialBackground"
       class="absolute top--64 right--64"
-    />
-    <div class="pt-[120px] px-[60px] pb-[60px]">
+    /> -->
+    <!-- <div class="pt-[120px] px-[60px] pb-[60px]">
       <div class="h-full w-full justify-between relative">
         <div class="flex flex-row justify-between items-start">
           <div class="flex flex-col space-x-3">
@@ -26,11 +28,11 @@ const appConfig = useAppConfig()
               {{ description }}
             </p>
           </div>
-        </div>
-        <div class="">
+        </div> -->
+        <!-- <div class="">
           <img v-if="appConfig.docs.logo" :src="appConfig.docs.logo" class="rounded-sm h-[60px] w-[60px]" />
-        </div>
-      </div>
-    </div>
+        </div> -->
+      <!-- </div> -->
+    <!-- </div> -->
   </div>
 </template>
