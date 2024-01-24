@@ -23,15 +23,15 @@ export async function setupDocs(dir: string) {
       dir,
     },
     appConfig: {
+      site: {
+        name: config.name || '',
+        description: config.description || '',
+      },
       docs: {
         name: config.name || '',
         description: config.description || '',
         github: config.github || '',
       },
-    },
-    site: {
-      name: config.name || '',
-      description: config.description || '',
     },
     routeRules: {
       ...Object.fromEntries(Object.entries(config.redirects || {}).map(([from, to]) => [from, { redirect: to }])),

@@ -4,7 +4,7 @@ defineProps<{
   description: string
 }>()
 
-const site = useSiteConfig()
+const appConfig = useAppConfig()
 </script>
 
 <template>
@@ -13,8 +13,8 @@ const site = useSiteConfig()
      <div class="pt-[80px] px-[60px] pb-[60px] w-full">
       <div class="h-full w-full justify-between relative">
           <div class="w-full flex flex-col items-start">
-            <span v-if="site.name !== title" class="mb-6 text-[#f9fafb] text-[24px] px-4 py-2 rounded-full bg-[#F2E78C]/20 border-1 border-[#F2E78C]/70">
-              {{ site.name }}
+            <span v-if="appConfig.site.name !== title" class="mb-6 text-[#f9fafb] text-[24px] px-4 py-2 rounded-full bg-[#F2E78C]/20 border-1 border-[#F2E78C]/70">
+              {{ appConfig.site.name }}
             </span>
             <div class="w-full flex flex-row justify-between">
               <div>

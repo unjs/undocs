@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-const site = useSiteConfig()
 const appConfig = useAppConfig()
 
 const socialLinks = computed(() => {
@@ -30,13 +29,13 @@ const iconLogo = '/icon.svg'
       <div class="grid md:grid-cols-2 gap-y-6 gap-x-12 md:gap-x-25">
         <div class="grow flex flex-col gap-3 md:gap-6 max-w-sm">
           <NuxtLink to="/" class="flex items-center gap-2 text-xl">
-            <img :src="iconLogo" :alt="`${site.name} logo`" class="h-7 w-7" />
+            <img :src="iconLogo" :alt="`${appConfig.site.name} logo`" class="h-7 w-7" />
             <span class="mt-[2px] font-bold">
-              {{ site.name }}
+              {{ appConfig.site.name }}
             </span>
           </NuxtLink>
           <p class="max-w-lg text-sm md:text-base text-gray-500 dark:text-gray-400 italic">
-            {{ site.description }}
+            {{ appConfig.site.description }}
           </p>
         </div>
         <ul class="flex gap-2">
@@ -89,7 +88,7 @@ const iconLogo = '/icon.svg'
         </div>
       </div>
       <div class="text-sm dark:text-gray-400 text-center">
-        <span class="capitalize font-medium">{{ site.name }}</span> is part of the
+        <span class="capitalize font-medium">{{ appConfig.site.name }}</span> is part of the
         <NuxtLink
           to="https://unjs.io"
           rel="noopener"
