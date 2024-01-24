@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.1.7
+
+[compare changes](https://github.com/unjs/docs/compare/v0.1.6...v0.1.7)
+
+### 🩹 Fixes
+
+- Overide with docs.config variables ([5220cd9](https://github.com/unjs/docs/commit/5220cd9))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.1.6
 
 [compare changes](https://github.com/unjs/docs/compare/v0.1.5...v0.1.6)
