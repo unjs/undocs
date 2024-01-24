@@ -14,12 +14,14 @@ const [{ data: stars }, { data: tag }] = await Promise.all([
     transform: (data: any) => data.release.tag as string,
   }),
 ])
+
+const iconLogo = '/icon.svg'
 </script>
 
 <template>
   <UHeader :ui="{ logo: 'items-center' }" :links="mapContentNavigation(navigation)">
     <template #logo>
-      <img :src="appConfig.docs.logo" :alt="`${site.name} logo`" class="h-7 w-7" />
+      <img :src="iconLogo" :alt="`${site.name} logo`" class="h-7 w-7" />
       <span>
         {{ site.name }}
       </span>

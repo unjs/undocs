@@ -21,6 +21,7 @@ const socialLinks = computed(() => {
     .filter(Boolean)
 })
 
+const iconLogo = '/icon.svg'
 const unjsLogo = '/unjs.svg'
 </script>
 
@@ -30,7 +31,7 @@ const unjsLogo = '/unjs.svg'
       <div class="grid md:grid-cols-2 gap-y-6 gap-x-12 md:gap-x-25">
         <div class="grow flex flex-col gap-3 md:gap-6 max-w-sm">
           <NuxtLink to="/" class="flex items-center gap-2 text-xl">
-            <img :src="appConfig.docs.logo" :alt="`${site.name} logo`" class="h-7 w-7" />
+            <img :src="iconLogo" :alt="`${site.name} logo`" class="h-7 w-7" />
             <span class="mt-[2px] font-bold">
               {{ site.name }}
             </span>
