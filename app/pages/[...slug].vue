@@ -14,7 +14,6 @@ if (!page.value) {
   throw createError({
     statusCode: 404,
     statusMessage: 'Page not found',
-    fatal: true,
   })
 }
 
@@ -58,7 +57,7 @@ const links = computed(() => [
 </script>
 
 <template>
-  <UPage>
+  <UPage v-if="page">
     <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline" />
 
     <UPageBody prose>
