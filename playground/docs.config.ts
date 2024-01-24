@@ -8,5 +8,5 @@ export default defineDocsConfig({
     '/foo': '/bar',
   },
   // theme: '#ECDC5A',
-  theme: '#f98007',
+  themeColor: '#f98007',
 })

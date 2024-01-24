@@ -38,7 +38,7 @@ export async function setupDocs(dir: string) {
         theme: {
           extend: {
             colors: {
-              theme: getColors(config.theme || ''),
+              theme: getColors(config.themeColor || '#ECDC5A'),
             },
           },
         },
