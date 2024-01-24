@@ -1,6 +1,30 @@
 # Changelog
 
 
+## v0.1.6
+
+[compare changes](https://github.com/unjs/docs/compare/v0.1.5...v0.1.6)
+
+### 🚀 Enhancements
+
+- Support custom favicon ([#9](https://github.com/unjs/docs/pull/9))
+- Infer NUXT_PUBLIC_SITE_URL value ([612034d](https://github.com/unjs/docs/commit/612034d))
+- Support basic `docs.config` ([d3ced7b](https://github.com/unjs/docs/commit/d3ced7b))
+
+### 🩹 Fixes
+
+- Resolve `/unjs.svg` from public dir instead of resolving from top layer ([af77665](https://github.com/unjs/docs/commit/af77665))
+
+### 🏡 Chore
+
+- **release:** V0.1.5 ([ea411c0](https://github.com/unjs/docs/commit/ea411c0))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Estéban ([@Barbapapazes](http://github.com/Barbapapazes))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v0.1.5
 
 [compare changes](https://github.com/unjs/docs/compare/v0.1.4...v0.1.5)
