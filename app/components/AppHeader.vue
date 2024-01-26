@@ -32,9 +32,7 @@ const { metaSymbol } = useShortcuts()
     </template>
 
     <template #right>
-      <UTooltip class="lg:hidden" text="Search" :shortcuts="[metaSymbol, 'K']">
-        <UDocsSearchButton :label="null" />
-      </UTooltip>
+      <UDocsSearchButton :label="null" aria-label="Open Search" class="lg:hidden" />
       <UTooltip v-if="stars" class="hidden lg:flex" :text="`${appConfig.docs.name} GitHub Stars`">
         <UButton
           icon="i-simple-icons-github"
