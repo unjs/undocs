@@ -5,7 +5,8 @@ export default defineNitroPlugin((nitroApp) => {
       if (file.body?.children?.[0]?.tag === 'h1') {
         file.body.children.shift()
       }
-      if (file.body?.children?.[0]?.tag === 'p') {
+      // Only if there is no description in front-matter
+      if (!file.description && file.body?.children?.[0]?.tag === 'p') {
         file.body.children.shift()
       }
       // Handle GitHub flavoured markdown blockquotes
