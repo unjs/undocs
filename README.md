@@ -30,8 +30,8 @@ export default defineDocsConfig({
 
 3. Create `content/index.yml` for the homepage and `content/**.md` for the docs.
 
-> [!IMPORTANT]
-> You **must** set a description in the front-matter of each markdown file.
+> [!NOTE]
+> You can set a custom subtitle and meta description in the front-matter of each markdown file with the key `description`. Otherwise, the first paragraph will be used and removed from the page to be used as a subtitle on the page and in the meta description.
 
 4. Add a `favicon.svg` in the `public` folder.
 
