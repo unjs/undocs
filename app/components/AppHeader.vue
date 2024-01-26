@@ -13,6 +13,8 @@ const [{ data: stars }, { data: tag }] = await Promise.all([
     transform: (data: any) => data.release.tag as string,
   }),
 ])
+
+const { metaSymbol } = useShortcuts()
 </script>
 
 <template>
@@ -30,6 +32,9 @@ const [{ data: stars }, { data: tag }] = await Promise.all([
     </template>
 
     <template #right>
+      <UTooltip class="lg:hidden" text="Search" :shortcuts="[metaSymbol, 'K']">
+        <UDocsSearchButton :label="null" />
+      </UTooltip>
       <UTooltip v-if="stars" class="hidden lg:flex" :text="`${appConfig.docs.name} GitHub Stars`">
         <UButton
           icon="i-simple-icons-github"
