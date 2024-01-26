@@ -1,8 +1,10 @@
 # UnJS Docs
 
-Minimal Documentation Theme and CLI for shared usage across unjs projects.
+Minimal Documentation Theme and CLI for shared usage across UnJS projects.
 
 Made with [Nuxt](https://nuxt.com/), [Nuxt Content](https://content.nuxt.com) and [Nuxt UI Pro](https://ui.nuxt.com/pro).
+
+This is fully SEO friendly thanks to [Nuxt SEO](https://nuxtseo.com).
 
 ## Usage
 
@@ -10,21 +12,33 @@ Made with [Nuxt](https://nuxt.com/), [Nuxt Content](https://content.nuxt.com) an
 > This project is under development and usage might change.
 
 1. Install `unjs-docs` as a dev dependency
-2. Create `app.config.ts`:
+2. Create `docs.config.ts` and set the name, description, github and themeColor.
 
 ```ts
-export default {
-  docs: {
-    name: '...',
-    description: '...',
-    github: '.../...',
-  },
-}
+import { defineDocsConfig } from 'unjs-docs/config'
+
+export default defineDocsConfig({
+  name: 'Docs Theme',
+  description: 'Default documentation for UnJS package.',
+  github: 'unjs/docs',
+  themeColor: '#f98007',
+})
 ```
 
-3. Create `content/index.md` or `content/index.yml`
+> [!NOTE]
+> Color can be a HEX or RGB value.
 
-4. Use `npx unjs-docs dev` to start in development mode and `npx unjs-docs build` to build for production!
+3. Create `content/index.yml` for the homepage and `content/**.md` for the docs.
+
+> [!IMPORTANT]
+> You **must** set a description in the front-matter of each markdown file.
+
+4. Add a `favicon.svg` in the `public` folder.
+
+> [!NOTE]
+> You can find the icon from your package in the [design kit of the website](https://unjs.io/design-kit#package-logos).
+
+5. Use `npx unjs-docs dev` to start in development mode and `npx unjs-docs build` to build for production!
 
 Check out [playground](./playground/) as example.
 
