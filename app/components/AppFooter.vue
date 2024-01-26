@@ -41,7 +41,7 @@ const iconLogo = '/icon.svg'
         <ul class="flex gap-2">
           <li>
             <UButton square to="https://unjs.io" rel="noopener" variant="ghost" color="gray" size="xl">
-              <img src="https://unjs.io/favicon.svg" alt="Logo of UnJS" class="w-6 h-6" />
+              <img src="/unjs.svg" alt="Logo of UnJS" class="w-6 h-6" />
             </UButton>
           </li>
           <li v-for="link of socialLinks" :key="link.label">

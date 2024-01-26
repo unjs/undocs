@@ -24,21 +24,6 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     '@nuxtjs/seo',
     '@nuxtjs/plausible',
-    (_, nuxt) => {
-      // need to register the hook before tailwind module
-      // TODO: upstream tailwind module should fire this once modules are loaded
-      nuxt.hook('tailwindcss:config', (tailwindConfig) => {
-        if (tailwindConfig.theme?.extend?.colors?.theme?.['500']) {
-          nuxt.options.app.head = nuxt.options.app.head || {}
-          nuxt.options.app.head.meta = nuxt.options.app.head.meta || []
-          const themeColor = {
-            name: 'theme-color',
-            content: tailwindConfig.theme.extend.colors.theme['500'],
-          }
-          nuxt.options.app.head.meta.push(themeColor)
-        }
-      })
-    },
     '@nuxt/ui',
   ],
   ui: {
@@ -62,8 +47,8 @@ export default defineNuxtConfig({
       },
       templateParams: {
         separator: '·',
-      }
-    }
+      },
+    },
   },
   content: {
     highlight: {
@@ -88,10 +73,7 @@ export default defineNuxtConfig({
     license: process.env.NUXT_UI_PRO_LICENSE || 'oss',
   },
   ogImage: {
-    fonts: [
-      'Nunito:400',
-      'Nunito:700',
-    ],
+    fonts: ['Nunito:400', 'Nunito:700'],
   },
   seo: {
     splash: false,
@@ -102,10 +84,7 @@ export default defineNuxtConfig({
       name: 'UnJS',
       url: 'https://unjs.io',
       logo: 'https://unjs.io/favicon.svg',
-      sameAs: [
-        'https://github.com/unjs',
-        'https://x.com/unjsio',
-      ],
+      sameAs: ['https://github.com/unjs', 'https://x.com/unjsio'],
     },
   },
   sitemap: {

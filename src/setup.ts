@@ -29,8 +29,6 @@ export async function setupDocs(dir: string) {
         description: config.description || '',
       },
       docs: {
-        name: config.name || '',
-        description: config.description || '',
         github: config.github || '',
       },
     },
