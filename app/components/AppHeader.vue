@@ -13,8 +13,6 @@ const [{ data: stars }, { data: tag }] = await Promise.all([
     transform: (data: any) => data.release.tag as string,
   }),
 ])
-
-const { metaSymbol } = useShortcuts()
 </script>
 
 <template>
