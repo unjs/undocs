@@ -30,6 +30,9 @@ export async function setupDocs(dir: string) {
         github: config.github || '',
       },
     },
+    nitro: {
+      publicAssets: [{ baseURL: '/', dir: resolve(dir, 'public'), maxAge: 0 }],
+    },
     routeRules: {
       ...Object.fromEntries(Object.entries(config.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
     },
