@@ -42,3 +42,5 @@ https://github.com/orgs/community/discussions/16925
 
 > [!CAUTION]
 > Negative potential consequences of an action.
+
+:read-more{to="/concepts/links/"}
