@@ -11,6 +11,7 @@ const { data: files } = useLazyFetch<ParsedContent[]>('/api/search.json', {
 })
 
 const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
+
 useSeoMeta({
   twitterSite: twitterSite ? `@${twitterSite}` : undefined,
 })
