@@ -31,6 +31,7 @@ export async function setupDocs(dir: string) {
       },
     },
     nitro: {
+      static: true,
       publicAssets: [{ baseURL: '/', dir: resolve(dir, 'public'), maxAge: 0 }],
     },
     routeRules: {
