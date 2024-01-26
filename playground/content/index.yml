@@ -8,7 +8,7 @@ hero:
   links:
     - label: 'Get Started'
       icon: 'i-heroicons-rocket-launch'
-      to: '/docs'
+      to: '/installation'
       size: lg
     - label: 'Contribute on GitHub'
       icon: 'i-simple-icons-github'
@@ -29,7 +29,7 @@ features:
       icon: 'i-heroicons-rocket-launch'
       trailingIcon: 'i-heroicons-arrow-right-20-solid'
       color: 'gray'
-      to: '/docs'
+      to: '/installation'
       size: lg
   items:
     - title: 'Feature A'

@@ -1,8 +1,8 @@
 # UnJS Docs
 
-Minimal Documentation Theme and CLI for shared usage across unjs projects.
+Minimal Documentation Theme and CLI for shared usage across UnJS projects.
 
-Made with [Nuxt](https://nuxt.com/), [Nuxt Content](https://content.nuxt.com) and [Nuxt UI Pro](https://ui.nuxt.com/pro).
+Made with [Nuxt](https://nuxt.com/), [Nuxt Content](https://content.nuxt.com), [Nuxt SEO](https://nuxtseo.com) and [Nuxt UI Pro](https://ui.nuxt.com/pro).
 
 ## Usage
 
@@ -10,23 +10,32 @@ Made with [Nuxt](https://nuxt.com/), [Nuxt Content](https://content.nuxt.com) an
 > This project is under development and usage might change.
 
 1. Install `unjs-docs` as a dev dependency
-2. Create `app.config.ts`:
+2. Create `docs.config.ts` and set config
 
 ```ts
-export default {
-  docs: {
-    name: '...',
-    description: '...',
-    github: '.../...',
-  },
-}
+import { defineDocsConfig } from 'unjs-docs/config'
+
+export default defineDocsConfig({
+  name: 'packageName',
+  description: 'packageDescription',
+  github: 'unjs/packageName',
+  // themeColor: '#f98007',
+})
 ```
 
-3. Create `content/index.md` or `content/index.yml`
+3. Create `content/index.yml` for the homepage and `content/**.md` for the docs.
 
-4. Use `npx unjs-docs dev` to start in development mode and `npx unjs-docs build` to build for production!
+> [!TIP]
+> You can set a custom subtitle and meta description in the front matter of each markdown file with the key `description`. Otherwise, the first paragraph will be used from the page to be used as a subtitle on the page and in the meta description.
 
-Check out [playground](./playground/) as example.
+4. Add an `icon.svg` file in the `public` folder.
+
+> [!TIP]
+> You can find the icon from your package in the [design kit of the website](https://unjs.io/design-kit#package-logos).
+
+5. Use `npx unjs-docs dev` to start in development mode and `npx unjs-docs build` to build for production!
+
+Check out [playground](./playground/) as an example.
 
 ## License
 
