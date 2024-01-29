@@ -5,7 +5,7 @@ const navigation = inject<NavItem[]>('navigation', [])
 
 const appConfig = useAppConfig()
 
-const [{ data: stars }, { data: tag }] = await Promise.all([
+const [{ data: cachedStars }, { data: tag }] = await Promise.all([
   useFetch(`https://ungh.cc/repos/${appConfig.docs.github}`, {
     transform: (data: any) => data.repo.stars as number,
   }),
@@ -13,6 +13,19 @@ const [{ data: stars }, { data: tag }] = await Promise.all([
     transform: (data: any) => data.release.tag as string,
   }),
 ])
+
+const stars = useState('stars', () => cachedStars.value)
+
+onMounted(async () => {
+  try {
+    const { stargazers_count } = await $fetch<{ stargazers_count: number }>(`https://api.github.com/repos/unjs/crossws`)
+    let timeSlice = 1000 / (stargazers_count - stars.value)
+    while (stars.value < stargazers_count) {
+      stars.value++
+      await new Promise((resolve) => setTimeout(resolve, timeSlice))
+    }
+  } catch {}
+})
 
 const iconLogo = '/icon.svg'
 </script>
