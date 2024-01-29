@@ -18,7 +18,9 @@ const stars = useState('stars', () => cachedStars.value)
 
 onMounted(async () => {
   try {
-    const { stargazers_count } = await $fetch<{ stargazers_count: number }>(`https://api.github.com/repos/unjs/crossws`)
+    const { stargazers_count } = await $fetch<{ stargazers_count: number }>(
+      `https://api.github.com/repos/${appConfig.docs.github}`,
+    )
     let timeSlice = 1000 / (stargazers_count - stars.value)
     while (stars.value < stargazers_count) {
       stars.value++
