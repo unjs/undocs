@@ -30,6 +30,7 @@ const [{ data: stars }, { data: tag }] = await Promise.all([
     </template>
 
     <template #right>
+      <UDocsSearchButton :label="null" aria-label="Open Search" class="lg:hidden" />
       <UTooltip v-if="stars" class="hidden lg:flex" :text="`${appConfig.docs.name} GitHub Stars`">
         <UButton
           icon="i-simple-icons-github"
