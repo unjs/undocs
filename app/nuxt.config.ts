@@ -4,7 +4,8 @@ import { defineNuxtConfig } from 'nuxt/config'
 const dev = !!process.env.NUXT_DOCS_DEV
 
 // SSR enabled only for production build to save life (at least until our stack will be little bit lighter)
-const ssr = Boolean(process.env.NODE_ENV === 'production' || process.env.NUXT_DOCS_SSR)
+const isProd = process.env.NODE_ENV === 'production'
+const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
 // https://github.com/unjs/std-env/issues/59
 process.env.NUXT_PUBLIC_SITE_URL =
@@ -27,7 +28,7 @@ export default defineNuxtConfig({
     '@nuxtjs/fontaine',
     '@nuxtjs/google-fonts',
     '@nuxtjs/seo',
-    '@nuxtjs/plausible',
+    isProd && '@nuxtjs/plausible',
     '@nuxt/ui',
   ],
   ui: {
