@@ -20,15 +20,16 @@
   ],
   "scripts": {
     "build": "unbuild",
-    "dev": "NUXT_DOCS_DEV=1 JITI_ESM_RESOLVE=1 jiti ./src/cli.ts dev playground",
+    "dev": "NUXT_DOCS_DEV=1 pnpm unjs-docs dev playground",
+    "dev:build": "pnpm unjs-docs build playground",
     "dev:ssr": "NUXT_DOCS_SSR=1 pnpm dev",
-    "dev:template": "NUXT_DOCS_DEV=1 JITI_ESM_RESOLVE=1 jiti ./src/cli.ts dev template",
-    "dev:build": "JITI_ESM_RESOLVE=1 jiti ./src/cli.ts build playground",
+    "dev:template": "pnpm unjs-docs dev template",
     "lint": "eslint --cache --ext .ts,.js,.mjs,.cjs . && prettier -c src",
     "lint:fix": "eslint --cache --ext .ts,.js,.mjs,.cjs . --fix && prettier -c src -w",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
-    "test": "pnpm lint"
+    "test": "pnpm lint",
+    "unjs-docs": "JITI_ESM_RESOLVE=1 jiti ./src/cli.ts"
   },
   "dependencies": {
     "@iconify/json": "^2.2.172",
