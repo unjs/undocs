@@ -3,6 +3,9 @@ import { defineNuxtConfig } from 'nuxt/config'
 // Flag enabled when developing docs theme
 const dev = !!process.env.NUXT_DOCS_DEV
 
+// SSR enabled only for production build to save life (at least until our stack will be little bit lighter)
+const ssr = Boolean(process.env.NODE_ENV === 'production' || process.env.NUXT_DOCS_SSR)
+
 // https://github.com/unjs/std-env/issues/59
 process.env.NUXT_PUBLIC_SITE_URL =
   process.env.NUXT_PUBLIC_SITE_URL ||
@@ -16,6 +19,7 @@ if (!dev && !process.env.NUXT_PUBLIC_SITE_URL) {
 }
 
 export default defineNuxtConfig({
+  ssr,
   extends: ['@nuxt/ui-pro'],
   modules: [
     '@nuxt/content',
@@ -73,12 +77,15 @@ export default defineNuxtConfig({
     license: process.env.NUXT_UI_PRO_LICENSE || 'oss',
   },
   ogImage: {
+    enabled: ssr,
+    debug: false,
     fonts: ['Nunito:400', 'Nunito:700'],
   },
   seo: {
     splash: false,
   },
   schemaOrg: {
+    enabled: ssr,
     identity: {
       type: 'Organization',
       name: 'UnJS',

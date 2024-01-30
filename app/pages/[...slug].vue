@@ -29,13 +29,20 @@ useSeoMeta({
   description: page.value?.description,
 })
 
-useSchemaOrg([
-  defineArticle({
-    '@type': 'TechArticle',
-  })
-])
+if (process.server) {
+  // @ts-ignore
+  useSchemaOrg([
+    // @ts-ignore
+    defineArticle({
+      '@type': 'TechArticle',
+    }),
+  ])
+}
 
-defineOgImageComponent('OgImageDocs')
+if (process.server) {
+  // @ts-ignore
+  defineOgImageComponent('OgImageDocs')
+}
 
 const headline = computed(() => findPageHeadline(page.value))
 

@@ -17,7 +17,10 @@ useSeoMeta({
   description: page.value.description,
 })
 
-defineOgImageComponent('OgImageDocs')
+if (process.server) {
+  // @ts-ignore
+  defineOgImageComponent('OgImageDocs')
+}
 </script>
 
 <template>
