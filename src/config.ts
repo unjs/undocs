@@ -50,26 +50,26 @@ export interface DocsConfig {
    */
   landing?: {
     /** page title */
-    title?: string,
+    title?: string
     /** page description */
-    description?: string,
+    description?: string
     hero?: {
       /** full title (auto generated) */
-      _title?: string,
+      _title?: string
       /** main title (default is same as page title) */
-      title?: string,
+      title?: string
       /** second title (kep it short. default is same as page description) */
-      description?: string,
+      description?: string
       /** Additional text */
-      text?: string,
+      text?: string
       /** Action Links */
-      links?: Record<string, { label: string, icon?: string, to?: string, size?: string }>
+      links?: Record<string, { label: string; icon?: string; to?: string; size?: string }>
       /** Hero Codes */
-      code?: { content: string, title?: string, lang?:string }[]
+      code?: { content: string; title?: string; lang?: string }[]
     }
     features?: {
-      title?: string,
-      items?: { title: string, description?: string, icon?: string }[]
+      title?: string
+      items?: { title: string; description?: string; icon?: string }[]
     }
   }
 }
@@ -81,8 +81,8 @@ export async function loadDocsConfig(dir: string) {
     name: 'docs',
     cwd: dir,
     defaults: {
-      dir
-    }
+      dir,
+    },
   })
 
   return config

@@ -8,7 +8,7 @@ const appDir = fileURLToPath(new URL('../app', import.meta.url))
 
 export async function setupDocs(dir: string) {
   // Try to load docs config
-  const docsconfig = (await loadDocsConfig(dir)) || {} as DocsConfig
+  const docsconfig = (await loadDocsConfig(dir)) || ({} as DocsConfig)
 
   // Normalize dir
   docsconfig.dir = dir = resolve(docsconfig.dir || dir)
