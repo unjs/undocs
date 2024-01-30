@@ -1,5 +1,5 @@
+import { join } from 'node:path'
 import { defineNuxtConfig } from 'nuxt/config'
-import { join } from 'path'
 
 // Flag enabled when developing docs theme
 const dev = !!process.env.NUXT_DOCS_DEV
