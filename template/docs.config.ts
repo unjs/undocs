@@ -9,7 +9,11 @@ export default defineDocsConfig({
   landing: {
     hero: {
       text: '',
-      // code: [{ content: `` }]
+      code: []
     },
-  }
+    features: {
+      title: '',
+      items: []
+    }
+  },
 })
