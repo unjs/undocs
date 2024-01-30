@@ -7,7 +7,6 @@ export default defineDocsConfig({
   redirects: {
     '/getting-started': '/guide',
   },
-  themeColor: '#f98007',
   landing: {
     hero: {
       text: 'Elegant documentation tooling for UnJS Docs',

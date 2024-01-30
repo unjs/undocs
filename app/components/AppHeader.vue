@@ -1,64 +1,62 @@
 <script setup lang="ts">
 import type { NavItem } from '@nuxt/content/dist/runtime/types'
+import { trainCase } from 'scule'
 
 const navigation = inject<NavItem[]>('navigation', [])
 
 const appConfig = useAppConfig()
 
-const [{ data: cachedStars }, { data: tag }] = await Promise.all([
-  useFetch(`https://ungh.cc/repos/${appConfig.docs.github}`, {
-    transform: (data: any) => data.repo.stars as number,
-  }),
-  useFetch(`https://ungh.cc/repos/${appConfig.docs.github}/releases/latest`, {
-    transform: (data: any) => data.release.tag as string,
-  }),
-])
+const { metaSymbol } = useShortcuts()
 
-const stars = useState('stars', () => cachedStars.value)
-
-onMounted(async () => {
-  try {
-    const { stargazers_count } = await $fetch<{ stargazers_count: number }>(
-      `https://api.github.com/repos/${appConfig.docs.github}`,
-    )
-    let timeSlice = 1000 / (stargazers_count - stars.value)
-    while (stars.value < stargazers_count) {
-      stars.value++
-      await new Promise((resolve) => setTimeout(resolve, timeSlice))
+const navLinks = computed(() => {
+  // console.log(mapContentNavigation(navigation.value))
+  return navigation.value.map(nav => {
+    let label = trainCase(nav._path.substring(1)).replaceAll("-", ' ')
+    if (label === 'Api') {
+      label = 'API'
     }
-  } catch {}
+    return {
+      label,
+      to: nav._path,
+    }
+  })
 })
 </script>
 
 <template>
-  <UHeader :ui="{ logo: 'items-center' }" :links="mapContentNavigation(navigation)">
+  <UHeader :links="navLinks">
     <template #logo>
       <img :src="appConfig.docs.logo" :alt="`${appConfig.site.name} logo`" class="h-7 w-7" />
       <span>
         {{ appConfig.site.name }}
       </span>
-      <UBadge v-if="tag" :label="tag" color="primary" variant="subtle" size="xs" />
     </template>
 
     <template #center>
-      <UDocsSearchButton class="hidden lg:flex" />
+      <!-- <UDocsSearchButton class="hidden lg:flex" /> -->
     </template>
 
     <template #right>
-      <UDocsSearchButton :label="null" aria-label="Open Search" class="lg:hidden" />
-      <UTooltip v-if="stars" class="hidden lg:flex" :text="`${appConfig.site.name} GitHub Stars`">
-        <UButton
-          icon="i-simple-icons-github"
-          :to="`https://github.com/${appConfig.docs.github}`"
-          target="_blank"
-          aria-label="Visit repository"
-          square
-          color="gray"
-          variant="ghost"
-        >
-          {{ formatNumber(stars) }}
-        </UButton>
+      <!-- Search -->
+      <UTooltip text="Search" :shortcuts="[metaSymbol, 'K']">
+        <UDocsSearchButton :label="null" />
       </UTooltip>
+
+      <!-- Color Stuff -->
+      <ColorPicker />
+
+      <!-- Github -->
+      <UTooltip :text="`View ${appConfig.docs.github} in GitHub`">
+        <UButton
+        :to="`https://github.com/${appConfig.docs.github}`"
+          target="_blank"
+          icon="i-simple-icons-github"
+          aria-label="GitHub"
+          v-bind="($ui.button.secondary as any)"
+        />
+      </UTooltip>
+
+
     </template>
 
     <template #panel>

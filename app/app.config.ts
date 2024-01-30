@@ -43,8 +43,8 @@ export default defineAppConfig({
     },
   },
   ui: {
-    primary: 'theme',
-    gray: 'cool',
+    primary: 'amber',
+    gray: 'zinc',
     presets: {
       button: {
         secondary: {

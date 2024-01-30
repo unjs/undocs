@@ -1,4 +1,4 @@
-# Markdown Components
+# Components
 
 Discover the components you can use in your markdown files.
 
