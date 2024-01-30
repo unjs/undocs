@@ -19,8 +19,6 @@ const socialLinks = computed(() => {
     })
     .filter(Boolean)
 })
-
-const iconLogo = '/icon.svg'
 </script>
 
 <template>
@@ -29,19 +27,19 @@ const iconLogo = '/icon.svg'
       <div class="grid md:grid-cols-2 gap-y-6 gap-x-12 md:gap-x-25">
         <div class="grow flex flex-col gap-3 md:gap-6 max-w-sm">
           <NuxtLink to="/" class="flex items-center gap-2 text-xl">
-            <img :src="iconLogo" :alt="`${appConfig.site.name} logo`" class="h-7 w-7" />
+            <img :src="appConfig.docs.logo" :alt="`${appConfig.docs.name} logo`" class="h-7 w-7" />
             <span class="mt-[2px] font-bold">
-              {{ appConfig.site.name }}
+              {{ appConfig.docs.name }}
             </span>
           </NuxtLink>
           <p class="max-w-lg text-sm md:text-base text-gray-500 dark:text-gray-400 italic">
-            {{ appConfig.site.description }}
+            {{ appConfig.docs.description }}
           </p>
         </div>
         <ul class="flex gap-2">
           <li>
             <UButton square to="https://unjs.io" rel="noopener" variant="ghost" color="gray" size="xl">
-              <img src="/unjs.svg" alt="Logo of UnJS" class="w-6 h-6" />
+              <UnJS class="w-6 h-6" />
             </UButton>
           </li>
           <li v-for="link of socialLinks" :key="link.label">
@@ -88,7 +86,7 @@ const iconLogo = '/icon.svg'
         </div>
       </div>
       <div class="text-sm dark:text-gray-400 text-center">
-        <span class="capitalize font-medium">{{ appConfig.site.name }}</span> is part of the
+        <span class="capitalize font-medium">{{ appConfig.docs.name }}</span> is part of the
         <NuxtLink
           to="https://unjs.io"
           rel="noopener"

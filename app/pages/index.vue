@@ -27,13 +27,20 @@ defineOgImageComponent('OgImageDocs')
         <MDC :value="page.hero.title" />
       </template>
 
-      <MDC :value="page.hero.code" tag="pre" class="prose prose-primary dark:prose-invert mx-auto" />
+      <MDC
+        v-if="page.hero.code"
+        :value="page.hero.code"
+        tag="pre"
+        class="prose prose-primary dark:prose-invert mx-auto"
+      />
     </ULandingHero>
 
-    <ULandingSection :title="page.features.title" :links="page.features.links">
-      <UPageGrid>
-        <ULandingCard v-for="(item, index) of page.features.items" :key="index" v-bind="item" />
-      </UPageGrid>
-    </ULandingSection>
+    <template v-if="page.features">
+      <ULandingSection :title="page.features.title" :links="page.features.links">
+        <UPageGrid>
+          <ULandingCard v-for="(item, index) of page.features.items" :key="index" v-bind="item" />
+        </UPageGrid>
+      </ULandingSection>
+    </template>
   </div>
 </template>

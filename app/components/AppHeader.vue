@@ -18,7 +18,9 @@ const stars = useState('stars', () => cachedStars.value)
 
 onMounted(async () => {
   try {
-    const { stargazers_count } = await $fetch<{ stargazers_count: number }>(`https://api.github.com/repos/unjs/crossws`)
+    const { stargazers_count } = await $fetch<{ stargazers_count: number }>(
+      `https://api.github.com/repos/${appConfig.docs.github}`,
+    )
     let timeSlice = 1000 / (stargazers_count - stars.value)
     while (stars.value < stargazers_count) {
       stars.value++
@@ -26,18 +28,16 @@ onMounted(async () => {
     }
   } catch {}
 })
-
-const iconLogo = '/icon.svg'
 </script>
 
 <template>
   <UHeader :ui="{ logo: 'items-center' }" :links="mapContentNavigation(navigation)">
     <template #logo>
-      <img :src="iconLogo" :alt="`${appConfig.site.name} logo`" class="h-7 w-7" />
+      <img :src="appConfig.docs.logo" :alt="`${appConfig.docs.name} logo`" class="h-7 w-7" />
       <span>
-        {{ appConfig.site.name }}
+        {{ appConfig.docs.name }}
       </span>
-      <UBadge v-if="tag" :label="tag" color="primary" variant="subtle" size="xs" />
+      <UBadge v-if="tag" :label="tag as string" color="primary" variant="subtle" size="xs" />
     </template>
 
     <template #center>
@@ -45,7 +45,8 @@ const iconLogo = '/icon.svg'
     </template>
 
     <template #right>
-      <UTooltip v-if="stars" class="hidden lg:flex" :text="`${appConfig.site.name} GitHub Stars`">
+      <UDocsSearchButton :label="null" aria-label="Open Search" class="lg:hidden" />
+      <UTooltip v-if="stars" class="hidden lg:flex" :text="`${appConfig.docs.name} GitHub Stars`">
         <UButton
           icon="i-simple-icons-github"
           :to="`https://github.com/${appConfig.docs.github}`"

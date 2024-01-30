@@ -1,6 +1,39 @@
 # Changelog
 
 
+## v0.1.8
+
+[compare changes](https://github.com/unjs/docs/compare/v0.1.7...v0.1.8)
+
+### 🚀 Enhancements
+
+- Support custom theme colors ([#12](https://github.com/unjs/docs/pull/12))
+- Add read-more component ([#21](https://github.com/unjs/docs/pull/21))
+- Add search button on mobile ([#23](https://github.com/unjs/docs/pull/23))
+
+### 🩹 Fixes
+
+- Workaround icon override issue ([4cbc5bc](https://github.com/unjs/docs/commit/4cbc5bc))
+- Explicitly add docs public dir ([2f38786](https://github.com/unjs/docs/commit/2f38786))
+- Only remove from markdown if injected during parsing in frontmatter ([87d21c2](https://github.com/unjs/docs/commit/87d21c2))
+
+### 📖 Documentation
+
+- Update readme ([#24](https://github.com/unjs/docs/pull/24))
+
+### 🏡 Chore
+
+- **release:** V0.1.7 ([db6a60e](https://github.com/unjs/docs/commit/db6a60e))
+- Add comments to types ([#13](https://github.com/unjs/docs/pull/13))
+- Use unjs svg component ([#26](https://github.com/unjs/docs/pull/26))
+
+### ❤️ Contributors
+
+- Estéban ([@Barbapapazes](http://github.com/Barbapapazes))
+- Inesh Bose <dev@inesh.xyz>
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.1.7
 
 [compare changes](https://github.com/unjs/docs/compare/v0.1.6...v0.1.7)
