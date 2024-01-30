@@ -11,9 +11,9 @@ const route = useRoute()
 const { data: page } = await useAsyncData(route.path, () => queryContent(route.path).findOne())
 
 if (!page.value) {
-  throw createError({
+  showError({
     statusCode: 404,
-    statusMessage: 'Page not found',
+    statusMessage: `Page not found: ${route.path}`,
   })
 }
 
@@ -54,8 +54,8 @@ const links = computed(() => [
     target: '_blank',
   },
   {
-    icon: 'i-heroicons-star',
-    label: 'Star on GitHub',
+    icon: 'i-simple-icons-github',
+    label: 'View on GitHub',
     to: `https://github.com/${appConfig.docs.github}`,
     target: '_blank',
   },
@@ -80,7 +80,7 @@ const links = computed(() => [
           <div class="hidden lg:block space-y-6" :class="{ '!mt-6': page.body?.toc?.links?.length }">
             <UDivider v-if="page.body?.toc?.links?.length" type="dashed" />
 
-            <UPageLinks title="Community" :links="links" />
+            <UPageLinks title="Quick Links" :links="links" />
           </div>
         </template>
       </UDocsToc>
