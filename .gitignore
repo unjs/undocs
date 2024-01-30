@@ -24,9 +24,5 @@ logs
 .env.*
 !.env.example
 
-# Docs
-.docs
-*.tgz
-
 # Template
 template/pnpm-lock.yaml

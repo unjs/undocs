@@ -6,21 +6,22 @@ import { type DocsConfig, loadDocsConfig } from './config'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 
-export async function setupDocs(dir: string) {
+export async function setupDocs(docsDir: string) {
   // Try to load docs config
-  const docsconfig = (await loadDocsConfig(dir)) || ({} as DocsConfig)
+  const docsconfig = (await loadDocsConfig(docsDir)) || ({} as DocsConfig)
 
   // Normalize dir
-  docsconfig.dir = dir = resolve(docsconfig.dir || dir)
+  docsconfig.dir = docsDir = resolve(docsconfig.dir || docsDir)
 
   // Prepare loadNuxt overrides
-  const overrides = <NuxtConfig>{
-    rootDir: dir,
-    extends: [appDir],
-    modulesDir: [resolve(appDir, '../node_modules'), resolve(dir, 'node_modules')],
+  const nuxtConfig: NuxtConfig = {
+    rootDir: appDir,
+    srcDir: appDir,
+    modulesDir: [resolve(appDir, '../node_modules'), resolve(docsDir, 'node_modules')],
     build: {
       transpile: [appDir],
     },
+    // @ts-ignore
     docs: docsconfig,
     appConfig: {
       site: {
@@ -33,7 +34,7 @@ export async function setupDocs(dir: string) {
     },
     nitro: {
       static: true,
-      publicAssets: [{ baseURL: '/', dir: resolve(dir, 'public'), maxAge: 0 }],
+      publicAssets: [{ baseURL: '/', dir: resolve(docsDir, '.docs/public'), maxAge: 0 }],
     },
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
@@ -52,7 +53,8 @@ export async function setupDocs(dir: string) {
   }
 
   return {
-    dir,
-    overrides,
+    docsDir,
+    appDir,
+    nuxtConfig,
   }
 }

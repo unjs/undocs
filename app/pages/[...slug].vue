@@ -50,7 +50,7 @@ const links = computed(() => [
   {
     icon: 'i-heroicons-pencil-square',
     label: 'Edit this page',
-    to: `https://github.com/${appConfig.docs.github}/edit/main/docs/content/${page.value._file}`,
+    to: `https://github.com/${appConfig.docs.github}/edit/main/docs/${page.value._file}`,
     target: '_blank',
   },
   {

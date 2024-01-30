@@ -27,7 +27,7 @@ const socialLinks = computed(() => {
       <UnJS class="w-5 h-5" />
     </div>
   </div>
-  <UFooter :links="links">
+  <UFooter :links="[]">
     <template #left>
       <p class="text-sm text-gray-500 dark:text-gray-400">
         <span class="text-gray-900 dark:text-white">{{ appConfig.site.name }}</span> is part of the <NuxtLink class="text-gray-900 dark:text-white" to="https://unjs.io" target="_blank">UnJS ecosystem</NuxtLink>.
@@ -38,7 +38,7 @@ const socialLinks = computed(() => {
     </template>
 
     <template #right>
-      <UColorModeSelect />
+      <UColorModeButton />
 
       <UButton
         v-for="link of socialLinks"

@@ -9,7 +9,7 @@ export interface ContentSourceOptions {
 
 export default (opts: ContentSourceOptions) => {
   const _fs = fsDriver({
-    base: opts.docsConfig.dir + '/content',
+    base: opts.docsConfig.dir,
    })
 
   return defineDriver({

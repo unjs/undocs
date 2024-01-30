@@ -57,6 +57,17 @@ export default defineNuxtConfig({
     },
   },
   content: {
+    // .* and -* are ignored by default
+    ignores: [
+      'package.json',
+      'dist',
+      'package-lock.json',
+      'yarn.lock',
+      'node_modules',
+      'pnpm-lock.yaml',
+      'pnpm-workspace.yaml',
+      '\\.(js|mjs|ts)$'
+    ],
     highlight: {
       theme: {
         default: 'min-dark',

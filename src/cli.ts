@@ -16,9 +16,8 @@ const dev = defineCommand({
     },
   },
   async setup({ args }) {
-    const { dir, overrides } = await setupDocs(args.dir)
-    process.chdir(dir)
-    await import('nuxi').then((nuxi) => nuxi.runCommand('dev', [dir, '--no-fork', '--port', '4000'], { overrides }))
+    const { appDir, nuxtConfig } = await setupDocs(args.dir)
+    await import('nuxi').then((nuxi) => nuxi.runCommand('dev', [appDir, '--no-fork', '--port', '4000'], { overrides: nuxtConfig }))
   },
 })
 
