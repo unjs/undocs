@@ -92,6 +92,7 @@ export default defineNuxtConfig({
   },
   linkChecker: {
     strictNuxtContentPaths: true,
+    skipInspections: ['link-text'],
   },
   tailwindcss: {
     viewer: dev,
