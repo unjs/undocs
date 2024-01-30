@@ -19,12 +19,12 @@ export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
   modules: [
     '@nuxt/content',
-    '@nuxt/ui',
     '@nuxthq/studio',
     '@nuxtjs/fontaine',
     '@nuxtjs/google-fonts',
-    'nuxt-og-image',
+    '@nuxtjs/seo',
     '@nuxtjs/plausible',
+    '@nuxt/ui',
   ],
   ui: {
     icons: ['heroicons', 'simple-icons', 'mdi', 'material-symbols', 'fa', 'ph'],
@@ -37,6 +37,17 @@ export default defineNuxtConfig({
     download: true,
     families: {
       Nunito: [400, 500, 600, 700],
+    },
+  },
+  app: {
+    head: {
+      htmlAttrs: {
+        dir: 'ltr',
+        class: 'scroll-smooth',
+      },
+      templateParams: {
+        separator: '·',
+      },
     },
   },
   content: {
@@ -60,6 +71,28 @@ export default defineNuxtConfig({
   },
   uiPro: {
     license: process.env.NUXT_UI_PRO_LICENSE || 'oss',
+  },
+  ogImage: {
+    fonts: ['Nunito:400', 'Nunito:700'],
+  },
+  seo: {
+    splash: false,
+  },
+  schemaOrg: {
+    identity: {
+      type: 'Organization',
+      name: 'UnJS',
+      url: 'https://unjs.io',
+      logo: 'https://unjs.io/favicon.svg',
+      sameAs: ['https://github.com/unjs', 'https://x.com/unjsio'],
+    },
+  },
+  sitemap: {
+    strictNuxtContentPaths: true,
+  },
+  linkChecker: {
+    strictNuxtContentPaths: true,
+    skipInspections: ['link-text'],
   },
   tailwindcss: {
     viewer: dev,

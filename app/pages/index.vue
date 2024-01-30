@@ -9,19 +9,15 @@ if (!page.value) {
   })
 }
 
+useHead({
+  titleTemplate: '%s %separator UnJS',
+})
 useSeoMeta({
-  titleTemplate: '',
   title: page.value.title,
-  ogTitle: page.value.title,
   description: page.value.description,
-  ogDescription: page.value.description,
 })
 
-defineOgImage({
-  component: 'Docs',
-  title: page.value.title,
-  description: page.value.description,
-})
+defineOgImageComponent('OgImageDocs')
 </script>
 
 <template>

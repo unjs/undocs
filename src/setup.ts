@@ -24,9 +24,11 @@ export async function setupDocs(dir: string) {
       dir,
     },
     appConfig: {
-      docs: {
+      site: {
         name: config.name || '',
         description: config.description || '',
+      },
+      docs: {
         github: config.github || '',
       },
     },

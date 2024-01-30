@@ -1,5 +1,5 @@
-title: 'packageName'
-description: 'package decription.'
+title: 'UnJS Docs Theme'
+description: 'Default documentation for UnJS package.'
 navigation: false
 hero:
   title: '[packageName]{.text-primary} :br [package decription.]{.text-4xl}'
@@ -13,14 +13,12 @@ hero:
     - label: 'Contribute on GitHub'
       icon: 'i-simple-icons-github'
       color: 'white'
-      to: 'https://github.com/unjs/unstorage'
+      to: 'https://github.com/unjs/docs'
       target: '_blank'
       size: lg
   code: |
-    ```ts [index.ts]
-    import { xyz } from "packageName"
-
-    xyz()
+    ```sh [Terminal]
+    npx giget gh:unjs/docs/playground docs
     ```
 features:
   title: 'Many Features'

@@ -25,18 +25,17 @@ const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
 )
 
 useSeoMeta({
-  titleTemplate: `%s · ${appConfig.docs.name}`,
-  title: page.value.title,
-  ogTitle: page.value.title,
-  description: page.value.description,
-  ogDescription: page.value.description,
-})
-
-defineOgImage({
-  component: 'Docs',
   title: page.value?.title,
   description: page.value?.description,
 })
+
+useSchemaOrg([
+  defineArticle({
+    '@type': 'TechArticle',
+  })
+])
+
+defineOgImageComponent('OgImageDocs')
 
 const headline = computed(() => findPageHeadline(page.value))
 

@@ -33,11 +33,11 @@ onMounted(async () => {
 <template>
   <UHeader :ui="{ logo: 'items-center' }" :links="mapContentNavigation(navigation)">
     <template #logo>
-      <img :src="appConfig.docs.logo" :alt="`${appConfig.docs.name} logo`" class="h-7 w-7" />
+      <img :src="appConfig.docs.logo" :alt="`${appConfig.site.name} logo`" class="h-7 w-7" />
       <span>
-        {{ appConfig.docs.name }}
+        {{ appConfig.site.name }}
       </span>
-      <UBadge v-if="tag" :label="tag as string" color="primary" variant="subtle" size="xs" />
+      <UBadge v-if="tag" :label="tag" color="primary" variant="subtle" size="xs" />
     </template>
 
     <template #center>
@@ -46,7 +46,7 @@ onMounted(async () => {
 
     <template #right>
       <UDocsSearchButton :label="null" aria-label="Open Search" class="lg:hidden" />
-      <UTooltip v-if="stars" class="hidden lg:flex" :text="`${appConfig.docs.name} GitHub Stars`">
+      <UTooltip v-if="stars" class="hidden lg:flex" :text="`${appConfig.site.name} GitHub Stars`">
         <UButton
           icon="i-simple-icons-github"
           :to="`https://github.com/${appConfig.docs.github}`"
