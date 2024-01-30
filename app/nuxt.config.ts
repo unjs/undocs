@@ -1,4 +1,5 @@
 import { defineNuxtConfig } from 'nuxt/config'
+import { join } from 'path'
 
 // Flag enabled when developing docs theme
 const dev = !!process.env.NUXT_DOCS_DEV
@@ -105,6 +106,11 @@ export default defineNuxtConfig({
   tailwindcss: {
     viewer: dev,
     quiet: !dev,
+    config: {
+      content: {
+        files: [join(__dirname, '{components,pages,layouts}/**/*.vue')]
+      }
+    }
   },
   typescript: {
     strict: false,
