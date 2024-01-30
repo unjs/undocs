@@ -109,6 +109,7 @@ export default defineNuxtConfig({
     quiet: !dev,
     config: {
       content: {
+        // eslint-disable-next-line unicorn/prefer-module
         files: [join(__dirname, '{components,pages,layouts}/**/*.vue')]
       }
     }
