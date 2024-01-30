@@ -36,6 +36,9 @@ export async function setupDocs(docsDir: string) {
       static: true,
       publicAssets: [{ baseURL: '/', dir: resolve(docsDir, '.docs/public'), maxAge: 0 }],
     },
+    alias: {
+      '.docs': resolve(docsDir, '.docs'),
+    },
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
     },

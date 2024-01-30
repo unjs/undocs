@@ -37,9 +37,8 @@ const build = defineCommand({
     },
   },
   async setup({ args }) {
-    const { dir, overrides } = await setupDocs(args.dir)
-    process.chdir(dir)
-    await import('nuxi').then((nuxi) => nuxi.runCommand('generate', [dir], { overrides }))
+    const { appDir, nuxtConfig } = await setupDocs(args.dir)
+    await import('nuxi').then((nuxi) => nuxi.runCommand('generate', [appDir], { overrides: nuxtConfig }))
   },
 })
 

@@ -62,7 +62,7 @@ The component is used to create a link to another page.
   label: Preview
   icon: i-heroicons-magnifying-glass-circle
   ---
-  :read-more{to="/installation"}
+  :read-more{to="/guide"}
   :read-more{to="https://unjs.io" title="UnJS Website"}
   ::
   ::div
@@ -71,7 +71,7 @@ The component is used to create a link to another page.
   icon: i-heroicons-code-bracket-square
   ---
   ```mdc
-  :read-more{to="/installation"}
+  :read-more{to="/guide"}
   :read-more{to="https://unjs.io" title="UnJS Website"}
   ```
   ::
