@@ -41,9 +41,6 @@ export default defineNuxtConfig({
   googleFonts: {
     display: 'swap',
     download: true,
-    families: {
-      Nunito: [400, 500, 600, 700],
-    },
   },
   app: {
     head: {
@@ -66,7 +63,7 @@ export default defineNuxtConfig({
       'node_modules',
       'pnpm-lock.yaml',
       'pnpm-workspace.yaml',
-      '\\.(js|mjs|ts)$'
+      '\\.(js|mjs|ts)$',
     ],
     highlight: {
       theme: {
@@ -81,7 +78,7 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       autoSubfolderIndex: false,
-      failOnError: false
+      failOnError: false,
     },
   },
   devtools: {
@@ -121,9 +118,9 @@ export default defineNuxtConfig({
     config: {
       content: {
         // eslint-disable-next-line unicorn/prefer-module
-        files: [join(__dirname, '{components,pages,layouts}/**/*.vue')]
-      }
-    }
+        files: [join(__dirname, '{components,pages,layouts}/**/*.vue')],
+      },
+    },
   },
   typescript: {
     strict: false,

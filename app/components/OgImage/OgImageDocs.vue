@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// /__og-image__/image/installation/og.png
+// /__og-image__/image/guide/og.png
 defineProps<{
   title: string
   description: string
@@ -32,7 +32,7 @@ const appConfig = useAppConfig()
           </div>
         </div>
         <div class="flex flex-row justify-between">
-          <img src=".docs/public/icon.svg" height="60" width="60" class="rounded-sm h-[60px] w-[60px]" />
+          <img src="/icon.svg" height="60" width="60" class="rounded-sm h-[60px] w-[60px]" />
           <UnJS class="w-6 h-6" />
         </div>
       </div>

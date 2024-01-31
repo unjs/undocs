@@ -17,6 +17,7 @@ export async function setupDocs(docsDir: string) {
   const nuxtConfig: NuxtConfig = {
     rootDir: resolve(docsDir, '.docs'),
     srcDir: resolve(docsDir, '.docs'),
+
     extends: [appDir],
     modulesDir: [resolve(appDir, '../node_modules'), resolve(docsDir, 'node_modules')],
     build: {
@@ -24,6 +25,12 @@ export async function setupDocs(docsDir: string) {
     },
     // @ts-ignore
     docs: docsconfig,
+    // @ts-ignore
+    googleFonts: {
+      families: {
+        Nunito: [400, 500, 600, 700], // in layer, it duplicates. why? (god knows?)
+      },
+    },
     appConfig: {
       site: {
         name: docsconfig.name || '',
@@ -35,7 +42,6 @@ export async function setupDocs(docsDir: string) {
     },
     nitro: {
       static: true,
-      publicAssets: [{ baseURL: '/', dir: resolve(docsDir, '.docs/public'), maxAge: 0 }],
     },
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
