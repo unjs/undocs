@@ -27,7 +27,7 @@ jobs:
       - run: pnpm types:prepare
       - run: pnpm lint
       - run: pnpm build
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
       - name: nightly release
         if: |
           github.ref_name == 'main' &&
