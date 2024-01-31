@@ -11,7 +11,7 @@ export default defineNuxtModule({
     contentConfig.sources = {
       ...contentConfig.sources,
       content: {
-        driver: fileURLToPath(new URL('source', import.meta.url)),
+        driver: fileURLToPath(new URL('source.mjs', import.meta.url)),
         docsConfig
       }
     }

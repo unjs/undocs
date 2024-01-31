@@ -1,9 +1,6 @@
 import defu from 'defu'
-import type { DocsConfig } from '../../../config'
 
-type LandingConfig = DocsConfig['landing']
-
-export function genLanding(docsConfig: DocsConfig): LandingConfig {
+export function genLanding(docsConfig) {
   const landing = defu(docsConfig.landing || {}, {
     navigation: false,
     title: docsConfig.name,
@@ -30,9 +27,9 @@ export function genLanding(docsConfig: DocsConfig): LandingConfig {
       },
     },
     features: {}
-  } as LandingConfig)
+  })
 
-  landing.hero!._title = landing.hero?._title|| `[${landing.hero?.title}]{.text-primary} :br [${landing.hero?.description}]{.text-4xl}`
+  landing.hero._title = landing.hero?._title|| `[${landing.hero?.title}]{.text-primary} :br [${landing.hero?.description}]{.text-4xl}`
 
   return landing
 }
