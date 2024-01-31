@@ -15,8 +15,9 @@ export async function setupDocs(docsDir: string) {
 
   // Prepare loadNuxt overrides
   const nuxtConfig: NuxtConfig = {
-    rootDir: appDir,
-    srcDir: appDir,
+    rootDir: resolve(docsDir, '.docs'),
+    srcDir: resolve(docsDir, '.docs'),
+    extends: [appDir],
     modulesDir: [resolve(appDir, '../node_modules'), resolve(docsDir, 'node_modules')],
     build: {
       transpile: [appDir],
@@ -35,9 +36,6 @@ export async function setupDocs(docsDir: string) {
     nitro: {
       static: true,
       publicAssets: [{ baseURL: '/', dir: resolve(docsDir, '.docs/public'), maxAge: 0 }],
-    },
-    alias: {
-      '.docs': resolve(docsDir, '.docs'),
     },
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
