@@ -10,6 +10,15 @@ export default defineAppConfig({
   ui: {
     primary: 'amber',
     gray: 'zinc',
+    content: {
+      prose: {
+        code: {
+          icon: {
+            auto: 'vscode-icons:file-type-js',
+          },
+        },
+      },
+    },
     presets: {
       button: {
         secondary: {
