@@ -20,23 +20,15 @@ Go to the docs dir `cd docs/`
 
 Install dependencies:
 
-:packageManager{action="install" name="unjs-docs" auto}
-
-::note
-  "Auto" uses [`nypm`](https://github.com/unjs/nypm) - it automatically installs using the package manager based on your project.
-::
+:pm-install{name="unjs-docs"}
 
 Start development server:
 
-```sh
-npm run dev
-```
+:pm-run{script="dev"}
 
 Build for production:
 
-```sh
-npm run build
-```
+:pm-run{script="build"}
 
 ## Components
 
