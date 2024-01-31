@@ -16,6 +16,8 @@
   "files": [
     "dist",
     "app",
+    "!app/.nuxt",
+    "!app/node_modules",
     "config.d.ts"
   ],
   "scripts": {
@@ -24,6 +26,7 @@
     "dev:build": "pnpm unjs-docs build playground",
     "dev:ssr": "NUXT_DOCS_SSR=1 pnpm dev",
     "dev:template": "pnpm unjs-docs dev template",
+    "types:prepare": "NUXT_DOCS_PREPARE=1 nuxt prepare app",
     "lint": "eslint --cache --ext .ts,.js,.mjs,.cjs . && prettier -c src",
     "lint:fix": "eslint --cache --ext .ts,.js,.mjs,.cjs . --fix && prettier -c src -w",
     "prepack": "pnpm build",

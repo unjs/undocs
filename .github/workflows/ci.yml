@@ -24,6 +24,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - run: pnpm install
+      - run: pnpm types:prepare
       - run: pnpm lint
       - run: pnpm build
       - uses: codecov/codecov-action@v3
