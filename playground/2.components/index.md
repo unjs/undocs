@@ -2,9 +2,9 @@
 
 Discover the components you can use in your markdown files.
 
-
 ## Alerts
 
+<!-- prettier-ignore-start -->
 ::tabs
   ::div
   ---
@@ -51,11 +51,13 @@ Discover the components you can use in your markdown files.
   ```
   ::
 ::
+<!-- prettier-ignore-end -->
 
 ## Read More
 
 The component is used to create a link to another page.
 
+<!-- prettier-ignore-start -->
 ::tabs
   ::div
   ---
@@ -76,6 +78,7 @@ The component is used to create a link to another page.
   ```
   ::
 ::
+<!-- prettier-ignore-end -->
 
 ### Github Notes
 
