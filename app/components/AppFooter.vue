@@ -1,24 +1,5 @@
 <script lang="ts" setup>
 const appConfig = useAppConfig()
-
-const socialLinks = computed(() => {
-  return Object.entries({ github: appConfig.docs.github, ...appConfig.docs.socials })
-    .map(([key, value]) => {
-      if (typeof value === 'object') {
-        return value
-      } else if (typeof value === 'string' && value) {
-        return {
-          href: /^https?:\/\//.test(value) ? value : `https://${key}.com/${value}`,
-          icon: `i-simple-icons-${key}`,
-          label: value,
-          rel: 'noopener noreferrer',
-        }
-      } else {
-        return null
-      }
-    })
-    .filter(Boolean)
-})
 </script>
 
 <template>
@@ -41,16 +22,7 @@ const socialLinks = computed(() => {
 
     <template #right>
       <ColorPicker />
-
-      <UButton
-        v-for="link of socialLinks"
-        :key="link.label"
-        :aria-label="link.label"
-        :icon="link.icon"
-        :to="link.href"
-        target="_blank"
-        v-bind="$ui.button.secondary as any"
-      ></UButton>
+      <SocialButtons />
     </template>
   </UFooter>
 </template>

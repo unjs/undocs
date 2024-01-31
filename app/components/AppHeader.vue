@@ -32,21 +32,10 @@ const navLinks = computed(() => {
     </template>
 
     <template #right>
-      <!-- Search -->
       <UTooltip text="Search" :shortcuts="[metaSymbol, 'K']">
         <UDocsSearchButton :label="null" />
       </UTooltip>
-
-      <!-- Github -->
-      <UTooltip :text="`View ${appConfig.docs.github} in GitHub`">
-        <UButton
-          :to="`https://github.com/${appConfig.docs.github}`"
-          target="_blank"
-          icon="i-simple-icons-github"
-          aria-label="GitHub"
-          v-bind="$ui.button.secondary as any"
-        />
-      </UTooltip>
+      <SocialButtons />
     </template>
 
     <template #panel>

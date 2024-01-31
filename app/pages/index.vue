@@ -70,8 +70,6 @@ const hero = computed(() => {
     code: formatHeroCode(page.value.heroCode),
   } as const
 })
-
-console.log(hero.value?.code)
 </script>
 
 <template>

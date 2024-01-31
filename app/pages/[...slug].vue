@@ -53,12 +53,6 @@ const links = computed(() => [
     to: `https://github.com/${appConfig.docs.github}/edit/main/docs/${page.value._file}`,
     target: '_blank',
   },
-  {
-    icon: 'i-simple-icons-github',
-    label: 'View on GitHub',
-    to: `https://github.com/${appConfig.docs.github}`,
-    target: '_blank',
-  },
 ])
 </script>
 
@@ -80,7 +74,7 @@ const links = computed(() => [
           <div class="hidden lg:block space-y-6" :class="{ '!mt-6': page.body?.toc?.links?.length }">
             <UDivider v-if="page.body?.toc?.links?.length" type="dashed" />
 
-            <UPageLinks title="Quick Links" :links="links" />
+            <UPageLinks title="" :links="links" />
           </div>
         </template>
       </UDocsToc>
