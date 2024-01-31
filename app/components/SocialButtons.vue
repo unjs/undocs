@@ -10,6 +10,7 @@ const socialLinks = computed(() => {
       }
       if (typeof value === 'string' && value) {
         return {
+          // Workaround: i-simple-icons-x i-simple-icons-github
           icon: `i-simple-icons-${key}`,
           label: value,
           to: /^https?:\/\//.test(value) ? value : `https://${key}.com/${value}`,
