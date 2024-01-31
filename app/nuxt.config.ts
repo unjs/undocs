@@ -33,7 +33,7 @@ export default defineNuxtConfig({
     '@nuxt/ui',
   ],
   ui: {
-    icons: ['heroicons', 'simple-icons', 'mdi', 'material-symbols', 'fa', 'ph'],
+    icons: ['mdi', 'heroicons', 'ph', 'simple-icons'],
   },
   fontMetrics: {
     fonts: ['Nunito'],
