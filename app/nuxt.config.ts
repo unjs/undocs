@@ -8,6 +8,9 @@ const dev = !!process.env.NUXT_DOCS_DEV
 const isProd = process.env.NODE_ENV === 'production'
 const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
+// Some modules are shameless and don't undrestand prepare mode and make nonsense warnings
+const isPrepare = Boolean(process.env.NUXT_DOCS_PREPARE)
+
 // https://github.com/unjs/std-env/issues/59
 process.env.NUXT_PUBLIC_SITE_URL =
   process.env.NUXT_PUBLIC_SITE_URL ||
@@ -27,7 +30,7 @@ export default defineNuxtConfig({
     '@nuxt/content',
     '@nuxthq/studio',
     '@nuxtjs/fontaine',
-    '@nuxtjs/google-fonts',
+    !isPrepare && '@nuxtjs/google-fonts',
     '@nuxtjs/seo',
     isProd && '@nuxtjs/plausible',
     '@nuxt/ui',

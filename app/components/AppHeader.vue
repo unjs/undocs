@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { NavItem } from '@nuxt/content/dist/runtime/types'
-import { trainCase } from 'scule'
 
 const navigation = inject<NavItem[]>('navigation', [])
 
@@ -10,13 +9,9 @@ const { metaSymbol } = useShortcuts()
 
 const navLinks = computed(() => {
   // console.log(mapContentNavigation(navigation.value))
-  return navigation.value.map(nav => {
-    let label = trainCase(nav._path.substring(1)).replaceAll("-", ' ')
-    if (label === 'Api') {
-      label = 'API'
-    }
+  return navigation.value.map((nav) => {
     return {
-      label,
+      label: toLabel(nav._path.substring(1)),
       to: nav._path,
     }
   })
@@ -42,21 +37,16 @@ const navLinks = computed(() => {
         <UDocsSearchButton :label="null" />
       </UTooltip>
 
-      <!-- Color Stuff -->
-      <ColorPicker />
-
       <!-- Github -->
       <UTooltip :text="`View ${appConfig.docs.github} in GitHub`">
         <UButton
-        :to="`https://github.com/${appConfig.docs.github}`"
+          :to="`https://github.com/${appConfig.docs.github}`"
           target="_blank"
           icon="i-simple-icons-github"
           aria-label="GitHub"
-          v-bind="($ui.button.secondary as any)"
+          v-bind="$ui.button.secondary as any"
         />
       </UTooltip>
-
-
     </template>
 
     <template #panel>

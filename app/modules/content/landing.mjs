@@ -2,34 +2,43 @@ import defu from 'defu'
 
 export function genLanding(docsConfig) {
   const landing = defu(docsConfig.landing || {}, {
+    // Meta
     navigation: false,
+
+    // Page
     title: docsConfig.name,
     description: docsConfig.description,
-    hero: {
-      title: docsConfig.name,
-      description: docsConfig.description,
-      text: '',
-      links: {
-        primary: {
-          label: "Get Started",
-          icon: "i-heroicons-rocket-launch",
-          to: "/guide",
-          size: "lg"
-        },
-        github: {
-          label: "View on GitHub",
-          icon: "i-simple-icons-github",
-          color: "white",
-          to: `https://github.com/${docsConfig.github}`,
-          target: "_blank",
-          size: "lg"
-        },
+
+    // Hero
+    heroTitle: docsConfig.name,
+    heroSubtitle: docsConfig.shortDescription,
+    heroDescription: docsConfig.description,
+    heroLinks: {
+      primary: {
+        label: 'Get Started',
+        icon: 'i-heroicons-rocket-launch',
+        to: '/guide',
+        size: 'lg',
+        order: 0,
+      },
+      github: {
+        label: 'View on GitHub',
+        icon: 'i-simple-icons-github',
+        color: 'white',
+        to: `https://github.com/${docsConfig.github}`,
+        target: '_blank',
+        size: 'lg',
+        order: 100,
       },
     },
-    features: {}
+
+    // Features
+    featuresTitle: '',
+    features: [],
   })
 
-  landing.hero._title = landing.hero?._title|| `[${landing.hero?.title}]{.text-primary} :br [${landing.hero?.description}]{.text-4xl}`
+  landing._heroMdTitle =
+    landing._heroMdTitle || `[${landing.heroTitle}]{.text-primary} :br [${landing.heroSubtitle}]{.text-4xl}`
 
   return landing
 }

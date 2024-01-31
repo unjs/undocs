@@ -5,6 +5,10 @@ import type { DocsConfig } from '../../../config'
 
 export default defineNuxtModule({
   setup(_, nuxt) {
+    if (nuxt.options._prepare) {
+      return
+    }
+
     const contentConfig = (nuxt.options as any).content as ContentOptions
     const docsConfig = (nuxt.options as any).docs as DocsConfig
 
@@ -12,9 +16,8 @@ export default defineNuxtModule({
       ...contentConfig.sources,
       content: {
         driver: fileURLToPath(new URL('source.mjs', import.meta.url)),
-        docsConfig
-      }
+        docsConfig,
+      },
     }
   },
 })
-

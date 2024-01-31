@@ -2,6 +2,10 @@ import { defineNuxtModule } from 'nuxt/kit'
 
 export default defineNuxtModule({
   setup(_, nuxt) {
+    if (nuxt.options._prepare) {
+      return
+    }
+
     // Need to register the hook before tailwind module
     // TODO: upstream tailwind module should fire this once modules are loaded
     nuxt.hook('tailwindcss:config', (tailwindConfig) => {

@@ -30,15 +30,17 @@ const socialLinks = computed(() => {
   <UFooter :links="[]">
     <template #left>
       <p class="text-sm text-gray-500 dark:text-gray-400">
-        <span class="text-gray-900 dark:text-white">{{ appConfig.site.name }}</span> is part of the <NuxtLink class="text-gray-900 dark:text-white" to="https://unjs.io" target="_blank">UnJS ecosystem</NuxtLink>.
-
+        <span class="text-gray-900 dark:text-white">{{ appConfig.site.name }}</span> is part of the
+        <NuxtLink class="text-gray-900 dark:text-white" to="https://unjs.io" target="_blank">UnJS ecosystem</NuxtLink>.
         Website made with
-      <NuxtLink class="text-gray-900 dark:text-white" to="https://ui.nuxt.com/pro" target="_blank">Nuxt UI Pro</NuxtLink>.
+        <NuxtLink class="text-gray-900 dark:text-white" to="https://ui.nuxt.com/pro" target="_blank"
+          >Nuxt UI Pro</NuxtLink
+        >.
       </p>
     </template>
 
     <template #right>
-      <UColorModeButton />
+      <ColorPicker />
 
       <UButton
         v-for="link of socialLinks"
@@ -47,7 +49,7 @@ const socialLinks = computed(() => {
         :icon="link.icon"
         :to="link.href"
         target="_blank"
-        v-bind="($ui.button.secondary as any)"
+        v-bind="$ui.button.secondary as any"
       ></UButton>
     </template>
   </UFooter>

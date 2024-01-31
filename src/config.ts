@@ -23,6 +23,13 @@ export interface DocsConfig {
   description?: string
 
   /**
+   * The description of the documentation site.
+   *
+   * @example 'Docs, Made Easy.'
+   */
+  shortDescription?: string
+
+  /**
    * The GitHub repository for the documentation site.
    *
    * @example 'unjs/docs'
@@ -49,28 +56,35 @@ export interface DocsConfig {
    * Landing page configuration
    */
   landing?: {
-    /** page title */
+    /** Page title */
     title?: string
-    /** page description */
+
+    /** Page description */
     description?: string
-    hero?: {
-      /** full title (auto generated) */
-      _title?: string
-      /** main title (default is same as page title) */
-      title?: string
-      /** second title (kep it short. default is same as page description) */
-      description?: string
-      /** Additional text */
-      text?: string
-      /** Action Links */
-      links?: Record<string, { label: string; icon?: string; to?: string; size?: string }>
-      /** Hero Codes */
-      code?: { content: string; title?: string; lang?: string }[]
-    }
-    features?: {
-      title?: string
-      items?: { title: string; description?: string; icon?: string }[]
-    }
+
+    /** Full hero title (auto generated markdown) */
+    _heroMdTitle?: string
+
+    /** main title (default is same as page title) */
+    heroTitle?: string
+
+    /** second hero title (default is same as shortDescription) */
+    heroSubtitle?: string
+
+    /** Additional text in hero (default is same as description) */
+    heroDescription?: string
+
+    /** Hero Links */
+    heroLinks?: Record<string, string | { label?: string; icon?: string; to?: string; size?: string; order?: number }>
+
+    /** Hero Codes */
+    heroCode?: { content: string; title?: string; lang?: string }[]
+
+    /** Features section title */
+    featuresTitle?: string
+
+    /** Features section description */
+    features?: { title: string; description?: string; icon?: string }[]
   }
 }
 

@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import type { DocsConfig } from '../../config'
 
-const { data: page } = await useAsyncData<DocsConfig['landing']>('index', () => queryContent('/').findOne())
+type LandingConfig = NonNullable<DocsConfig['landing']>
 
+const { data: page } = (await useAsyncData('index', () => queryContent('/').findOne())) as unknown as {
+  data: Ref<LandingConfig>
+}
 
 if (!page.value) {
   showError({
@@ -16,8 +19,8 @@ useHead({
 })
 
 useSeoMeta({
-  title: page.value.title,
-  description: page.value.description,
+  title: page.value!.title,
+  description: page.value!.description,
 })
 
 if (process.server) {
@@ -25,39 +28,66 @@ if (process.server) {
   defineOgImageComponent('OgImageDocs')
 }
 
-const pageHero = computed(() => {
-  if (!page.value?.hero) {
+function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
+  return Object.entries(links || {})
+    .map(([key, link], order) => {
+      if (!link) {
+        return
+      }
+      if (typeof link === 'string') {
+        link = { to: link }
+      }
+      return {
+        label: toLabel(key),
+        order,
+        target: link.to?.startsWith('https') ? '_blank' : undefined,
+        ...link,
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => a!.order - b!.order) as any[]
+}
+
+function formatHeroCode(code: LandingConfig['heroCode']) {
+  if (!code) {
+    return
+  }
+  if (typeof code === 'string') {
+    code = { content: code }
+  }
+  return `${'`'.repeat(3)}${code.lang || 'sh'} [${code.title || 'Terminal'}]\n${code.content}\n${'`'.repeat(3)}`
+}
+
+const hero = computed(() => {
+  if (!page.value!._heroMdTitle) {
     return
   }
   return {
-    title: page.value.hero._title,
-    description: page.value.hero.text,
-    links: Object.values(page.value.hero.links || {}),
-    orientation: page.value.hero.code?.length ? 'horizontal' : 'vertical',
-    code: (page.value.hero.code || []).map(c => `${"`".repeat(3)}${c.lang || 'sh'} [${c.title || 'Terminal'}]\n${c.content}\n${"`".repeat(3)}`).join('\n'),
-  }
+    title: page.value!._heroMdTitle,
+    description: page.value!.heroDescription,
+    links: nornalizeHeroLinks(page.value!.heroLinks),
+    orientation: page.value!.heroCode?.length ? 'horizontal' : 'vertical',
+    code: formatHeroCode(page.value.heroCode),
+  } as const
 })
+
+console.log(hero.value?.code)
 </script>
 
 <template>
   <div>
-    <ULandingHero v-if="pageHero" v-bind="pageHero">
+    <ULandingHero v-if="hero" v-bind="hero">
       <template #title>
-        <MDC :value="pageHero.title" />
+        <MDC :value="hero.title" />
       </template>
 
-      <MDC
-        v-if="pageHero.code"
-        :value="pageHero.code"
-        tag="pre"
-        class="prose prose-primary dark:prose-invert mx-auto"
-      />
+      <MDC v-if="hero.code" :value="hero.code" tag="pre" class="prose prose-primary dark:prose-invert mx-auto" />
     </ULandingHero>
 
     <template v-if="page.features">
-      <ULandingSection :title="page.features.title" :links="page.features.links">
+      <ULandingSection :title="page.featuresTitle">
         <UPageGrid>
-          <ULandingCard v-for="(item, index) of page.features.items" :key="index" v-bind="item" />
+          <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" />
         </UPageGrid>
       </ULandingSection>
     </template>
