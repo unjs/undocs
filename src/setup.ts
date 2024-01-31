@@ -37,7 +37,7 @@ export async function setupDocs(docsDir: string) {
         description: docsconfig.description || '',
       },
       docs: {
-        github: docsconfig.github || '',
+        github: docsconfig.github || 'unjs',
       },
     },
     nitro: {

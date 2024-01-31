@@ -2,44 +2,9 @@ export default defineAppConfig({
   docs: {
     socialBackground: 'https://github.com/unjs/docs/blob/main/assets/ellipse.png?raw=true',
     logo: '/icon.svg',
-    github: 'unjs/unjs',
+    github: '',
     socials: {
       x: 'unjsio',
-    },
-    footer: {
-      menu: [
-        // {
-        //   title: 'Community',
-        //   items: [
-        //     {
-        //       title: 'Contribute',
-        //       url: 'https://github.com/unjs/governance',
-        //       target: '_blank',
-        //     },
-        //     {
-        //       title: 'Contact us',
-        //       url: 'mailto:hi@unjs.io',
-        //       rel: null,
-        //       target: null,
-        //     },
-        //   ],
-        // },
-        // {
-        //   title: 'UnJS',
-        //   items: [
-        //     {
-        //       title: 'Website',
-        //       url: 'https://unjs.io',
-        //       rel: 'noopener',
-        //     },
-        //     {
-        //       title: 'GitHub',
-        //       url: 'https://github.com/unjs',
-        //       target: '_blank',
-        //     },
-        //   ],
-        // },
-      ],
     },
   },
   ui: {
