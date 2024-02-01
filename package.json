@@ -19,20 +19,22 @@
     "!app/.nuxt",
     "!app/node_modules",
     "!app/tsconfig.json",
+    "schema",
     "config.d.ts"
   ],
   "scripts": {
-    "build": "unbuild",
-    "dev": "NUXT_DOCS_DEV=1 pnpm unjs-docs dev playground",
-    "dev:build": "pnpm unjs-docs build playground",
-    "dev:ssr": "NUXT_DOCS_SSR=1 pnpm dev",
-    "dev:template": "pnpm unjs-docs dev template",
+    "build": "bun build-schema && unbuild",
+    "build-schema": "typescript-json-schema ./schema/config.d.ts DocsConfig -o schema/config.json",
+    "dev": "NUXT_DOCS_DEV=1 bun unjs-docs dev playground",
+    "dev:build": "bun unjs-docs build playground",
+    "dev:ssr": "NUXT_DOCS_SSR=1 bun dev",
+    "dev:template": "bun unjs-docs dev template",
     "types:prepare": "NUXT_DOCS_PREPARE=1 nuxt prepare app",
     "lint": "eslint --cache --ext .ts,.js,.mjs,.cjs . && prettier -c src",
     "lint:fix": "eslint --cache --ext .ts,.js,.mjs,.cjs . --fix && prettier -c src -w",
-    "prepack": "pnpm build",
-    "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
-    "test": "pnpm lint",
+    "prepack": "bun run build",
+    "release": "bun test && changelogen --release && npm publish && git push --follow-tags",
+    "test": "bun lint",
     "unjs-docs": "JITI_ESM_RESOLVE=1 jiti ./src/cli.ts"
   },
   "dependencies": {
@@ -73,6 +75,7 @@
     "prettier": "^3.2.4",
     "scule": "^1.2.0",
     "typescript": "^5.3.3",
+    "typescript-json-schema": "^0.62.0",
     "unbuild": "^2.0.0",
     "vue-tsc": "^1.8.27"
   }

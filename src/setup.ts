@@ -2,7 +2,8 @@ import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
 import type { NuxtConfig } from 'nuxt/schema'
 import { getColors } from 'theme-colors'
-import { type DocsConfig, loadDocsConfig } from './config'
+import type { DocsConfig } from '../schema'
+import { loadDocsConfig } from './config'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 
