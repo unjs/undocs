@@ -6,6 +6,7 @@ import { loadConfig } from 'c12'
 import type { DocsConfig } from '../schema'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
+const pkgDir = fileURLToPath(new URL('../../..', import.meta.url))
 
 export interface SetupDocsOptions {
   defaults?: DocsConfig
@@ -25,7 +26,7 @@ export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
     srcDir: resolve(docsDir, '.docs'),
 
     extends: [...(opts.extends || []), appDir, '@nuxt/ui-pro'],
-    modulesDir: [resolve(appDir, '../node_modules'), resolve(docsDir, 'node_modules')],
+    modulesDir: [resolve(pkgDir, 'node_modules'), resolve(docsDir, 'node_modules')],
     build: {
       transpile: [appDir],
     },
