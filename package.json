@@ -18,6 +18,7 @@
     "app",
     "!app/.nuxt",
     "!app/node_modules",
+    "!app/tsconfig.json",
     "config.d.ts"
   ],
   "scripts": {

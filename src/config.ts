@@ -78,7 +78,7 @@ export interface DocsConfig {
     heroLinks?: Record<string, string | { label?: string; icon?: string; to?: string; size?: string; order?: number }>
 
     /** Hero Codes */
-    heroCode?: { content: string; title?: string; lang?: string }[]
+    heroCode?: string | { content: string; title?: string; lang?: string }
 
     /** Features section title */
     featuresTitle?: string

@@ -1,5 +1,5 @@
 {
-  "extends": "./app/.nuxt/tsconfig.json",
+  "extends": "./playground/.docs/.nuxt/tsconfig.json",
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",

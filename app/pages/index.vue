@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DocsConfig } from '../../config'
+import type { DocsConfig } from '../../src/config'
 
 type LandingConfig = NonNullable<DocsConfig['landing']>
 
@@ -62,12 +62,13 @@ const hero = computed(() => {
   if (!page.value!._heroMdTitle) {
     return
   }
+  const code = formatHeroCode(page.value!.heroCode)
   return {
     title: page.value!._heroMdTitle,
     description: page.value!.heroDescription,
     links: nornalizeHeroLinks(page.value!.heroLinks),
-    orientation: page.value!.heroCode?.length ? 'horizontal' : 'vertical',
-    code: formatHeroCode(page.value.heroCode),
+    orientation: code ? 'horizontal' : 'vertical',
+    code,
   } as const
 })
 </script>
