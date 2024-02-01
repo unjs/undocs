@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const shiki = useShiki()
 const props = defineProps({
   command: { type: String, required: true },
 })
@@ -6,7 +7,7 @@ const props = defineProps({
 const codeBlocks = computed(() =>
   packageManagers.map((pm) => ({
     filename: pm.name,
-    code: `${pm.x} ${props.command}`,
+    code: shiki(`${pm.x} ${props.command}`, 'sh').value,
   })),
 )
 
@@ -20,17 +21,9 @@ onMounted(() => {
 
 <template>
   <CodeGroup ref="codeGroup">
-    <ProseCode v-bind="codeBlocks[0]">
-      <pre><code>{{ codeBlocks[0].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[1]">
-      <pre><code>{{ codeBlocks[1].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[2]">
-      <pre><code>{{ codeBlocks[2].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[3]">
-      <pre><code>{{ codeBlocks[3].code }}</code></pre>
-    </ProseCode>
+    <ProseCode v-bind="codeBlocks[0]" v-html="codeBlocks[0].code" />
+    <ProseCode v-bind="codeBlocks[1]" v-html="codeBlocks[1].code" />
+    <ProseCode v-bind="codeBlocks[2]" v-html="codeBlocks[2].code" />
+    <ProseCode v-bind="codeBlocks[3]" v-html="codeBlocks[3].code" />
   </CodeGroup>
 </template>

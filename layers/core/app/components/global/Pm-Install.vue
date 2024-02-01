@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const shiki = useShiki()
 const props = defineProps({
   name: { type: String, required: true },
 })
@@ -7,13 +8,16 @@ const codeBlocks = computed(() =>
   packageManagers
     .map((pm) => ({
       filename: pm.name,
-      code: `${pm.command} ${pm.install} ${props.name}`,
+      code: shiki( `${pm.command} ${pm.install} ${props.name}`, 'sh').value,
     }))
     .concat({
+      // @ts-expect-error - Auto is a custom entry
       filename: 'auto',
-      code: `npx nypm i ${props.name}`,
+      code: shiki(`npx nypm i ${props.name}`, 'sh').value,
     }),
 )
+
+console.log(codeBlocks.value)
 
 const codeGroup = ref()
 onMounted(() => {
@@ -25,20 +29,10 @@ onMounted(() => {
 
 <template>
   <CodeGroup ref="codeGroup">
-    <ProseCode v-bind="codeBlocks[0]">
-      <pre><code>{{ codeBlocks[0].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[1]">
-      <pre><code>{{ codeBlocks[1].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[2]">
-      <pre><code>{{ codeBlocks[2].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[3]">
-      <pre><code>{{ codeBlocks[3].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[4]">
-      <pre><code>{{ codeBlocks[4].code }}</code></pre>
-    </ProseCode>
+    <ProseCode v-bind="codeBlocks[0]" v-html="codeBlocks[0].code" />
+    <ProseCode v-bind="codeBlocks[1]" v-html="codeBlocks[1].code" />
+    <ProseCode v-bind="codeBlocks[2]" v-html="codeBlocks[2].code" />
+    <ProseCode v-bind="codeBlocks[3]" v-html="codeBlocks[3].code" />
+    <ProseCode v-bind="codeBlocks[4]" v-html="codeBlocks[4].code" />
   </CodeGroup>
 </template>
