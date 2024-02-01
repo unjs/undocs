@@ -19,10 +19,6 @@ process.env.NUXT_PUBLIC_SITE_URL =
   process.env.CI_PAGES_URL || // Gitlab Pages
   process.env.CF_PAGES_URL // Cloudflare Pages
 
-if (!dev && !process.env.NUXT_PUBLIC_SITE_URL) {
-  console.warn('`NUXT_PUBLIC_SITE_URL` env variable is not set!')
-}
-
 export default defineNuxtConfig({
   ssr,
   modules: [
