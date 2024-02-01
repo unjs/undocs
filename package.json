@@ -3,13 +3,7 @@
   "version": "0.1.8",
   "license": "MIT",
   "type": "module",
-  "exports": {
-    "./config": {
-      "types": "./dist/config.d.ts",
-      "import": "./dist/config.mjs",
-      "require": "./dist/config.cjs"
-    }
-  },
+  "exports": {},
   "bin": {
     "unjs-docs": "./dist/cli.mjs"
   },
@@ -19,8 +13,7 @@
     "!app/.nuxt",
     "!app/node_modules",
     "!app/tsconfig.json",
-    "schema",
-    "config.d.ts"
+    "schema"
   ],
   "scripts": {
     "build": "bun build-schema && unbuild",
