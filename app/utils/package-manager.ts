@@ -2,7 +2,7 @@ export const packageManagers = [
   { name: 'npm', command: 'npm', install: 'i', run: 'run ', x: 'npx' },
   { name: 'yarn', command: 'yarn', install: 'add', run: '', x: 'yarn dlx' },
   { name: 'pnpm', command: 'pnpm', install: 'i', run: '', x: 'pnpx' },
-  { name: 'bun', command: 'bun', install: 'i', run: '', x: 'bunx' },
+  { name: 'bun', command: 'bun', install: 'i', run: 'run ', x: 'bunx' },
 ] as const
 
 export function useSyncedPackageManager(codeBlocks: Ref<{ filename: string }[]>, syncRef: Ref<number>) {

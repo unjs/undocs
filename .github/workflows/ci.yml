@@ -22,8 +22,8 @@ jobs:
         with:
           bun-version: latest
       - run: bun install
-      - run: bun lint
-      - run: bun build
+      - run: bun run lint
+      - run: bun run build
       - uses: codecov/codecov-action@v4
       - name: nightly release
         if: |
@@ -32,7 +32,7 @@ jobs:
           !startsWith(github.event.head_commit.message, 'docs')
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc &&
-          bun changelogen --canary nightly --publish
+          bun run changelogen --canary nightly --publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: false
