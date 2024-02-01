@@ -10,6 +10,9 @@ export default defineAppConfig({
   ui: {
     primary: 'amber',
     gray: 'zinc',
+    icons: {
+      dynamic: true,
+    },
     content: {
       prose: {
         code: {
