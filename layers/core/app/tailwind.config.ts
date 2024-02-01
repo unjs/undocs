@@ -2,9 +2,7 @@ import type { Config } from 'tailwindcss'
 import defaultTheme from 'tailwindcss/defaultTheme'
 
 export default <Partial<Config>>{
-  content: [
-    './nuxt.config.ts'
-  ],
+  content: ['./nuxt.config.ts'],
   theme: {
     extend: {
       fontFamily: {

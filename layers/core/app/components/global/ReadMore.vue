@@ -1,9 +1,7 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <Callout icon="i-ph-bookmark-simple-duotone" :to="to">
-    <MDCSlot unwrap="p">
-      Read more in <span class="font-bold" v-html="computedTitle" />.
-    </MDCSlot>
+    <MDCSlot unwrap="p"> Read more in <span class="font-bold" v-html="computedTitle" />. </MDCSlot>
   </Callout>
 </template>
 
@@ -18,20 +16,29 @@ import { splitByCase, upperFirst } from 'scule'
 const props = defineProps({
   to: {
     type: String,
-    required: true
+    required: true,
   },
   title: {
     type: String,
     required: false,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 const createBreadcrumb = (link: string = 'Missing link') => {
   if (link.startsWith('http')) {
     return link
   }
-  return link.split('/').filter(Boolean).map(part => splitByCase(part).map(p => upperFirst(p)).join(' ')).join(' > ').replace('Api', 'API')
+  return link
+    .split('/')
+    .filter(Boolean)
+    .map((part) =>
+      splitByCase(part)
+        .map((p) => upperFirst(p))
+        .join(' '),
+    )
+    .join(' > ')
+    .replace('Api', 'API')
 }
 
 // Guess title from link!

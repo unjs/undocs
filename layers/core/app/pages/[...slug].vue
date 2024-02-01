@@ -52,12 +52,13 @@ const communityLinks = computed(() => [
     label: 'Edit this page',
     to: `https://github.com/${appConfig.docs.github}/edit/main/docs/${page.value._file}`,
     target: '_blank',
-  }, {
+  },
+  {
     icon: 'i-ph-shooting-star-duotone',
     label: 'Star on GitHub',
     to: `https://github.com/${appConfig.docs.github}`,
-    target: '_blank'
-  }
+    target: '_blank',
+  },
 ])
 </script>
 

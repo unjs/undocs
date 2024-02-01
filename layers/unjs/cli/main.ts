@@ -1,5 +1,5 @@
-import { createCLI } from '../../core/cli/cli'
 import { fileURLToPath } from 'node:url'
+import { createCLI } from '../../core/cli/cli'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 

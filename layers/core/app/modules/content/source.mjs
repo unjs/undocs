@@ -4,7 +4,7 @@ import fsDriver from 'unstorage/drivers/fs'
 export default (opts) => {
   const _fs = fsDriver({
     base: opts.docsConfig.dir,
-   })
+  })
 
   return defineDriver({
     ..._fs,
@@ -14,19 +14,17 @@ export default (opts) => {
       if (!val && key === 'index.json') {
         return await import('./landing.mjs').then(({ genLanding }) => genLanding(opts.docsConfig))
       }
-      if (!val && key === 'index.json$')  {
+      if (!val && key === 'index.json$') {
         return { mtime: new Date() }
       }
       return val
     },
     async getKeys(prefix) {
       const keys = await _fs.getKeys(prefix)
-      if (!keys.some(key => /^index\.\w+$/.test(key))) {
+      if (!keys.some((key) => /^index\.\w+$/.test(key))) {
         keys.push('index.json')
       }
       return keys
     },
   })
 }
-
-
