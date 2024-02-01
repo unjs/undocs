@@ -13,10 +13,11 @@ export function useShiki() {
   const theme = useColorMode()
   const isDark = computed(() => theme.value === 'dark')
 
-  return (code: string, lang: string) => computed(() =>
-    highlighter.codeToHtml(code, {
-      lang,
-      theme: isDark ? 'min-dark' : 'min-light',
-    })
-  )
+  return (code: string, lang: string) =>
+    computed(() =>
+      highlighter.codeToHtml(code, {
+        lang,
+        theme: isDark ? 'min-dark' : 'min-light',
+      }),
+    )
 }
