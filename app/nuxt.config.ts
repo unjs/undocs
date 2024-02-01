@@ -66,6 +66,7 @@ export default defineNuxtConfig({
       'node_modules',
       'pnpm-lock.yaml',
       'pnpm-workspace.yaml',
+      'docs.config.json',
       '\\.(js|mjs|ts)$',
     ],
     highlight: {
