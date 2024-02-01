@@ -41,7 +41,7 @@
     "@iconify-json/simple-icons": "^1.1.90",
     "@nuxt/content": "^2.11.0",
     "@nuxt/ui": "^2.13.0",
-    "@nuxt/ui-pro": "^0.7.4",
+    "@nuxt/ui-pro": "npm:@nuxt/ui-pro-edge@0.7.4-28445636.12065c9",
     "@nuxthq/studio": "^1.0.10",
     "@nuxtjs/fontaine": "^0.4.1",
     "@nuxtjs/google-fonts": "^3.1.3",

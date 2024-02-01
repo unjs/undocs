@@ -3,25 +3,36 @@ const props = defineProps({
   script: { type: String, required: true },
 })
 
-const packageManagers = [
-  { name: 'npm', command: 'npm', run: 'run ' },
-  { name: 'yarn', command: 'yarn', run: '' },
-  { name: 'pnpm', command: 'pnpm', run: '' },
-  { name: 'bun', command: 'bun', run: 'run ' },
-] as const
+const codeBlocks = computed(() =>
+  packageManagers
+    .filter((pm) => pm.run !== false)
+    .map((pm) => ({
+      filename: pm.name,
+      code: `${pm.command} ${pm.run}${props.script}`,
+    })),
+)
 
-const mdcPkgManager = computed(() => {
-  return (
-    `::code-group \n` +
-    packageManagers
-      .map((pm) => {
-        return `\`\`\`sh [${pm.name}]\n ${pm.command} ${pm.run}${props.script}\n\`\`\``
-      })
-      .join('\n')
-  )
+const codeGroup = ref()
+onMounted(() => {
+  if (codeGroup.value) {
+    useSyncedPackageManager(codeBlocks, toRef(codeGroup.value, 'selectedIndex'))
+  }
 })
 </script>
 
 <template>
-  <MDC :value="mdcPkgManager" />
+  <CodeGroup ref="codeGroup">
+    <ProseCode v-bind="codeBlocks[0]">
+      <pre><code>{{ codeBlocks[0].code }}</code></pre>
+    </ProseCode>
+    <ProseCode v-bind="codeBlocks[1]">
+      <pre><code>{{ codeBlocks[1].code }}</code></pre>
+    </ProseCode>
+    <ProseCode v-bind="codeBlocks[2]">
+      <pre><code>{{ codeBlocks[2].code }}</code></pre>
+    </ProseCode>
+    <ProseCode v-bind="codeBlocks[3]">
+      <pre><code>{{ codeBlocks[3].code }}</code></pre>
+    </ProseCode>
+  </CodeGroup>
 </template>

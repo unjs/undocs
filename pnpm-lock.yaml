@@ -24,8 +24,8 @@ dependencies:
     specifier: ^2.13.0
     version: 2.13.0(nuxt@3.10.0)(rollup@3.29.4)(vite@5.0.12)(vue@3.3.13)
   '@nuxt/ui-pro':
-    specifier: ^0.7.4
-    version: 0.7.4(nuxt@3.10.0)(rollup@3.29.4)(vite@5.0.12)(vue@3.3.13)
+    specifier: npm:@nuxt/ui-pro-edge@0.7.4-28445636.12065c9
+    version: /@nuxt/ui-pro-edge@0.7.4-28445636.12065c9(nuxt@3.10.0)(rollup@3.29.4)(vite@5.0.12)(vue@3.3.13)
   '@nuxthq/studio':
     specifier: ^1.0.10
     version: 1.0.10(rollup@3.29.4)
@@ -1827,10 +1827,58 @@ packages:
       - supports-color
     dev: false
 
-  /@nuxt/ui-pro@0.7.4(nuxt@3.10.0)(rollup@3.29.4)(vite@5.0.12)(vue@3.3.13):
-    resolution: {integrity: sha512-1+eHw9Fr4s2FiLgSilq3YYPklhUNyhUTbC+f1C2E2PF1qshFgdR+2n7MqdCvT/OaAZF/UK/SoO78DMdJSsJ8vw==}
+  /@nuxt/ui-edge@2.13.0-28443874.a12f37e(nuxt@3.10.0)(rollup@3.29.4)(vite@5.0.12)(vue@3.3.13):
+    resolution: {integrity: sha512-oU6pN8ux4wKiStF4jmPE5NQJcyMh1mZ4oK7vs/m9vmsFMzwInwRotISnJQuiGEBQ1QciLTa1hmL2187yOV7qCg==}
+    engines: {node: '>=v16.20.2'}
     dependencies:
-      '@nuxt/ui': 2.13.0(nuxt@3.10.0)(rollup@3.29.4)(vite@5.0.12)(vue@3.3.13)
+      '@egoist/tailwindcss-icons': 1.7.4(tailwindcss@3.4.1)
+      '@headlessui/tailwindcss': 0.2.0(tailwindcss@3.4.1)
+      '@headlessui/vue': 1.7.16(vue@3.3.13)
+      '@iconify-json/heroicons': 1.1.19
+      '@nuxt/kit': 3.10.0(rollup@3.29.4)
+      '@nuxtjs/color-mode': 3.3.2(rollup@3.29.4)
+      '@nuxtjs/tailwindcss': 6.11.2(rollup@3.29.4)
+      '@popperjs/core': 2.11.8
+      '@tailwindcss/aspect-ratio': 0.4.2(tailwindcss@3.4.1)
+      '@tailwindcss/container-queries': 0.1.1(tailwindcss@3.4.1)
+      '@tailwindcss/forms': 0.5.7(tailwindcss@3.4.1)
+      '@tailwindcss/typography': 0.5.10(tailwindcss@3.4.1)
+      '@vueuse/core': 10.7.2(vue@3.3.13)
+      '@vueuse/integrations': 10.7.2(fuse.js@6.6.2)(vue@3.3.13)
+      '@vueuse/math': 10.7.2(vue@3.3.13)
+      defu: 6.1.4
+      fuse.js: 6.6.2
+      nuxt-icon: 0.6.8(nuxt@3.10.0)(rollup@3.29.4)(vite@5.0.12)(vue@3.3.13)
+      ohash: 1.1.3
+      pathe: 1.1.2
+      scule: 1.2.0
+      tailwind-merge: 2.2.1
+      tailwindcss: 3.4.1
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - async-validator
+      - axios
+      - change-case
+      - drauu
+      - focus-trap
+      - idb-keyval
+      - jwt-decode
+      - nprogress
+      - nuxt
+      - qrcode
+      - rollup
+      - sortablejs
+      - supports-color
+      - ts-node
+      - universal-cookie
+      - vite
+      - vue
+    dev: false
+
+  /@nuxt/ui-pro-edge@0.7.4-28445636.12065c9(nuxt@3.10.0)(rollup@3.29.4)(vite@5.0.12)(vue@3.3.13):
+    resolution: {integrity: sha512-Uq8a7v3xCNIJkqN79jmSXP429UDryCLTKEs7id+txGxyStNPac2FCGPBYmky7lyq+g67F5k9j2hFzNFAON4N0w==}
+    dependencies:
+      '@nuxt/ui': /@nuxt/ui-edge@2.13.0-28443874.a12f37e(nuxt@3.10.0)(rollup@3.29.4)(vite@5.0.12)(vue@3.3.13)
       '@vueuse/core': 10.7.2(vue@3.3.13)
       defu: 6.1.4
       git-url-parse: 14.0.0
@@ -5812,7 +5860,7 @@ packages:
       eslint-plugin-promise: ^6.0.0
     dependencies:
       eslint: 8.56.0
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.20.0)(eslint@8.56.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
       eslint-plugin-n: 16.6.2(eslint@8.56.0)
       eslint-plugin-promise: 6.1.1(eslint@8.56.0)
     dev: true
@@ -5829,7 +5877,7 @@ packages:
       eslint-config-prettier: 8.10.0(eslint@8.56.0)
       eslint-config-standard: 17.1.0(eslint-plugin-import@2.29.1)(eslint-plugin-n@16.6.2)(eslint-plugin-promise@6.1.1)(eslint@8.56.0)
       eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@5.62.0)(eslint-plugin-import@2.29.1)(eslint@8.56.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.20.0)(eslint@8.56.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
       eslint-plugin-n: 16.6.2(eslint@8.56.0)
       eslint-plugin-node: 11.1.0(eslint@8.56.0)
       eslint-plugin-promise: 6.1.1(eslint@8.56.0)
@@ -5862,7 +5910,7 @@ packages:
       enhanced-resolve: 5.15.0
       eslint: 8.56.0
       eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.20.0)(eslint@8.56.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
       fast-glob: 3.3.2
       get-tsconfig: 4.7.2
       is-core-module: 2.13.1
@@ -5904,35 +5952,6 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-module-utils@2.8.0(@typescript-eslint/parser@6.20.0)(eslint-import-resolver-node@0.3.9)(eslint@8.56.0):
-    resolution: {integrity: sha512-aWajIYfsqCKRDgUfjEXNN/JlrzauMuSEy5sbd7WXbtW3EH6A6MpwEh42c7qD+MqQo9QMJ6fWLAeIJynx0g6OAw==}
-    engines: {node: '>=4'}
-    peerDependencies:
-      '@typescript-eslint/parser': '*'
-      eslint: '*'
-      eslint-import-resolver-node: '*'
-      eslint-import-resolver-typescript: '*'
-      eslint-import-resolver-webpack: '*'
-    peerDependenciesMeta:
-      '@typescript-eslint/parser':
-        optional: true
-      eslint:
-        optional: true
-      eslint-import-resolver-node:
-        optional: true
-      eslint-import-resolver-typescript:
-        optional: true
-      eslint-import-resolver-webpack:
-        optional: true
-    dependencies:
-      '@typescript-eslint/parser': 6.20.0(eslint@8.56.0)(typescript@5.3.3)
-      debug: 3.2.7
-      eslint: 8.56.0
-      eslint-import-resolver-node: 0.3.9
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /eslint-plugin-es-x@7.5.0(eslint@8.56.0):
     resolution: {integrity: sha512-ODswlDSO0HJDzXU0XvgZ3lF3lS3XAZEossh15Q2UHjwrJggWeBoKqqEsLTZLXl+dh5eOAozG0zRcYtuE35oTuQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -5956,7 +5975,7 @@ packages:
       regexpp: 3.2.0
     dev: true
 
-  /eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.20.0)(eslint@8.56.0):
+  /eslint-plugin-import@2.29.1(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0):
     resolution: {integrity: sha512-BbPC0cuExzhiMo4Ff1BTVwHpjjv28C5R+btTOGaCRC7UEz801up0JadwkeSk5Ued6TG34uaczuVuH6qyy5YUxw==}
     engines: {node: '>=4'}
     peerDependencies:
@@ -5966,7 +5985,7 @@ packages:
       '@typescript-eslint/parser':
         optional: true
     dependencies:
-      '@typescript-eslint/parser': 6.20.0(eslint@8.56.0)(typescript@5.3.3)
+      '@typescript-eslint/parser': 5.62.0(eslint@8.56.0)(typescript@5.3.3)
       array-includes: 3.1.7
       array.prototype.findlastindex: 1.2.3
       array.prototype.flat: 1.3.2
@@ -5975,7 +5994,7 @@ packages:
       doctrine: 2.1.0
       eslint: 8.56.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.20.0)(eslint-import-resolver-node@0.3.9)(eslint@8.56.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
       hasown: 2.0.0
       is-core-module: 2.13.1
       is-glob: 4.0.3
