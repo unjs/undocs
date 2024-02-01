@@ -26,3 +26,6 @@ logs
 
 # Template
 template/pnpm-lock.yaml
+
+# npm pack
+*.tgz

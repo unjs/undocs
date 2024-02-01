@@ -9,6 +9,8 @@
   "files": [
     "bin",
     "layers",
+    "!layers/**/node_modules",
+    "!layers/**/tsconfig.json",
     "schema"
   ],
   "scripts": {
