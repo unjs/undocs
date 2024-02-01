@@ -25,7 +25,6 @@ if (!dev && !process.env.NUXT_PUBLIC_SITE_URL) {
 
 export default defineNuxtConfig({
   ssr,
-  extends: ['@nuxt/ui-pro'],
   modules: [
     '@nuxt/content',
     '@nuxthq/studio',

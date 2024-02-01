@@ -24,7 +24,7 @@ export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
     rootDir: resolve(docsDir, '.docs'),
     srcDir: resolve(docsDir, '.docs'),
 
-    extends: [...(opts.extends || []), appDir],
+    extends: [...(opts.extends || []), appDir, '@nuxt/ui-pro'],
     modulesDir: [resolve(appDir, '../node_modules'), resolve(docsDir, 'node_modules')],
     build: {
       transpile: [appDir],
