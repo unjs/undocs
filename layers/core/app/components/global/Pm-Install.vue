@@ -17,8 +17,6 @@ const codeBlocks = computed(() =>
     }),
 )
 
-console.log(codeBlocks.value)
-
 const codeGroup = ref()
 onMounted(() => {
   if (codeGroup.value) {
