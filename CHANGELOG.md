@@ -1,6 +1,61 @@
 # Changelog
 
 
+## v0.2.0
+
+[compare changes](https://github.com/unjs/docs/compare/v0.1.8...v0.2.0)
+
+### 🚀 Enhancements
+
+- ⚠️  Auto generated landing ([#34](https://github.com/unjs/docs/pull/34))
+- ⚠️  Flatten content ([e1ab039](https://github.com/unjs/docs/commit/e1ab039))
+- `pm-install` and `pm-run` components ([#36](https://github.com/unjs/docs/pull/36))
+- Sync package manager commands ([1038381](https://github.com/unjs/docs/commit/1038381))
+
+### 🩹 Fixes
+
+- Remove default github empty string ([feded37](https://github.com/unjs/docs/commit/feded37))
+- Restore color ([81c7208](https://github.com/unjs/docs/commit/81c7208))
+- Workaround for nuxt/ui#809 ([#809](https://github.com/unjs/docs/issues/809))
+
+### 💅 Refactors
+
+- Split core and unjs theme ([dce4034](https://github.com/unjs/docs/commit/dce4034))
+
+### 📖 Documentation
+
+- Add 3rd feature ([903f238](https://github.com/unjs/docs/commit/903f238))
+
+### 📦 Build
+
+- Exclude layer local files from publish ([df943ac](https://github.com/unjs/docs/commit/df943ac))
+
+### 🏡 Chore
+
+- **release:** V0.1.8 ([a7011cc](https://github.com/unjs/docs/commit/a7011cc))
+- Update lockfile ([313c37f](https://github.com/unjs/docs/commit/313c37f))
+- Update scripts ([243c3d1](https://github.com/unjs/docs/commit/243c3d1))
+- Update deps ([a1bfedd](https://github.com/unjs/docs/commit/a1bfedd))
+- Move tailwind to deps ([dca9441](https://github.com/unjs/docs/commit/dca9441))
+- Disable failOnError for prerender ([f8983d0](https://github.com/unjs/docs/commit/f8983d0))
+- Apply automated fixes ([b074f7f](https://github.com/unjs/docs/commit/b074f7f))
+- Apply automated fixes ([9138727](https://github.com/unjs/docs/commit/9138727))
+- Typo ([03f984b](https://github.com/unjs/docs/commit/03f984b))
+- Lint ([b16c02a](https://github.com/unjs/docs/commit/b16c02a))
+- Switch back to stabl ui-pro dep ([99a36a3](https://github.com/unjs/docs/commit/99a36a3))
+- Apply automated fixes ([78b16ba](https://github.com/unjs/docs/commit/78b16ba))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  Auto generated landing ([#34](https://github.com/unjs/docs/pull/34))
+- ⚠️  Flatten content ([e1ab039](https://github.com/unjs/docs/commit/e1ab039))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+
 ## v0.1.8
 
 [compare changes](https://github.com/unjs/docs/compare/v0.1.7...v0.1.8)
