@@ -8,7 +8,7 @@ const codeBlocks = computed(() =>
   packageManagers
     .map((pm) => ({
       filename: pm.name,
-      code: shiki( `${pm.command} ${pm.install} ${props.name}`, 'sh').value,
+      code: shiki(`${pm.command} ${pm.install} ${props.name}`, 'sh').value,
     }))
     .concat({
       // @ts-expect-error - Auto is a custom entry
