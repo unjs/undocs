@@ -8,7 +8,7 @@ const dev = !!process.env.NUXT_DOCS_DEV
 const isProd = process.env.NODE_ENV === 'production'
 const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
-// Some modules are shameless and don't undrestand prepare mode and make nonsense warnings
+// Some modules are shameless and don't understand prepare mode and make nonsense warnings
 const isPrepare = Boolean(process.env.NUXT_DOCS_PREPARE)
 
 // https://github.com/unjs/std-env/issues/59
