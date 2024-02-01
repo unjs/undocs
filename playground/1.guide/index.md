@@ -12,9 +12,7 @@ It is made with [Nuxt](https://nuxt.com/), [Nuxt Content](https://content.nuxt.c
 
 Create `docs/` project with starter template:
 
-```sh
-npx giget@latest gh:unjs/docs/template docs
-```
+:pm-x{command="giget gh:unjs/docs/template docs"}
 
 Go to the docs dir `cd docs/`
 

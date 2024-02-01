@@ -4,12 +4,10 @@ const props = defineProps({
 })
 
 const codeBlocks = computed(() =>
-  packageManagers
-    .filter((pm) => pm.run !== false)
-    .map((pm) => ({
-      filename: pm.name,
-      code: `${pm.command} ${pm.run}${props.script}`,
-    })),
+  packageManagers.map((pm) => ({
+    filename: pm.name,
+    code: `${pm.command} ${pm.run}${props.script}`,
+  })),
 )
 
 const codeGroup = ref()

@@ -1,18 +1,13 @@
 <script setup lang="ts">
 const props = defineProps({
-  name: { type: String, required: true },
+  command: { type: String, required: true },
 })
 
 const codeBlocks = computed(() =>
-  packageManagers
-    .map((pm) => ({
-      filename: pm.name,
-      code: `${pm.command} ${pm.install} ${props.name}`,
-    }))
-    .concat({
-      filename: 'auto',
-      code: `npx nypm i ${props.name}`,
-    }),
+  packageManagers.map((pm) => ({
+    filename: pm.name,
+    code: `${pm.x} ${props.command}`,
+  })),
 )
 
 const codeGroup = ref()
@@ -36,9 +31,6 @@ onMounted(() => {
     </ProseCode>
     <ProseCode v-bind="codeBlocks[3]">
       <pre><code>{{ codeBlocks[3].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[4]">
-      <pre><code>{{ codeBlocks[4].code }}</code></pre>
     </ProseCode>
   </CodeGroup>
 </template>

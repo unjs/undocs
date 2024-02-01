@@ -68,6 +68,8 @@ Components to generate cross package manager comments
 
   :pm-run{script="dev"}
 
+  :pm-x{command="giget unjs new-lib"}
+
   ::
   ::div
   ---
@@ -78,6 +80,8 @@ Components to generate cross package manager comments
   :pm-install{name="defu"}
 
   :pm-run{script="dev"}
+
+  :pm-x{command="giget unjs new-lib"}
   ```
   ::
 ::
