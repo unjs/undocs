@@ -13,8 +13,9 @@
       "stackblitz": { "icon": "i-heroicons-play", "to": "https://stackblitz.com/github/unjs/docs/tree/main/template" }
     },
     "features": [
-      { "title": "Eazy to use", "description": "Focus on building your docs, not tooling." },
-      { "title": "Using best of best", "description": "Made with Nuxt, Nuxt Content, [Nuxt SEO and Nuxt UI Pro." }
+      { "title": "Eazy to use", "description": "Focus on writing your documentation with Markdown, not tooling." },
+      { "title": "Nuxt powered", "description": "Made with Nuxt, Nuxt Content, Nuxt SEO and Nuxt UI Pro." },
+      { "title": "Deploy anywhere", "description": "The documentation can be hosted on any static hosting." }
     ]
   }
 }
