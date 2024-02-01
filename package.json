@@ -74,7 +74,6 @@
     "scule": "^1.2.0",
     "typescript": "^5.3.3",
     "unbuild": "^2.0.0",
-    "unjs-docs": "link:",
     "vue-tsc": "^1.8.27"
   }
 }
