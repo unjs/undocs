@@ -101,13 +101,6 @@ export default defineNuxtConfig({
   },
   schemaOrg: {
     enabled: ssr,
-    identity: {
-      type: 'Organization',
-      name: 'UnJS',
-      url: 'https://unjs.io',
-      logo: 'https://unjs.io/favicon.svg',
-      sameAs: ['https://github.com/unjs', 'https://x.com/unjsio'],
-    },
   },
   sitemap: {
     strictNuxtContentPaths: true,

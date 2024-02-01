@@ -3,21 +3,17 @@
   "version": "0.1.8",
   "license": "MIT",
   "type": "module",
-  "exports": {},
   "bin": {
-    "unjs-docs": "./dist/cli.mjs"
+    "unjs-docs": "./bin/cli.mjs"
   },
   "files": [
-    "dist",
-    "app",
-    "!app/.nuxt",
-    "!app/node_modules",
-    "!app/tsconfig.json",
+    "bin",
+    "layers",
     "schema"
   ],
   "scripts": {
-    "build": "bun build-schema && unbuild",
-    "build-schema": "typescript-json-schema ./schema/config.d.ts DocsConfig -o schema/config.json",
+    "build": "true",
+    "build-schema": "typescript-json-schema ./core/schema/config.d.ts DocsConfig -o schema/config.json",
     "dev": "NUXT_DOCS_DEV=1 bun unjs-docs dev playground",
     "dev:build": "bun unjs-docs build playground",
     "dev:ssr": "NUXT_DOCS_SSR=1 bun dev",
@@ -28,7 +24,7 @@
     "prepack": "bun run build",
     "release": "bun test && changelogen --release && npm publish && git push --follow-tags",
     "test": "bun lint",
-    "unjs-docs": "JITI_ESM_RESOLVE=1 jiti ./src/cli.ts"
+    "unjs-docs": "./bin/cli.mjs"
   },
   "dependencies": {
     "@nuxt/content": "^2.11.0",
@@ -67,5 +63,6 @@
     "typescript-json-schema": "^0.62.0",
     "unbuild": "^2.0.0",
     "vue-tsc": "^1.8.27"
-  }
+  },
+  "packageManager": "bun@1.0.25"
 }

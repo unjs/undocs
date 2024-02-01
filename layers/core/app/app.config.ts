@@ -1,15 +1,13 @@
 export default defineAppConfig({
   docs: {
-    socialBackground: 'https://github.com/unjs/docs/blob/main/assets/ellipse.png?raw=true',
+    socialBackground: undefined,
     logo: '/icon.svg',
     github: undefined,
     socials: {
-      x: 'unjsio',
+      x: undefined,
     },
   },
   ui: {
-    primary: 'amber',
-    gray: 'zinc',
     icons: {
       dynamic: true,
     },

@@ -2,14 +2,19 @@ import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
 import type { NuxtConfig } from 'nuxt/schema'
 import { getColors } from 'theme-colors'
+import { loadConfig } from 'c12'
 import type { DocsConfig } from '../schema'
-import { loadDocsConfig } from './config'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 
-export async function setupDocs(docsDir: string) {
+export interface SetupDocsOptions {
+  defaults?: DocsConfig
+  extends?: string[]
+}
+
+export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
   // Try to load docs config
-  const docsconfig = (await loadDocsConfig(docsDir)) || ({} as DocsConfig)
+  const docsconfig = (await loadDocsConfig(docsDir, opts.defaults)) || ({} as DocsConfig)
 
   // Normalize dir
   docsconfig.dir = docsDir = resolve(docsconfig.dir || docsDir)
@@ -19,7 +24,7 @@ export async function setupDocs(docsDir: string) {
     rootDir: resolve(docsDir, '.docs'),
     srcDir: resolve(docsDir, '.docs'),
 
-    extends: [appDir],
+    extends: [...(opts.extends || []), appDir],
     modulesDir: [resolve(appDir, '../node_modules'), resolve(docsDir, 'node_modules')],
     build: {
       transpile: [appDir],
@@ -38,7 +43,7 @@ export async function setupDocs(docsDir: string) {
         description: docsconfig.description || '',
       },
       docs: {
-        github: docsconfig.github || 'unjs',
+        github: docsconfig.github,
       },
     },
     nitro: {
@@ -52,9 +57,7 @@ export async function setupDocs(docsDir: string) {
       config: {
         theme: {
           extend: {
-            colors: {
-              theme: getColors(docsconfig.themeColor || '#ECDC5A'),
-            },
+            colors: docsconfig.themeColor ? { theme: getColors(docsconfig.themeColor) } : undefined,
           },
         },
       },
@@ -66,4 +69,15 @@ export async function setupDocs(docsDir: string) {
     appDir,
     nuxtConfig,
   }
+}
+
+async function loadDocsConfig(dir: string, defaults: DocsConfig = {}) {
+  const { config } = await loadConfig<DocsConfig>({
+    name: 'docs',
+    cwd: dir,
+    defaults,
+    overrides: { dir },
+  })
+
+  return config
 }

@@ -33,7 +33,7 @@ const appConfig = useAppConfig()
         </div>
         <div class="flex flex-row justify-between">
           <img src="/icon.svg" height="60" width="60" class="rounded-sm h-[60px] w-[60px]" />
-          <UnJS class="w-6 h-6" />
+          <OrgLogo class="w-6 h-6" />
         </div>
       </div>
     </div>
