@@ -36,7 +36,7 @@ export default defineNuxtConfig({
     '@nuxt/ui',
   ],
   ui: {
-    icons: ['mdi', 'heroicons', 'ph', 'simple-icons'],
+    icons: [],
   },
   fontMetrics: {
     fonts: ['Nunito'],

@@ -46,13 +46,18 @@ if (process.server) {
 
 const headline = computed(() => findPageHeadline(page.value))
 
-const links = computed(() => [
+const communityLinks = computed(() => [
   {
-    icon: 'i-heroicons-pencil-square',
+    icon: 'i-ph-pen-duotone',
     label: 'Edit this page',
     to: `https://github.com/${appConfig.docs.github}/edit/main/docs/${page.value._file}`,
     target: '_blank',
-  },
+  }, {
+    icon: 'i-ph-shooting-star-duotone',
+    label: 'Star on GitHub',
+    to: `https://github.com/${appConfig.docs.github}`,
+    target: '_blank'
+  }
 ])
 </script>
 
@@ -74,7 +79,7 @@ const links = computed(() => [
           <div class="hidden lg:block space-y-6" :class="{ '!mt-6': page.body?.toc?.links?.length }">
             <UDivider v-if="page.body?.toc?.links?.length" type="dashed" />
 
-            <UPageLinks title="" :links="links" />
+            <UPageLinks title="Community" :links="communityLinks" />
           </div>
         </template>
       </UDocsToc>
