@@ -107,13 +107,13 @@ export default defineNuxtModule({
     // -- collect build cache --
     async function collectBuildCache() {
       const { cacheDir, cacheFile, hashes } = await getCacheStore()
+      await mkdir(cacheDir, { recursive: true })
       await writeFile(join(cacheDir, 'hashes.json'), JSON.stringify(hashes, undefined, 2))
 
       const start = Date.now()
       logger.start(`Collecting nuxt build cache from \`${nuxt.options.buildDir}\`...`)
       const fileEntries = await readFilesRecursive(nuxt.options.buildDir)
       const tarData = await createTar(fileEntries)
-      await mkdir(cacheDir, { recursive: true })
       await writeFile(cacheFile, tarData)
       logger.success(`Nuxt build cache collected in \`${Date.now() - start}ms\` to \`${cacheDir}\``)
     }
