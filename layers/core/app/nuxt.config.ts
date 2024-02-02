@@ -50,6 +50,7 @@ export default defineNuxtConfig({
       'dist',
       'package-lock.json',
       'yarn.lock',
+      'bun.lockb',
       'node_modules',
       'pnpm-lock.yaml',
       'pnpm-workspace.yaml',
