@@ -22,6 +22,10 @@
       "type": "string",
       "description": "The description of the documentation site."
     },
+    "url": {
+      "type": "string",
+      "description": "The URL of the documentation site."
+    },
     "github": {
       "type": "string",
       "description": "The GitHub repository for the documentation site."

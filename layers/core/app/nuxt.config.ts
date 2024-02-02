@@ -11,14 +11,6 @@ const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 // Some modules are shameless and don't understand prepare mode and make nonsense warnings
 const isPrepare = Boolean(process.env.NUXT_DOCS_PREPARE)
 
-// https://github.com/unjs/std-env/issues/59
-process.env.NUXT_PUBLIC_SITE_URL =
-  process.env.NUXT_PUBLIC_SITE_URL ||
-  (process.env.NEXT_PUBLIC_VERCEL_URL && `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`) || // Vercel
-  process.env.URL || // Netlify
-  process.env.CI_PAGES_URL || // Gitlab Pages
-  process.env.CF_PAGES_URL // Cloudflare Pages
-
 export default defineNuxtConfig({
   ssr,
   modules: [

@@ -3,6 +3,7 @@ export interface DocsConfig {
   name?: string
   description?: string
   shortDescription?: string
+  url?: string
   github?: string
   themeColor?: string
   redirects?: Record<string, string>
