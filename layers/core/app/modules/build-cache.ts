@@ -93,7 +93,8 @@ export default defineNuxtModule({
       const cacheDir = join(
         nuxt.options.rootDir,
         '..' /** .docs/.. */,
-        'node_modules/.cache/nuxt-build-cache',
+        '.cache', // https://developers.cloudflare.com/pages/configuration/build-caching/#frameworks -_-
+        // 'node_modules/.cache/nuxt-build-cache',
         hashes.hash,
       )
       const cacheFile = join(cacheDir, 'nuxt.tar')
