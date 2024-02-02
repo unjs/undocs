@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/unjs/docs/main/schema/config.json",
+  "$schema": "../schema/config.json",
   "name": "UnJS Docs",
   "description": "Elegant documentation tooling for UnJS Docs",
   "shortDescription": "Docs, made easy.",
