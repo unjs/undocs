@@ -43,6 +43,12 @@ export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
         Nunito: [400, 500, 600, 700], // in layer, it duplicates. why? (god knows?)
       },
     },
+    // @ts-ignore
+    site: {
+      name: docsconfig.name || '',
+      description: docsconfig.description || '',
+      url: docsconfig.url,
+    },
     appConfig: {
       site: {
         name: docsconfig.name || '',
