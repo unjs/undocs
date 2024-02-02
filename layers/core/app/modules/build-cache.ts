@@ -91,8 +91,7 @@ export default defineNuxtModule({
     async function getCacheStore() {
       const hashes = await getHashes()
       const cacheDir = join(
-        nuxt.options.rootDir,
-        '..' /** .docs/.. */,
+        nuxt.options.workspaceDir,
         '.cache', // https://developers.cloudflare.com/pages/configuration/build-caching/#frameworks -_-
         // 'node_modules/.cache/nuxt-build-cache',
         hashes.hash,
