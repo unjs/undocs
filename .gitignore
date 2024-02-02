@@ -29,3 +29,5 @@ template/pnpm-lock.yaml
 
 # npm pack
 *.tgz
+
+.next
