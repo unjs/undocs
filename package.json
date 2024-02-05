@@ -15,12 +15,13 @@
     "schema"
   ],
   "scripts": {
+    "build": "true",
     "docs:dev": "NUXT_DOCS_DEV=1 bun run undocs dev docs",
     "docs:build": "bun run undocs build docs",
     "template:dev": "bun run undocs dev template",
     "lint": "eslint --cache --ext .ts,.js,.mjs,.cjs . && prettier -c layers",
     "lint:fix": "eslint --cache --ext .ts,.js,.mjs,.cjs . --fix && prettier -c -w layers",
-    "prepack": "true",
+    "prepack": "bun run build",
     "release": "bun run lint && changelogen --release && npm publish && git push --follow-tags",
     "undocs": "./bin/cli.mjs"
   },
