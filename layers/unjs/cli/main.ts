@@ -4,7 +4,7 @@ import { createCLI } from '../../core/cli/cli'
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 
 const cli = createCLI({
-  name: 'unjs-docs',
+  name: 'undocs',
   description: 'UnJS Docs Tool',
   setup: {
     extends: [appDir],

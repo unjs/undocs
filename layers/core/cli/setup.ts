@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import type { NuxtConfig } from 'nuxt/schema'
 import { getColors } from 'theme-colors'
 import { loadConfig } from 'c12'
-import type { DocsConfig } from '../schema'
+import type { DocsConfig } from '../../../schema/config'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 const pkgDir = fileURLToPath(new URL('../../..', import.meta.url))
@@ -19,6 +19,11 @@ export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
 
   // Normalize dir
   docsconfig.dir = docsDir = resolve(docsconfig.dir || docsDir)
+
+  // URL is required for production build (SEO)
+  if (!docsconfig.url) {
+    throw new Error('`url` config is required for production build!')
+  }
 
   // Prepare loadNuxt overrides
   const nuxtConfig: NuxtConfig = {
@@ -38,10 +43,17 @@ export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
         Nunito: [400, 500, 600, 700], // in layer, it duplicates. why? (god knows?)
       },
     },
+    // @ts-ignore
+    site: {
+      name: docsconfig.name || '',
+      description: docsconfig.description || '',
+      url: docsconfig.url,
+    },
     appConfig: {
       site: {
         name: docsconfig.name || '',
         description: docsconfig.description || '',
+        url: docsconfig.url,
       },
       docs: {
         github: docsconfig.github,
@@ -76,9 +88,23 @@ async function loadDocsConfig(dir: string, defaults: DocsConfig = {}) {
   const { config } = await loadConfig<DocsConfig>({
     name: 'docs',
     cwd: dir,
-    defaults,
+    defaults: {
+      url: inferSiteURL(),
+      ...defaults,
+    },
     overrides: { dir },
   })
 
   return config
+}
+
+function inferSiteURL() {
+  // https://github.com/unjs/std-env/issues/59
+  return (
+    process.env.NUXT_PUBLIC_SITE_URL ||
+    (process.env.NEXT_PUBLIC_VERCEL_URL && `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`) || // Vercel
+    process.env.URL || // Netlify
+    process.env.CI_PAGES_URL || // Gitlab Pages
+    process.env.CF_PAGES_URL // Cloudflare Pages
+  )
 }

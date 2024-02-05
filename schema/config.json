@@ -1,121 +1,125 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-        "Record<string,string>": {
-            "type": "object"
-        },
-        "Record<string,string|{label?:string;icon?:string;to?:string;size?:string;order?:number;}>": {
-            "type": "object"
-        }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
     },
-    "properties": {
+    "dir": {
+      "type": "string",
+      "description": "Documentation directory\n\nNote: This option will be automatically set"
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the documentation site."
+    },
+    "description": {
+      "type": "string",
+      "description": "The description of the documentation site."
+    },
+    "shortDescription": {
+      "type": "string",
+      "description": "The description of the documentation site."
+    },
+    "url": {
+      "type": "string",
+      "description": "The URL of the documentation site."
+    },
+    "github": {
+      "type": "string",
+      "description": "The GitHub repository for the documentation site."
+    },
+    "themeColor": {
+      "type": "string",
+      "description": "The theme color of the documentation site.\nIt will be used as the `theme-color` meta tag and a full palette of colors will be generated from it."
+    },
+    "redirects": {
+      "description": "Redirects for the documentation site.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "landing": {
+      "type": "object",
+      "description": "Landing page configuration",
+      "additionalProperties": false,
+      "properties": {
         "description": {
-            "description": "The description of the documentation site.",
-            "type": "string"
+          "type": "string",
+          "description": "Page description"
         },
-        "dir": {
-            "description": "Documentation directory\n\nNote: This option will be automatically set",
-            "type": "string"
-        },
-        "github": {
-            "description": "The GitHub repository for the documentation site.",
-            "type": "string"
-        },
-        "landing": {
-            "description": "Landing page configuration",
+        "features": {
+          "type": "array",
+          "description": "Features section description",
+          "items": {
+            "type": "object",
             "properties": {
-                "_heroMdTitle": {
-                    "description": "Full hero title (auto generated markdown)",
-                    "type": "string"
+              "description": {
+                "type": "string"
+              },
+              "icon": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "featuresTitle": {
+          "type": "string",
+          "description": "Features section title"
+        },
+        "heroCode": {
+          "description": "Hero Codes",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["content"],
+              "properties": {
+                "content": {
+                  "type": "string"
                 },
-                "description": {
-                    "description": "Page description",
-                    "type": "string"
-                },
-                "features": {
-                    "description": "Features section description",
-                    "items": {
-                        "properties": {
-                            "description": {
-                                "type": "string"
-                            },
-                            "icon": {
-                                "type": "string"
-                            },
-                            "title": {
-                                "type": "string"
-                            }
-                        },
-                        "type": "object"
-                    },
-                    "type": "array"
-                },
-                "featuresTitle": {
-                    "description": "Features section title",
-                    "type": "string"
-                },
-                "heroCode": {
-                    "anyOf": [
-                        {
-                            "properties": {
-                                "content": {
-                                    "type": "string"
-                                },
-                                "lang": {
-                                    "type": "string"
-                                },
-                                "title": {
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ],
-                    "description": "Hero Codes"
-                },
-                "heroDescription": {
-                    "description": "Additional text in hero (default is same as description)",
-                    "type": "string"
-                },
-                "heroLinks": {
-                    "$ref": "#/definitions/Record<string,string|{label?:string;icon?:string;to?:string;size?:string;order?:number;}>",
-                    "description": "Hero Links"
-                },
-                "heroSubtitle": {
-                    "description": "second hero title (default is same as shortDescription)",
-                    "type": "string"
-                },
-                "heroTitle": {
-                    "description": "main title (default is same as page title)",
-                    "type": "string"
+                "lang": {
+                  "type": "string"
                 },
                 "title": {
-                    "description": "Page title",
-                    "type": "string"
+                  "type": "string"
                 }
-            },
+              }
+            }
+          ]
+        },
+        "heroDescription": {
+          "type": "string",
+          "description": "Additional text in hero (default is same as description)"
+        },
+        "heroLinks": {
+          "description": "Hero Links",
+          "type": "object",
+          "additionalProperties": {
             "type": "object"
+          }
         },
-        "name": {
-            "description": "The name of the documentation site.",
-            "type": "string"
+        "heroSubtitle": {
+          "type": "string",
+          "description": "second hero title (default is same as shortDescription)"
         },
-        "redirects": {
-            "$ref": "#/definitions/Record<string,string>",
-            "description": "Redirects for the documentation site."
+        "heroTitle": {
+          "type": "string",
+          "description": "main title (default is same as page title)"
         },
-        "shortDescription": {
-            "description": "The description of the documentation site.",
-            "type": "string"
-        },
-        "themeColor": {
-            "description": "The theme color of the documentation site.\nIt will be used as the `theme-color` meta tag and a full palette of colors will be generated from it.",
-            "type": "string"
+        "title": {
+          "type": "string",
+          "description": "Page title"
         }
-    },
-    "type": "object"
+      }
+    }
+  }
 }
-
