@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "true",
+    "dev": "bun run docs:dev",
     "docs:dev": "NUXT_DOCS_DEV=1 bun run undocs dev docs",
     "docs:build": "bun run undocs build docs",
     "template:dev": "bun run undocs dev template",

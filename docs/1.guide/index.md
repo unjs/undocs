@@ -2,6 +2,10 @@
 
 Writing docs should be fun and this tool is exactly designed for this!
 
+> [!IMPORTANT]
+> This is an internal tool meant for UnJS docs tooling and not reusable at the moment.
+> These docs are for demonstration purposes only, do not rely on them or this tool!
+
 ## Overview
 
 UnJS Docs is a minimal Documentation Theme and CLI for shared usage across UnJS projects.
@@ -12,13 +16,9 @@ It is made with [Nuxt](https://nuxt.com/), [Nuxt Content](https://content.nuxt.c
 
 Create `docs/` project with starter template:
 
-:pm-x{command="giget gh:unjs/docs/template docs"}
+:pm-x{command="giget gh:unjs/undocs/template docs --install"}
 
 Go to the docs dir `cd docs/`
-
-Install dependencies:
-
-:pm-install{name="undocs"}
 
 Start development server:
 
