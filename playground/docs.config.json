@@ -3,7 +3,7 @@
   "name": "UnJS Docs",
   "description": "Elegant documentation tooling for UnJS Docs",
   "shortDescription": "Docs, made easy.",
-  "url": "https://unjs-docs.pages.dev",
+  "url": "https://undocs.pages.dev",
   "github": "unjs/docs",
   "redirects": {
     "/docs": "/docs/getting-started"

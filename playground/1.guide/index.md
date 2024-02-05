@@ -18,7 +18,7 @@ Go to the docs dir `cd docs/`
 
 Install dependencies:
 
-:pm-install{name="unjs-docs"}
+:pm-install{name="undocs"}
 
 Start development server:
 

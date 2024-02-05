@@ -1,10 +1,11 @@
 {
-  "name": "unjs-docs",
+  "name": "undocs",
   "version": "0.2.0",
+  "repository": "unjs/undocs",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "unjs-docs": "./bin/cli.mjs"
+    "undocs": "./bin/cli.mjs"
   },
   "files": [
     "bin",
@@ -15,17 +16,17 @@
   ],
   "scripts": {
     "build": "true",
-    "dev": "NUXT_DOCS_DEV=1 bun unjs-docs dev playground",
-    "dev:build": "bun unjs-docs build playground",
+    "dev": "NUXT_DOCS_DEV=1 bun undocs dev playground",
+    "dev:build": "bun undocs build playground",
     "dev:ssr": "NUXT_DOCS_SSR=1 bun dev",
-    "dev:template": "bun unjs-docs dev template",
-    "types:prepare": "NUXT_DOCS_PREPARE=1 nuxt prepare app",
+    "dev:template": "bun undocs dev template",
     "lint": "eslint --cache --ext .ts,.js,.mjs,.cjs . && prettier -c layers",
     "lint:fix": "eslint --cache --ext .ts,.js,.mjs,.cjs . --fix && prettier -c layers -w",
     "prepack": "bun run build",
     "release": "bun test && changelogen --release && npm publish && git push --follow-tags",
     "test": "bun lint",
-    "unjs-docs": "./bin/cli.mjs"
+    "types:prepare": "NUXT_DOCS_PREPARE=1 nuxt prepare app",
+    "undocs": "./bin/cli.mjs"
   },
   "dependencies": {
     "@nuxt/content": "^2.11.0",
