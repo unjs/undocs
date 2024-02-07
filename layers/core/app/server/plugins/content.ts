@@ -10,7 +10,7 @@ export default defineNitroPlugin((nitroApp) => {
       file.body.children.shift()
     }
 
-    // Overide default behavior that duplicates first paragraph as description
+    // Only use the first blockquote as the description
     const firstChild = file.body.children?.[0]
     const firstChildContent = firstChild?.children?.[0]?.children?.[0]?.value
     if (firstChild.tag === 'blockquote' && firstChildContent) {
