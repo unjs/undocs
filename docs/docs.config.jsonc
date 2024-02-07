@@ -6,16 +6,16 @@
   "url": "https://undocs.pages.dev",
   "github": "unjs/docs",
   "redirects": {
-    "/docs": "/docs/getting-started"
+    "/docs": "/docs/getting-started",
   },
   "landing": {
-    "heroLinks": {
-      "stackblitz": { "icon": "i-heroicons-play", "to": "https://stackblitz.com/github/unjs/docs/tree/main/template" }
-    },
+    // "heroLinks": {
+    //   "stackblitz": { "icon": "i-heroicons-play", "to": "https://stackblitz.com/github/unjs/docs/tree/main/template" }
+    // },
     "features": [
       { "title": "Eazy to use", "description": "Focus on writing your documentation with Markdown, not tooling." },
       { "title": "Nuxt powered", "description": "Made with Nuxt, Nuxt Content, Nuxt SEO and Nuxt UI Pro." },
-      { "title": "Deploy anywhere", "description": "The documentation can be hosted on any static hosting." }
-    ]
-  }
+      { "title": "Deploy anywhere", "description": "The documentation can be hosted on any static hosting." },
+    ],
+  },
 }

@@ -36,7 +36,7 @@
     "@nuxtjs/plausible": "^0.2.4",
     "@nuxtjs/seo": "^2.0.0-rc.8",
     "@nuxtjs/tailwindcss": "^6.11.3",
-    "c12": "^1.6.1",
+    "c12": "^1.7.0",
     "citty": "^0.1.5",
     "consola": "^3.2.3",
     "defu": "^6.1.4",
