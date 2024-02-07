@@ -21,6 +21,7 @@ export default defineNuxtConfig({
     '@nuxtjs/seo',
     isProd && '@nuxtjs/plausible',
     '@nuxt/ui',
+    'nuxt-build-cache',
   ],
   ui: {
     icons: [],
