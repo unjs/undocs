@@ -1,6 +1,44 @@
 # Changelog
 
 
+## v0.2.1
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.0...v0.2.1)
+
+### 🚀 Enhancements
+
+- Support `url` config ([e0115d0](https://github.com/unjs/undocs/commit/e0115d0))
+- Enable `nuxt-build-cache` ([c9e9104](https://github.com/unjs/undocs/commit/c9e9104))
+
+### 🩹 Fixes
+
+- Provide full resolve top level `site` config ([c7e334a](https://github.com/unjs/undocs/commit/c7e334a))
+- Ignore `bun.lockb` ([#39](https://github.com/unjs/undocs/pull/39))
+- Revert default cli to node due to issues ([c9cc699](https://github.com/unjs/undocs/commit/c9cc699))
+- Only use first blockquote child as description ([#46](https://github.com/unjs/undocs/pull/46))
+
+### 💅 Refactors
+
+- Manually rewrite schema ([a04d9aa](https://github.com/unjs/undocs/commit/a04d9aa))
+- Rename to `undocs` ([ca8d26e](https://github.com/unjs/undocs/commit/ca8d26e))
+- Rename to `docs/` ([bcb967f](https://github.com/unjs/undocs/commit/bcb967f))
+- Update tsconfig references to docs ([3c5933a](https://github.com/unjs/undocs/commit/3c5933a))
+
+### 🏡 Chore
+
+- **release:** V0.2.0 ([fee510e](https://github.com/unjs/undocs/commit/fee510e))
+- Update deps ([844e818](https://github.com/unjs/undocs/commit/844e818))
+- Apply automated fixes ([85d77aa](https://github.com/unjs/undocs/commit/85d77aa))
+- Keep build script ([50d546d](https://github.com/unjs/undocs/commit/50d546d))
+- Update docs ([5acb08b](https://github.com/unjs/undocs/commit/5acb08b))
+- Update deps ([a683fe0](https://github.com/unjs/undocs/commit/a683fe0))
+- Apply automated fixes ([4e6e2a3](https://github.com/unjs/undocs/commit/4e6e2a3))
+- Apply automated fixes ([2713b95](https://github.com/unjs/undocs/commit/2713b95))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.0
 
 [compare changes](https://github.com/unjs/docs/compare/v0.1.8...v0.2.0)
