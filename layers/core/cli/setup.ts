@@ -10,6 +10,7 @@ const pkgDir = fileURLToPath(new URL('../../..', import.meta.url))
 
 export interface SetupDocsOptions {
   defaults?: DocsConfig
+  dev?: boolean
   extends?: string[]
 }
 
@@ -21,7 +22,7 @@ export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
   docsconfig.dir = docsDir = resolve(docsconfig.dir || docsDir)
 
   // URL is required for production build (SEO)
-  if (!docsconfig.url) {
+  if (!docsconfig.url && !opts.dev) {
     throw new Error('`url` config is required for production build!')
   }
 

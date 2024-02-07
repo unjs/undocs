@@ -25,7 +25,7 @@ export function createCLI(opts: DocsCLIOptions = {}) {
     },
     args: { ...sharedArgs },
     async setup({ args }) {
-      const { appDir, nuxtConfig } = await setupDocs(args.dir, opts.setup)
+      const { appDir, nuxtConfig } = await setupDocs(args.dir, { ...opts.setup, dev: true })
       process.chdir(appDir)
       await import('nuxi').then((nuxi) =>
         nuxi.runCommand('dev', [appDir, '--no-fork', '--port', '4000'], { overrides: nuxtConfig }),
