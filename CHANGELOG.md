@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v0.2.2
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.1...v0.2.2)
+
+### 🩹 Fixes
+
+- Url should be optional in dev ([9eb9b76](https://github.com/unjs/undocs/commit/9eb9b76))
+
+### 🏡 Chore
+
+- Update c12 ([7ab71ff](https://github.com/unjs/undocs/commit/7ab71ff))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.1
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.0...v0.2.1)
