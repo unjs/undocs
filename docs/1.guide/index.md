@@ -1,7 +1,5 @@
 # Getting Started
 
-Writing docs should be fun and this tool is exactly designed for this!
-
 > [!IMPORTANT]
 > This is an internal tool meant for UnJS docs tooling and not reusable at the moment.
 > These docs are for demonstration purposes only, do not rely on them or this tool!
