@@ -1,6 +1,6 @@
 # Components
 
-Discover the components you can use in your markdown files.
+> Learn more about components usage
 
 ## Alerts
 
