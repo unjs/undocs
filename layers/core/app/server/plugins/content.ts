@@ -13,7 +13,7 @@ export default defineNitroPlugin((nitroApp) => {
     // Only use the first blockquote as the description
     const firstChild = file.body.children?.[0]
     const firstChildContent = firstChild?.children?.[0]?.children?.[0]?.value
-    if (firstChild.tag === 'blockquote' && firstChildContent) {
+    if (firstChild?.tag === 'blockquote' && firstChildContent) {
       file.description = firstChildContent
       file.body.children.shift()
     } else {
