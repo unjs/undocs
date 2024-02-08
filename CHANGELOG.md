@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.2.3
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.2...v0.2.3)
+
+### 🩹 Fixes
+
+- Check first child existence before access ([1b300b6](https://github.com/unjs/undocs/commit/1b300b6))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.2
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.1...v0.2.2)
