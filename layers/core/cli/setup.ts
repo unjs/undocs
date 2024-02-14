@@ -72,7 +72,9 @@ export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
       'components:extend': (components) => {
         const globals = components.filter((c) => (docsconfig.uiGlobalComponents || []).includes(c.pascalName))
 
-        for (const c of globals) { c.global = true }
+        for (const c of globals) {
+          c.global = true
+        }
       },
     },
     tailwindcss: {
