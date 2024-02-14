@@ -41,6 +41,13 @@
         "type": "string"
       }
     },
+    "uiGlobalComponents": {
+      "type": "array",
+      "description": "Global components to be used in the documentation site from @nuxt/ui.",
+      "items": {
+        "type": "string"
+      }
+    },
     "landing": {
       "type": "object",
       "description": "Landing page configuration",

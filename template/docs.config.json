@@ -5,6 +5,7 @@
   "shortDescription": "packageShortDescription",
   "github": "unjs/packageName",
   "redirects": {},
+  "uiGlobalComponents": [],
   "landing": {
     "heroCode": "",
     "heroLinks": {},

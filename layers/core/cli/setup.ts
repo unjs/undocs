@@ -67,6 +67,14 @@ export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
     },
+    hooks: {
+      // Define `@nuxt/ui` components as global to use them in `.md`
+      'components:extend': (components) => {
+        const globals = components.filter((c) => (docsconfig.uiGlobalComponents || []).includes(c.pascalName))
+
+        for (const c of globals) { c.global = true }
+      },
+    },
     tailwindcss: {
       config: {
         theme: {
