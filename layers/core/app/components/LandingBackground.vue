@@ -17,34 +17,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="bg absolute left-[calc(50%-4rem)] top-10 -z-10 transform-gpu blur-3xl sm:left-[calc(50%-18rem)] lg:left-48 lg:top-[calc(50%-30rem)] xl:left-[calc(50%-24rem)] right-0"
-    aria-hidden="true"
-  >
+  <div class="bg absolute left-0 right-0 top-0 -z-10 transform-gpu blur-3xl" aria-hidden="true">
     <div
-      class="aspect-[1108/632] w-full bg-gradient-to-r from-[rgb(var(--color-primary-DEFAULT))] to-white/20 opacity-35"
+      class="aspect-[1.7] w-full bg-gradient-to-r from-[rgb(var(--color-primary-DEFAULT))] to-white/10 lg:opacity-30 xs:opacity-50"
       :style="{ 'clip-path': `polygon(${poly})` }"
     ></div>
   </div>
 </template>
 
 <style scoped>
-/* @keyframes fade {
-  0%,
-  100% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.bg {
-  animation: fade 3s ease-in-out infinite;
-} */
-
 .bg > div {
   clip-path: circle(75%);
   transition: clip-path 2s;
+}
+
+.light .bg > div {
+  opacity: 1 !important;
 }
 </style>
