@@ -7,16 +7,21 @@ export interface DocsConfig {
   github?: string
   themeColor?: string
   redirects?: Record<string, string>
-  landing?: {
-    title?: string
-    description?: string
-    _heroMdTitle?: string
-    heroTitle?: string
-    heroSubtitle?: string
-    heroDescription?: string
-    heroLinks?: Record<string, string | { label?: string; icon?: string; to?: string; size?: string; order?: number }>
-    heroCode?: string | { content: string; title?: string; lang?: string }
-    featuresTitle?: string
-    features?: { title: string; description?: string; icon?: string }[]
-  }
+  landing?:
+    | false
+    | {
+        title?: string
+        description?: string
+        _heroMdTitle?: string
+        heroTitle?: string
+        heroSubtitle?: string
+        heroDescription?: string
+        heroLinks?: Record<
+          string,
+          string | { label?: string; icon?: string; to?: string; size?: string; order?: number }
+        >
+        heroCode?: string | { content: string; title?: string; lang?: string }
+        featuresTitle?: string
+        features?: { title: string; description?: string; icon?: string }[]
+      }
 }

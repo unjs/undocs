@@ -42,84 +42,92 @@
       }
     },
     "landing": {
-      "type": "object",
-      "description": "Landing page configuration",
-      "additionalProperties": false,
-      "properties": {
-        "description": {
-          "type": "string",
-          "description": "Page description"
+      "oneOf": [
+        {
+          "type": "boolean",
+          "const": false
         },
-        "features": {
-          "type": "array",
-          "description": "Features section description",
-          "items": {
-            "type": "object",
-            "properties": {
-              "description": {
-                "type": "string"
-              },
-              "icon": {
-                "type": "string"
-              },
-              "title": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "featuresTitle": {
-          "type": "string",
-          "description": "Features section title"
-        },
-        "heroCode": {
-          "description": "Hero Codes",
-          "anyOf": [
-            {
-              "type": "string"
+        {
+          "type": "object",
+          "description": "Landing page configuration",
+          "additionalProperties": false,
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Page description"
             },
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["content"],
-              "properties": {
-                "content": {
-                  "type": "string"
-                },
-                "lang": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
+            "features": {
+              "type": "array",
+              "description": "Features section description",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "icon": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
                 }
               }
+            },
+            "featuresTitle": {
+              "type": "string",
+              "description": "Features section title"
+            },
+            "heroCode": {
+              "description": "Hero Codes",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["content"],
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    },
+                    "lang": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            },
+            "heroDescription": {
+              "type": "string",
+              "description": "Additional text in hero (default is same as description)"
+            },
+            "heroLinks": {
+              "description": "Hero Links",
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            },
+            "heroSubtitle": {
+              "type": "string",
+              "description": "second hero title (default is same as shortDescription)"
+            },
+            "heroTitle": {
+              "type": "string",
+              "description": "main title (default is same as page title)"
+            },
+            "title": {
+              "type": "string",
+              "description": "Page title"
             }
-          ]
-        },
-        "heroDescription": {
-          "type": "string",
-          "description": "Additional text in hero (default is same as description)"
-        },
-        "heroLinks": {
-          "description": "Hero Links",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
           }
-        },
-        "heroSubtitle": {
-          "type": "string",
-          "description": "second hero title (default is same as shortDescription)"
-        },
-        "heroTitle": {
-          "type": "string",
-          "description": "main title (default is same as page title)"
-        },
-        "title": {
-          "type": "string",
-          "description": "Page title"
         }
-      }
+      ]
     }
   }
 }

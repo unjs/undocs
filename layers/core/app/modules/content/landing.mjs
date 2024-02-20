@@ -1,6 +1,9 @@
 import defu from 'defu'
 
 export function genLanding(docsConfig) {
+  if (docsConfig.landing === false) {
+    return undefined
+  }
   const landing = defu(docsConfig.landing || {}, {
     // Meta
     navigation: false,

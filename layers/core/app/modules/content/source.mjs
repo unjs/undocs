@@ -11,6 +11,9 @@ export default (opts) => {
     name: 'content',
     async getItem(key) {
       const val = await _fs.getItem(key)
+      if (opts.docsConfig.landing === false) {
+        return val
+      }
       if (!val && key === 'index.json') {
         return await import('./landing.mjs').then(({ genLanding }) => genLanding(opts.docsConfig))
       }
@@ -21,6 +24,9 @@ export default (opts) => {
     },
     async getKeys(prefix) {
       const keys = await _fs.getKeys(prefix)
+      if (opts.docsConfig.landing === false) {
+        return keys
+      }
       if (!keys.some((key) => /^index\.\w+$/.test(key))) {
         keys.push('index.json')
       }
