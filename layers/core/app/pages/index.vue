@@ -75,6 +75,7 @@ const hero = computed(() => {
 
 <template>
   <ULandingHero v-if="hero" v-bind="hero">
+    <LandingBackground />
     <template #title>
       <MDC :value="hero.title" />
     </template>
