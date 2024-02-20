@@ -74,21 +74,19 @@ const hero = computed(() => {
 </script>
 
 <template>
-  <div>
-    <ULandingHero v-if="hero" v-bind="hero">
-      <template #title>
-        <MDC :value="hero.title" />
-      </template>
-
-      <MDC v-if="hero.code" :value="hero.code" tag="pre" class="prose prose-primary dark:prose-invert mx-auto" />
-    </ULandingHero>
-
-    <template v-if="page.features">
-      <ULandingSection :title="page.featuresTitle">
-        <UPageGrid>
-          <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" />
-        </UPageGrid>
-      </ULandingSection>
+  <ULandingHero v-if="hero" v-bind="hero">
+    <template #title>
+      <MDC :value="hero.title" />
     </template>
-  </div>
+
+    <MDC v-if="hero.code" :value="hero.code" tag="pre" class="prose prose-primary dark:prose-invert mx-auto" />
+  </ULandingHero>
+
+  <template v-if="page.features?.length > 0">
+    <ULandingSection :title="page.featuresTitle">
+      <UPageGrid>
+        <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" />
+      </UPageGrid>
+    </ULandingSection>
+  </template>
 </template>
