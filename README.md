@@ -23,10 +23,10 @@ Made with [Nuxt](https://nuxt.com/), [Nuxt Content](https://content.nuxt.com), [
 
 ## License
 
-<!-- automd:contributors license=MIT author=pi0 -->
+<!-- automd:contributors license=MIT author="pi0,atinux" -->
 
 Published under the [MIT](https://github.com/unjs/undocs/blob/main/LICENSE) license.
-Made by [@pi0](https://github.com/pi0) and [community](https://github.com/unjs/undocs/graphs/contributors) 💛
+Made by [@pi0](https://github.com/pi0), [@atinux](https://github.com/atinux) and [community](https://github.com/unjs/undocs/graphs/contributors) 💛
 <br><br>
 <a href="https://github.com/unjs/undocs/graphs/contributors">
 <img src="https://contrib.rocks/image?repo=unjs/undocs" />
