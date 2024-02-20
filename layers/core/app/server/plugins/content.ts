@@ -6,15 +6,18 @@ export default defineNitroPlugin((nitroApp) => {
     }
 
     // Remove first h1 from markdown files as it is added to front-matter as title
-    if (file.body?.children?.[0]?.tag === 'h1' && file.title === file.body.children[0].children?.[0]?.value) {
-      file.body.children.shift()
+    if (file.body?.children?.[0]?.tag === 'h1') {
+      const text = getTextContents(file.body.children[0].children)
+      if (file.title === text) {
+        file.body.children.shift()
+      }
     }
 
     // Only use the first blockquote as the description
     const firstChild = file.body.children?.[0]
-    const firstChildContent = firstChild?.children?.[0]?.children?.[0]?.value
-    if (firstChild?.tag === 'blockquote' && firstChildContent) {
-      file.description = firstChildContent
+    const firstChildText = getTextContents(firstChild?.children)
+    if (firstChild?.tag === 'blockquote' && firstChildText) {
+      file.description = firstChildText
       file.body.children.shift()
     } else {
       file.description = '' // Avoid duplication
@@ -36,3 +39,14 @@ export default defineNitroPlugin((nitroApp) => {
     }
   })
 })
+
+function getTextContents(children) {
+  return (children || [])
+    .map((child) => {
+      if (child.type === 'element') {
+        return getTextContents(child.children)
+      }
+      return child.value
+    })
+    .join('')
+}
