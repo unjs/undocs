@@ -26,6 +26,24 @@ Build for production:
 
 :pm-run{script="build"}
 
+## Configuration
+
+```json [docs.json]
+{
+  "$schema": "https://raw.githubusercontent.com/unjs/docs/main/schema/config.json",
+  "name": "packageName",
+  "description": "packageDescription",
+  "shortDescription": "packageShortDescription",
+  "github": "unjs/packageName",
+  "redirects": {},
+  "landing": {
+    "heroCode": "",
+    "heroLinks": {},
+    "features": []
+  }
+}
+```
+
 ## Components
 
 :read-more{to="/components"}
