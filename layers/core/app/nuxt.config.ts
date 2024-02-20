@@ -112,4 +112,8 @@ export default defineNuxtConfig({
     strict: false,
     includeWorkspace: true,
   },
+  colorMode: {
+    preference: 'dark',
+    fallback: 'dark',
+  },
 })
