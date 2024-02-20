@@ -1,18 +1,23 @@
 <script setup lang="ts">
-function randomPolygon() {
-  const points = []
-  for (let i = 0; i < 18; i++) {
-    points.push(`${Math.random() * 100}% ${Math.random() * 100}%`)
-  }
-  return points.join(', ')
+const points = useState(() => new Array(16).fill(0).map(() => [Math.random(), Math.random()]))
+
+const poly = computed(() => points.value.map(([x, y]) => `${x * 100}% ${y * 100}%`).join(', '))
+
+function jumpVal(val: number) {
+  return Math.random() > 0.5 ? val + (Math.random() - 0.5) / 2 : Math.random()
 }
 
-const poly = useState(() => randomPolygon())
+let timeout
+function jumpPoints() {
+  for (let i = 0; i < points.value.length; i++) {
+    points.value[i] = [jumpVal(points.value[i][0]), jumpVal(points.value[i][1])]
+  }
+  timeout = setTimeout(jumpPoints, 1000 + Math.random() * 1000)
+}
 
 onMounted(() => {
-  setInterval(() => {
-    poly.value = randomPolygon()
-  }, 1500)
+  jumpPoints()
+  onUnmounted(() => clearTimeout(timeout))
 })
 </script>
 
