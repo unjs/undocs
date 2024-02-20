@@ -29,3 +29,7 @@ Build for production:
 ## Components
 
 :read-more{to="/components"}
+
+<!-- automd:with-automd -->
+
+<!-- /automd -->

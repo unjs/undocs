@@ -34,6 +34,10 @@
       "type": "string",
       "description": "The theme color of the documentation site.\nIt will be used as the `theme-color` meta tag and a full palette of colors will be generated from it."
     },
+    "automd": {
+      "type": "boolean",
+      "description": "Enable integration with https://automd.unjs.io"
+    },
     "redirects": {
       "description": "Redirects for the documentation site.",
       "type": "object",

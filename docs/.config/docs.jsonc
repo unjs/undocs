@@ -8,6 +8,7 @@
   "redirects": {
     "/docs": "/docs/getting-started",
   },
+  "automd": true,
   "landing": {
     // "heroLinks": {
     //   "stackblitz": { "icon": "i-heroicons-play", "to": "https://stackblitz.com/github/unjs/docs/tree/main/template" }

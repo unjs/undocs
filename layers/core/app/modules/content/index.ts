@@ -4,7 +4,7 @@ import type { ModuleOptions as ContentOptions } from '@nuxt/content'
 import type { DocsConfig } from '../../../../../schema/config'
 
 export default defineNuxtModule({
-  setup(_, nuxt) {
+  async setup(_, nuxt) {
     if (nuxt.options._prepare) {
       return
     }
@@ -18,6 +18,13 @@ export default defineNuxtModule({
         if (index !== -1) {
           pages.splice(index, 1)
         }
+      })
+    }
+
+    if (docsConfig.automd) {
+      const { loadConfig } = await import('automd')
+      docsConfig.automd = loadConfig(docsConfig.dir, {
+        ...docsConfig.automd,
       })
     }
 
