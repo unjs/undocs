@@ -17,7 +17,7 @@ export async function setupDocs(docsDir, opts = {}) {
       url: inferSiteURL(),
       ...opts.defaults,
     },
-    ...opts.watch
+    ...opts.watch,
   })
 
   // Normalize dir

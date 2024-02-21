@@ -1,7 +1,7 @@
 import { defineCommand, runMain } from 'citty'
 import consola from 'consola'
 // import { relative } from "pathe"
-import { getContext } from "unctx"
+import { getContext } from 'unctx'
 import { setupDocs } from './setup.mjs'
 
 export function createCLI(opts) {
@@ -26,23 +26,25 @@ export function createCLI(opts) {
       const { tryUse: tryUseNuxt } = getContext('nuxt')
 
       const { appDir, nuxtConfig, unwatch } = await setupDocs(args.dir, {
-        ...opts.setup, dev: true, watch: {
+        ...opts.setup,
+        dev: true,
+        watch: {
           // onWatch: (event) => {
           // logger.info(`Config file ${event.type} \`${relative(cwd, event.path)}\``)
           // },
           acceptHMR({ getDiff }) {
-            const diff = getDiff().filter(entry => entry.key !== 'dir')
+            const diff = getDiff().filter((entry) => entry.key !== 'dir')
             if (diff.length === 0) {
-              return true;
+              return true
             }
           },
           onUpdate({ getDiff, newConfig: { config } }) {
-            const diff = getDiff().filter(entry => entry.key !== 'dir');
-            logger.info("Config updated:\n" + diff.map((i) => ' - ' + i.toJSON()).join("\n"));
+            const diff = getDiff().filter((entry) => entry.key !== 'dir')
+            logger.info('Config updated:\n' + diff.map((i) => ' - ' + i.toJSON()).join('\n'))
             Object.assign(nuxtConfig.docs, config)
             tryUseNuxt()?.callHook('restart')
           },
-        }
+        },
       })
 
       process.chdir(appDir)
