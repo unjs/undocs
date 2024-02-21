@@ -15,7 +15,6 @@ export default defineNuxtConfig({
   ssr,
   modules: [
     '@nuxt/content',
-    '@nuxthq/studio',
     '@nuxtjs/fontaine',
     !isPrepare && '@nuxtjs/google-fonts',
     '@nuxtjs/seo',
