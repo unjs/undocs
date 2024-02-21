@@ -4,11 +4,7 @@ import consola from 'consola'
 import { getContext } from 'unctx'
 import { setupDocs } from './setup.mjs'
 
-const HMRKeys = new Set([
-  "description",
-  "shortDescription",
-  "landing",
-])
+const HMRKeys = new Set(['description', 'shortDescription', 'landing'])
 
 export function createCLI(opts) {
   const sharedArgs = {
