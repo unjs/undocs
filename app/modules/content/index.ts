@@ -35,6 +35,7 @@ export default defineNuxtModule({
     }
 
     // Inject globalThis.__undocs__ for same process + nitro runtime
+    // @ts-ignore
     globalThis.__undocs__ = { docsConfig }
     nuxt.hook('nitro:init', (nitro) => {
       nitro.options.plugins.push(resolver.resolve('./runtime/nitro.mjs'))
@@ -42,7 +43,8 @@ export default defineNuxtModule({
     })
 
     // HMR
-    nuxt.hook('undocs:config' as any, (newConfig) => {
+    // @ts-ignore
+    nuxt.hook('undocs:config' as any, (newConfig: DocsConfig) => {
       Object.assign(docsConfig, newConfig)
       const nitro = useNitro()
       nitro.updateConfig({
