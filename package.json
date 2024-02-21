@@ -8,11 +8,11 @@
     "undocs": "./bin/cli.mjs"
   },
   "files": [
-    "bin",
-    "layers",
-    "!layers/**/node_modules",
-    "!layers/**/tsconfig.json",
-    "schema"
+    "app",
+    "cli",
+    "schema",
+    "!app/**/node_modules",
+    "!app/**/tsconfig.json"
   ],
   "scripts": {
     "build": "true",
@@ -22,12 +22,12 @@
     "lint": "eslint --cache --ext .ts,.js,.mjs,.cjs . && prettier -c layers",
     "lint:fix": "eslint --cache --ext .ts,.js,.mjs,.cjs . --fix && prettier -c -w layers",
     "prepack": "bun run build",
-    "profile:0x": "bunx 0x -o bin/cli.mjs dev docs",
+    "profile:0x": "bunx 0x -o cli/main.mjs dev docs",
     "profile:0x-kernel": "bun run profile:0x --kernel-tracing",
-    "profile:cpu": "rm -rf .profile && node --cpu-prof --diagnostic-dir ../../../.profile bin/cli.mjs dev docs",
+    "profile:cpu": "rm -rf .profile && node --cpu-prof --diagnostic-dir ../.profile bin/cli.mjs dev docs",
     "release": "bun run lint && changelogen --release && npm publish && git push --follow-tags",
     "template:dev": "bun run undocs dev template",
-    "undocs": "./bin/cli.mjs"
+    "undocs": "./cli/main.mjs"
   },
   "dependencies": {
     "@nuxt/content": "^2.12.0",

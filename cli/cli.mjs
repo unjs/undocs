@@ -1,12 +1,5 @@
 import { defineCommand, runMain } from 'citty'
 import { setupDocs } from './setup.mjs'
-// import type { SetupDocsOptions } from './setup.mjs'
-
-// export interface DocsCLIOptions {
-//   name?: string
-//   description?: string
-//   setup?: SetupDocsOptions
-// }
 
 export function createCLI(opts) {
   const sharedArgs = {

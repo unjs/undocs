@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import { defineNuxtModule } from 'nuxt/kit'
 import type { ModuleOptions as ContentOptions } from '@nuxt/content'
-import type { DocsConfig } from '../../../../../schema/config'
+import type { DocsConfig } from '../../../schema/config'
 
 export default defineNuxtModule({
   async setup(_, nuxt) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DocsConfig } from '../../schema'
+import type { DocsConfig } from '../../schema/config'
 
 type LandingConfig = NonNullable<DocsConfig['landing']>
 

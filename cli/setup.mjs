@@ -1,18 +1,12 @@
 import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
-// import type { NuxtConfig } from 'nuxt/schema'
 import { getColors } from 'theme-colors'
 import { loadConfig } from 'c12'
-// import type { DocsConfig } from '../../../schema/config'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
-const pkgDir = fileURLToPath(new URL('../../..', import.meta.url))
+const appDirUnjs = fileURLToPath(new URL('../app/.unjs', import.meta.url))
 
-// export interface SetupDocsOptions {
-//   defaults?: DocsConfig
-//   dev?: boolean
-//   extends?: string[]
-// }
+const pkgDir = fileURLToPath(new URL('..', import.meta.url))
 
 export async function setupDocs(docsDir, opts = {}) {
   // Try to load docs config
@@ -30,8 +24,7 @@ export async function setupDocs(docsDir, opts = {}) {
   const nuxtConfig = {
     rootDir: resolve(docsDir, '.docs'),
     srcDir: resolve(docsDir, '.docs'),
-
-    extends: [...(opts.extends || []), appDir, '@nuxt/ui-pro'],
+    extends: [...(opts.extends || []), appDirUnjs, appDir, '@nuxt/ui-pro'],
     modulesDir: [resolve(pkgDir, 'node_modules'), resolve(docsDir, 'node_modules')],
     build: {
       transpile: [appDir],
