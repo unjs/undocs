@@ -1,14 +1,12 @@
 <script lang="ts" setup>
-import { AppFooterNotes } from '#components'
+import { AppFooterNotes, UDivider } from '#components'
 </script>
 
 <template>
-  <div class="w-full h-px bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
-    <div class="bg-white dark:bg-gray-900 px-4">
-      <OrgLogo class="w-5 h-5" />
-    </div>
-  </div>
-  <UFooter :links="[]">
+  <UDivider class="-mb-[10px]">
+    <OrgLogo class="w-5 h-5 z-10" />
+  </UDivider>
+  <UFooter :links="[]" class="bg-background/75 backdrop-blur">
     <template #left>
       <AppFooterNotes />
     </template>

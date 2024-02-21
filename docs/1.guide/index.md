@@ -38,6 +38,7 @@ Build for production:
   "redirects": {},
   "landing": {
     "heroCode": "",
+    "heroFeatures": [],
     "heroLinks": {},
     "features": []
   }

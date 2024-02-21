@@ -106,6 +106,24 @@
                 }
               ]
             },
+            "heroFeatures": {
+              "type": "array",
+              "description": "Features to display in hero section",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "icon": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
             "heroDescription": {
               "type": "string",
               "description": "Additional text in hero (default is same as description)"
