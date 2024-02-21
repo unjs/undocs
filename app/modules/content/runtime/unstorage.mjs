@@ -2,9 +2,11 @@ import { defineDriver } from 'unstorage'
 import fsDriver from 'unstorage/drivers/fs'
 import { transform, loadConfig } from 'automd'
 
-export default (opts) => {
+const getDocsConfig = () => globalThis.__undocs__?.docsConfig || {}
+
+export default (driverOpts) => {
   const _fs = fsDriver({
-    base: opts.docsConfig.dir,
+    base: driverOpts.base,
   })
 
   let automdConfig
@@ -13,23 +15,23 @@ export default (opts) => {
     ..._fs,
     name: 'content',
     async getItem(key) {
+      const docsConfig = getDocsConfig()
+
       const val = await _fs.getItem(key)
 
       // Landing
-      if (opts.docsConfig.automd) {
-        if (!val && key === 'index.json') {
-          return await import('./landing.mjs').then(({ genLanding }) => genLanding(opts.docsConfig))
-        }
-        if (!val && key === 'index.json$') {
-          return { mtime: new Date() }
-        }
+      if (!val && key === 'index.json') {
+        return await import('./landing.mjs').then(({ genLanding }) => genLanding(docsConfig))
+      }
+      if (!val && key === 'index.json$') {
+        return { mtime: new Date() }
       }
 
       // Automd transform
-      if (opts.docsConfig.automd) {
+      if (docsConfig.automd) {
         if (key.endsWith('.md') && typeof val === 'string') {
           if (!automdConfig) {
-            automdConfig = await loadConfig(opts.docsConfig.dir, opts.docsConfig.automd)
+            automdConfig = await loadConfig(docsConfig.dir, docsConfig.automd)
           }
           const res = await transform(val, automdConfig)
           if (res.hasChanged) {
@@ -44,10 +46,12 @@ export default (opts) => {
       return val
     },
     async getKeys(prefix) {
+      const docsConfig = getDocsConfig()
+
       const keys = await _fs.getKeys(prefix)
 
       // Landing
-      if (opts.docsConfig.landing !== false && !keys.some((key) => /^index\.\w+$/.test(key))) {
+      if (docsConfig.landing !== false && !keys.some((key) => /^index\.\w+$/.test(key))) {
         keys.push('index.json')
       }
 

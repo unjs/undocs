@@ -4,6 +4,12 @@ import consola from 'consola'
 import { getContext } from 'unctx'
 import { setupDocs } from './setup.mjs'
 
+const HMRKeys = new Set([
+  "description",
+  "shortDescription",
+  "landing",
+])
+
 export function createCLI(opts) {
   const sharedArgs = {
     dir: {
@@ -42,7 +48,13 @@ export function createCLI(opts) {
             const diff = getDiff().filter((entry) => entry.key !== 'dir')
             logger.info('Config updated:\n' + diff.map((i) => ' - ' + i.toJSON()).join('\n'))
             Object.assign(nuxtConfig.docs, config)
-            tryUseNuxt()?.callHook('restart')
+            if (diff.some((entry) => !HMRKeys.has(entry.key))) {
+              logger.info('Full reloading...')
+              tryUseNuxt()?.callHook('restart')
+            } else {
+              logger.info('Fast reloading...')
+              tryUseNuxt()?.callHook('undocs:config', config)
+            }
           },
         },
       })

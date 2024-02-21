@@ -1,5 +1,4 @@
-import { fileURLToPath } from 'node:url'
-import { defineNuxtModule } from 'nuxt/kit'
+import { defineNuxtModule, createResolver, useNitro } from 'nuxt/kit'
 import type { ModuleOptions as ContentOptions } from '@nuxt/content'
 import type { DocsConfig } from '../../../schema/config'
 
@@ -9,7 +8,13 @@ export default defineNuxtModule({
       return
     }
 
+    const resolver = createResolver(import.meta.url)
+
     const docsConfig = (nuxt.options as any).docs as DocsConfig
+
+    nuxt.options.nitro.externals ||= {}
+    nuxt.options.nitro.externals.inline ||= []
+    nuxt.options.nitro.externals.inline.push(resolver.resolve('./runtime'))
 
     if (docsConfig.landing === false) {
       nuxt.hooks.hook('pages:extend', (pages) => {
@@ -24,9 +29,28 @@ export default defineNuxtModule({
     contentConfig.sources = {
       ...contentConfig.sources,
       content: {
-        driver: fileURLToPath(new URL('source.mjs', import.meta.url)),
-        docsConfig,
+        driver: resolver.resolve('./runtime/unstorage.mjs'),
+        base: docsConfig.dir,
       },
     }
+
+    // Inject globalThis.__undocs__ for same process + nitro runtime
+    globalThis.__undocs__ = { docsConfig }
+    nuxt.hook('nitro:init', (nitro) => {
+      nitro.options.plugins.push(resolver.resolve('./runtime/nitro.mjs'))
+      nitro.options.runtimeConfig.__undocs__ = { docsConfig }
+    })
+
+    // HMR
+    nuxt.hook('undocs:config' as any, (newConfig) => {
+      Object.assign(docsConfig, newConfig)
+      const nitro = useNitro()
+      nitro.updateConfig({
+        runtimeConfig: {
+          ...nitro.options.runtimeConfig,
+          __undocs__: { docsConfig },
+        },
+      })
+    })
   },
 })
