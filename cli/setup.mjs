@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
 import { getColors } from 'theme-colors'
-import { loadConfig } from 'c12'
+import { loadConfig, watchConfig } from 'c12'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 const appDirUnjs = fileURLToPath(new URL('../app/.unjs', import.meta.url))
@@ -9,8 +9,16 @@ const appDirUnjs = fileURLToPath(new URL('../app/.unjs', import.meta.url))
 const pkgDir = fileURLToPath(new URL('..', import.meta.url))
 
 export async function setupDocs(docsDir, opts = {}) {
-  // Try to load docs config
-  const docsconfig = (await loadDocsConfig(docsDir, opts.defaults)) || {}
+  // Load config
+  const { unwatch, config: docsconfig } = await (opts.watch ? watchConfig : loadConfig)({
+    name: 'docs',
+    cwd: docsDir,
+    defaults: {
+      url: inferSiteURL(),
+      ...opts.defaults,
+    },
+    ...opts.watch
+  })
 
   // Normalize dir
   docsconfig.dir = docsDir = resolve(docsconfig.dir || docsDir)
@@ -75,21 +83,8 @@ export async function setupDocs(docsDir, opts = {}) {
     docsDir,
     appDir,
     nuxtConfig,
+    unwatch,
   }
-}
-
-async function loadDocsConfig(dir, defaults = {}) {
-  const { config } = await loadConfig({
-    name: 'docs',
-    cwd: dir,
-    defaults: {
-      url: inferSiteURL(),
-      ...defaults,
-    },
-    overrides: { dir },
-  })
-
-  return config
 }
 
 function inferSiteURL() {
