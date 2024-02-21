@@ -17,13 +17,16 @@
   "scripts": {
     "build": "true",
     "dev": "bun run docs:dev",
-    "docs:dev": "NUXT_DOCS_DEV=1 bun run undocs dev docs",
     "docs:build": "bun run undocs build docs",
-    "template:dev": "bun run undocs dev template",
+    "docs:dev": "NUXT_DOCS_DEV=1 bun run undocs dev docs",
     "lint": "eslint --cache --ext .ts,.js,.mjs,.cjs . && prettier -c layers",
     "lint:fix": "eslint --cache --ext .ts,.js,.mjs,.cjs . --fix && prettier -c -w layers",
     "prepack": "bun run build",
+    "profile:0x": "bunx 0x -o bin/cli.mjs dev docs",
+    "profile:0x-kernel": "bun run profile:0x --kernel-tracing",
+    "profile:cpu": "rm -rf .profile && node --cpu-prof --diagnostic-dir ../../../.profile bin/cli.mjs dev docs",
     "release": "bun run lint && changelogen --release && npm publish && git push --follow-tags",
+    "template:dev": "bun run undocs dev template",
     "undocs": "./bin/cli.mjs"
   },
   "dependencies": {
