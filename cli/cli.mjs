@@ -44,7 +44,7 @@ export function createCLI(opts) {
             const diff = getDiff().filter((entry) => entry.key !== 'dir')
             logger.info('Config updated:\n' + diff.map((i) => ' - ' + i.toJSON()).join('\n'))
             Object.assign(nuxtConfig.docs, config)
-            if (diff.some((entry) => !HMRKeys.has(entry.key))) {
+            if (diff.some((entry) => !HMRKeys.has(entry.key.split('.')[0]))) {
               logger.info('Full reloading...')
               tryUseNuxt()?.callHook('restart')
             } else {
