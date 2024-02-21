@@ -28,7 +28,9 @@ export default (opts) => {
       // Automd transform
       if (opts.docsConfig.automd) {
         if (key.endsWith('.md') && typeof val === 'string') {
-          if (!automdConfig) { automdConfig = await loadConfig(opts.docsConfig.dir, opts.docsConfig.automd) }
+          if (!automdConfig) {
+            automdConfig = await loadConfig(opts.docsConfig.dir, opts.docsConfig.automd)
+          }
           const res = await transform(val, automdConfig)
           if (res.hasChanged) {
             _fs.setItem(key, res.contents).catch(console.error)
