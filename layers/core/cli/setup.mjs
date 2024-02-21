@@ -16,7 +16,7 @@ const pkgDir = fileURLToPath(new URL('../../..', import.meta.url))
 
 export async function setupDocs(docsDir, opts = {}) {
   // Try to load docs config
-  const docsconfig = (await loadDocsConfig(docsDir, opts.defaults)) || ({})
+  const docsconfig = (await loadDocsConfig(docsDir, opts.defaults)) || {}
 
   // Normalize dir
   docsconfig.dir = docsDir = resolve(docsconfig.dir || docsDir)
