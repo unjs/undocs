@@ -1,6 +1,23 @@
 # Changelog
 
 
+## v0.2.7
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.6...v0.2.7)
+
+### 🩹 Fixes
+
+- Move build cache behind experimental flag ([32d59b6](https://github.com/unjs/undocs/commit/32d59b6))
+
+### 🏡 Chore
+
+- Update automd ([bf218d9](https://github.com/unjs/undocs/commit/bf218d9))
+- Lint ([4225a19](https://github.com/unjs/undocs/commit/4225a19))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.6
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.5...v0.2.6)
