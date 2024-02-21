@@ -90,4 +90,12 @@ const hero = computed(() => {
       </UPageGrid>
     </ULandingSection>
   </template>
+
+  <ULandingSection v-if="page.contributors && page._github" title="Made by community">
+    <UContainer>
+      <a :href="`https://github.com/${page._github}/graphs/contributors`" target="_blank">
+        <img :src="`https://contrib.rocks/image?repo=${page._github}`" />
+      </a>
+    </UContainer>
+  </ULandingSection>
 </template>
