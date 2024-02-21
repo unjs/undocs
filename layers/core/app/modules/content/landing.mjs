@@ -38,6 +38,8 @@ export function genLanding(docsConfig) {
     // Features
     featuresTitle: '',
     features: [],
+
+    _github: docsConfig.github,
   })
 
   landing._heroMdTitle =

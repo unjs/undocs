@@ -12,7 +12,7 @@ function jumpPoints() {
   for (let i = 0; i < points.value.length; i++) {
     points.value[i] = [jumpVal(points.value[i][0]), jumpVal(points.value[i][1])]
   }
-  timeout = setTimeout(jumpPoints, 1000 + Math.random() * 1000)
+  timeout = setTimeout(jumpPoints, 2000 + Math.random() * 1000)
 }
 
 onMounted(() => {
@@ -33,7 +33,7 @@ onMounted(() => {
 <style scoped>
 .bg > div {
   clip-path: circle(75%);
-  transition: clip-path 2s;
+  transition: clip-path 3s;
 }
 
 .light .bg > div {

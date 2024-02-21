@@ -37,6 +37,7 @@ Build for production:
   "github": "unjs/packageName",
   "redirects": {},
   "landing": {
+    "contributors": true,
     "heroCode": "",
     "heroFeatures": [],
     "heroLinks": {},

@@ -60,6 +60,10 @@
               "type": "string",
               "description": "Page description"
             },
+            "contributors": {
+              "type": "boolean",
+              "description": "Show contributors section"
+            },
             "features": {
               "type": "array",
               "description": "Features section description",

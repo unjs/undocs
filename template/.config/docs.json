@@ -6,6 +6,7 @@
   "github": "unjs/packageName",
   "redirects": {},
   "landing": {
+    "contributors": false,
     "heroCode": "",
     "heroFeatures": [],
     "heroLinks": {},

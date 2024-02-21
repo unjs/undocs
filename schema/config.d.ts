@@ -8,6 +8,7 @@ export interface DocsConfig {
   themeColor?: string
   redirects?: Record<string, string>
   automd?: any
+  contributors?: boolean
   landing?:
     | false
     | {
