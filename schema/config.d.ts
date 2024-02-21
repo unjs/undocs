@@ -23,8 +23,8 @@ export interface DocsConfig {
           string | { label?: string; icon?: string; to?: string; size?: string; order?: number }
         >
         heroCode?: string | { content: string; title?: string; lang?: string }
-        heroFeatures?: { title: string; description?: string; icon?: string }[]
         featuresTitle?: string
+        featuresLayout?: 'default' | 'hero'
         features?: { title: string; description?: string; icon?: string }[]
       }
 }

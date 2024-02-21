@@ -86,6 +86,11 @@
               "type": "string",
               "description": "Features section title"
             },
+            "featuresLayout": {
+              "type": "string",
+              "description": "Features section layout to be in default place or in the hero (only if there is no code)",
+              "enum": ["default", "hero"]
+            },
             "heroCode": {
               "description": "Hero Codes",
               "anyOf": [
@@ -109,24 +114,6 @@
                   }
                 }
               ]
-            },
-            "heroFeatures": {
-              "type": "array",
-              "description": "Features to display in hero section",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "description": {
-                    "type": "string"
-                  },
-                  "icon": {
-                    "type": "string"
-                  },
-                  "title": {
-                    "type": "string"
-                  }
-                }
-              }
             },
             "heroDescription": {
               "type": "string",
