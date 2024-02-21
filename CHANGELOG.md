@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.2.6
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.5...v0.2.6)
+
+### 🩹 Fixes
+
+- Use prefix check for hmr keys ([e5420c8](https://github.com/unjs/undocs/commit/e5420c8))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.5
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.4...v0.2.5)
