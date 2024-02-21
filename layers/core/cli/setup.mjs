@@ -1,22 +1,22 @@
 import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
-import type { NuxtConfig } from 'nuxt/schema'
+// import type { NuxtConfig } from 'nuxt/schema'
 import { getColors } from 'theme-colors'
 import { loadConfig } from 'c12'
-import type { DocsConfig } from '../../../schema/config'
+// import type { DocsConfig } from '../../../schema/config'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 const pkgDir = fileURLToPath(new URL('../../..', import.meta.url))
 
-export interface SetupDocsOptions {
-  defaults?: DocsConfig
-  dev?: boolean
-  extends?: string[]
-}
+// export interface SetupDocsOptions {
+//   defaults?: DocsConfig
+//   dev?: boolean
+//   extends?: string[]
+// }
 
-export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
+export async function setupDocs(docsDir, opts = {}) {
   // Try to load docs config
-  const docsconfig = (await loadDocsConfig(docsDir, opts.defaults)) || ({} as DocsConfig)
+  const docsconfig = (await loadDocsConfig(docsDir, opts.defaults)) || ({})
 
   // Normalize dir
   docsconfig.dir = docsDir = resolve(docsconfig.dir || docsDir)
@@ -27,7 +27,7 @@ export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
   }
 
   // Prepare loadNuxt overrides
-  const nuxtConfig: NuxtConfig = {
+  const nuxtConfig = {
     rootDir: resolve(docsDir, '.docs'),
     srcDir: resolve(docsDir, '.docs'),
 
@@ -85,8 +85,8 @@ export async function setupDocs(docsDir: string, opts: SetupDocsOptions = {}) {
   }
 }
 
-async function loadDocsConfig(dir: string, defaults: DocsConfig = {}) {
-  const { config } = await loadConfig<DocsConfig>({
+async function loadDocsConfig(dir, defaults = {}) {
+  const { config } = await loadConfig({
     name: 'docs',
     cwd: dir,
     defaults: {

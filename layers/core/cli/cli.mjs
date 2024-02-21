@@ -1,14 +1,14 @@
-#!/usr/bin/env node
 import { defineCommand, runMain } from 'citty'
-import { setupDocs, type SetupDocsOptions } from './setup'
+import { setupDocs } from './setup.mjs'
+// import type { SetupDocsOptions } from './setup.mjs'
 
-export interface DocsCLIOptions {
-  name?: string
-  description?: string
-  setup?: SetupDocsOptions
-}
+// export interface DocsCLIOptions {
+//   name?: string
+//   description?: string
+//   setup?: SetupDocsOptions
+// }
 
-export function createCLI(opts: DocsCLIOptions = {}) {
+export function createCLI(opts) {
   const sharedArgs = {
     dir: {
       type: 'positional',
@@ -16,7 +16,7 @@ export function createCLI(opts: DocsCLIOptions = {}) {
       required: true,
       default: '.',
     },
-  } as const
+  }
 
   const dev = defineCommand({
     meta: {
