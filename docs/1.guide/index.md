@@ -39,6 +39,7 @@ Build for production:
   "landing": {
     "contributors": true,
     "heroCode": "",
+    "heroFeatures": [],
     "heroLinks": {},
     "features": []
   }
@@ -50,5 +51,9 @@ Build for production:
 :read-more{to="/components"}
 
 <!-- automd:with-automd -->
+
+---
+
+_🤖 auto updated with [automd](https://automd.unjs.io) (last updated: Wed Feb 21 2024)_
 
 <!-- /automd -->

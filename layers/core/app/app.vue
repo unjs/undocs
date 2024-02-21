@@ -20,21 +20,19 @@ provide('navigation', navigation)
 </script>
 
 <template>
-  <div>
-    <AppHeader />
+  <AppHeader />
 
-    <UMain>
-      <NuxtLayout>
-        <NuxtPage />
-      </NuxtLayout>
-    </UMain>
+  <UMain class="min-h-[calc(100vh-var(--header-height)-78px)]">
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </UMain>
 
-    <AppFooter />
+  <AppFooter />
 
-    <ClientOnly>
-      <LazyUDocsSearch :files="files" :navigation="navigation" />
-    </ClientOnly>
+  <ClientOnly>
+    <LazyUDocsSearch :files="files" :navigation="navigation" />
+  </ClientOnly>
 
-    <UNotifications />
-  </div>
+  <UNotifications />
 </template>

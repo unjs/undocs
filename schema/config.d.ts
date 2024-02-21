@@ -24,6 +24,7 @@ export interface DocsConfig {
         >
         heroCode?: string | { content: string; title?: string; lang?: string }
         featuresTitle?: string
+        featuresLayout?: 'default' | 'hero'
         features?: { title: string; description?: string; icon?: string }[]
       }
 }

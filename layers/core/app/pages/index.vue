@@ -63,27 +63,33 @@ const hero = computed(() => {
     return
   }
   const code = formatHeroCode(page.value!.heroCode)
+  const withFeatures = !code && page.value.featuresLayout === 'hero' && page.value.features?.length > 0
   return {
     title: page.value!._heroMdTitle,
     description: page.value!.heroDescription,
     links: nornalizeHeroLinks(page.value!.heroLinks),
-    orientation: code ? 'horizontal' : 'vertical',
+    withFeatures,
+    orientation: code || withFeatures ? 'horizontal' : 'vertical',
     code,
   } as const
 })
 </script>
 
 <template>
-  <ULandingHero v-if="hero" v-bind="hero">
-    <LandingBackground />
+  <ULandingHero v-if="hero" v-bind="hero" :orientation="hero.orientation">
+    <template #top>
+      <LandingBackground />
+    </template>
     <template #title>
       <MDC :value="hero.title" />
     </template>
 
     <MDC v-if="hero.code" :value="hero.code" tag="pre" class="prose prose-primary dark:prose-invert mx-auto" />
+    <div v-else-if="hero.withFeatures" class="flex flex-col gap-6">
+      <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" />
+    </div>
   </ULandingHero>
-
-  <template v-if="page.features?.length > 0">
+  <template v-if="page.features?.length > 0 && !hero.withFeatures">
     <ULandingSection :title="page.featuresTitle">
       <UPageGrid>
         <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" />
