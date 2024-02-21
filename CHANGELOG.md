@@ -1,6 +1,35 @@
 # Changelog
 
 
+## v0.2.5
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.4...v0.2.5)
+
+### 🚀 Enhancements
+
+- Basic config watcher ([c6e8d20](https://github.com/unjs/undocs/commit/c6e8d20))
+- Poc for config HMR ([d0d34fc](https://github.com/unjs/undocs/commit/d0d34fc))
+
+### 🩹 Fixes
+
+- Read automd config in runtime ([0e6c530](https://github.com/unjs/undocs/commit/0e6c530))
+- Updat bin path ([34e8011](https://github.com/unjs/undocs/commit/34e8011))
+
+### 💅 Refactors
+
+- Simplify structure ([4761a1d](https://github.com/unjs/undocs/commit/4761a1d))
+
+### 🏡 Chore
+
+- **release:** V0.2.4 ([22fb749](https://github.com/unjs/undocs/commit/22fb749))
+- Apply automated updates ([61c85f4](https://github.com/unjs/undocs/commit/61c85f4))
+- Apply automated updates ([9ebcc0c](https://github.com/unjs/undocs/commit/9ebcc0c))
+- Apply automated updates ([60827b0](https://github.com/unjs/undocs/commit/60827b0))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.4
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.3...v0.2.4)
