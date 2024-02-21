@@ -50,10 +50,8 @@ Build for production:
 
 :read-more{to="/components"}
 
-<!-- automd:with-automd -->
+<!-- automd:test -->
 
----
-
-_🤖 auto updated with [automd](https://automd.unjs.io) (last updated: Wed Feb 21 2024)_
+automd works!
 
 <!-- /automd -->
