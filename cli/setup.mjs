@@ -37,6 +37,9 @@ export async function setupDocs(docsDir, opts = {}) {
     build: {
       transpile: [appDir],
     },
+    modules: [
+      docsconfig.buildCache ? 'nuxt-build-cache' : undefined,
+    ].filter(Boolean),
     // @ts-ignore
     docs: docsconfig,
     // @ts-ignore

@@ -38,6 +38,10 @@
       "type": "boolean",
       "description": "Enable integration with https://automd.unjs.io"
     },
+    "buildCache": {
+      "type": "boolean",
+      "description": "Enable build cache (experimental)"
+    },
     "redirects": {
       "description": "Redirects for the documentation site.",
       "type": "object",
