@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "undocs": "./bin/cli.mjs"
+    "undocs": "./cli/main.mjs"
   },
   "files": [
     "app",
