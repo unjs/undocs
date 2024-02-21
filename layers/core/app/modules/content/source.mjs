@@ -27,6 +27,9 @@ export default (opts) => {
       if (opts.docsConfig.automd) {
         if (key.endsWith('.md') && typeof val === 'string') {
           const res = await transform(val, opts.docsConfig.automd)
+          if (res.hasChanged) {
+            _fs.setItem(key, res.contents).catch(console.error)
+          }
           return res.contents
         } else if (key.endsWith('.md$')) {
           return { mtime: new Date() }
