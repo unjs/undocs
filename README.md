@@ -38,6 +38,6 @@ Made by [@pi0](https://github.com/pi0), [@atinux](https://github.com/atinux) and
 
 ---
 
-_🤖 auto updated with [automd](https://automd.unjs.io) (last updated: Wed Feb 21 2024)_
+_🤖 auto updated with [automd](https://automd.unjs.io)_
 
 <!-- /automd -->
