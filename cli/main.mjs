@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
-import { fileURLToPath } from 'node:url'
 import { createCLI } from './cli.mjs'
-
 
 const cli = createCLI({
   name: 'undocs',
