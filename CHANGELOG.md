@@ -1,6 +1,57 @@
 # Changelog
 
 
+## v0.2.4
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.3...v0.2.4)
+
+### 🚀 Enhancements
+
+- Allow disabling landing ([00761a3](https://github.com/unjs/undocs/commit/00761a3))
+- Automd integration ([c860629](https://github.com/unjs/undocs/commit/c860629))
+- Add basic landing background ([143e157](https://github.com/unjs/undocs/commit/143e157))
+- Add contributors option for landing ([#48](https://github.com/unjs/undocs/pull/48))
+- Write transform updates back to storage ([c4fc410](https://github.com/unjs/undocs/commit/c4fc410))
+- `featuresLayout` and design improvements ([#52](https://github.com/unjs/undocs/pull/52))
+
+### 🔥 Performance
+
+- Use js for CLI impl for now ([8db3a91](https://github.com/unjs/undocs/commit/8db3a91))
+- Remove studio to investigate perf ([c258897](https://github.com/unjs/undocs/commit/c258897))
+
+### 🩹 Fixes
+
+- Check first child existence before access ([1b300b6](https://github.com/unjs/undocs/commit/1b300b6))
+- Dedup children ([#47](https://github.com/unjs/undocs/pull/47))
+- Exclude alerts from first child ([8731ece](https://github.com/unjs/undocs/commit/8731ece))
+- Hotfix landing height ([3b689b2](https://github.com/unjs/undocs/commit/3b689b2))
+
+### 💅 Refactors
+
+- Move config to `.config` ([6f66f9d](https://github.com/unjs/undocs/commit/6f66f9d))
+
+### 🏡 Chore
+
+- **release:** V0.2.3 ([8bc771a](https://github.com/unjs/undocs/commit/8bc771a))
+- Update lockfile ([4ff4809](https://github.com/unjs/undocs/commit/4ff4809))
+- Update lock ([ae92b6f](https://github.com/unjs/undocs/commit/ae92b6f))
+- Update lock ([566c0d4](https://github.com/unjs/undocs/commit/566c0d4))
+- Add automd ([b875521](https://github.com/unjs/undocs/commit/b875521))
+- Update ci ([2b2d264](https://github.com/unjs/undocs/commit/2b2d264))
+- Apply automated updates ([38a7f94](https://github.com/unjs/undocs/commit/38a7f94))
+- Add @atinux ([09337e0](https://github.com/unjs/undocs/commit/09337e0))
+- Update docs ([c99875e](https://github.com/unjs/undocs/commit/c99875e))
+- Apply automated updates ([a1154f0](https://github.com/unjs/undocs/commit/a1154f0))
+- Add `.devcontainer` for kernel profiling ([fe3e2fe](https://github.com/unjs/undocs/commit/fe3e2fe))
+- Add profile scripts ([34d93df](https://github.com/unjs/undocs/commit/34d93df))
+- Apply automated updates ([11a787d](https://github.com/unjs/undocs/commit/11a787d))
+- Update lock ([9cf341b](https://github.com/unjs/undocs/commit/9cf341b))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v0.2.3
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.2...v0.2.3)
