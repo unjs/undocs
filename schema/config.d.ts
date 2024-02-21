@@ -8,7 +8,6 @@ export interface DocsConfig {
   themeColor?: string
   redirects?: Record<string, string>
   automd?: any
-  contributors?: boolean
   landing?:
     | false
     | {
@@ -26,5 +25,6 @@ export interface DocsConfig {
         featuresTitle?: string
         featuresLayout?: 'default' | 'hero'
         features?: { title: string; description?: string; icon?: string }[]
+        contributors?: boolean
       }
 }
