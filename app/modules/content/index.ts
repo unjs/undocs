@@ -21,13 +21,6 @@ export default defineNuxtModule({
       })
     }
 
-    if (docsConfig.automd) {
-      const { loadConfig } = await import('automd')
-      docsConfig.automd = loadConfig(docsConfig.dir, {
-        ...docsConfig.automd,
-      })
-    }
-
     contentConfig.sources = {
       ...contentConfig.sources,
       content: {
