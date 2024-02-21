@@ -1,0 +1,22 @@
+// https://code.visualstudio.com/docs/devcontainers/containers
+// https://containers.dev/implementors/json_reference/
+{
+  "build": {
+    "dockerfile": "Dockerfile",
+  },
+  "features": {},
+  "customizations": {
+    "vscode": {
+      "settings": {},
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "dbaeumer.vscode-eslint",
+        "github.vscode-github-actions",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  "runArgs": ["--privileged"],
+  "postStartCommand": "corepack enable && bun install",
+  "mounts": ["type=volume,target=${containerWorkspaceFolder}/node_modules"]
+}
