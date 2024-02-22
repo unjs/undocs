@@ -53,6 +53,10 @@ const tocLinks = computed(() =>
     href: `#${link.id}`,
   })),
 )
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
+}
 </script>
 
 <template>
@@ -60,18 +64,20 @@ const tocLinks = computed(() =>
     <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline">
     </UPageHeader>
 
-    <UDropdown
+    <div class="mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 lg:sticky">
+      <UDropdown
       v-if="tocLinks.length > 2"
-      :items="[/*[{ label: 'Return to top', href: '#' }] TODO: once sticky */ tocLinks]"
+      :items="[[{ label: 'Return to top', click: scrollToTop }], tocLinks]"
+      :popper="{ placement: 'bottom-start' }"
       v-model:open="tocOpen"
-      class="mt-4 lg:sticky"
-    >
-      <UButton
+     >
+        <UButton
         color="white"
         label="On this page"
         :trailing-icon="`i-heroicons-chevron-${tocOpen ? 'down' : 'right'}-20-solid`"
-      />
-    </UDropdown>
+        />
+      </UDropdown>
+    </div>
 
     <UPageBody prose>
       <ContentRenderer v-if="page.body" :value="page" />
