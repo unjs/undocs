@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.13
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.12...v0.2.13)
+
+### 🩹 Fixes
+
+- Generate url for automd transforms ([03c3ce9](https://github.com/unjs/undocs/commit/03c3ce9))
+
+### 📖 Documentation
+
+- Add config page to test automd ([0105f4c](https://github.com/unjs/undocs/commit/0105f4c))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.12
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.11...v0.2.12)
