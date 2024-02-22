@@ -1,18 +1,5 @@
 # Changelog
 
-
-## v0.2.9
-
-[compare changes](https://github.com/unjs/undocs/compare/v0.2.8...v0.2.9)
-
-### 🏡 Chore
-
-- Upgrade ui pro to 1.0 ([#54](https://github.com/unjs/undocs/pull/54))
-
-### ❤️ Contributors
-
-- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
-
 ## v0.2.8
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.7...v0.2.8)
@@ -210,8 +197,8 @@
 
 ### 🚀 Enhancements
 
-- ⚠️  Auto generated landing ([#34](https://github.com/unjs/docs/pull/34))
-- ⚠️  Flatten content ([e1ab039](https://github.com/unjs/docs/commit/e1ab039))
+- ⚠️ Auto generated landing ([#34](https://github.com/unjs/docs/pull/34))
+- ⚠️ Flatten content ([e1ab039](https://github.com/unjs/docs/commit/e1ab039))
 - `pm-install` and `pm-run` components ([#36](https://github.com/unjs/docs/pull/36))
 - Sync package manager commands ([1038381](https://github.com/unjs/docs/commit/1038381))
 
@@ -250,8 +237,8 @@
 
 #### ⚠️ Breaking Changes
 
-- ⚠️  Auto generated landing ([#34](https://github.com/unjs/docs/pull/34))
-- ⚠️  Flatten content ([e1ab039](https://github.com/unjs/docs/commit/e1ab039))
+- ⚠️ Auto generated landing ([#34](https://github.com/unjs/docs/pull/34))
+- ⚠️ Flatten content ([e1ab039](https://github.com/unjs/docs/commit/e1ab039))
 
 ### ❤️ Contributors
 
@@ -395,4 +382,3 @@
 ### ❤️ Contributors
 
 - Pooya Parsa ([@pi0](http://github.com/pi0))
-
