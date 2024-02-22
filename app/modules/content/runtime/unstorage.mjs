@@ -40,7 +40,10 @@ export default (driverOpts) => {
           if (res.hasIssues) {
             console.warn(
               `[undocs] [automd] Issues for updating \`${key}\`:`,
-              res.updates.flatMap(u => u.result.issues).map(i => `\n  - ${i}`).join('\n')
+              res.updates
+                .flatMap((u) => u.result.issues)
+                .map((i) => `\n  - ${i}`)
+                .join('\n'),
             )
             return val // Fallback to original content
           }
