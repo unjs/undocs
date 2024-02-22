@@ -1,4 +1,3 @@
-import { join } from 'node:path'
 import { defineNuxtConfig } from 'nuxt/config'
 
 // Flag enabled when developing docs theme
