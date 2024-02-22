@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v0.2.8
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.7...v0.2.8)
+
+### 🩹 Fixes
+
+- **header:** Only list top level sections that have index ([c37319e](https://github.com/unjs/undocs/commit/c37319e))
+
+### 🏡 Chore
+
+- Apply automated updates ([6fa148e](https://github.com/unjs/undocs/commit/6fa148e))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.7
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.6...v0.2.7)
