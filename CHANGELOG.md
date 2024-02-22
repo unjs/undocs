@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.2.10
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.8...v0.2.10)
+
+### 🚀 Enhancements
+
+- Add scroll to top ([#56](https://github.com/unjs/undocs/pull/56))
+
+### 🏡 Chore
+
+- Update @nuxt/ui to 2.14 ([#58](https://github.com/unjs/undocs/pull/58))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Estéban ([@Barbapapazes](http://github.com/Barbapapazes))
+
 ## v0.2.8
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.7...v0.2.8)
