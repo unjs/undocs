@@ -1,15 +1,4 @@
-import { createRequire } from 'node:module'
 import { defineNuxtModule } from 'nuxt/kit'
-
-// Remove deprecated color warnings for Bun
-// https://github.com/nuxt/ui/issues/809
-const _require = createRequire(import.meta.url)
-const defaultColors = _require('tailwindcss/colors.js')
-delete defaultColors.lightBlue
-delete defaultColors.warmGray
-delete defaultColors.trueGray
-delete defaultColors.coolGray
-delete defaultColors.blueGray
 
 export default defineNuxtModule({
   setup(_, nuxt) {

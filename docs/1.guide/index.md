@@ -50,8 +50,3 @@ Build for production:
 
 :read-more{to="/components"}
 
-<!-- automd:test -->
-
-automd works!
-
-<!-- /automd -->
