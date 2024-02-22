@@ -98,7 +98,7 @@ const scrollToTop = () => {
             ]"
           />
         </div>
-        <UDocsSurround v-if="surround?.length" class="mb-4" :surround="surround" />
+        <UContentSurround v-if="surround?.length" class="mb-4" :surround="surround" />
       </div>
     </UPageBody>
   </UPage>

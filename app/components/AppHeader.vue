@@ -33,18 +33,17 @@ const navLinks = computed(() => {
           {{ appConfig.site.name }}
         </span>
       </NuxtLink>
-      <div class="hidden lg:flex ml-8">
-        <UDocsSearchButton label="Search..." />
-      </div>
     </template>
 
-    <template #center> </template>
+    <template #center>
+      <UContentSearchButton label="Search..." class="hidden lg:flex" />
+    </template>
 
     <template #right>
       <UHeaderLinks :links="navLinks" class="mr-4" v-if="navLinks.length > 1" />
 
       <UTooltip class="lg:hidden" text="Search" :shortcuts="[metaSymbol, 'K']">
-        <UDocsSearchButton :label="null" />
+        <UContentSearchButton :label="null" />
       </UTooltip>
 
       <!-- <ColorPicker /> -->
