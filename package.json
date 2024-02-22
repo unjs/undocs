@@ -53,12 +53,12 @@
     "theme-colors": "^0.1.0",
     "unctx": "^2.3.1",
     "unstorage": "^1.10.1",
-    "vue": "~3.4.19",
+    "vue": "^3.4.19",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@nuxt/eslint-config": "^0.2.0",
-    "@types/node": "^20.11.19",
+    "@types/node": "^20.11.20",
     "changelogen": "^0.5.5",
     "eslint": "^8.56.0",
     "eslint-config-unjs": "^0.2.1",
