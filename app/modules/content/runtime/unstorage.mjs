@@ -1,3 +1,5 @@
+import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { defineDriver } from 'unstorage'
 import fsDriver from 'unstorage/drivers/fs'
 import { transform, loadConfig } from 'automd'
@@ -33,7 +35,8 @@ export default (driverOpts) => {
           if (!automdConfig) {
             automdConfig = await loadConfig(docsConfig.dir, docsConfig.automd)
           }
-          const res = await transform(val, automdConfig)
+          const url = pathToFileURL(join(driverOpts.base, key.replace(/:/g, '/')))
+          const res = await transform(val, automdConfig, url)
           if (res.hasChanged && !res.hasIssues) {
             _fs.setItem(key, res.contents).catch(console.error)
           }
