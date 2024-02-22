@@ -1,7 +1,27 @@
+import { resolve, join } from 'node:path'
 import type { Config } from 'tailwindcss'
 import defaultTheme from 'tailwindcss/defaultTheme'
 
+// eslint-disable-next-line unicorn/prefer-module
+const uiProDir = resolve(require.resolve('@nuxt/ui-pro'), '..')
+
+// eslint-disable-next-line unicorn/prefer-module
+const appDir = __dirname
+
+const contentFiles = [
+  join(appDir, '{components,pages,layouts}/**/*.{vue,mjs,js,cjs,ts}'),
+  join(appDir, '.unjs/{components,pages,layouts}/**/*.{vue,mjs,js,cjs,ts}'),
+  join(uiProDir, 'components/**/*.{vue,mjs,js,cjs,ts}'),
+  join(uiProDir, 'modules/pro/runtime/components/**/*.{vue,mjs,js,cjs,ts}'),
+]
+
+console.log('tailwind content files', contentFiles)
+
 export default <Partial<Config>>{
+  content: {
+    files: contentFiles,
+    transform: {},
+  },
   theme: {
     extend: {
       fontFamily: {
