@@ -1,9 +1,17 @@
 <script setup lang="ts">
 const appConfig = useAppConfig()
 
+const props = defineProps({
+  socials: {
+    type: Array,
+    required: false,
+  },
+})
+
 const socialLinks = computed(() => {
   return Object.entries({ github: appConfig.docs.github, ...appConfig.docs.socials })
     .reverse() // x<>github
+    .filter(([key]) => props.socials?.includes(key) || !props.socials)
     .map(([key, value]) => {
       if (typeof value === 'object') {
         return value

@@ -46,44 +46,53 @@ if (process.server) {
 
 const headline = computed(() => findPageHeadline(page.value))
 
-const communityLinks = computed(() => [
-  {
-    icon: 'i-ph-pen-duotone',
-    label: 'Edit this page',
-    to: `https://github.com/${appConfig.docs.github}/edit/main/docs/${page.value._file}`,
-    target: '_blank',
-  },
-  {
-    icon: 'i-ph-shooting-star-duotone',
-    label: 'Star on GitHub',
-    to: `https://github.com/${appConfig.docs.github}`,
-    target: '_blank',
-  },
-])
+const tocOpen = ref(false)
+const tocLinks = computed(() =>
+  (page.value.body?.toc?.links || []).map((link) => ({
+    label: link.text,
+    href: `#${link.id}`,
+  })),
+)
 </script>
 
 <template>
   <UPage v-if="page">
-    <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline" />
+    <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline">
+    </UPageHeader>
+
+    <UDropdown
+      v-if="tocLinks.length > 2"
+      :items="[/*[{ label: 'Return to top', href: '#' }] TODO: once sticky */ tocLinks]"
+      v-model:open="tocOpen"
+      class="mt-4 lg:sticky"
+    >
+      <UButton
+        color="white"
+        label="On this page"
+        :trailing-icon="`i-heroicons-chevron-${tocOpen ? 'down' : 'right'}-20-solid`"
+      />
+    </UDropdown>
 
     <UPageBody prose>
       <ContentRenderer v-if="page.body" :value="page" />
 
-      <hr v-if="surround?.length" />
-
-      <UDocsSurround :surround="surround" />
+      <div class="space-y-6">
+        <UDivider type="dashed" />
+        <div class="mb-4">
+          <UPageLinks
+            class="inline-block"
+            :links="[
+              {
+                icon: 'i-ph-pen-duotone',
+                label: 'Edit this page on GitHub',
+                to: `https://github.com/${appConfig.docs.github}/edit/main/docs/${page._file}`,
+                target: '_blank',
+              },
+            ]"
+          />
+        </div>
+        <UDocsSurround v-if="surround?.length" class="mb-4" :surround="surround" />
+      </div>
     </UPageBody>
-
-    <template #right>
-      <UDocsToc title="Table of Contents" :links="page.body?.toc?.links">
-        <template #bottom>
-          <div class="hidden lg:block space-y-6" :class="{ '!mt-6': page.body?.toc?.links?.length }">
-            <UDivider v-if="page.body?.toc?.links?.length" type="dashed" />
-
-            <UPageLinks title="Community" :links="communityLinks" />
-          </div>
-        </template>
-      </UDocsToc>
-    </template>
   </UPage>
 </template>

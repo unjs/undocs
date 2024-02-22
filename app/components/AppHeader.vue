@@ -9,7 +9,7 @@ const { metaSymbol } = useShortcuts()
 
 const navLinks = computed(() => {
   // console.log(mapContentNavigation(navigation.value))
-  console.log(JSON.parse(JSON.stringify(navigation.value, null, 2)))
+  // console.log(JSON.parse(JSON.stringify(navigation.value, null, 2)))
   return navigation.value
     .map((nav) => {
       if (!nav.children?.find((c) => c._path === nav._path)) {
@@ -25,23 +25,31 @@ const navLinks = computed(() => {
 </script>
 
 <template>
-  <UHeader :links="navLinks">
-    <template #logo>
-      <img :src="appConfig.docs.logo" :alt="`${appConfig.site.name} logo`" class="h-7 w-7" />
-      <span>
-        {{ appConfig.site.name }}
-      </span>
+  <UHeader>
+    <template #left>
+      <NuxtLink to="/" class="flex-shrink-0 font-bold text-xl text-gray-900 dark:text-white flex items-end gap-1.5">
+        <img :src="appConfig.docs.logo" :alt="`${appConfig.site.name} logo`" class="h-7 w-7" />
+        <span>
+          {{ appConfig.site.name }}
+        </span>
+      </NuxtLink>
+      <div class="hidden lg:flex ml-8">
+        <UDocsSearchButton label="Search..." />
+      </div>
     </template>
 
-    <template #center>
-      <!-- <UDocsSearchButton class="hidden lg:flex" /> -->
-    </template>
+    <template #center> </template>
 
     <template #right>
-      <UTooltip text="Search" :shortcuts="[metaSymbol, 'K']">
+      <UHeaderLinks :links="navLinks" class="mr-4" v-if="navLinks.length > 1" />
+
+      <UTooltip class="lg:hidden" text="Search" :shortcuts="[metaSymbol, 'K']">
         <UDocsSearchButton :label="null" />
       </UTooltip>
-      <SocialButtons />
+
+      <!-- <ColorPicker /> -->
+
+      <SocialButtons :socials="['github']" />
     </template>
 
     <template #panel>
