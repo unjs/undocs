@@ -36,7 +36,7 @@ const navLinks = computed(() => {
     </template>
 
     <template #center>
-      <UContentSearchButton label="Search..." class="hidden lg:flex"/>
+      <UContentSearchButton label="Search..." class="hidden lg:flex" />
     </template>
 
     <template #right>
