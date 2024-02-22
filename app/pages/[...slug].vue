@@ -66,15 +66,15 @@ const scrollToTop = () => {
 
     <div class="mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 lg:sticky">
       <UDropdown
-      v-if="tocLinks.length > 2"
-      :items="[[{ label: 'Return to top', click: scrollToTop }], tocLinks]"
-      :popper="{ placement: 'bottom-start' }"
-      v-model:open="tocOpen"
-     >
+        v-if="tocLinks.length > 2"
+        :items="[[{ label: 'Return to top', click: scrollToTop }], tocLinks]"
+        :popper="{ placement: 'bottom-start' }"
+        v-model:open="tocOpen"
+      >
         <UButton
-        color="white"
-        label="On this page"
-        :trailing-icon="`i-heroicons-chevron-${tocOpen ? 'down' : 'right'}-20-solid`"
+          color="white"
+          label="On this page"
+          :trailing-icon="`i-heroicons-chevron-${tocOpen ? 'down' : 'right'}-20-solid`"
         />
       </UDropdown>
     </div>
