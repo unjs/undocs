@@ -1,6 +1,6 @@
-# The `<Components>` guide
+# Components
 
-> Discover the components you can use in your `markdown` files.
+> Discover the components you can use in your markdown files.
 
 ## Alerts
 
