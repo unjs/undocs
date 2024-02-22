@@ -9,12 +9,18 @@ const { metaSymbol } = useShortcuts()
 
 const navLinks = computed(() => {
   // console.log(mapContentNavigation(navigation.value))
-  return navigation.value.map((nav) => {
-    return {
-      label: toLabel(nav._path.substring(1)),
-      to: nav._path,
-    }
-  })
+  console.log(JSON.parse(JSON.stringify(navigation.value, null, 2)))
+  return navigation.value
+    .map((nav) => {
+      if (!nav.children?.find((c) => c._path === nav._path)) {
+        return
+      }
+      return {
+        label: toLabel(nav._path.substring(1)),
+        to: nav._path,
+      }
+    })
+    .filter(Boolean)
 })
 </script>
 
