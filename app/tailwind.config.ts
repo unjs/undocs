@@ -15,8 +15,6 @@ const contentFiles = [
   join(uiProDir, 'modules/pro/runtime/components/**/*.{vue,mjs,js,cjs,ts}'),
 ]
 
-console.log('tailwind content files', contentFiles)
-
 export default <Partial<Config>>{
   content: {
     files: contentFiles,
