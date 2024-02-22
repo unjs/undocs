@@ -34,8 +34,15 @@ export default (driverOpts) => {
             automdConfig = await loadConfig(docsConfig.dir, docsConfig.automd)
           }
           const res = await transform(val, automdConfig)
-          if (res.hasChanged) {
+          if (res.hasChanged && !res.hasIssues) {
             _fs.setItem(key, res.contents).catch(console.error)
+          }
+          if (res.hasIssues) {
+            console.warn(
+              `[undocs] [automd] Issues for updating \`${key}\`:`,
+              res.updates.flatMap(u => u.result.issues).map(i => `\n  - ${i}`).join('\n')
+            )
+            return val // Fallback to original content
           }
           return res.contents
         } else if (key.endsWith('.md$')) {
