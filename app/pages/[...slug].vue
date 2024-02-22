@@ -64,7 +64,7 @@ const tocLinks = computed(() =>
       v-if="tocLinks.length > 2"
       :items="[/*[{ label: 'Return to top', href: '#' }] TODO: once sticky */ tocLinks]"
       v-model:open="tocOpen"
-      class="mt-4 lg:sticky"
+      class="mt-4"
     >
       <UButton
         color="white"
@@ -91,7 +91,7 @@ const tocLinks = computed(() =>
             ]"
           />
         </div>
-        <UDocsSurround v-if="surround?.length" class="mb-4" :surround="surround" />
+        <UContentSurround v-if="surround?.length" class="mb-4" :surround="surround" />
       </div>
     </UPageBody>
   </UPage>

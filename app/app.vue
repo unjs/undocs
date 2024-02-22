@@ -31,7 +31,7 @@ provide('navigation', navigation)
   <AppFooter />
 
   <ClientOnly>
-    <LazyUDocsSearch :files="files" :navigation="navigation" />
+    <LazyUContentSearch :files="files" :navigation="navigation" />
   </ClientOnly>
 
   <UNotifications />

@@ -38,6 +38,7 @@ const socialLinks = computed(() => {
     :to="link.to"
     target="_blank"
     rel="noopener noreferrer"
-    v-bind="$ui.button.secondary as any"
+    color="gray"
+    variant="ghost"
   ></UButton>
 </template>
