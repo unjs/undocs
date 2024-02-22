@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.11
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.10...v0.2.11)
+
+### 🩹 Fixes
+
+- Downgrade `@nuxt/ui` ([#60](https://github.com/unjs/undocs/pull/60))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.10
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.8...v0.2.10)
