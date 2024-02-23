@@ -57,6 +57,10 @@ const tocLinks = computed(() =>
 const scrollToTop = () => {
   window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
 }
+const isMobile = ref(false)
+onMounted(() => {
+  isMobile.value = ('ontouchstart' in document.documentElement)
+})
 </script>
 
 <template>
@@ -69,6 +73,7 @@ const scrollToTop = () => {
         v-if="tocLinks.length > 2"
         :items="[[{ label: 'Return to top', click: scrollToTop }], tocLinks]"
         :popper="{ placement: 'bottom-end' }"
+        :mode="isMobile ? 'click' : 'hover'"
         v-model:open="tocOpen"
       >
         <UButton
