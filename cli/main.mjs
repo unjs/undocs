@@ -8,7 +8,7 @@ const cli = createCLI({
   setup: {
     defaults: {
       github: 'unjs',
-      themeColor: '#ECDC5A',
+      themeColor: 'amber',
     },
   },
 })
