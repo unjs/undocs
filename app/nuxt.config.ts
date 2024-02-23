@@ -56,10 +56,7 @@ export default defineNuxtConfig({
       '\\.(js|mjs|ts)$',
     ],
     highlight: {
-      theme: {
-        default: 'min-dark',
-        light: 'min-light',
-      },
+      langs: ['json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash'],
     },
   },
   routeRules: {
