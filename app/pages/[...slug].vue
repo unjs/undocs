@@ -68,7 +68,7 @@ onMounted(() => {
     <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline">
     </UPageHeader>
 
-    <div class="mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end lg:sticky">
+    <div class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky">
       <UDropdown
         v-if="tocLinks.length > 2"
         :items="[[{ label: 'Return to top', click: scrollToTop }], tocLinks]"
