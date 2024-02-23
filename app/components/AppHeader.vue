@@ -43,7 +43,7 @@ const navLinks = computed(() => {
     </template>
 
     <template #right>
-      <UHeaderLinks :links="navLinks" class="mr-4" v-if="navLinks.length > 1" />
+      <UHeaderLinks :links="navLinks" class="hidden sm:flex mr-4" v-if="navLinks.length > 1" />
 
       <UTooltip class="lg:hidden" text="Search" :shortcuts="[metaSymbol, 'K']">
         <UContentSearchButton :label="null" />
