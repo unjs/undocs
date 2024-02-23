@@ -7,6 +7,8 @@ const appConfig = useAppConfig()
 
 const { metaSymbol } = useShortcuts()
 
+const route = useRoute()
+
 const navLinks = computed(() => {
   // console.log(mapContentNavigation(navigation.value))
   // console.log(JSON.parse(JSON.stringify(navigation.value, null, 2)))
@@ -18,6 +20,7 @@ const navLinks = computed(() => {
       return {
         label: toLabel(nav._path.substring(1)),
         to: nav._path,
+        active: route.path.startsWith(nav._path),
       }
     })
     .filter(Boolean)
