@@ -69,15 +69,6 @@ export async function setupDocs(docsDir, opts = {}) {
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
     },
-    tailwindcss: {
-      config: {
-        theme: {
-          extend: {
-            colors: docsconfig.themeColor ? { theme: getColors(docsconfig.themeColor) } : undefined,
-          },
-        },
-      },
-    },
   }
 
   return {
