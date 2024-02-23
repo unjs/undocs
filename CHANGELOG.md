@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.2.17
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.16...v0.2.17)
+
+### 🚀 Enhancements
+
+- Add `mdc` on landing card description ([#64](https://github.com/unjs/undocs/pull/64))
+
+### 🩹 Fixes
+
+- Default `themeColor` to `amber` ([e086941](https://github.com/unjs/undocs/commit/e086941))
+- Check `item.description` before using `MDC` ([c5f473b](https://github.com/unjs/undocs/commit/c5f473b))
+- **nav:** Autmatically resolve to first child if has no index ([28d9d39](https://github.com/unjs/undocs/commit/28d9d39))
+
+### 💅 Refactors
+
+- Use `yaml` config ([038198a](https://github.com/unjs/undocs/commit/038198a))
+
+### 🏡 Chore
+
+- Add md and mdc to supported highlight syntaxes ([a6c23cd](https://github.com/unjs/undocs/commit/a6c23cd))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+
 ## v0.2.16
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.15...v0.2.16)
