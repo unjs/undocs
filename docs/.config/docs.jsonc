@@ -16,8 +16,8 @@
     "contributors": true,
     // "featuresLayout": "hero",
     "features": [
-      { "title": "Eazy to use", "description": "Focus on writing your documentation with Markdown, not tooling." },
-      { "title": "Nuxt powered", "description": "Made with Nuxt, Nuxt Content, Nuxt SEO and Nuxt UI Pro." },
+      { "title": "Eazy to use", "description": "Focus on writing your *documentation* with Markdown, not tooling." },
+      { "title": "Nuxt powered", "description": "Made with [Nuxt](https://nuxt.com), Nuxt Content, Nuxt SEO and Nuxt UI Pro." },
       { "title": "Deploy anywhere", "description": "The documentation can be hosted on any static hosting." },
     ],
   },

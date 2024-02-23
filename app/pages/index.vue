@@ -92,7 +92,11 @@ const hero = computed(() => {
   <template v-if="page.features?.length > 0 && !hero.withFeatures">
     <ULandingSection :title="page.featuresTitle">
       <UPageGrid>
-        <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" />
+        <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item">
+          <template #description>
+            <MDC :value="item.description" tag="p" class="prose prose-primary dark:prose-invert" />
+          </template>
+        </ULandingCard>
       </UPageGrid>
     </ULandingSection>
   </template>
