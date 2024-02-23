@@ -56,7 +56,7 @@ export default defineNuxtConfig({
       '\\.(js|mjs|ts)$',
     ],
     highlight: {
-      langs: ['json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash'],
+      langs: ['json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md'],
     },
   },
   routeRules: {
