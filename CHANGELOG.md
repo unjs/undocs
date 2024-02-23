@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.2.16
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.15...v0.2.16)
+
+### 🩹 Fixes
+
+- **read-more:** Don't default to to `#` ([74fafcb](https://github.com/unjs/undocs/commit/74fafcb))
+- **read-more:** Hide protocol from title ([e86df20](https://github.com/unjs/undocs/commit/e86df20))
+
+### 🏡 Chore
+
+- Fix landing shape height ([382146a](https://github.com/unjs/undocs/commit/382146a))
+- Apply automated updates ([929fab3](https://github.com/unjs/undocs/commit/929fab3))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v0.2.15
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.14...v0.2.15)
