@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.15
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.14...v0.2.15)
+
+### 💅 Refactors
+
+- Improve nav and design ([6e40e11](https://github.com/unjs/undocs/commit/6e40e11))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.14
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.13...v0.2.14)
