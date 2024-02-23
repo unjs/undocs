@@ -1,6 +1,5 @@
 import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
-import { getColors } from 'theme-colors'
 import { loadConfig, watchConfig } from 'c12'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
