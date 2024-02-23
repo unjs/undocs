@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.2.14
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.13...v0.2.14)
+
+### 🚀 Enhancements
+
+- Toc on hover on desktop ([#61](https://github.com/unjs/undocs/pull/61))
+
+### 🩹 Fixes
+
+- Generate url for automd transforms ([03c3ce9](https://github.com/unjs/undocs/commit/03c3ce9))
+
+### 📖 Documentation
+
+- Add config page to test automd ([0105f4c](https://github.com/unjs/undocs/commit/0105f4c))
+
+### 🏡 Chore
+
+- **release:** V0.2.13 ([411fa69](https://github.com/unjs/undocs/commit/411fa69))
+
+### ❤️ Contributors
+
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.13
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.12...v0.2.13)
