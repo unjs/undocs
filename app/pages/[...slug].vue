@@ -59,7 +59,7 @@ const scrollToTop = () => {
 }
 const isMobile = ref(false)
 onMounted(() => {
-  isMobile.value = ('ontouchstart' in document.documentElement)
+  isMobile.value = 'ontouchstart' in document.documentElement
 })
 </script>
 
