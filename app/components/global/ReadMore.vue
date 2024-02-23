@@ -25,9 +25,9 @@ const props = defineProps({
   },
 })
 
-const createBreadcrumb = (link: string = 'Missing link') => {
+const createBreadcrumb = (link: string = 'here') => {
   if (link.startsWith('http')) {
-    return link
+    return link.replace(/^https?:\/\//, '')
   }
   return link
     .split('/')
