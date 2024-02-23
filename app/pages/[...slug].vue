@@ -57,6 +57,10 @@ const tocLinks = computed(() =>
 const scrollToTop = () => {
   window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
 }
+const isMobile = ref(false)
+onMounted(() => {
+  isMobile.value = 'ontouchstart' in document.documentElement
+})
 </script>
 
 <template>
@@ -64,11 +68,12 @@ const scrollToTop = () => {
     <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline">
     </UPageHeader>
 
-    <div class="mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end lg:sticky">
+    <div class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky">
       <UDropdown
         v-if="tocLinks.length > 2"
         :items="[[{ label: 'Return to top', click: scrollToTop }], tocLinks]"
         :popper="{ placement: 'bottom-end' }"
+        :mode="isMobile ? 'click' : 'hover'"
         v-model:open="tocOpen"
       >
         <UButton
