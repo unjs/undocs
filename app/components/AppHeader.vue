@@ -10,12 +10,14 @@ const { metaSymbol } = useShortcuts()
 const docsNav = useDocsNav()
 
 const headerLinks = computed(() => {
-  return docsNav.links.map((link) => {
-    return {
-      ...link,
-      children: link.children?.filter((child) => !child.children || child.children.some((c) => c.to === child.to)),
-    }
-  })
+  return docsNav.links
+    .filter((link) => link.hasIndex)
+    .map((link) => {
+      return {
+        ...link,
+        children: link.children?.filter((child) => !child.children || child.children.some((c) => c.to === child.to)),
+      }
+    })
 })
 </script>
 

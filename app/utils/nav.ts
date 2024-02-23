@@ -9,24 +9,35 @@ export function useDocsNav() {
 
   const links = computed(() => {
     return mapContentNavigation(navigation.value).map((item) => {
+      console.log(item)
+
+      // Flatren single child
       if (item.children?.length === 1) {
-        return {
+        item = {
           ...item,
           ...item.children[0],
           children: undefined,
-          active: isActive(item.to as string),
         }
       }
+
+      // Check if group index is not exists and default to first child
+      const originalTo = item.to as string
+      if (item.children?.length && !item.children.some((c) => c.to === originalTo)) {
+        item.to = item.children[0].to
+      }
+
       return {
         ...item,
-        label: titleCase(item.to),
-        active: isActive(item.to as string),
+        originalTo,
+        hasIndex: item.to === originalTo,
+        label: titleCase(originalTo),
+        active: isActive(originalTo),
       }
     })
   })
 
   const activeLinks = computed(() => {
-    return links.value.find((l) => route.path.startsWith(l.to as string))?.children || []
+    return links.value.find((l) => route.path.startsWith(l.originalTo))?.children || []
   })
 
   return reactive({
