@@ -16,7 +16,7 @@ import { splitByCase, upperFirst } from 'scule'
 const props = defineProps({
   to: {
     type: String,
-    required: true,
+    required: false,
   },
   title: {
     type: String,

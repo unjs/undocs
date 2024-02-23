@@ -7,23 +7,15 @@ const appConfig = useAppConfig()
 
 const { metaSymbol } = useShortcuts()
 
-const route = useRoute()
+const docsNav = useDocsNav()
 
-const navLinks = computed(() => {
-  // console.log(mapContentNavigation(navigation.value))
-  // console.log(JSON.parse(JSON.stringify(navigation.value, null, 2)))
-  return navigation.value
-    .map((nav) => {
-      if (!nav.children?.find((c) => c._path === nav._path)) {
-        return
-      }
-      return {
-        label: toLabel(nav._path.substring(1)),
-        to: nav._path,
-        active: route.path.startsWith(nav._path),
-      }
-    })
-    .filter(Boolean)
+const headerLinks = computed(() => {
+  return docsNav.links.map((link) => {
+    return {
+      ...link,
+      children: link.children?.filter((child) => !child.children || child.children.some((c) => c.to === child.to)),
+    }
+  })
 })
 </script>
 
@@ -36,26 +28,30 @@ const navLinks = computed(() => {
           {{ appConfig.site.name }}
         </span>
       </NuxtLink>
+
+      <div class="ml-8 lg:flex hidden">
+        <UContentSearchButton label="Search..." />
+      </div>
     </template>
 
-    <template #center>
-      <UContentSearchButton label="Search..." class="hidden lg:flex" />
-    </template>
+    <!-- <template #center>
+      <UContentSearchButton label="Search..." class="lg:flex hidden" />
+    </template> -->
 
     <template #right>
-      <UHeaderLinks :links="navLinks" class="hidden sm:flex mr-4" v-if="navLinks.length > 1" />
+      <UHeaderLinks :links="headerLinks" class="hidden md:flex mr-4" v-if="docsNav.links.length > 1" />
 
       <UTooltip class="lg:hidden" text="Search" :shortcuts="[metaSymbol, 'K']">
         <UContentSearchButton :label="null" />
       </UTooltip>
 
-      <!-- <ColorPicker /> -->
+      <ColorPicker />
 
-      <SocialButtons :socials="['github']" />
+      <SocialButtons />
     </template>
 
     <template #panel>
-      <NavigationTree />
+      <UNavigationTree :links="docsNav.links" default-open :multiple="false" />
     </template>
   </UHeader>
 </template>

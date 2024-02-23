@@ -68,9 +68,11 @@ onMounted(() => {
     <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline">
     </UPageHeader>
 
-    <div class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky">
+    <div
+      v-if="tocLinks.length > 1"
+      class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky"
+    >
       <UDropdown
-        v-if="tocLinks.length > 2"
         :items="[[{ label: 'Return to top', click: scrollToTop }], tocLinks]"
         :popper="{ placement: 'bottom-end' }"
         :mode="isMobile ? 'click' : 'hover'"
@@ -86,6 +88,8 @@ onMounted(() => {
     </div>
 
     <UPageBody prose>
+      <br v-if="tocLinks.length > 1" />
+
       <ContentRenderer v-if="page.body" :value="page" />
 
       <div class="space-y-6">

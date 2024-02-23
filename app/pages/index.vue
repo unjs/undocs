@@ -38,7 +38,7 @@ function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
         link = { to: link }
       }
       return {
-        label: toLabel(key),
+        label: titleCase(key),
         order,
         target: link.to?.startsWith('https') ? '_blank' : undefined,
         ...link,
