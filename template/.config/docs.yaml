@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://unpkg.com/undocs/schema/config.json
+
+name: 'packageName'
+shortDescription: ''
+description: ''
+github: 'unjs/packageName'
+# url: 'https://packageName.unjs.io'
+# redirects:
+#   "/from": "/to"
+# automd: true
+landing:
+  heroLinks:
+    stackblitz:
+      icon: 'i-heroicons-play'
+      to: 'https://stackblitz.com/github/unjs/packageName/tree/main/playground'
+  # contributors: true
+  # features:
+  #   - title:
+  #     description:

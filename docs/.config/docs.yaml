@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://unpkg.com/undocs/schema/config.json
+
+name: 'UnDocs'
+shortDescription: 'Docs, made easy.'
+description: 'Elegant documentation tooling for UnJS ecosystem.'
+github: 'unjs/docs'
+url: 'https://undocs.pages.dev'
+redirects:
+  '/docs': '/docs/getting-started'
+  '/old': '/docs'
+automd: true
+landing:
+  heroLinks:
+    stackblitz:
+      icon: 'i-heroicons-play'
+      to: 'https://stackblitz.com/github/unjs/docs/tree/main/template'
+  contributors: true
+  # featuresLayout: 'hero'
+  features:
+    - title: 'Eazy to use'
+      description: 'Focus on writing your *documentation* with Markdown, not tooling.'
+    - title: 'Nuxt powered'
+      description: 'Made with [Nuxt](https://nuxt.com), Nuxt Content, Nuxt SEO and Nuxt UI Pro.'
+    - title: 'Deploy anywhere'
+    - description: 'The documentation can be hosted on any static hosting.'
