@@ -1,15 +1,11 @@
-<script setup lang="ts">
-import type { NavItem } from '@nuxt/content/dist/runtime/types'
-
-const navigation = inject<Ref<NavItem[]>>('navigation')
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <UContainer>
     <UPage>
       <template #left>
         <UAside>
-          <UNavigationTree :links="mapContentNavigation(navigation)" />
+          <NavigationTree />
         </UAside>
       </template>
       <slot />

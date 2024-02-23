@@ -55,7 +55,7 @@ const navLinks = computed(() => {
     </template>
 
     <template #panel>
-      <UNavigationTree :links="mapContentNavigation(navigation)" />
+      <NavigationTree />
     </template>
   </UHeader>
 </template>
