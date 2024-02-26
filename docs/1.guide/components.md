@@ -179,9 +179,13 @@ export default defineNuxtConfig({
 })
 ```
 
-```vue twoslash [example.vue]
+```vue twoslash
 <script lang="ts" setup>
+import { ref, onMounted } from 'vue'
+
 const name = ref("World")
+//    ^?
+
 
 onMounted(() => {
   console.log("Hello, World")
@@ -189,7 +193,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>Hello, {{name}}</div>
+  <div>Hello, {{ name }}</div>
 </template>
 ```
 
