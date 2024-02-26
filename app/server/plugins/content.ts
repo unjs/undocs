@@ -12,7 +12,7 @@ export default defineNitroPlugin((nitroApp) => {
       '/config': 'ri:settings-3-line',
       '/configuration': 'ri:settings-3-line',
       '/examples': 'ph:code',
-      '/utils': 'ph:function-bold'
+      '/utils': 'ph:function-bold',
     }
 
     // Set the icon for the file if it is not already set
