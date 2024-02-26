@@ -5,6 +5,19 @@ export default defineNitroPlugin((nitroApp) => {
       return
     }
 
+    // A Set of common icons for the guide
+    const commonIcons = {
+      '/guide': 'ph:book-open-duotone',
+      '/guide/components': 'bxs:component',
+      '/config': 'ri:settings-3-line',
+      '/configuration': 'ri:settings-3-line',
+    }
+
+    // Set the icon for the file if it is not already set
+    if (commonIcons?.[file._path] && !file.icon) {
+      file.icon = commonIcons[file._path]
+    }
+
     // Remove first h1 from markdown files as it is added to front-matter as title
     if (file.body?.children?.[0]?.tag === 'h1') {
       const text = getTextContents(file.body.children[0].children)
