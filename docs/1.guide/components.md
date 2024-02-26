@@ -164,7 +164,7 @@ https://github.com/orgs/community/discussions/16925
 
 ## Twoslash support
 
-Nuxt content [TwoSlash](https://github.com/antfu/nuxt-content-twoslash#nuxt-content-twoslash) is only enabled for production builds to enhance development experience.
+[nuxt-content-twoslash](https://github.com/antfu/nuxt-content-twoslash#nuxt-content-twoslash) is only enabled for production builds to enhance development experience.
 
 ```ts twoslash [index.ts]
 console.log("Hello, World")
