@@ -16,7 +16,7 @@ export default defineNitroPlugin((nitroApp) => {
     }
 
     // Set the icon for the file if it is not already set
-    if (commonIcons?.[file._path] && !file.icon) {
+    if (!file.icon && commonIcons?.[file._path]) {
       file.icon = commonIcons[file._path]
     }
 
