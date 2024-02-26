@@ -43,7 +43,8 @@ provide('navigation', navigation)
   --twoslash-popup-color: rgb(var(--color-gray-300) / 1);
   --twoslash-docs-color: inherit;
   --twoslash-docs-font: inherit;
-  --twoslash-code-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --twoslash-code-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
   --twoslash-underline-color: #8888;
   --twoslash-border-color: rgb(var(--color-gray-700) / 1);
   --twoslash-cursor-color: rgb(var(--color-primary-DEFAULT) / 1);

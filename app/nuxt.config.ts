@@ -99,11 +99,11 @@ export default defineNuxtConfig({
   },
   twoslash: {
     floatingVueOptions: {
-      classMarkdown: 'prose prose-primary dark:prose-invert'
+      classMarkdown: 'prose prose-primary dark:prose-invert',
     },
     // Skip Twoslash in dev to improve performance.
     enableInDev: !dev,
-    throws: false
+    throws: false,
   },
   typescript: {
     strict: false,
