@@ -13,6 +13,7 @@ const isPrepare = Boolean(process.env.NUXT_DOCS_PREPARE)
 export default defineNuxtConfig({
   ssr,
   modules: [
+    'nuxt-content-twoslash',
     '@nuxt/content',
     '@nuxtjs/fontaine',
     !isPrepare && '@nuxtjs/google-fonts',
@@ -95,6 +96,14 @@ export default defineNuxtConfig({
   tailwindcss: {
     viewer: dev,
     quiet: !dev,
+  },
+  twoslash: {
+    floatingVueOptions: {
+      classMarkdown: 'prose prose-primary dark:prose-invert'
+    },
+    // Skip Twoslash in dev to improve performance.
+    enableInDev: !dev,
+    throws: false
   },
   typescript: {
     strict: false,

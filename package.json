@@ -53,6 +53,7 @@
     "tailwindcss": "^3.4.1",
     "unctx": "^2.3.1",
     "unstorage": "^1.10.1",
+    "nuxt-content-twoslash": "^0.0.10",
     "vue": "^3.4.19",
     "vue-router": "^4.3.0"
   },
