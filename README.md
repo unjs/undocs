@@ -14,8 +14,8 @@ Made with [Nuxt](https://nuxt.com/), [Nuxt Content](https://content.nuxt.com), [
 - Clone this repository
 - Install the latest LTS version of [Node.js](https://nodejs.org/en/)
 - Enable [Corepack](https://github.com/nodejs/corepack) using `corepack enable`
-- Install dependencies using `pnpm install`
-- Run tests using `pnpm dev` or `pnpm test`
+- Install dependencies using `bun install`
+- Run tests using `bun dev`
 
 </details>
 
