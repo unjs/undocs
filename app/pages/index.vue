@@ -99,8 +99,10 @@ const hero = computed(() => {
           :ui="{
             icon: {
               // If the icon is an emoji, we need to use a bigger size
-              base: /\p{Emoji}/u.test(item.icon) ? '!text-2xl !w-auto !h-auto': 'w-8 h-8 flex-shrink-0 text-gray-900 dark:text-white',
-            }
+              base: /\p{Emoji}/u.test(item.icon)
+                ? '!text-2xl !w-auto !h-auto'
+                : 'w-8 h-8 flex-shrink-0 text-gray-900 dark:text-white',
+            },
           }"
         >
           <template v-if="item.description" #description>
