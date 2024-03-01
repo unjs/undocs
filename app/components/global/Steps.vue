@@ -2,7 +2,7 @@
 const props = defineProps({
   badgeVariant: {
     type: String,
-    default: 'subtle'
+    default: 'subtle',
   },
 })
 
@@ -14,24 +14,19 @@ const steps = computed(() => {
     return {
       idx: index + 1,
       label: step.props?.label || `Step ${index + 1}`,
-      component: step
+      component: step,
     }
   })
 })
 
 defineOptions({
-  inheritAttrs: false
+  inheritAttrs: false,
 })
 </script>
 
 <template>
   <div role="list" class="ml-3.5 mt-10 mb-6">
-    <div
-      v-for="step in steps"
-      :key="step.idx"
-      role="listitem"
-      class="relative flex items-start pb-2"
-    >
+    <div v-for="step in steps" :key="step.idx" role="listitem" class="relative flex items-start pb-2">
       <div class="absolute w-px h-[calc(100%-2.5rem)] top-[2.75rem] bg-gray-200/70 dark:bg-white/10"></div>
       <div class="absolute ml-[-14px] py-2">
         <UBadge variant="soft" size="lg" color="gray">
