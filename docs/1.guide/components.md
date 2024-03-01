@@ -118,6 +118,64 @@ The component is used to create a link to another page.
 ::
 <!-- prettier-ignore-end -->
 
+### Steps
+
+The component is used to create a list of steps that look pretty.
+
+<!-- prettier-ignore-start -->
+::tabs
+  ::div
+  ---
+  label: Preview
+  icon: i-heroicons-magnifying-glass-circle
+  ---
+    ::steps
+      ::div{label="Install dependencies"}
+        :pm-install{name="undocs"}
+
+        ::note
+          Install the dependencies using the package manager of your choice.
+        ::
+      ::
+
+      ::div{label="Run dev server"}
+        :pm-run{script="dev"}
+      ::
+
+      ::div{label="Build for production"}
+        :pm-run{script="build"}
+      ::
+    ::
+  ::
+
+  ::div
+  ---
+  label: Code
+  icon: i-heroicons-code-bracket-square
+  ---
+    ```mdc
+    ::steps
+      ::div{label="Install dependencies"}
+        :pm-install{name="undocs"}
+
+        ::note
+          Install the dependencies using the package manager of your choice.
+        ::
+      ::
+
+      ::div{label="Run dev server"}
+        :pm-run{script="dev"}
+      ::
+
+      ::div{label="Build for production"}
+        :pm-run{script="build"}
+      ::
+    ::
+    ```
+  ::
+::
+<!-- prettier-ignore-end -->
+
 ### Github Notes
 
 https://github.com/orgs/community/discussions/16925

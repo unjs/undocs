@@ -9,9 +9,7 @@ export function useDocsNav() {
 
   const links = computed(() => {
     return mapContentNavigation(navigation.value).map((item) => {
-      console.log(item)
-
-      // Flatren single child
+      // Flatten single child
       if (item.children?.length === 1) {
         item = {
           ...item,
