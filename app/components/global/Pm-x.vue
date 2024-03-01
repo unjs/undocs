@@ -7,6 +7,7 @@ const codeBlocks = computed(() =>
   packageManagers.map((pm) => ({
     filename: pm.name,
     code: `${pm.x} ${props.command}`,
+    key: pm.name,
   })),
 )
 
