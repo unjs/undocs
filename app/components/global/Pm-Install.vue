@@ -8,10 +8,12 @@ const codeBlocks = computed(() =>
     .map((pm) => ({
       filename: pm.name,
       code: `${pm.command} ${pm.install} ${props.name}`,
+      key: pm.name,
     }))
     .concat({
       filename: 'auto',
       code: `npx nypm i ${props.name}`,
+      key: 'auto',
     }),
 )
 
