@@ -20,6 +20,7 @@ provide('navigation', navigation)
 </script>
 
 <template>
+  <NuxtLoadingIndicator  color="rgb(252,211,77)" />
   <AppHeader />
 
   <UMain class="min-h-[calc(100vh-var(--header-height)-78px)]">
