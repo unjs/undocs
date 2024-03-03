@@ -17,7 +17,7 @@ landing:
   contributors: true
   # featuresLayout: 'hero'
   features:
-    - title: 'Eazy to use'
+    - title: 'Easy to use'
       icon: '⚡'
       description: 'Focus on writing your *documentation* with Markdown, not tooling.'
     - title: 'Nuxt powered'
