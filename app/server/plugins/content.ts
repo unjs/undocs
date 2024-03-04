@@ -1,5 +1,5 @@
 export default defineNitroPlugin((nitroApp) => {
-  nitroApp.hooks.hook('content:file:afterParse', (file) => {
+  nitroApp.hooks.hook('content:file:afterParse' as any, (file) => {
     // Filter out non-markdown files
     if (!file._id.endsWith('.md')) {
       return
