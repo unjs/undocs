@@ -1,8 +1,13 @@
 export default defineNitroPlugin((nitroApp) => {
-  nitroApp.hooks.hook('content:file:afterParse', (file) => {
+  nitroApp.hooks.hook('content:file:afterParse' as any, async (file) => {
     // Filter out non-markdown files
     if (!file._id.endsWith('.md')) {
       return
+    }
+
+    // Set the icon for the file if it is not already set
+    if (!file.icon) {
+      file.icon = await resolveIcon(file._path)
     }
 
     // Remove first h1 from markdown files as it is added to front-matter as title
@@ -49,4 +54,40 @@ function getTextContents(children) {
       return child.value
     })
     .join('')
+}
+
+// A set of common icons
+const commonIcons = [
+  {
+    pattern: 'guide',
+    icon: 'ph:book-open-duotone',
+  },
+  {
+    pattern: 'components',
+    icon: 'bxs:component',
+  },
+  {
+    pattern: 'config',
+    icon: 'ri:settings-3-line',
+  },
+  {
+    pattern: 'configuration',
+    icon: 'ri:settings-3-line',
+  },
+  {
+    pattern: 'examples',
+    icon: 'ph:code',
+  },
+  {
+    pattern: 'utils',
+    icon: 'ph:function-bold',
+  },
+]
+
+function resolveIcon(path: string) {
+  for (const icon of commonIcons) {
+    if (path.includes(icon.pattern)) {
+      return icon.icon
+    }
+  }
 }
