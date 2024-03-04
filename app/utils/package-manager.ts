@@ -1,7 +1,7 @@
 export const packageManagers = [
   { name: 'npm', command: 'npm', install: 'i', run: 'run ', x: 'npx' },
   { name: 'yarn', command: 'yarn', install: 'add', run: '', x: 'yarn dlx' },
-  { name: 'pnpm', command: 'pnpm', install: 'i', run: '', x: 'pnpx' },
+  { name: 'pnpm', command: 'pnpm', install: 'i', run: '', x: 'pnpm dlx' },
   { name: 'bun', command: 'bun', install: 'i', run: 'run ', x: 'bunx' },
 ] as const
 
