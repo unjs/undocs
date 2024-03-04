@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 const appConfig = useAppConfig()
-console.log(appConfig)
 </script>
 
 <template>
