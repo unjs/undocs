@@ -7,15 +7,11 @@ const dev = !!process.env.NUXT_DOCS_DEV
 const isProd = process.env.NODE_ENV === 'production'
 const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
-// Some modules are shameless and don't understand prepare mode and make nonsense warnings
-const isPrepare = Boolean(process.env.NUXT_DOCS_PREPARE)
-
 export default defineNuxtConfig({
   ssr,
   modules: [
+    '@nuxt/fonts',
     '@nuxt/content',
-    '@nuxtjs/fontaine',
-    !isPrepare && '@nuxtjs/google-fonts',
     '@nuxtjs/seo',
     isProd && '@nuxtjs/plausible',
     '@nuxt/ui',
@@ -23,12 +19,13 @@ export default defineNuxtConfig({
   ui: {
     icons: [],
   },
-  fontMetrics: {
-    fonts: ['Nunito'],
-  },
-  googleFonts: {
-    display: 'swap',
-    download: true,
+  fonts: {
+    families: [
+      { name: 'Nunito', provider: 'bunny' },
+    ],
+    defaults: {
+      weights: [400, 500, 600, 700],
+    }
   },
   app: {
     head: {

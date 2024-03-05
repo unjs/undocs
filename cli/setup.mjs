@@ -40,12 +40,6 @@ export async function setupDocs(docsDir, opts = {}) {
     // @ts-ignore
     docs: docsconfig,
     // @ts-ignore
-    googleFonts: {
-      families: {
-        Nunito: [400, 500, 600, 700], // in layer, it duplicates. why? (god knows?)
-      },
-    },
-    // @ts-ignore
     site: {
       name: docsconfig.name || '',
       description: docsconfig.description || '',
