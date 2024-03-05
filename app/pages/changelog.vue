@@ -43,7 +43,7 @@ useSeoMeta({
 
 if (import.meta.server) {
   // @ts-ignore
-  defineOgImageComponent('OgImageDocs')
+  defineOgImageComponent('OgImageChangelog')
 }
 </script>
 
