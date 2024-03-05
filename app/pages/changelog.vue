@@ -8,14 +8,13 @@ const { data: releases } = await useFetch('/api/releases.json')
 if (!github || !releases) {
   showError({
     statusCode: 404,
-    statusMessage: 'Changelogs not found!',
+    statusMessage: 'Changelog not found!',
   })
 }
 
-const TITLE = `${github} changelogs`
-const TITLE_HTML = `<span class="text-primary">${github}</span> changelogs`
+const TITLE = `${github} changelog`
+const TITLE_HTML = `<span class="text-primary">${github}</span> changelog`
 const DESCRIPTION = `Follow the latest releases and updates happening on the repository`
-const GITHUB_LINK = `https://github.com/${github}`
 
 const dates = computed(() => {
   const first = releases.value[releases.value.length - 1]
@@ -27,7 +26,6 @@ const dates = computed(() => {
   return days.map((day) => {
     return {
       day,
-      github,
       latest: isSameDay(day, last.publishedAt),
       release: releases.value.find((release) => isSameDay(new Date(release.publishedAt), day)),
     }
@@ -43,10 +41,9 @@ useSeoMeta({
   description: DESCRIPTION,
 })
 
-if (process.server) {
+if (import.meta.server) {
   // @ts-ignore
-  // TODO: Define New OG Image for releases.
-  // defineOgImageComponent('OgImageDocs')
+  defineOgImageComponent('OgImageDocs')
 }
 </script>
 
@@ -61,7 +58,7 @@ if (process.server) {
         {
           label: 'View on GitHub',
           icon: 'simple-icons:github',
-          to: GITHUB_LINK,
+          to: `https://github.com/${github}`,
           target: '_blank',
           size: 'md',
           color: 'white',
@@ -88,14 +85,14 @@ if (process.server) {
 
         <template v-if="date.release || isToday(date.day)">
           <div
-            class="flex items-start gap-8 relative w-[50%]"
+            class="flex items-start gap-6 sm:gap-8 relative w-[50%]"
             :class="index % 2 === 0 ? 'translate-x-[50%] -ml-2' : '-translate-x-[50%] ml-2 flex-row-reverse'"
           >
             <div
               class="h-[8px] w-[8px] bg-gray-400 dark:bg-gray-400 rounded-full z-[1] mt-2 ring-2 ring-gray-300 dark:ring-gray-600 flex-shrink-0"
             />
 
-            <ChangelogItem :date="date" :class="index % 2 === 0 ? '' : 'item-right'" />
+            <ChangelogItem :github="github" :date="date" :right-side="index % 2 !== 0" />
           </div>
         </template>
       </div>
@@ -104,12 +101,3 @@ if (process.server) {
     </UPageBody>
   </div>
 </template>
-
-<style>
-.item-right {
-  text-align: right;
-}
-.item-right .changelog-item ul li {
-  direction: rtl;
-}
-</style>
