@@ -8,10 +8,12 @@ const codeBlocks = computed(() =>
     .map((pm) => ({
       filename: pm.name,
       code: `${pm.command} ${pm.install} ${props.name}`,
+      key: pm.name,
     }))
     .concat({
       filename: 'auto',
       code: `npx nypm i ${props.name}`,
+      key: 'auto',
     }),
 )
 
@@ -25,20 +27,8 @@ onMounted(() => {
 
 <template>
   <CodeGroup ref="codeGroup">
-    <ProseCode v-bind="codeBlocks[0]">
-      <pre><code>{{ codeBlocks[0].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[1]">
-      <pre><code>{{ codeBlocks[1].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[2]">
-      <pre><code>{{ codeBlocks[2].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[3]">
-      <pre><code>{{ codeBlocks[3].code }}</code></pre>
-    </ProseCode>
-    <ProseCode v-bind="codeBlocks[4]">
-      <pre><code>{{ codeBlocks[4].code }}</code></pre>
+    <ProseCode v-for="(codeBlock, index) in codeBlocks" :key="index" v-bind="codeBlock">
+      <pre><code>{{ codeBlock.code }}</code></pre>
     </ProseCode>
   </CodeGroup>
 </template>

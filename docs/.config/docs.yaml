@@ -17,9 +17,12 @@ landing:
   contributors: true
   # featuresLayout: 'hero'
   features:
-    - title: 'Eazy to use'
+    - title: 'Easy to use'
+      icon: '⚡'
       description: 'Focus on writing your *documentation* with Markdown, not tooling.'
     - title: 'Nuxt powered'
+      icon: 'logos:nuxt-icon'
       description: 'Made with [Nuxt](https://nuxt.com), Nuxt Content, Nuxt SEO and Nuxt UI Pro.'
     - title: 'Deploy anywhere'
-    - description: 'The documentation can be hosted on any static hosting.'
+      icon: '✨'
+      description: 'The documentation can be hosted on any static hosting.'
