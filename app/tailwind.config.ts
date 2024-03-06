@@ -26,7 +26,7 @@ export default <Partial<Config>>{
   theme: {
     extend: {
       fontFamily: {
-        sans: ['nunito', 'sans-serif', ...defaultTheme.fontFamily.sans],
+        sans: ['Nunito', 'sans-serif', ...defaultTheme.fontFamily.sans],
       },
       colors: {
         yellow: {
