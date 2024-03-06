@@ -9,7 +9,7 @@ const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
 export default defineNuxtConfig({
   ssr,
-  modules: ['@nuxt/fonts', '@nuxt/content', '@nuxtjs/seo', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
+  modules: ['nuxt-shiki', '@nuxt/fonts', '@nuxt/content', '@nuxtjs/seo', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
   ui: {
     icons: [],
   },
@@ -45,7 +45,14 @@ export default defineNuxtConfig({
       '\\.(js|mjs|ts)$',
     ],
     highlight: {
-      langs: ['json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md'],
+      langs: ['json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md', 'docker'],
+    },
+  },
+  shiki: {
+    bundledLangs: ['json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md', 'docker'],
+    defaultTheme: {
+      dark: 'material-theme-palenight',
+      light: 'material-theme-lighter',
     },
   },
   routeRules: {

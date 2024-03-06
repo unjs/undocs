@@ -22,7 +22,7 @@ onMounted(() => {
 <template>
   <CodeGroup ref="codeGroup">
     <ProseCode v-for="(codeBlock, index) in codeBlocks" :key="index" v-bind="codeBlock">
-      <pre><code>{{ codeBlock.code }}</code></pre>
+      <Shiki :code="codeBlock.code" language="bash" />
     </ProseCode>
   </CodeGroup>
 </template>
