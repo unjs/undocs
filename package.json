@@ -31,14 +31,14 @@
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.19",
-    "@nuxt/content": "^2.12.0",
-    "@nuxt/fonts": "^0.0.1",
+    "@nuxt/content": "^2.12.1",
+    "@nuxt/fonts": "^0.1.0",
     "@nuxt/ui-pro": "^1.0.2",
     "@nuxtjs/plausible": "^0.2.4",
     "@nuxtjs/seo": "^2.0.0-rc.8",
     "@nuxtjs/tailwindcss": "^6.11.4",
     "automd": "^0.3.6",
-    "c12": "^1.9.0",
+    "c12": "^1.10.0",
     "citty": "^0.1.6",
     "consola": "^3.2.3",
     "defu": "^6.1.4",
@@ -56,14 +56,14 @@
   },
   "devDependencies": {
     "@nuxt/eslint-config": "^0.2.0",
-    "@types/node": "^20.11.24",
+    "@types/node": "^20.11.25",
     "changelogen": "^0.5.5",
     "eslint": "^8.57.0",
     "eslint-config-unjs": "^0.2.1",
     "jiti": "^1.21.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.3.3",
-    "vue-tsc": "^2.0.4"
+    "typescript": "^5.4.2",
+    "vue-tsc": "^2.0.6"
   },
   "packageManager": "bun@1.0.26"
 }
