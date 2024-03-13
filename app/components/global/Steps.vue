@@ -1,11 +1,4 @@
 <script setup lang="ts">
-const props = defineProps({
-  badgeVariant: {
-    type: String,
-    default: 'subtle',
-  },
-})
-
 const slots = useSlots()
 const steps = computed(() => {
   const s = slots.default?.() || []
@@ -26,8 +19,13 @@ defineOptions({
 
 <template>
   <div role="list" class="ml-3.5 mt-10 mb-6">
-    <div v-for="step in steps" :key="step.idx" role="listitem" class="relative flex items-start pb-2">
-      <div class="absolute w-px h-[calc(100%-2.5rem)] top-[2.75rem] bg-gray-200/70 dark:bg-white/10"></div>
+    <div v-for="(step, idx) in steps" :key="step.idx" role="listitem" class="relative flex items-start pb-2">
+      <div
+        class="absolute w-px h-[calc(100%-2.5rem)] top-[2.75rem] bg-gray-200/70 dark:bg-white/10"
+        :class="{
+          hidden: idx === steps.length - 1,
+        }"
+      ></div>
       <div class="absolute ml-[-14px] py-2">
         <UBadge variant="soft" size="lg" color="gray">
           {{ step.idx }}

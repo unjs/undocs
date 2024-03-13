@@ -116,61 +116,40 @@ The component is used to create a link to another page.
 
 ### Steps
 
-The component is used to create a list of steps that look pretty.
+To generate steps all you have to do is use standard markdown numbered lists
 
-<!-- prettier-ignore-start -->
-::tabs
-  ::div
-  ---
-  label: Preview
-  icon: i-heroicons-magnifying-glass-circle
-  ---
-    ::steps
-      ::div{label="Install dependencies"}
-        :pm-install{name="undocs"}
+> [!IMPORTANT]
+> In order to generate this component, you need to have content inside at least one of the steps. Also list canont be a child of another component.
 
-        ::note
-          Install the dependencies using the package manager of your choice.
-        ::
-      ::
+```md
+1. Install Package
 
-      ::div{label="Run dev server"}
-        :pm-run{script="dev"}
-      ::
-
-      ::div{label="Build for production"}
-        :pm-run{script="build"}
-      ::
+    ::note
+      Please note that steps only work with numbered lists and is not within children.
     ::
-  ::
 
-  ::div
-  ---
-  label: Code
-  icon: i-heroicons-code-bracket-square
-  ---
-    ```mdc
-    ::steps
-      ::div{label="Install dependencies"}
-        :pm-install{name="undocs"}
+    :pm-install{name="undocs"}
 
-        ::note
-          Install the dependencies using the package manager of your choice.
-        ::
-      ::
+2. Run development server
 
-      ::div{label="Run dev server"}
-        :pm-run{script="dev"}
-      ::
+    :pm-run{name="undocs"}
 
-      ::div{label="Build for production"}
-        :pm-run{script="build"}
-      ::
+3. Done ✅
+```
+
+1. Install Package
+
+    ::note
+      Please note that steps only work with numbered lists and is not within children.
     ::
-    ```
-  ::
-::
-<!-- prettier-ignore-end -->
+
+    :pm-install{name="undocs"}
+
+2. Run development server
+
+    :pm-run{name="undocs"}
+
+3. Done ✅
 
 ### Github Notes
 
