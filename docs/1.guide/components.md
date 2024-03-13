@@ -114,6 +114,46 @@ The component is used to create a link to another page.
 ::
 <!-- prettier-ignore-end -->
 
+### Auto Code Groups
+
+This is automatic transformation, if you have code blocks right after each other, they will be grouped together using [`code-group`](https://ui.nuxt.com/pro/prose/code-group).
+
+```md
+    ```ts [nuxt.config.ts]
+    export default defineNuxtConfig({
+      modules: [],
+    })
+    ```
+
+    ```vue [app.vue]
+    <template>
+      <h1>Hello World</h1>
+    </template>
+    ```
+```
+
+```ts [nuxt.config.ts]
+export default defineNuxtConfig({
+  modules: [],
+})
+```
+
+```ts [server/api/hello.get.ts]
+export default defineEventHandler(() => {
+  return {
+    hello: 'world'
+  }
+})
+```
+
+```vue [app.vue]
+<template>
+  <div>
+   <h1>Welcome to the homepage</h1>
+  </div>
+</template>
+```
+
 ### Github Notes
 
 https://github.com/orgs/community/discussions/16925

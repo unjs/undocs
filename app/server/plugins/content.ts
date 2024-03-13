@@ -30,7 +30,7 @@ export default defineNitroPlugin((nitroApp) => {
 
     // Handle GitHub flavoured markdown blockquotes
     // https://github.com/orgs/community/discussions/16925
-    for (const node of file.body?.children || []) {
+    for (const [idx, node] of (file.body?.children || []).entries()) {
       if (
         node.tag === 'blockquote' && // bloquote > p x 2 > span > text
         ['!NOTE', '!TIP', '!IMPORTANT', '!WARNING', '!CAUTION'].includes(
@@ -41,19 +41,57 @@ export default defineNitroPlugin((nitroApp) => {
         node.tag = node.children?.[0]?.children?.[0]?.children?.[0]?.value.slice(1).toLowerCase()
         node.children[0].children.shift()
       }
+
+      // Generate Code Groups
+      generateCodeGroup(idx, file.body.children)
     }
   })
 })
 
-function getTextContents(children) {
+function isValidCodeBlock(children: any): boolean {
+  return (
+    children?.tag === 'pre' &&
+    children?.children?.[0]?.tag === 'code' &&
+    children?.props?.className?.includes('shiki') &&
+    children?.props?.language !== 'md'
+  );
+}
+
+function generateCodeGroup(currChildIdx: number, children: any[]): void {
+  const tempChildren = [];
+
+  if (isValidCodeBlock(children[currChildIdx])) {
+    for (let i = currChildIdx ; i < children.length; i++) {
+      const nextNode = children[i];
+      if (!isValidCodeBlock(nextNode)) {
+        break;
+      }
+
+      // Reset the next node to null so that it is not added to the final children
+      tempChildren.push(nextNode);
+      children[i] = {};
+    }
+  }
+
+  // Replace current children with the new code group if it has two or more code blocks
+  if (tempChildren.length > 2) {
+    children[currChildIdx] = {
+      type: 'element',
+      tag: 'CodeGroup',
+      children: tempChildren,
+    };
+  }
+}
+
+function getTextContents(children: any[]): string {
   return (children || [])
     .map((child) => {
       if (child.type === 'element') {
-        return getTextContents(child.children)
+        return getTextContents(child.children);
       }
-      return child.value
+      return child.value;
     })
-    .join('')
+    .join('');
 }
 
 // A set of common icons
