@@ -124,30 +124,30 @@ To generate steps all you have to do is use standard markdown numbered lists
 ```md
 1. Install Package
 
-    ::note
-      Please note that steps only work with numbered lists and is not within children.
-    ::
+   ::note
+   Please note that steps only work with numbered lists and is not within children.
+   ::
 
-    :pm-install{name="undocs"}
+   :pm-install{name="undocs"}
 
 2. Run development server
 
-    :pm-run{name="undocs"}
+   :pm-run{script="undocs"}
 
 3. Done ✅
 ```
 
 1. Install Package
 
-    ::note
-      Please note that steps only work with numbered lists and is not within children.
-    ::
+   ::note
+   Please note that steps only work with numbered lists and is not within children.
+   ::
 
-    :pm-install{name="undocs"}
+   :pm-install{name="undocs"}
 
 2. Run development server
 
-    :pm-run{name="undocs"}
+   :pm-run{script="undocs"}
 
 3. Done ✅
 
