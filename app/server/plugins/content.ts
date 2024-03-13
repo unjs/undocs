@@ -1,5 +1,5 @@
 export default defineNitroPlugin((nitroApp) => {
-  nitroApp.hooks.hook('content:file:afterParse' as any, async (file) => {
+  nitroApp.hooks.hook('content:file:afterParse' as any, (file) => {
     // Filter out non-markdown files
     if (!file._id.endsWith('.md')) {
       return
@@ -7,7 +7,7 @@ export default defineNitroPlugin((nitroApp) => {
 
     // Set the icon for the file if it is not already set
     if (!file.icon) {
-      file.icon = await resolveIcon(file._path)
+      file.icon = resolveIcon(file._path)
     }
 
     // Remove first h1 from markdown files as it is added to front-matter as title
@@ -85,9 +85,15 @@ const commonIcons = [
 ]
 
 function resolveIcon(path: string) {
-  for (const icon of commonIcons) {
-    if (path.includes(icon.pattern)) {
-      return icon.icon
+  // Split the path into parts and reverse it
+  const paths = path.slice(1).split('/').reverse()
+
+  // Search for icons in reverse order
+  for (const p of paths) {
+    for (const icon of commonIcons) {
+      if (p.includes(icon.pattern)) {
+        return icon.icon
+      }
     }
   }
 }
