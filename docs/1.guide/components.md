@@ -154,6 +154,43 @@ export default defineEventHandler(() => {
 </template>
 ```
 
+### Steps
+
+To generate steps all you have to do is use standard markdown numbered lists
+
+> [!IMPORTANT]
+> In order to generate this component, you need to have content inside at least one of the lists. The list can't be a child of another component & also any content within a Mardown list will need at least 2 tabs to be considered as a child of the list.
+
+```md
+1. Install Package
+
+   ::note
+   Please note that steps only work with numbered lists and is not within children.
+   ::
+
+   :pm-install{name="undocs"}
+
+2. Run development server
+
+   :pm-run{script="undocs"}
+
+3. Done ✅
+```
+
+1. Install Package
+
+   ::note
+   Please note that steps only work with numbered lists and is not within children.
+   ::
+
+   :pm-install{name="undocs"}
+
+2. Run development server
+
+   :pm-run{script="undocs"}
+
+3. Done ✅
+
 ### Github Notes
 
 https://github.com/orgs/community/discussions/16925

@@ -1,6 +1,6 @@
 {
   "name": "undocs",
-  "version": "0.2.17",
+  "version": "0.2.18",
   "repository": "unjs/undocs",
   "license": "MIT",
   "type": "module",
@@ -32,7 +32,7 @@
   "dependencies": {
     "@headlessui/vue": "^1.7.19",
     "@nuxt/content": "^2.12.1",
-    "@nuxt/fonts": "^0.2.1",
+    "@nuxt/fonts": "^0.3.0",
     "@nuxt/ui-pro": "^1.0.2",
     "@nuxtjs/plausible": "^0.2.4",
     "@nuxtjs/seo": "^2.0.0-rc.9",
@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint-config": "^0.2.0",
-    "@types/node": "^20.11.26",
+    "@types/node": "^20.11.27",
     "changelogen": "^0.5.5",
     "eslint": "^8.57.0",
     "eslint-config-unjs": "^0.2.1",

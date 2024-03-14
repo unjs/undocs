@@ -32,7 +32,7 @@ export default defineNitroPlugin((nitroApp) => {
     // https://github.com/orgs/community/discussions/16925
     for (const [idx, node] of (file.body?.children || []).entries()) {
       if (
-        node.tag === 'blockquote' && // bloquote > p x 2 > span > text
+        node.tag === 'blockquote' && // blockquote > p x 2 > span > text
         ['!NOTE', '!TIP', '!IMPORTANT', '!WARNING', '!CAUTION'].includes(
           node.children?.[0]?.children?.[0]?.children?.[0]?.value,
         )
@@ -40,6 +40,34 @@ export default defineNitroPlugin((nitroApp) => {
         node.type = 'element'
         node.tag = node.children?.[0]?.children?.[0]?.children?.[0]?.value.slice(1).toLowerCase()
         node.children[0].children.shift()
+      }
+
+      // CONVERT OL->LI to Steps
+      // TODO: Find a way to opt out of this transformation if needed within markdown.
+      if (node.tag === 'ol' && node.children.length > 0 && node.children[0].tag === 'li') {
+        const stepsChildren = node.children.map((li) => {
+          const label = li.children?.[0]?.value ?? undefined
+          // Exclude br tags from children to avoid spacing
+          const children = (label ? li.children.slice(1) : []).filter((child) => !['br'].includes(child.tag))
+
+          return {
+            type: 'element',
+            tag: 'div',
+            props: {
+              label,
+            },
+            children,
+          }
+        })
+
+        // For now we only check if there is at least (1) content to generate the steps..
+        const stepsHaveContent = stepsChildren.some((step) => step.children.length > 0)
+        if (stepsHaveContent) {
+          node.type = 'element'
+          node.tag = 'Steps'
+          node.props = {}
+          node.children = stepsChildren
+        }
       }
 
       // Generate Code Groups
@@ -58,7 +86,7 @@ function isValidCodeBlock(children: any): boolean {
 }
 
 function generateCodeGroup(currChildIdx: number, children: any[]): void {
-  const tempChildren = [];
+  const tempChildren: any[] = [];
 
   if (isValidCodeBlock(children[currChildIdx])) {
     for (let i = currChildIdx ; i < children.length; i++) {
