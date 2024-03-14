@@ -82,22 +82,22 @@ function isValidCodeBlock(children: any): boolean {
     children?.children?.[0]?.tag === 'code' &&
     children?.props?.className?.includes('shiki') &&
     children?.props?.language !== 'md'
-  );
+  )
 }
 
 function generateCodeGroup(currChildIdx: number, children: any[]): void {
   const tempChildren: any[] = [];
 
   if (isValidCodeBlock(children[currChildIdx])) {
-    for (let i = currChildIdx ; i < children.length; i++) {
-      const nextNode = children[i];
+    for (let i = currChildIdx; i < children.length; i++) {
+      const nextNode = children[i]
       if (!isValidCodeBlock(nextNode)) {
-        break;
+        break
       }
 
       // Reset the next node to null so that it is not added to the final children
-      tempChildren.push(nextNode);
-      children[i] = {};
+      tempChildren.push(nextNode)
+      children[i] = {}
     }
   }
 
@@ -107,7 +107,7 @@ function generateCodeGroup(currChildIdx: number, children: any[]): void {
       type: 'element',
       tag: 'CodeGroup',
       children: tempChildren,
-    };
+    }
   }
 }
 
@@ -115,11 +115,11 @@ function getTextContents(children: any[]): string {
   return (children || [])
     .map((child) => {
       if (child.type === 'element') {
-        return getTextContents(child.children);
+        return getTextContents(child.children)
       }
-      return child.value;
+      return child.value
     })
-    .join('');
+    .join('')
 }
 
 // A set of common icons
