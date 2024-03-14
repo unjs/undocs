@@ -86,7 +86,7 @@ function isValidCodeBlock(children: any): boolean {
 }
 
 function generateCodeGroup(currChildIdx: number, children: any[]): void {
-  const tempChildren: any[] = [];
+  const tempChildren: any[] = []
 
   if (isValidCodeBlock(children[currChildIdx])) {
     for (let i = currChildIdx; i < children.length; i++) {
