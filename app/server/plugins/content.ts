@@ -71,7 +71,7 @@ export default defineNitroPlugin((nitroApp) => {
       }
 
       // Generate Code Groups
-      generateCodeGroup(idx, file.body.children)
+      file.body.children = generateCodeGroup(idx, file.body.children)
     }
   })
 })
@@ -85,7 +85,7 @@ function isValidCodeBlock(children: any): boolean {
   )
 }
 
-function generateCodeGroup(currChildIdx: number, children: any[]): void {
+function generateCodeGroup(currChildIdx: number, children: any[]) {
   const tempChildren: any[] = [];
 
   if (isValidCodeBlock(children[currChildIdx])) {
@@ -109,6 +109,8 @@ function generateCodeGroup(currChildIdx: number, children: any[]): void {
       children: tempChildren,
     }
   }
+
+  return children
 }
 
 function getTextContents(children: any[]): string {
