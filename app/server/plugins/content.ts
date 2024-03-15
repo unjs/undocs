@@ -87,23 +87,23 @@ function isValidCodeBlock(children: any): boolean {
 
 function generateCodeGroup(currChildIdx: number, children: any[]) {
   if (isValidCodeBlock(children[currChildIdx])) {
-    const group: any[] = []
+    const group = new Map<number, Record<any, any>>()
 
     for (let i = currChildIdx; i < children.length; i++) {
       const nextNode = children[i]
       if (!isValidCodeBlock(nextNode)) {
         break
       }
-      group.push(nextNode)
+      group.set(i, nextNode)
       children[i] = { type: 'text', value: '' }
     }
 
     // Replace current children with the new code group if it has two or more code blocks
-    if (group.length >= 2) {
+    if (group.size >= 2) {
       children[currChildIdx] = {
         type: 'element',
         tag: 'CodeGroup',
-        children: group,
+        children: [...group.values()],
       }
     }
   }
