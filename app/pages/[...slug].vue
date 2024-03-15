@@ -29,6 +29,10 @@ useSeoMeta({
   description: page.value?.description,
 })
 
+if (process.server) {
+  defineOgImageComponent('OgImageDocs')
+}
+
 const headline = computed(() => findPageHeadline(page.value))
 
 const tocOpen = ref(false)

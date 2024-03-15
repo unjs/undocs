@@ -23,6 +23,10 @@ useSeoMeta({
   description: page.value!.description,
 })
 
+if (process.server) {
+  defineOgImageComponent('OgImageDocs')
+}
+
 function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
   return Object.entries(links || {})
     .map(([key, link], order) => {
