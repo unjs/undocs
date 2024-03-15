@@ -9,7 +9,7 @@ const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
 export default defineNuxtConfig({
   ssr,
-  modules: ['@nuxt/fonts', '@nuxt/content', '@nuxtjs/seo', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
+  modules: ['@nuxt/fonts', '@nuxt/content', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
   ui: {
     icons: [],
   },
@@ -67,19 +67,6 @@ export default defineNuxtConfig({
     enabled: ssr,
     debug: false,
     fonts: ['Nunito:400', 'Nunito:700'],
-  },
-  seo: {
-    splash: false,
-  },
-  schemaOrg: {
-    enabled: ssr,
-  },
-  sitemap: {
-    strictNuxtContentPaths: true,
-  },
-  linkChecker: {
-    strictNuxtContentPaths: true,
-    skipInspections: ['link-text'],
   },
   tailwindcss: {
     viewer: dev,

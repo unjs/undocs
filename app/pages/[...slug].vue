@@ -29,21 +29,6 @@ useSeoMeta({
   description: page.value?.description,
 })
 
-if (process.server) {
-  // @ts-ignore
-  useSchemaOrg([
-    // @ts-ignore
-    defineArticle({
-      '@type': 'TechArticle',
-    }),
-  ])
-}
-
-if (process.server) {
-  // @ts-ignore
-  defineOgImageComponent('OgImageDocs')
-}
-
 const headline = computed(() => findPageHeadline(page.value))
 
 const tocOpen = ref(false)
