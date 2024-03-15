@@ -78,9 +78,7 @@ export default defineNitroPlugin((nitroApp) => {
 
 function isValidCodeBlock(children: any): boolean {
   return (
-    children?.tag === 'pre' &&
-    children?.children?.[0]?.tag === 'code' &&
-    children?.props?.language !== 'md' // Skip markdown code blocks (they usually show examples)
+    children?.tag === 'pre' && children?.children?.[0]?.tag === 'code' && children?.props?.language !== 'md' // Skip markdown code blocks (they usually show examples)
   )
 }
 
