@@ -80,7 +80,6 @@ function isValidCodeBlock(children: any): boolean {
   return (
     children?.tag === 'pre' &&
     children?.children?.[0]?.tag === 'code' &&
-    children?.props?.className?.includes('shiki') &&
     children?.props?.language !== 'md' // Skip markdown code blocks (they usually show examples)
   )
 }
