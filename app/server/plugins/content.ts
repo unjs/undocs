@@ -71,7 +71,7 @@ export default defineNitroPlugin((nitroApp) => {
       }
 
       // Generate Code Groups
-      file.body.children = generateCodeGroup(idx, file.body.children)
+      generateCodeGroup(idx, file.body.children)
     }
   })
 })
@@ -81,36 +81,32 @@ function isValidCodeBlock(children: any): boolean {
     children?.tag === 'pre' &&
     children?.children?.[0]?.tag === 'code' &&
     children?.props?.className?.includes('shiki') &&
-    children?.props?.language !== 'md'
+    children?.props?.language !== 'md' // Skip markdown code blocks (they usually show examples)
   )
 }
 
 function generateCodeGroup(currChildIdx: number, children: any[]) {
-  const tempChildren: any[] = []
-
   if (isValidCodeBlock(children[currChildIdx])) {
+    const group = new Map<number, Record<any, any>>()
+
     for (let i = currChildIdx; i < children.length; i++) {
       const nextNode = children[i]
       if (!isValidCodeBlock(nextNode)) {
         break
       }
+      group.set(i, nextNode)
+      children[i] = { type: 'text', value: '' }
+    }
 
-      // Reset the next node to null so that it is not added to the final children
-      tempChildren.push(nextNode)
-      children[i] = {}
+    // Replace current children with the new code group if it has two or more code blocks
+    if (group.size >= 2) {
+      children[currChildIdx] = {
+        type: 'element',
+        tag: 'CodeGroup',
+        children: [...group.values()],
+      }
     }
   }
-
-  // Replace current children with the new code group if it has two or more code blocks
-  if (tempChildren.length > 2) {
-    children[currChildIdx] = {
-      type: 'element',
-      tag: 'CodeGroup',
-      children: tempChildren,
-    }
-  }
-
-  return children
 }
 
 function getTextContents(children: any[]): string {
