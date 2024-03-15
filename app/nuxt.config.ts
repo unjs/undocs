@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     icons: [],
   },
   fonts: {
-    families: [{ name: 'Nunito', provider: 'bunny' }],
+    families: [{ name: 'Nunito', provider: 'local' }],
     defaults: {
       weights: [400, 500, 600, 700],
     },
