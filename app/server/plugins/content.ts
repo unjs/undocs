@@ -30,7 +30,7 @@ export default defineNitroPlugin((nitroApp) => {
 
     // Handle GitHub flavoured markdown blockquotes
     // https://github.com/orgs/community/discussions/16925
-    for (const node of file.body?.children || []) {
+    for (const [idx, node] of (file.body?.children || []).entries()) {
       if (
         node.tag === 'blockquote' && // blockquote > p x 2 > span > text
         ['!NOTE', '!TIP', '!IMPORTANT', '!WARNING', '!CAUTION'].includes(
@@ -69,11 +69,44 @@ export default defineNitroPlugin((nitroApp) => {
           node.children = stepsChildren
         }
       }
+
+      // Generate Code Groups
+      generateCodeGroup(idx, file.body.children)
     }
   })
 })
 
-function getTextContents(children) {
+function isNamedCodeBlock(children: any): boolean {
+  return children?.tag === 'pre' && children?.children?.[0]?.tag === 'code' && children?.props?.filename
+}
+
+function generateCodeGroup(currChildIdx: number, children: any[]) {
+  if (!isNamedCodeBlock(children[currChildIdx])) {
+    return
+  }
+
+  const group: any[] = []
+
+  for (let i = currChildIdx; i < children.length; i++) {
+    const nextNode = children[i]
+    if (!isNamedCodeBlock(nextNode)) {
+      break
+    }
+    group.push(nextNode)
+    children[i] = { type: 'text', value: '' }
+  }
+
+  // Replace current children with the new code group if it has two or more code blocks
+  if (group.length > 1) {
+    children[currChildIdx] = {
+      type: 'element',
+      tag: 'CodeGroup',
+      children: [...group],
+    }
+  }
+}
+
+function getTextContents(children: any[]): string {
   return (children || [])
     .map((child) => {
       if (child.type === 'element') {
