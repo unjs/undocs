@@ -76,32 +76,32 @@ export default defineNitroPlugin((nitroApp) => {
   })
 })
 
-function isValidCodeBlock(children: any): boolean {
-  return (
-    children?.tag === 'pre' && children?.children?.[0]?.tag === 'code' && children?.props?.language !== 'md' // Skip markdown code blocks (they usually show examples)
-  )
+function isNamedCodeBlock(children: any): boolean {
+  return children?.tag === 'pre' && children?.children?.[0]?.tag === 'code' && children?.props?.filename
 }
 
 function generateCodeGroup(currChildIdx: number, children: any[]) {
-  if (isValidCodeBlock(children[currChildIdx])) {
-    const group: any[] = []
+  if (!isNamedCodeBlock(children[currChildIdx])) {
+    return
+  }
 
-    for (let i = currChildIdx; i < children.length; i++) {
-      const nextNode = children[i]
-      if (!isValidCodeBlock(nextNode)) {
-        break
-      }
-      group.push(nextNode)
-      children[i] = { type: 'text', value: '' }
+  const group: any[] = []
+
+  for (let i = currChildIdx; i < children.length; i++) {
+    const nextNode = children[i]
+    if (!isNamedCodeBlock(nextNode)) {
+      break
     }
+    group.push(nextNode)
+    children[i] = { type: 'text', value: '' }
+  }
 
-    // Replace current children with the new code group if it has two or more code blocks
-    if (group.length >= 2) {
-      children[currChildIdx] = {
-        type: 'element',
-        tag: 'CodeGroup',
-        children: [...group],
-      }
+  // Replace current children with the new code group if it has two or more code blocks
+  if (group.length > 1) {
+    children[currChildIdx] = {
+      type: 'element',
+      tag: 'CodeGroup',
+      children: [...group],
     }
   }
 }
