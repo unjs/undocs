@@ -24,7 +24,6 @@ useSeoMeta({
 })
 
 if (process.server) {
-  // @ts-ignore
   defineOgImageComponent('OgImageDocs')
 }
 

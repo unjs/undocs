@@ -1,5 +1,54 @@
 # Changelog
 
+## v0.2.18
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.17...v0.2.18)
+
+### 🚀 Enhancements
+
+- Add loading indicator ([#81](https://github.com/unjs/undocs/pull/81))
+- Autogen  section icons ([#72](https://github.com/unjs/undocs/pull/72))
+- Transform ol->li to `Steps` component. ([#83](https://github.com/unjs/undocs/pull/83))
+
+### 🩹 Fixes
+
+- Emojis from showing up small in `ULandingCard` ([#75](https://github.com/unjs/undocs/pull/75))
+- Add `key` for `pm-` components ([#80](https://github.com/unjs/undocs/pull/80))
+- Autogen icons based on last segments ([#93](https://github.com/unjs/undocs/pull/93))
+
+### 💅 Refactors
+
+- **pm:** Migrate `pnpx` to `pnpm dlx` ([#87](https://github.com/unjs/undocs/pull/87))
+- Remove extra log in nav ([a0a5092](https://github.com/unjs/undocs/commit/a0a5092))
+- Use `@nuxt/fonts` ([#92](https://github.com/unjs/undocs/pull/92))
+
+### 📖 Documentation
+
+- **readme:** Project locked with bun change from pnpm ([#74](https://github.com/unjs/undocs/pull/74))
+- Fix spelling ([#82](https://github.com/unjs/undocs/pull/82))
+
+### 🏡 Chore
+
+- **release:** V0.2.17 ([d1b1ac8](https://github.com/unjs/undocs/commit/d1b1ac8))
+- Remove extra config from template ([0c45e4c](https://github.com/unjs/undocs/commit/0c45e4c))
+- Improve links color in alerts ([58ca050](https://github.com/unjs/undocs/commit/58ca050))
+- Update deps and lock ([10cb12b](https://github.com/unjs/undocs/commit/10cb12b))
+- Lint md ([42cc5a4](https://github.com/unjs/undocs/commit/42cc5a4))
+- Apply automated updates ([0d7c0a8](https://github.com/unjs/undocs/commit/0d7c0a8))
+- Remove console.log -_- ([b265a1b](https://github.com/unjs/undocs/commit/b265a1b))
+- Use `v-for` in `Pm` components ([#89](https://github.com/unjs/undocs/pull/89))
+- Update deps ([9159210](https://github.com/unjs/undocs/commit/9159210))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+- Benjamin Canac ([@benjamincanac](http://github.com/benjamincanac))
+- Shoshana Connack ([@moshetanzer](http://github.com/moshetanzer))
+- Jake <jakeismeh1@gmail.com>
+- Xjccc ([@xjccc](http://github.com/xjccc))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v0.2.17
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.16...v0.2.17)

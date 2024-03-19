@@ -30,17 +30,6 @@ useSeoMeta({
 })
 
 if (process.server) {
-  // @ts-ignore
-  useSchemaOrg([
-    // @ts-ignore
-    defineArticle({
-      '@type': 'TechArticle',
-    }),
-  ])
-}
-
-if (process.server) {
-  // @ts-ignore
   defineOgImageComponent('OgImageDocs')
 }
 
