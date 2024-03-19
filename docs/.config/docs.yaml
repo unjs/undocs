@@ -3,7 +3,7 @@
 name: 'UnDocs'
 shortDescription: 'Docs, made easy.'
 description: 'Elegant documentation tooling for UnJS ecosystem.'
-github: 'unjs/docs'
+github: 'unjs/undocs'
 url: 'https://undocs.pages.dev'
 redirects:
   '/docs': '/docs/getting-started'

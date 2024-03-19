@@ -10,6 +10,14 @@ const { data: files } = useLazyFetch<ParsedContent[]>('/api/search.json', {
   server: false,
 })
 
+const links = [
+  {
+    label: 'Changlog',
+    icon: 'solar:notes-minimalistic-bold-duotone',
+    to: '/changelog',
+  },
+]
+
 const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
 
 useSeoMeta({
@@ -32,7 +40,7 @@ provide('navigation', navigation)
   <AppFooter />
 
   <ClientOnly>
-    <LazyUContentSearch :files="files" :navigation="navigation" />
+    <LazyUContentSearch :files="files" :navigation="navigation" :links="links" />
   </ClientOnly>
 
   <UNotifications />
