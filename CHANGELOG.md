@@ -1,5 +1,37 @@
 # Changelog
 
+## v0.2.19
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.18...v0.2.19)
+
+### 🚀 Enhancements
+
+- Auto code groups ([#98](https://github.com/unjs/undocs/pull/98))
+- Use lightweight og image generator ([500ad57](https://github.com/unjs/undocs/commit/500ad57))
+
+### 🔥 Performance
+
+- Inline fonts ([2b2b914](https://github.com/unjs/undocs/commit/2b2b914))
+
+### 💅 Refactors
+
+- Simplify ([5dd64ba](https://github.com/unjs/undocs/commit/5dd64ba))
+- Improve content transformer maintenability ([e7244af](https://github.com/unjs/undocs/commit/e7244af))
+
+### 🏡 Chore
+
+- **release:** V0.2.18 ([0a7fa72](https://github.com/unjs/undocs/commit/0a7fa72))
+- Apply automated updates ([80729c2](https://github.com/unjs/undocs/commit/80729c2))
+- Apply automated updates ([8724277](https://github.com/unjs/undocs/commit/8724277))
+- Update lockfile ([0b5d647](https://github.com/unjs/undocs/commit/0b5d647))
+- Apply automated updates ([093ef7e](https://github.com/unjs/undocs/commit/093ef7e))
+- Apply automated updates ([248efb0](https://github.com/unjs/undocs/commit/248efb0))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+
 ## v0.2.18
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.17...v0.2.18)
