@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.20
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.19...v0.2.20)
+
+### 🩹 Fixes
+
+- Add hmr hotfix for nitro ([0868eaa](https://github.com/unjs/undocs/commit/0868eaa))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.19
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.18...v0.2.19)
