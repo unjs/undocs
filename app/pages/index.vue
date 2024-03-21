@@ -14,18 +14,13 @@ if (!page.value) {
   })
 }
 
-useHead({
-  titleTemplate: '%s %separator UnJS',
-})
+const appConfig = useAppConfig()
 
-useSeoMeta({
-  title: page.value!.title,
+usePageSEO({
+  title: `${appConfig.site.name} - ${page.value!.heroSubtitle}`,
+  ogTitle: page.value!.heroSubtitle,
   description: page.value!.description,
 })
-
-if (process.server) {
-  defineOgImageComponent('OgImageDocs')
-}
 
 function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
   return Object.entries(links || {})
@@ -91,19 +86,14 @@ const hero = computed(() => {
   <template v-if="page.features?.length > 0 && !hero.withFeatures">
     <ULandingSection :title="page.featuresTitle">
       <UPageGrid>
-        <ULandingCard
-          v-for="(item, index) of page.features"
-          :key="index"
-          v-bind="item"
-          :ui="{
-            icon: {
-              // If the icon is an emoji, we need to use a bigger size
-              base: /\p{Emoji}/u.test(item.icon)
-                ? '!text-2xl !w-auto !h-auto'
-                : 'w-8 h-8 flex-shrink-0 text-gray-900 dark:text-white',
-            },
-          }"
-        >
+        <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" :ui="{
+    icon: {
+      // If the icon is an emoji, we need to use a bigger size
+      base: /\p{Emoji}/u.test(item.icon)
+        ? '!text-2xl !w-auto !h-auto'
+        : 'w-8 h-8 flex-shrink-0 text-gray-900 dark:text-white',
+    },
+  }">
           <template v-if="item.description" #description>
             <MDC :value="item.description" tag="p" class="prose prose-primary dark:prose-invert" />
           </template>
