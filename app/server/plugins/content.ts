@@ -40,7 +40,7 @@ function transformStepsList(node: ContentNode) {
   // TODO: Find a way to opt out of this transformation if needed within markdown.
   if (node.tag === 'ol' && (node.children?.length || 0) > 0 && node.children?.[0].tag === 'li') {
     const stepsChildren = node.children.map((li) => {
-      const children = (li.children || [])
+      const children = li.children || []
 
       return {
         type: 'element',
