@@ -40,22 +40,18 @@ function transformStepsList(node: ContentNode) {
   // TODO: Find a way to opt out of this transformation if needed within markdown.
   if (node.tag === 'ol' && (node.children?.length || 0) > 0 && node.children?.[0].tag === 'li') {
     const stepsChildren = node.children.map((li) => {
-      const label = li.children?.[0]?.value ?? undefined
-      // Exclude br tags from children to avoid spacing
-      const children = ((label && li.children?.slice(1)) || []).filter((child) => !['br'].includes(child.tag || ''))
+      const children = (li.children || [])
 
       return {
         type: 'element',
         tag: 'div',
-        props: {
-          label,
-        },
         children,
       }
     })
 
     // For now we only check if there is at least (1) content to generate the steps..
-    const stepsHaveContent = stepsChildren.some((step) => step.children.length > 0)
+    // When children have length > 1, it means there is more than just the text content.
+    const stepsHaveContent = stepsChildren.some((step) => step.children.length > 1)
     if (stepsHaveContent) {
       node.type = 'element'
       node.tag = 'Steps'

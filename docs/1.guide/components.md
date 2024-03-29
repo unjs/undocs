@@ -125,9 +125,19 @@ This is automatic transformation, if you have code blocks right after each other
     })
     ```
 
+    ```ts [server/api/hello.get.ts]
+    export default defineEventHandler(() => {
+      return {
+        hello: 'world'
+      }
+    })
+    ```
+
     ```vue [app.vue]
     <template>
-      <h1>Hello World</h1>
+      <div>
+        <h1>Welcome to the homepage</h1>
+      </div>
     </template>
     ```
 ```
@@ -149,7 +159,7 @@ export default defineEventHandler(() => {
 ```vue [app.vue]
 <template>
   <div>
-   <h1>Welcome to the homepage</h1>
+    <h1>Welcome to the homepage</h1>
   </div>
 </template>
 ```
