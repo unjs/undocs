@@ -51,22 +51,24 @@ function transformStepsList(node: ContentNode) {
       }
     })
 
-    const lastLeadingSpaceOnStep = stepsChildren.map((step) => {
-      let lastLeadingSpace = -1;
+    const lastLeadingSpaceOnStep = stepsChildren
+      .map((step) => {
+        let lastLeadingSpace = -1
 
-      for (let i = 0; i < step.children.length; i++) {
-        const child = step.children[i];
-        const prevChild = step.children[i - 1];
-        if (
-          (child?.type === 'text' && child.value?.startsWith(' ')) ||
-          (prevChild?.type === 'text' && prevChild?.value?.endsWith(' '))
-        ) {
-          lastLeadingSpace = i;
+        for (let i = 0; i < step.children.length; i++) {
+          const child = step.children[i]
+          const prevChild = step.children[i - 1]
+          if (
+            (child?.type === 'text' && child.value?.startsWith(' ')) ||
+            (prevChild?.type === 'text' && prevChild?.value?.endsWith(' '))
+          ) {
+            lastLeadingSpace = i
+          }
         }
-      }
 
-      return lastLeadingSpace;
-    }).filter((step) => step > -1);
+        return lastLeadingSpace
+      })
+      .filter((step) => step > -1)
 
     const stepsHaveContent = stepsChildren.some((step) => {
       if (lastLeadingSpaceOnStep.length > 0) {
