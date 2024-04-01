@@ -201,6 +201,20 @@ To generate steps all you have to do is use standard markdown numbered lists
 
 3. Done ✅
 
+---
+
+1. test
+
+2. test 2
+
+3. test 3
+
+---
+
+1. test [hello](#components) more
+2. test 2
+3. test `test` more here
+
 ### Github Notes
 
 https://github.com/orgs/community/discussions/16925

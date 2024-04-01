@@ -42,6 +42,8 @@ function transformStepsList(node: ContentNode) {
     const stepsChildren = node.children.map((li) => {
       const children = li.children || []
 
+      // console.log(JSON.stringify(children, undefined, 2))
+
       return {
         type: 'element',
         tag: 'div',
@@ -49,9 +51,31 @@ function transformStepsList(node: ContentNode) {
       }
     })
 
-    // For now we only check if there is at least (1) content to generate the steps..
-    // When children have length > 1, it means there is more than just the text content.
-    const stepsHaveContent = stepsChildren.some((step) => step.children.length > 1)
+    const lastLeadingSpaceOnStep = stepsChildren.map((step) => {
+      let lastLeadingSpace = -1;
+
+      for (let i = 0; i < step.children.length; i++) {
+        const child = step.children[i];
+        const prevChild = step.children[i - 1];
+        if (
+          (child?.type === 'text' && child.value?.startsWith(' ')) ||
+          (prevChild?.type === 'text' && prevChild?.value?.endsWith(' '))
+        ) {
+          lastLeadingSpace = i;
+        }
+      }
+
+      return lastLeadingSpace;
+    }).filter((step) => step > -1);
+
+    const stepsHaveContent = stepsChildren.some((step) => {
+      if (lastLeadingSpaceOnStep.length > 0) {
+        return step.children.slice(lastLeadingSpaceOnStep[0], lastLeadingSpaceOnStep[0]).length > 1
+      }
+
+      return step.children.length > 1
+    })
+
     if (stepsHaveContent) {
       node.type = 'element'
       node.tag = 'Steps'
