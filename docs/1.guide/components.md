@@ -114,50 +114,6 @@ The component is used to create a link to another page.
 ::
 <!-- prettier-ignore-end -->
 
-### Github Notes
-
-https://github.com/orgs/community/discussions/16925
-
-```md
-> [!NOTE]
-> Highlights information that users should take into account, even when skimming.
-```
-
-> [!NOTE]
-> Highlights information that users should take into account, even when skimming.
-
-```md
-> [!TIP]
-> Optional information to help a user be more successful.
-```
-
-> [!TIP]
-> Optional information to help a user be more successful.
-
-```md
-> [!IMPORTANT]
-> Crucial information necessary for users to succeed.
-```
-
-> [!IMPORTANT]
-> Crucial information necessary for users to succeed.
-
-```md
-> [!WARNING]
-> Critical content demanding immediate user attention due to potential risks.
-```
-
-> [!WARNING]
-> Critical content demanding immediate user attention due to potential risks.
-
-```md
-> [!CAUTION]
-> Negative potential consequences of an action.
-```
-
-> [!CAUTION]
-> Negative potential consequences of an action.
-
 ## UI Pro
 
 You can use all the Prose components from [Nuxt UI Pro](https://ui.nuxt.com/pro/components/prose/callout) in your markdown files.

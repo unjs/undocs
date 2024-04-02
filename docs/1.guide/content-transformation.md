@@ -6,6 +6,50 @@ icon: bi:stars
 
 > Discover ways that undocs transforms content to make it more easier to just write documentation.
 
+## Github Notes
+
+https://github.com/orgs/community/discussions/16925
+
+```md
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
+```
+
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
+
+```md
+> [!TIP]
+> Optional information to help a user be more successful.
+```
+
+> [!TIP]
+> Optional information to help a user be more successful.
+
+```md
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
+```
+
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
+
+```md
+> [!WARNING]
+> Critical content demanding immediate user attention due to potential risks.
+```
+
+> [!WARNING]
+> Critical content demanding immediate user attention due to potential risks.
+
+```md
+> [!CAUTION]
+> Negative potential consequences of an action.
+```
+
+> [!CAUTION]
+> Negative potential consequences of an action.
+
 ## Auto Code Groups
 
 If you have code blocks right after each other, they will be grouped together using [`code-group`](https://ui.nuxt.com/pro/prose/code-group).
