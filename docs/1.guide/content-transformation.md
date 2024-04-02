@@ -93,5 +93,73 @@ Generate steps by useing standard markdown numbered lists!
 
 3. Done ✅
 
+## Twoslash Code Blocks
+
+[nuxt-content-twoslash](https://github.com/antfu/nuxt-content-twoslash#nuxt-content-twoslash) is only enabled for production builds to enhance development experience.
+
+```md
+    ```ts twoslash [index.ts]
+    console.log("Hello, World")
+    ```
+
+    ```ts twoslash [nuxt.config.ts]
+    export default defineNuxtConfig({
+      modules: [],
+      nitro: {
+        static: true
+      }
+    })
+    ```
+
+    ```vue twoslash [index.vue]
+    <script lang="ts" setup>
+    import { ref, onMounted } from 'vue'
+
+    const name = ref("World")
+    //    ^?
+
+
+    onMounted(() => {
+      console.log("Hello, World")
+    })
+    </script>
+
+    <template>
+      <div>Hello, {{ name }}</div>
+    </template>
+    ```
+```
+
+```ts twoslash [index.ts]
+console.log("Hello, World")
+```
+
+```ts twoslash [nuxt.config.ts]
+export default defineNuxtConfig({
+  modules: [],
+  nitro: {
+    static: true
+  }
+})
+```
+
+```vue twoslash [index.vue]
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue'
+
+const name = ref("World")
+//    ^?
+
+
+onMounted(() => {
+  console.log("Hello, World")
+})
+</script>
+
+<template>
+  <div>Hello, {{ name }}</div>
+</template>
+```
+
 > [!TIP]
 > Do you have an idea for a new content transformation, feel free to [open an issue](https://github.com/unjs/undocs/issues/new?assignees=&labels=pending+triage&projects=&template=feature-request.yml)!

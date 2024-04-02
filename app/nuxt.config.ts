@@ -9,7 +9,7 @@ const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
 export default defineNuxtConfig({
   ssr,
-  modules: ['@nuxt/fonts', '@nuxt/content', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
+  modules: ['@nuxt/fonts', 'nuxt-content-twoslash', '@nuxt/content', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
   ui: {
     icons: [],
   },
@@ -66,6 +66,14 @@ export default defineNuxtConfig({
   tailwindcss: {
     viewer: dev,
     quiet: !dev,
+  },
+  twoslash: {
+    floatingVueOptions: {
+      classMarkdown: 'prose prose-primary dark:prose-invert',
+    },
+    // Skip Twoslash in dev to improve performance.
+    enableInDev: !dev,
+    throws: false,
   },
   typescript: {
     strict: false,
