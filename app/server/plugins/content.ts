@@ -166,23 +166,31 @@ function transformCodeGroups(currChildIdx: number, children: ContentNode[] = [])
     return
   }
 
-  const group: ContentNode[] = []
+  const group: {
+    idx: number
+    node: ContentNode
+  }[] = []
 
   for (let i = currChildIdx; i < children.length; i++) {
     const nextNode = children[i]
     if (!_isNamedCodeBlock(nextNode)) {
       break
     }
-    group.push(nextNode)
-    children[i] = { type: 'text', value: '' }
+    group.push({ idx: i, node: nextNode })
   }
 
   // Replace current children with the new code group if it has two or more code blocks
   if (group.length > 1) {
+    // Only  reset children if we have more than one code block
+    // Code here is to avoid empty text nodes in the markdown AST
+    for (const { idx } of group) {
+      children[idx] = { type: 'text', value: '' }
+    }
+
     children[currChildIdx] = {
       type: 'element',
       tag: 'CodeGroup',
-      children: [...group],
+      children: group.map((g) => g.node),
     }
   }
 }
