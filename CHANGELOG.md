@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.2.21
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.20...v0.2.21)
+
+### 🩹 Fixes
+
+- Add hmr hotfix for nitro ([0868eaa](https://github.com/unjs/undocs/commit/0868eaa))
+- Auto-code group transformation ([#114](https://github.com/unjs/undocs/pull/114))
+
+### 📖 Documentation
+
+- Refactor content transformation section ([#115](https://github.com/unjs/undocs/pull/115))
+
+### 🏡 Chore
+
+- **release:** V0.2.20 ([522ef79](https://github.com/unjs/undocs/commit/522ef79))
+- Update deps ([337921a](https://github.com/unjs/undocs/commit/337921a))
+- Apply automated updates ([11fa9ad](https://github.com/unjs/undocs/commit/11fa9ad))
+
+### ❤️ Contributors
+
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.20
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.19...v0.2.20)
