@@ -22,7 +22,7 @@ landing:
       description: 'Focus on writing your *documentation* with Markdown, not tooling.'
     - title: 'Nuxt powered'
       icon: 'logos:nuxt-icon'
-      description: 'Made with [Nuxt](https://nuxt.com), Nuxt Content, Nuxt SEO and Nuxt UI Pro.'
+      description: 'Made with [Nuxt](https://nuxt.com), [Nuxt Content](https://content.nuxt.com/), and [Nuxt UI Pro](https://ui.nuxt.com/pro).'
     - title: 'Deploy anywhere'
       icon: '✨'
       description: 'The documentation can be hosted on any static hosting.'

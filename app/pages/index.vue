@@ -14,19 +14,13 @@ if (!page.value) {
   })
 }
 
-useHead({
-  titleTemplate: '%s %separator UnJS',
-})
+const appConfig = useAppConfig()
 
-useSeoMeta({
-  title: page.value!.title,
+usePageSEO({
+  title: `${appConfig.site.name} - ${page.value!.heroSubtitle}`,
+  ogTitle: page.value!.heroSubtitle,
   description: page.value!.description,
 })
-
-if (process.server) {
-  // @ts-ignore
-  defineOgImageComponent('OgImageDocs')
-}
 
 function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
   return Object.entries(links || {})

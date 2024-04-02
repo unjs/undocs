@@ -24,25 +24,11 @@ const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
     .findSurround(withoutTrailingSlash(route.path)),
 )
 
-useSeoMeta({
-  title: page.value?.title,
+usePageSEO({
+  title: `${page.value?.title} - ${appConfig.site.name}`,
+  ogTitle: page.value?.title,
   description: page.value?.description,
 })
-
-if (process.server) {
-  // @ts-ignore
-  useSchemaOrg([
-    // @ts-ignore
-    defineArticle({
-      '@type': 'TechArticle',
-    }),
-  ])
-}
-
-if (process.server) {
-  // @ts-ignore
-  defineOgImageComponent('OgImageDocs')
-}
 
 const headline = computed(() => findPageHeadline(page.value))
 

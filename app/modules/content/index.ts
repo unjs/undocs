@@ -48,6 +48,8 @@ export default defineNuxtModule({
       Object.assign(docsConfig, newConfig)
       const nitro = useNitro()
       nitro.updateConfig({
+        // @ts-expect-error TODO: temp fix for nitro
+        experimental: {},
         runtimeConfig: {
           ...nitro.options.runtimeConfig,
           __undocs__: { docsConfig },
