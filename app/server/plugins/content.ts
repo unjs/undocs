@@ -13,6 +13,7 @@ export default defineNitroPlugin((nitroApp) => {
       transformGithubAlert(node)
       transformStepsList(node)
       transformCodeGroups(idx, file.body?.children)
+      transformJSDocs(idx, file.body?.children)
     }
   })
 })
@@ -177,6 +178,94 @@ function _isNamedCodeBlock(children: ContentNode): boolean {
   return children?.tag === 'pre' && children?.children?.[0]?.tag === 'code' && children?.props?.filename
 }
 
+// --- transform automd jsdocs ---
+
+function transformJSDocs(currChildIdx: number, children: ContentNode[] = []) {
+  if (!children?.length || !_isJSDocBlock(children[currChildIdx])) {
+    return
+  }
+
+  const fields: ContentNode[] = []
+
+  const generateFields = (i: number): ContentNode => {
+    const name = _parseJSDocName(children[i])
+    const type = _parseJSDocType(children[i + 1])
+
+    const props: {
+      name: string
+      type: string | false
+    } = {
+      name,
+      type
+    }
+
+    const content: ContentNode[] = []
+
+    i++
+
+    if (type !== '') {
+      children[i] = _emptyASTNode()
+      i++
+    }
+
+    while (i < children.length && children[i].tag !== 'h3' && children[i].tag === 'p') {
+      content.push(children[i])
+      children[i] = _emptyASTNode()
+      i++
+    }
+
+    return {
+      type: 'element',
+      tag: 'field',
+      props,
+      children: content,
+    }
+  }
+
+  // Go through we find the correct match for all h3
+  for (let i = currChildIdx; i < children.length; i++) {
+    // Make sure it's a JSDoc block before generating fields
+    if (_isJSDocBlock(children[i])) {
+      const field = generateFields(i)
+      // Double check if has description or a type to avoid empty fields
+      if ((field?.children || [])?.length > 0 || field?.props?.type !== '') {
+        fields.push(field)
+      } else {
+        // set blank text node to avoid empty text nodes in the markdown AST
+        children[i] = _emptyASTNode()
+      }
+    }
+  }
+
+  // If no fields were generated, return early
+  if (fields.length <= 0) {
+    return
+  }
+
+  // Replace current children with the new field group
+  children[currChildIdx] = {
+    type: 'element',
+    tag: 'field-group',
+    children: [...fields],
+  }
+}
+
+function _isJSDocBlock(children: ContentNode): boolean {
+  return children?.tag === 'h3' && children?.children?.[0]?.tag === 'code' && children?.children?.[0]?.type === 'element'
+}
+
+function _parseJSDocName(node: ContentNode): string {
+  return node?.props?.id || ''
+}
+function _parseJSDocType(node: ContentNode): string {
+  const hasType = !!node?.children?.[0]?.children?.[0]?.children?.[0]?.value
+  if (!hasType) {
+    return ''
+  }
+
+  return node?.children?.[0]?.children?.[2]?.children?.[0]?.value || ''
+}
+
 // --- internal utils ---
 
 function _getTextContents(children: ContentNode[] = []): string {
@@ -188,6 +277,10 @@ function _getTextContents(children: ContentNode[] = []): string {
       return child.value
     })
     .join('')
+}
+
+function _emptyASTNode() {
+  return { type: 'text', value: '' }
 }
 
 // --- types ---
