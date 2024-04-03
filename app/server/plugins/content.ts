@@ -255,7 +255,8 @@ function _isJSDocBlock(children: ContentNode): boolean {
 }
 
 function _parseJSDocName(node: ContentNode): string {
-  return node?.props?.id || ''
+  // Code block || id prop || empty string
+  return node.children?.[0]?.children?.[0]?.value || node?.props?.id || ''
 }
 function _parseJSDocType(node: ContentNode): string {
   const hasType = !!node?.children?.[0]?.children?.[0]?.children?.[0]?.value
