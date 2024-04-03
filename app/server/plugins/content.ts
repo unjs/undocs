@@ -196,7 +196,7 @@ function transformJSDocs(currChildIdx: number, children: ContentNode[] = []) {
       type: string | false
     } = {
       name,
-      type
+      type,
     }
 
     const content: ContentNode[] = []
@@ -251,7 +251,9 @@ function transformJSDocs(currChildIdx: number, children: ContentNode[] = []) {
 }
 
 function _isJSDocBlock(children: ContentNode): boolean {
-  return children?.tag === 'h3' && children?.children?.[0]?.tag === 'code' && children?.children?.[0]?.type === 'element'
+  return (
+    children?.tag === 'h3' && children?.children?.[0]?.tag === 'code' && children?.children?.[0]?.type === 'element'
+  )
 }
 
 function _parseJSDocName(node: ContentNode): string {
