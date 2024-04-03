@@ -51,6 +51,18 @@ import colors from '#tailwind-config/theme/colors'
 const appConfig = useAppConfig()
 const colorMode = useColorMode()
 
+// last 32 bit unix time stamp
+const cookieExpireDate = new Date(2147483647 * 1000)
+
+const primaryCookie = useCookie('nuxt-ui-primary', { expires: cookieExpireDate })
+if (primaryCookie.value) {
+  appConfig.ui.primary = primaryCookie.value
+}
+const grayCookie = useCookie('nuxt-ui-gray', { expires: cookieExpireDate })
+if (grayCookie.value) {
+  appConfig.ui.gray = grayCookie.value
+}
+
 // Computed
 
 const primaryColors = computed(() =>
@@ -65,7 +77,7 @@ const primary = computed({
   set(option) {
     appConfig.ui.primary = option.value
 
-    window.localStorage.setItem('nuxt-ui-primary', appConfig.ui.primary)
+    primaryCookie.value = appConfig.ui.primary
   },
 })
 
@@ -83,18 +95,7 @@ const gray = computed({
   set(option) {
     appConfig.ui.gray = option.value
 
-    window.localStorage.setItem('nuxt-ui-gray', appConfig.ui.gray)
+    grayCookie.value = appConfig.ui.gray
   },
-})
-
-onMounted(() => {
-  const primary = window.localStorage.getItem('nuxt-ui-primary')
-  if (primary) {
-    appConfig.ui.primary = primary
-  }
-  const gray = window.localStorage.getItem('nuxt-ui-gray')
-  if (gray) {
-    appConfig.ui.gray = gray
-  }
 })
 </script>
