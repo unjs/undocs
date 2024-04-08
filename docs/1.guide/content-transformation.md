@@ -6,6 +6,16 @@ icon: bi:stars
 
 > Discover ways that undocs transforms content to make it more easier to just write documentation.
 
+<!-- automd:file src="../.partials/warn.md" -->
+
+> [!IMPORTANT]
+> Undocs is currently intended for UnJS docs only and is not fully customizable yet. <br>
+> Contributions are more than welcome but please consider that this project is not ready yet to be used. <br>
+> Make sure to use [Bun](https://bun.sh/) and [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) for Windows.
+> We don't guarantee stability yet and it is expected that it doesn't work time to time.
+
+<!-- /automd -->
+
 ## Github Notes
 
 https://github.com/orgs/community/discussions/16925
@@ -54,7 +64,7 @@ https://github.com/orgs/community/discussions/16925
 
 If you have code blocks right after each other, they will be grouped together using [`code-group`](https://ui.nuxt.com/pro/prose/code-group).
 
-```md
+````md
     ```ts [nuxt.config.ts]
     export default defineNuxtConfig({
       modules: [],
@@ -76,7 +86,7 @@ If you have code blocks right after each other, they will be grouped together us
       </div>
     </template>
     ```
-```
+````
 
 ```ts [nuxt.config.ts]
 export default defineNuxtConfig({
@@ -87,7 +97,7 @@ export default defineNuxtConfig({
 ```ts [server/api/hello.get.ts]
 export default defineEventHandler(() => {
   return {
-    hello: 'world'
+    hello: 'world',
   }
 })
 ```
@@ -95,7 +105,7 @@ export default defineEventHandler(() => {
 ```vue [app.vue]
 <template>
   <div>
-   <h1>Welcome to the homepage</h1>
+    <h1>Welcome to the homepage</h1>
   </div>
 </template>
 ```
@@ -136,6 +146,59 @@ Generate steps by useing standard markdown numbered lists!
    :pm-run{script="undocs"}
 
 3. Done ✅
+
+## Config References
+
+Generate beautiful references for your configuration files by just using markdown!
+
+> [!TIP]
+> If you use [automd:jsdocs](https://automd.unjs.io/generators/jsdocs), you can reference the schema file directly! Check out this example from the [config](/config) page.
+
+```md
+  ### `$schema`
+
+  - **Type**: `string`
+
+  ### `automd`
+
+  - **Type**: `boolean`
+
+  Enable integration with https://automd.unjs.io
+
+  ### `buildCache`
+
+  - **Type**: `boolean`
+
+  Enable build cache (experimental)
+
+  ### `description`
+
+  - **Type**: `string`
+
+  The description of the documentation site.
+```
+
+### `$schema`
+
+- **Type**: `string`
+
+### `automd`
+
+- **Type**: `boolean`
+
+Enable integration with https://automd.unjs.io
+
+### `buildCache`
+
+- **Type**: `boolean`
+
+Enable build cache (experimental)
+
+### `description`
+
+- **Type**: `string`
+
+The description of the documentation site.
 
 > [!TIP]
 > Do you have an idea for a new content transformation, feel free to [open an issue](https://github.com/unjs/undocs/issues/new?assignees=&labels=pending+triage&projects=&template=feature-request.yml)!
