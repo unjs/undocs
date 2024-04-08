@@ -103,5 +103,58 @@ Generate steps by useing standard markdown numbered lists!
 
 3. Done ✅
 
+## Config References
+
+Generate beautiful references for your configuration files by just using markdown!
+
+> [!TIP]
+> If you use [automd:jsdocs](https://automd.unjs.io/generators/jsdocs), you can reference the schema file directly! Check out this example from the [config](/config) page.
+
+```md
+  ### `$schema`
+
+  - **Type**: `string`
+
+  ### `automd`
+
+  - **Type**: `boolean`
+
+  Enable integration with https://automd.unjs.io
+
+  ### `buildCache`
+
+  - **Type**: `boolean`
+
+  Enable build cache (experimental)
+
+  ### `description`
+
+  - **Type**: `string`
+
+  The description of the documentation site.
+```
+
+### `$schema`
+
+- **Type**: `string`
+
+### `automd`
+
+- **Type**: `boolean`
+
+Enable integration with https://automd.unjs.io
+
+### `buildCache`
+
+- **Type**: `boolean`
+
+Enable build cache (experimental)
+
+### `description`
+
+- **Type**: `string`
+
+The description of the documentation site.
+
 > [!TIP]
 > Do you have an idea for a new content transformation, feel free to [open an issue](https://github.com/unjs/undocs/issues/new?assignees=&labels=pending+triage&projects=&template=feature-request.yml)!
