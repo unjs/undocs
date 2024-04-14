@@ -53,25 +53,9 @@ onMounted(() => {
   <UPage v-if="page">
     <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline">
     </UPageHeader>
-
-    <div
-      v-if="tocLinks.length > 1"
-      class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky"
-    >
-      <UDropdown
-        :items="[[{ label: 'Return to top', click: scrollToTop }], tocLinks]"
-        :popper="{ placement: 'bottom-end' }"
-        :mode="isMobile ? 'click' : 'hover'"
-        v-model:open="tocOpen"
-      >
-        <UButton
-          color="white"
-          label="On this page"
-          :trailing="false"
-          :icon="`i-heroicons-chevron-${tocOpen ? 'down' : 'left'}-20-solid`"
-        />
-      </UDropdown>
-    </div>
+    <template #right>
+      <UContentToc :links="page.body.toc.links" />
+    </template>
 
     <UPageBody prose>
       <br v-if="tocLinks.length > 1" />
