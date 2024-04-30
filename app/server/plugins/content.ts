@@ -41,22 +41,44 @@ function transformStepsList(node: ContentNode) {
   // TODO: Find a way to opt out of this transformation if needed within markdown.
   if (node.tag === 'ol' && (node.children?.length || 0) > 0 && node.children?.[0].tag === 'li') {
     const stepsChildren = node.children.map((li) => {
-      const label = li.children?.[0]?.value ?? undefined
-      // Exclude br tags from children to avoid spacing
-      const children = ((label && li.children?.slice(1)) || []).filter((child) => !['br'].includes(child.tag || ''))
+      const children = li.children || []
+
+      // console.log(JSON.stringify(children, undefined, 2))
 
       return {
         type: 'element',
         tag: 'div',
-        props: {
-          label,
-        },
         children,
       }
     })
 
-    // For now we only check if there is at least (1) content to generate the steps..
-    const stepsHaveContent = stepsChildren.some((step) => step.children.length > 0)
+    const lastLeadingSpaceOnStep = stepsChildren
+      .map((step) => {
+        let lastLeadingSpace = -1
+
+        for (let i = 0; i < step.children.length; i++) {
+          const child = step.children[i]
+          const prevChild = step.children[i - 1]
+          if (
+            (child?.type === 'text' && child.value?.startsWith(' ')) ||
+            (prevChild?.type === 'text' && prevChild?.value?.endsWith(' '))
+          ) {
+            lastLeadingSpace = i
+          }
+        }
+
+        return lastLeadingSpace
+      })
+      .filter((step) => step > -1)
+
+    const stepsHaveContent = stepsChildren.some((step) => {
+      if (lastLeadingSpaceOnStep.length > 0) {
+        return step.children.slice(lastLeadingSpaceOnStep[0], lastLeadingSpaceOnStep[0]).length > 1
+      }
+
+      return step.children.length > 1
+    })
+
     if (stepsHaveContent) {
       node.type = 'element'
       node.tag = 'Steps'
