@@ -21,7 +21,6 @@ export function genLanding(docsConfig) {
         label: 'Get Started',
         icon: 'i-heroicons-rocket-launch',
         to: '/guide',
-        size: 'lg',
         order: 0,
       },
       github: {
@@ -30,7 +29,6 @@ export function genLanding(docsConfig) {
         color: 'white',
         to: `https://github.com/${docsConfig.github}`,
         target: '_blank',
-        size: 'lg',
         order: 100,
       },
     },

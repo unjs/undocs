@@ -34,6 +34,7 @@ function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
       return {
         label: titleCase(key),
         order,
+        size: 'lg',
         target: link.to?.startsWith('https') ? '_blank' : undefined,
         ...link,
       }
@@ -83,6 +84,7 @@ const hero = computed(() => {
       <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" />
     </div>
   </ULandingHero>
+
   <template v-if="page.features?.length > 0 && !hero.withFeatures">
     <ULandingSection :title="page.featuresTitle">
       <UPageGrid>
