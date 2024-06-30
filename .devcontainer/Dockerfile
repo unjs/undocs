@@ -1,4 +1,4 @@
-FROM node:20.12.2
+FROM node:20.15.0
 
 RUN apt update && apt install -y sudo linux-perf
 
