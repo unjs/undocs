@@ -1,5 +1,40 @@
 # Changelog
 
+## v0.2.22
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.21...v0.2.22)
+
+### 🚀 Enhancements
+
+- Jsdocs markdown shortcut ([#118](https://github.com/unjs/undocs/pull/118))
+
+### 🩹 Fixes
+
+- Split app in 3 layers to fix tailwind ([65ef022](https://github.com/unjs/undocs/commit/65ef022))
+- Default button size ([#135](https://github.com/unjs/undocs/pull/135))
+- Add `icon` head ([#129](https://github.com/unjs/undocs/pull/129))
+
+### 📖 Documentation
+
+- Refactor github notes ([#116](https://github.com/unjs/undocs/pull/116))
+
+### 🏡 Chore
+
+- **release:** V0.2.21 ([017fe5e](https://github.com/unjs/undocs/commit/017fe5e))
+- Add usage warn ([99186ab](https://github.com/unjs/undocs/commit/99186ab))
+- Update dependencies ([28bbd60](https://github.com/unjs/undocs/commit/28bbd60))
+- Update eslint ([b3fcc78](https://github.com/unjs/undocs/commit/b3fcc78))
+- Add iconify-json (logos, simple-icons) as deps ([ee82f95](https://github.com/unjs/undocs/commit/ee82f95))
+- Apply automated updates ([89d11d7](https://github.com/unjs/undocs/commit/89d11d7))
+- Add `@nuxt/image` dep ([54b7887](https://github.com/unjs/undocs/commit/54b7887))
+
+### ❤️ Contributors
+
+- Selemondev ([@selemondev](http://github.com/selemondev))
+- Yvan Zhu ([@fyzhu](http://github.com/fyzhu))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+
 ## v0.2.21
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.20...v0.2.21)
