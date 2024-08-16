@@ -7,8 +7,6 @@ const dev = !!process.env.NUXT_DOCS_DEV
 const isProd = process.env.NODE_ENV === 'production'
 const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
-console.log('foo')
-
 export default defineNuxtConfig({
   ssr,
   modules: ['@nuxt/fonts', '@nuxt/content', isProd && '@nuxtjs/plausible', '@nuxt/ui'],

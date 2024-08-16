@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
 import { loadConfig, watchConfig } from 'c12'
 
-const appDir = fileURLToPath(new URL('../app/unjs', import.meta.url))
+const appDir = fileURLToPath(new URL('../app', import.meta.url))
 
 const pkgDir = fileURLToPath(new URL('..', import.meta.url))
 
