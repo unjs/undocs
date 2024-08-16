@@ -75,21 +75,14 @@ export default defineNuxtConfig({
   },
   hooks: {
     'tailwindcss:config'(twConfig) {
-      let contentFiles
-      if (Array.isArray(twConfig.content)) {
-        contentFiles = twConfig.content
-        twConfig.content = {
-          files: twConfig.content,
-        }
-      } else {
-        contentFiles = twConfig.content.files
-      }
+      console.log('(before)', twConfig.content)
+      const contentFiles = Array.isArray(twConfig.content) ? twConfig.content : twConfig.content.files
       for (const file of contentFiles) {
         if (typeof file === 'string' && file.includes('app/.unjs')) {
           contentFiles.push(file.replace('app/.unjs', 'app'))
         }
       }
-      console.log('contentFiles', contentFiles)
+      console.log('(after)', contentFiles)
     },
   },
 })
