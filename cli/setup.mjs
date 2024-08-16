@@ -29,6 +29,7 @@ export async function setupDocs(docsDir, opts = {}) {
 
   // Prepare loadNuxt overrides
   const nuxtConfig = {
+    compatibilityDate: '2024-08-16',
     rootDir: resolve(docsDir, '.docs'),
     srcDir: resolve(docsDir, '.docs'),
     extends: [...(opts.extends || []), appDirUnjs, appDir, '@nuxt/ui-pro'],
