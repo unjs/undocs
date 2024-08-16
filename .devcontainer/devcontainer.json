@@ -2,7 +2,7 @@
 // https://containers.dev/implementors/json_reference/
 {
   "build": {
-    "dockerfile": "Dockerfile",
+    "dockerfile": "Dockerfile"
   },
   "features": {},
   "customizations": {

@@ -3,7 +3,6 @@ import { resolve } from 'node:path'
 import { loadConfig, watchConfig } from 'c12'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
-const appDirUnjs = fileURLToPath(new URL('../app/.unjs', import.meta.url))
 
 const pkgDir = fileURLToPath(new URL('..', import.meta.url))
 
@@ -29,9 +28,10 @@ export async function setupDocs(docsDir, opts = {}) {
 
   // Prepare loadNuxt overrides
   const nuxtConfig = {
+    compatibilityDate: '2024-08-16',
     rootDir: resolve(docsDir, '.docs'),
     srcDir: resolve(docsDir, '.docs'),
-    extends: [...(opts.extends || []), appDirUnjs, appDir, '@nuxt/ui-pro'],
+    extends: [...(opts.extends || []), appDir, '@nuxt/ui-pro'],
     modulesDir: [resolve(pkgDir, 'node_modules'), resolve(docsDir, 'node_modules')],
     build: {
       transpile: [appDir],

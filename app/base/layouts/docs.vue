@@ -7,7 +7,7 @@ const docsNav = useDocsNav()
     <UPage>
       <template #left>
         <UAside :links="docsNav.links">
-          <UDivider type="dashed" class="mb-6" v-if="docsNav.activeLinks?.length" />
+          <UDivider v-if="docsNav.activeLinks?.length" type="dashed" class="mb-6" />
           <UNavigationTree :links="docsNav.activeLinks" />
         </UAside>
       </template>

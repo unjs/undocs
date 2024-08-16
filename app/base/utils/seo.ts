@@ -5,7 +5,7 @@ export interface PageMeta {
 }
 
 export function usePageSEO(page: PageMeta) {
-  if (!process.server && !import.meta.dev) {
+  if (!import.meta.server && !import.meta.dev) {
     return
   }
 
