@@ -75,7 +75,7 @@
 ### 🚀 Enhancements
 
 - Add loading indicator ([#81](https://github.com/unjs/undocs/pull/81))
-- Autogen  section icons ([#72](https://github.com/unjs/undocs/pull/72))
+- Autogen section icons ([#72](https://github.com/unjs/undocs/pull/72))
 - Transform ol->li to `Steps` component. ([#83](https://github.com/unjs/undocs/pull/83))
 
 ### 🩹 Fixes
@@ -103,7 +103,7 @@
 - Update deps and lock ([10cb12b](https://github.com/unjs/undocs/commit/10cb12b))
 - Lint md ([42cc5a4](https://github.com/unjs/undocs/commit/42cc5a4))
 - Apply automated updates ([0d7c0a8](https://github.com/unjs/undocs/commit/0d7c0a8))
-- Remove console.log -_- ([b265a1b](https://github.com/unjs/undocs/commit/b265a1b))
+- Remove console.log -\_- ([b265a1b](https://github.com/unjs/undocs/commit/b265a1b))
 - Use `v-for` in `Pm` components ([#89](https://github.com/unjs/undocs/pull/89))
 - Update deps ([9159210](https://github.com/unjs/undocs/commit/9159210))
 

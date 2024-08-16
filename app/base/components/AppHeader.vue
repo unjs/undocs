@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { NavItem } from '@nuxt/content/dist/runtime/types'
+// import type { NavItem } from '@nuxt/content/dist/runtime/types'
 
-const navigation = inject<NavItem[]>('navigation', [])
+// const navigation = inject<NavItem[]>('navigation', [])
 
 const appConfig = useAppConfig()
 
@@ -41,7 +41,7 @@ const headerLinks = computed(() => {
     </template> -->
 
     <template #right>
-      <UHeaderLinks :links="headerLinks" class="hidden md:flex mr-4" v-if="docsNav.links.length > 1" />
+      <UHeaderLinks v-if="docsNav.links.length > 1" :links="headerLinks" class="hidden md:flex mr-4" />
 
       <UTooltip class="lg:hidden" text="Search" :shortcuts="[metaSymbol, 'K']">
         <UContentSearchButton :label="null" />

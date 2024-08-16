@@ -155,27 +155,27 @@ Generate beautiful references for your configuration files by just using markdow
 > If you use [automd:jsdocs](https://automd.unjs.io/generators/jsdocs), you can reference the schema file directly! Check out this example from the [config](/config) page.
 
 ```md
-  ### `$schema`
+### `$schema`
 
-  - **Type**: `string`
+- **Type**: `string`
 
-  ### `automd`
+### `automd`
 
-  - **Type**: `boolean`
+- **Type**: `boolean`
 
-  Enable integration with https://automd.unjs.io
+Enable integration with https://automd.unjs.io
 
-  ### `buildCache`
+### `buildCache`
 
-  - **Type**: `boolean`
+- **Type**: `boolean`
 
-  Enable build cache (experimental)
+Enable build cache (experimental)
 
-  ### `description`
+### `description`
 
-  - **Type**: `string`
+- **Type**: `string`
 
-  The description of the documentation site.
+The description of the documentation site.
 ```
 
 ### `$schema`

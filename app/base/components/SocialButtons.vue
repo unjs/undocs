@@ -5,6 +5,7 @@ const props = defineProps({
   socials: {
     type: Array,
     required: false,
+    default: () => ['github', 'twitter', 'discord'],
   },
 })
 
@@ -40,5 +41,5 @@ const socialLinks = computed(() => {
     rel="noopener noreferrer"
     color="gray"
     variant="ghost"
-  ></UButton>
+  />
 </template>

@@ -75,6 +75,7 @@ const icon = computed(() => {
   if (ui.value[extName]) {
     return ui.value[extName]
   }
+  return ''
 })
 </script>
 
