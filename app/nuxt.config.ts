@@ -76,6 +76,10 @@ export default defineNuxtConfig({
   hooks: {
     'tailwindcss:config'(twConfig) {
       const contentFiles = (twConfig.content as { files: string[] }).files
+      if (!contentFiles) {
+        console.log('No content files found in tailwind config:', twConfig)
+        return
+      }
       for (const file of contentFiles) {
         if (file.includes('app/.unjs')) {
           contentFiles.push(file.replace('app/.unjs', 'app'))
