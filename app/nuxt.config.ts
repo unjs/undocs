@@ -73,4 +73,14 @@ export default defineNuxtConfig({
     preference: 'dark',
     fallback: 'dark',
   },
+  hooks: {
+    'tailwindcss:config'(twConfig) {
+      const contentFiles = (twConfig.content as { files: string[] }).files
+      for (const file of contentFiles) {
+        if (file.includes('app/.unjs')) {
+          contentFiles.push(file.replace('app/.unjs', 'app'))
+        }
+      }
+    },
+  },
 })

@@ -1,25 +1,7 @@
-import { resolve, join } from 'node:path'
 import type { Config } from 'tailwindcss'
 import defaultTheme from 'tailwindcss/defaultTheme'
 
-const uiDir = resolve(require.resolve('@nuxt/ui'), '..')
-
-const uiProDir = resolve(require.resolve('@nuxt/ui-pro'), '..')
-
-const appDir = __dirname
-
-const contentFiles = [
-  join(appDir, '{components,pages,layouts}/**/*.{vue,mjs,js,cjs,ts}'),
-  join(appDir, '.unjs/{components,pages,layouts}/**/*.{vue,mjs,js,cjs,ts}'),
-  join(uiDir, 'runtime/**/*.{vue,mjs,js,cjs,ts}'),
-  join(uiProDir, 'components/**/*.{vue,mjs,js,cjs,ts}'),
-  join(uiProDir, 'modules/pro/runtime/**/*.{vue,mjs,js,cjs,ts}'),
-]
-
 export default <Partial<Config>>{
-  content: {
-    files: contentFiles,
-  },
   theme: {
     extend: {
       fontFamily: {
