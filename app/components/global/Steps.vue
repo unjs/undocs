@@ -25,7 +25,7 @@ defineOptions({
         :class="{
           hidden: idx === steps.length - 1,
         }"
-      ></div>
+      />
       <div class="absolute ml-[-14px] py-2">
         <UBadge variant="soft" size="lg" color="gray">
           {{ step.idx }}
