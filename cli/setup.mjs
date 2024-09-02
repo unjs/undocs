@@ -33,9 +33,6 @@ export async function setupDocs(docsDir, opts = {}) {
     srcDir: resolve(docsDir, '.docs'),
     extends: [...(opts.extends || []), appDir, '@nuxt/ui-pro'],
     modulesDir: [resolve(pkgDir, 'node_modules'), resolve(docsDir, 'node_modules')],
-    build: {
-      transpile: [appDir],
-    },
     modules: [docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
     // @ts-ignore
     docs: docsconfig,
