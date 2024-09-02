@@ -71,49 +71,51 @@ const hero = computed(() => {
 </script>
 
 <template>
-  <ULandingHero v-if="hero" v-bind="hero" :orientation="hero.orientation">
-    <template #top>
-      <LandingBackground />
-    </template>
-    <template #title>
-      <MDC :value="hero.title" />
+  <div>
+    <ULandingHero v-if="hero" v-bind="hero" :orientation="hero.orientation">
+      <template #top>
+        <LandingBackground />
+      </template>
+      <template #title>
+        <MDC :value="hero.title" />
+      </template>
+
+      <MDC v-if="hero.code" :value="hero.code" tag="pre" class="prose prose-primary dark:prose-invert mx-auto" />
+      <div v-else-if="hero.withFeatures" class="flex flex-col gap-6">
+        <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" />
+      </div>
+    </ULandingHero>
+
+    <template v-if="page.features?.length > 0 && !hero.withFeatures">
+      <ULandingSection :title="page.featuresTitle">
+        <UPageGrid>
+          <ULandingCard
+            v-for="(item, index) of page.features"
+            :key="index"
+            v-bind="item"
+            :ui="{
+              icon: {
+                // If the icon is an emoji, we need to use a bigger size
+                base: /\p{Emoji}/u.test(item.icon)
+                  ? '!text-2xl !w-auto !h-auto'
+                  : 'w-8 h-8 flex-shrink-0 text-gray-900 dark:text-white',
+              },
+            }"
+          >
+            <template v-if="item.description" #description>
+              <MDC :value="item.description" tag="span" class="prose prose-primary dark:prose-invert" />
+            </template>
+          </ULandingCard>
+        </UPageGrid>
+      </ULandingSection>
     </template>
 
-    <MDC v-if="hero.code" :value="hero.code" tag="pre" class="prose prose-primary dark:prose-invert mx-auto" />
-    <div v-else-if="hero.withFeatures" class="flex flex-col gap-6">
-      <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" />
-    </div>
-  </ULandingHero>
-
-  <template v-if="page.features?.length > 0 && !hero.withFeatures">
-    <ULandingSection :title="page.featuresTitle">
-      <UPageGrid>
-        <ULandingCard
-          v-for="(item, index) of page.features"
-          :key="index"
-          v-bind="item"
-          :ui="{
-            icon: {
-              // If the icon is an emoji, we need to use a bigger size
-              base: /\p{Emoji}/u.test(item.icon)
-                ? '!text-2xl !w-auto !h-auto'
-                : 'w-8 h-8 flex-shrink-0 text-gray-900 dark:text-white',
-            },
-          }"
-        >
-          <template v-if="item.description" #description>
-            <MDC :value="item.description" tag="p" class="prose prose-primary dark:prose-invert" />
-          </template>
-        </ULandingCard>
-      </UPageGrid>
+    <ULandingSection v-if="page.contributors && page._github" title="Made by community">
+      <UContainer>
+        <a :href="`https://github.com/${page._github}/graphs/contributors`" target="_blank">
+          <img :src="`https://contrib.rocks/image?repo=${page._github}`" />
+        </a>
+      </UContainer>
     </ULandingSection>
-  </template>
-
-  <ULandingSection v-if="page.contributors && page._github" title="Made by community">
-    <UContainer>
-      <a :href="`https://github.com/${page._github}/graphs/contributors`" target="_blank">
-        <img :src="`https://contrib.rocks/image?repo=${page._github}`" />
-      </a>
-    </UContainer>
-  </ULandingSection>
+  </div>
 </template>
