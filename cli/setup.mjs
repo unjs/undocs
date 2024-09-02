@@ -26,14 +26,26 @@ export async function setupDocs(docsDir, opts = {}) {
     throw new Error('`url` config is required for production build!')
   }
 
+  // Module to fix layers (force add .docs as first)
+  const docsSrcDir = resolve(docsDir, '.docs')
+  const fixLayers = (_, nuxt) => {
+    nuxt.options._layers.unshift({
+      cwd: docsSrcDir,
+      config: {
+        rootDir: docsSrcDir,
+        srcDir: docsSrcDir
+      }
+    })
+  }
+
   // Prepare loadNuxt overrides
   const nuxtConfig = {
     compatibilityDate: '2024-08-16',
-    rootDir: resolve(docsDir, '.docs'),
-    srcDir: resolve(docsDir, '.docs'),
+    rootDir: docsSrcDir,
+    srcDir: docsSrcDir,
     extends: [...(opts.extends || []), appDir, '@nuxt/ui-pro'],
     modulesDir: [resolve(pkgDir, 'node_modules'), resolve(docsDir, 'node_modules')],
-    modules: [docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
+    modules: [fixLayers,docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
     // @ts-ignore
     docs: docsconfig,
     // @ts-ignore
