@@ -33,8 +33,8 @@ export async function setupDocs(docsDir, opts = {}) {
       cwd: docsSrcDir,
       config: {
         rootDir: docsSrcDir,
-        srcDir: docsSrcDir
-      }
+        srcDir: docsSrcDir,
+      },
     })
   }
 
@@ -45,7 +45,7 @@ export async function setupDocs(docsDir, opts = {}) {
     srcDir: docsSrcDir,
     extends: [...(opts.extends || []), appDir, '@nuxt/ui-pro'],
     modulesDir: [resolve(pkgDir, 'node_modules'), resolve(docsDir, 'node_modules')],
-    modules: [fixLayers,docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
+    modules: [fixLayers, docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
     // @ts-ignore
     docs: docsconfig,
     // @ts-ignore
