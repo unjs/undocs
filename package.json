@@ -38,7 +38,7 @@
     "@nuxt/ui-pro": "^1.4.1",
     "@nuxtjs/plausible": "^1.0.2",
     "@nuxtjs/tailwindcss": "^6.12.1",
-    "@resvg/resvg-js": "^2.6.2",
+    "@resvg/resvg-wasm": "^2.6.2",
     "automd": "^0.3.8",
     "c12": "^1.11.1",
     "citty": "^0.1.6",

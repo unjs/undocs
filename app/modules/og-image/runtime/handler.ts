@@ -1,14 +1,17 @@
 import { defineLazyEventHandler, setHeader, getQuery } from 'h3'
 export default defineLazyEventHandler(async () => {
-  const { Resvg } = await import('@resvg/resvg-js')
+  // const { Resvg } = await import('@resvg/resvg-js')
+  const { default: ResvgWasm } = await import('@resvg/resvg-wasm/index_bg.wasm?module' as any)
+  const { Resvg, initWasm } = await import('@resvg/resvg-wasm')
+  await initWasm(ResvgWasm)
 
   // Read server assets
   const nunito = await useStorage().getItemRaw('assets:og-image:nunito.ttf')
-  const svgTemplate = (await useStorage().getItem('assets:og-image:template.svg')) as string
+  // const svgTemplate = (await useStorage().getItem('assets:og-image:template.svg')) as string
 
-  return defineEventHandler((event) => {
+  return defineEventHandler(async (event) => {
     // Use this for HMR
-    // const svgTemplate = (await useStorage().getItem('assets:og-image:template.svg')) as string
+    const svgTemplate = (await useStorage().getItem('assets:og-image:template.svg')) as string
 
     const { name = '', title = '', description = '' } = getQuery(event) as Record<string, string>
 
@@ -22,14 +25,7 @@ export default defineLazyEventHandler(async () => {
 
     // https://github.com/yisibl/resvg-js
     const resvg = new Resvg(svg, {
-      background: '',
-      dpi: 600,
-      fitTo: {
-        mode: 'width',
-        value: 1200,
-      },
       font: {
-        // @ts-expect-error missing types
         fontBuffers: [nunito],
       },
     })
