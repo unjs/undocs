@@ -7,11 +7,11 @@ export default defineLazyEventHandler(async () => {
 
   // Read server assets
   const nunito = await useStorage().getItemRaw('assets:og-image:nunito.ttf')
-  // const svgTemplate = (await useStorage().getItem('assets:og-image:template.svg')) as string
+  const svgTemplate = (await useStorage().getItem('assets:og-image:template.svg')) as string
 
   return defineEventHandler(async (event) => {
     // Use this for HMR
-    const svgTemplate = (await useStorage().getItem('assets:og-image:template.svg')) as string
+    // const svgTemplate = (await useStorage().getItem('assets:og-image:template.svg')) as string
 
     const { name = '', title = '', description = '' } = getQuery(event) as Record<string, string>
 
