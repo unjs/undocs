@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.2.23
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.22...v0.2.23)
+
+### 🚀 Enhancements
+
+- Use resvg with wasm ([b9be2aa](https://github.com/unjs/undocs/commit/b9be2aa))
+
+### 🩹 Fixes
+
+- Force add `.docs` as layer 0 ([486903f](https://github.com/unjs/undocs/commit/486903f))
+- Fix landing hydration issue ([8df421e](https://github.com/unjs/undocs/commit/8df421e))
+- Workaround tailwind initial build issue ([f7a394f](https://github.com/unjs/undocs/commit/f7a394f))
+
+### 💅 Refactors
+
+- Simplify app dir ([f3b7d07](https://github.com/unjs/undocs/commit/f3b7d07))
+- Use yellow shadow for og bg ([ce281c3](https://github.com/unjs/undocs/commit/ce281c3))
+
+### 🏡 Chore
+
+- Update lockfile ([3b4b70f](https://github.com/unjs/undocs/commit/3b4b70f))
+- Lint ([a52361f](https://github.com/unjs/undocs/commit/a52361f))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.22
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.21...v0.2.22)
