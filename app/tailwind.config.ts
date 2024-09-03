@@ -2,6 +2,10 @@ import type { Config } from 'tailwindcss'
 import defaultTheme from 'tailwindcss/defaultTheme'
 
 export default <Partial<Config>>{
+  // Without empty content block, first build without `.nuxt` dir fails
+  content: {
+    files: [],
+  },
   theme: {
     extend: {
       fontFamily: {
