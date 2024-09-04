@@ -30,6 +30,10 @@
       "type": "string",
       "description": "The GitHub repository for the documentation site."
     },
+    "branch": {
+      "type": "string",
+      "description": "The branch of the GitHub repository for the documentation site."
+    },
     "themeColor": {
       "type": "string",
       "description": "The theme color of the documentation site.\nIt will be used as the `theme-color` meta tag and a full palette of colors will be generated from it."

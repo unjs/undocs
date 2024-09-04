@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
+import { execSync } from 'node:child_process'
 import { loadConfig, watchConfig } from 'c12'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
@@ -62,6 +63,7 @@ export async function setupDocs(docsDir, opts = {}) {
       },
       docs: {
         github: docsconfig.github,
+        branch: docsconfig.branch || getGitBranch() || 'main',
       },
     },
     nitro: {
@@ -96,4 +98,12 @@ function inferSiteURL() {
     process.env.CI_PAGES_URL || // Gitlab Pages
     process.env.CF_PAGES_URL // Cloudflare Pages
   )
+}
+
+function getGitBranch() {
+  try {
+    return execSync('git rev-parse --abbrev-ref HEAD').toString().trim()
+  } catch {
+    // Ignore
+  }
 }

@@ -5,6 +5,7 @@ export interface DocsConfig {
   shortDescription?: string
   url?: string
   github?: string
+  branch?: string
   themeColor?: string
   redirects?: Record<string, string>
   automd?: unknown
