@@ -32,7 +32,7 @@ defineOptions({
       </div>
 
       <div class="w-full overflow-hidden pl-8 md:pl-12 pr-px">
-        <component class="mt-2.5" :is="step.component" />
+        <component :is="step.component" class="mt-2.5" />
       </div>
     </div>
   </div>
