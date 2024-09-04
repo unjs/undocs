@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.26
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.25...v0.2.26)
+
 ## v0.2.25
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.24...v0.2.25)
