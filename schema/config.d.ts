@@ -7,7 +7,7 @@ export interface DocsConfig {
   github?: string
   themeColor?: string
   redirects?: Record<string, string>
-  automd?: any
+  automd?: unknown
   buildCache?: boolean
   landing?:
     | false

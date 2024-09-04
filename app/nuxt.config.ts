@@ -10,9 +10,7 @@ const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 export default defineNuxtConfig({
   ssr,
   modules: ['@nuxt/fonts', '@nuxt/content', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
-  ui: {
-    icons: [],
-  },
+  ui: {},
   fonts: {
     families: [{ name: 'Nunito', provider: 'local' }],
     defaults: {

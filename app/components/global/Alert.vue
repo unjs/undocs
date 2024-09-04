@@ -11,10 +11,10 @@
 import type uiColors from '#ui-colors'
 
 const props = defineProps({
-  title: { type: String },
-  icon: { type: String },
-  color: { type: String as PropType<(typeof uiColors)[number]> },
-  to: { type: String },
+  title: { type: String, default: '' },
+  icon: { type: String, default: '' },
+  color: { type: String as PropType<(typeof uiColors)[number]>, default: '' },
+  to: { type: String, default: '' },
 })
 
 const target = computed(() => (props.to?.startsWith('https://') ? '_blank' : ''))

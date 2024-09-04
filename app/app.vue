@@ -12,8 +12,19 @@ const { data: files } = useLazyFetch<ParsedContent[]>('/api/search.json', {
 
 const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
 
+const browserTabIcon = appConfig.docs?.logo || undefined
+
 useSeoMeta({
   twitterSite: twitterSite ? `@${twitterSite}` : undefined,
+})
+
+useHead({
+  link: [
+    {
+      rel: 'icon',
+      href: browserTabIcon,
+    },
+  ],
 })
 
 provide('navigation', navigation)

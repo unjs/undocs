@@ -6,6 +6,6 @@
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "Node",
     "strict": true,
-    "types": ["node"],
-  },
+    "types": ["node"]
+  }
 }
