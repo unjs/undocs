@@ -1,5 +1,18 @@
 // @ts-ignore
 export default defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook('content:file:beforeParse', (file) => {
+    if (typeof file.body !== 'string') {
+      return // can be json meta
+    }
+    if (file.body.includes('<!-- automd:')) {
+      // Add meta
+      if (file.body.startsWith('---')) {
+        file.body = file.body.replace('---', '---\nautomd: true\n')
+      } else {
+        file.body = `---\nautomd: true\n---\n${file.body}`
+      }
+    }
+  })
   nitroApp.hooks.hook('content:file:afterParse', (file: ContentFile) => {
     // Filter out non-markdown files
     if (!file._id?.endsWith('.md')) {
