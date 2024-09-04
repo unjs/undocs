@@ -67,6 +67,12 @@ export async function setupDocs(docsDir, opts = {}) {
     nitro: {
       static: true,
       publicAssets: [{ baseURL: '/', dir: resolve(docsDir, '.docs/public'), maxAge: 0 }],
+      serverAssets: [
+        {
+          baseName: 'public',
+          dir: resolve(docsDir, '.docs/public'),
+        },
+      ],
     },
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
