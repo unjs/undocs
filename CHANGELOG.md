@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.24
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.23...v0.2.24)
+
+### 🩹 Fixes
+
+- **steps:** Simplify logic ([#112](https://github.com/unjs/undocs/pull/112))
+
+### 🏡 Chore
+
+- Apply automated updates ([19dc043](https://github.com/unjs/undocs/commit/19dc043))
+
+### ❤️ Contributors
+
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+
 ## v0.2.23
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.22...v0.2.23)
