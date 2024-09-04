@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.2.25
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.24...v0.2.25)
+
+### 🚀 Enhancements
+
+- Detect branch for edit button ([8b9e3fa](https://github.com/unjs/undocs/commit/8b9e3fa))
+- Auto note about automd pages ([20c2e83](https://github.com/unjs/undocs/commit/20c2e83))
+
+### 🩹 Fixes
+
+- Workaround for scanning fonts from dist ([87b617e](https://github.com/unjs/undocs/commit/87b617e))
+
+### 🏡 Chore
+
+- Apply automated updates ([b774fcd](https://github.com/unjs/undocs/commit/b774fcd))
+- Lint ([ed7c365](https://github.com/unjs/undocs/commit/ed7c365))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.24
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.23...v0.2.24)
