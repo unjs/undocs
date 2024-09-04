@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 1200 600" width="1200px" height="600px" preserveAspectRatio="none"
+  xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <clipPath id="clip0_206_4645">
+      <rect width="32" height="32" rx="2" fill="white" />
+    </clipPath>
+    <radialGradient id="grad1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" style="stop-color: yellow;" />
+      <stop offset="1" stop-color="transparent" />
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="600"
+    style="paint-order: stroke; stroke: rgb(24, 24, 24); fill: rgb(24, 24, 24);" x="0.23" />
+  <ellipse fill="url(#grad1)" cx="1200" cy="-150" rx="600" ry="600" />
+
+  {icon}
+
+  <text
+    style="fill: yellow; font-family: Nunito; font-size: 4.5em; font-weight: 700;"
+    x="85"
+    y="160"
+  >{name}</text>
+
+  <text
+    style="fill: white; font-family: Nunito; font-size: {titleSize}em; font-weight: 700;"
+  >
+    <tspan x="85" y="250">{title}</tspan>
+  </text>
+
+  <text style="fill: white; font-family: Nunito; font-size: 3.5em; font-weight: 400; line-height: 21.4572px;" y="330" x="85">{description1}<tspan x="85" dy="1.5em">​</tspan>{description2}<tspan x="85" dy="1.5em">​</tspan>{description3}<tspan x="85" dy="1.5em">​</tspan>{description4}</text>
+</svg>

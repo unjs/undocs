@@ -1,5 +1,136 @@
 # Changelog
 
+## v0.2.23
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.22...v0.2.23)
+
+### 🚀 Enhancements
+
+- Use resvg with wasm ([b9be2aa](https://github.com/unjs/undocs/commit/b9be2aa))
+
+### 🩹 Fixes
+
+- Force add `.docs` as layer 0 ([486903f](https://github.com/unjs/undocs/commit/486903f))
+- Fix landing hydration issue ([8df421e](https://github.com/unjs/undocs/commit/8df421e))
+- Workaround tailwind initial build issue ([f7a394f](https://github.com/unjs/undocs/commit/f7a394f))
+
+### 💅 Refactors
+
+- Simplify app dir ([f3b7d07](https://github.com/unjs/undocs/commit/f3b7d07))
+- Use yellow shadow for og bg ([ce281c3](https://github.com/unjs/undocs/commit/ce281c3))
+
+### 🏡 Chore
+
+- Update lockfile ([3b4b70f](https://github.com/unjs/undocs/commit/3b4b70f))
+- Lint ([a52361f](https://github.com/unjs/undocs/commit/a52361f))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
+## v0.2.22
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.21...v0.2.22)
+
+### 🚀 Enhancements
+
+- Jsdocs markdown shortcut ([#118](https://github.com/unjs/undocs/pull/118))
+
+### 🩹 Fixes
+
+- Split app in 3 layers to fix tailwind ([65ef022](https://github.com/unjs/undocs/commit/65ef022))
+- Default button size ([#135](https://github.com/unjs/undocs/pull/135))
+- Add `icon` head ([#129](https://github.com/unjs/undocs/pull/129))
+
+### 📖 Documentation
+
+- Refactor github notes ([#116](https://github.com/unjs/undocs/pull/116))
+
+### 🏡 Chore
+
+- **release:** V0.2.21 ([017fe5e](https://github.com/unjs/undocs/commit/017fe5e))
+- Add usage warn ([99186ab](https://github.com/unjs/undocs/commit/99186ab))
+- Update dependencies ([28bbd60](https://github.com/unjs/undocs/commit/28bbd60))
+- Update eslint ([b3fcc78](https://github.com/unjs/undocs/commit/b3fcc78))
+- Add iconify-json (logos, simple-icons) as deps ([ee82f95](https://github.com/unjs/undocs/commit/ee82f95))
+- Apply automated updates ([89d11d7](https://github.com/unjs/undocs/commit/89d11d7))
+- Add `@nuxt/image` dep ([54b7887](https://github.com/unjs/undocs/commit/54b7887))
+
+### ❤️ Contributors
+
+- Selemondev ([@selemondev](http://github.com/selemondev))
+- Yvan Zhu ([@fyzhu](http://github.com/fyzhu))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+
+## v0.2.21
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.20...v0.2.21)
+
+### 🩹 Fixes
+
+- Add hmr hotfix for nitro ([0868eaa](https://github.com/unjs/undocs/commit/0868eaa))
+- Auto-code group transformation ([#114](https://github.com/unjs/undocs/pull/114))
+
+### 📖 Documentation
+
+- Refactor content transformation section ([#115](https://github.com/unjs/undocs/pull/115))
+
+### 🏡 Chore
+
+- **release:** V0.2.20 ([522ef79](https://github.com/unjs/undocs/commit/522ef79))
+- Update deps ([337921a](https://github.com/unjs/undocs/commit/337921a))
+- Apply automated updates ([11fa9ad](https://github.com/unjs/undocs/commit/11fa9ad))
+
+### ❤️ Contributors
+
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
+## v0.2.20
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.19...v0.2.20)
+
+### 🩹 Fixes
+
+- Add hmr hotfix for nitro ([0868eaa](https://github.com/unjs/undocs/commit/0868eaa))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
+## v0.2.19
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.18...v0.2.19)
+
+### 🚀 Enhancements
+
+- Auto code groups ([#98](https://github.com/unjs/undocs/pull/98))
+- Use lightweight og image generator ([500ad57](https://github.com/unjs/undocs/commit/500ad57))
+
+### 🔥 Performance
+
+- Inline fonts ([2b2b914](https://github.com/unjs/undocs/commit/2b2b914))
+
+### 💅 Refactors
+
+- Simplify ([5dd64ba](https://github.com/unjs/undocs/commit/5dd64ba))
+- Improve content transformer maintenability ([e7244af](https://github.com/unjs/undocs/commit/e7244af))
+
+### 🏡 Chore
+
+- **release:** V0.2.18 ([0a7fa72](https://github.com/unjs/undocs/commit/0a7fa72))
+- Apply automated updates ([80729c2](https://github.com/unjs/undocs/commit/80729c2))
+- Apply automated updates ([8724277](https://github.com/unjs/undocs/commit/8724277))
+- Update lockfile ([0b5d647](https://github.com/unjs/undocs/commit/0b5d647))
+- Apply automated updates ([093ef7e](https://github.com/unjs/undocs/commit/093ef7e))
+- Apply automated updates ([248efb0](https://github.com/unjs/undocs/commit/248efb0))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Christian Preston ([@cpreston321](http://github.com/cpreston321))
+
 ## v0.2.18
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.17...v0.2.18)
@@ -7,7 +138,7 @@
 ### 🚀 Enhancements
 
 - Add loading indicator ([#81](https://github.com/unjs/undocs/pull/81))
-- Autogen  section icons ([#72](https://github.com/unjs/undocs/pull/72))
+- Autogen section icons ([#72](https://github.com/unjs/undocs/pull/72))
 - Transform ol->li to `Steps` component. ([#83](https://github.com/unjs/undocs/pull/83))
 
 ### 🩹 Fixes
@@ -35,7 +166,7 @@
 - Update deps and lock ([10cb12b](https://github.com/unjs/undocs/commit/10cb12b))
 - Lint md ([42cc5a4](https://github.com/unjs/undocs/commit/42cc5a4))
 - Apply automated updates ([0d7c0a8](https://github.com/unjs/undocs/commit/0d7c0a8))
-- Remove console.log -_- ([b265a1b](https://github.com/unjs/undocs/commit/b265a1b))
+- Remove console.log -\_- ([b265a1b](https://github.com/unjs/undocs/commit/b265a1b))
 - Use `v-for` in `Pm` components ([#89](https://github.com/unjs/undocs/pull/89))
 - Update deps ([9159210](https://github.com/unjs/undocs/commit/9159210))
 

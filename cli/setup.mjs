@@ -3,7 +3,6 @@ import { resolve } from 'node:path'
 import { loadConfig, watchConfig } from 'c12'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
-const appDirUnjs = fileURLToPath(new URL('../app/.unjs', import.meta.url))
 
 const pkgDir = fileURLToPath(new URL('..', import.meta.url))
 
@@ -27,16 +26,26 @@ export async function setupDocs(docsDir, opts = {}) {
     throw new Error('`url` config is required for production build!')
   }
 
+  // Module to fix layers (force add .docs as first)
+  const docsSrcDir = resolve(docsDir, '.docs')
+  const fixLayers = (_, nuxt) => {
+    nuxt.options._layers.unshift({
+      cwd: docsSrcDir,
+      config: {
+        rootDir: docsSrcDir,
+        srcDir: docsSrcDir,
+      },
+    })
+  }
+
   // Prepare loadNuxt overrides
   const nuxtConfig = {
-    rootDir: resolve(docsDir, '.docs'),
-    srcDir: resolve(docsDir, '.docs'),
-    extends: [...(opts.extends || []), appDirUnjs, appDir, '@nuxt/ui-pro'],
+    compatibilityDate: '2024-08-16',
+    rootDir: docsSrcDir,
+    srcDir: docsSrcDir,
+    extends: [...(opts.extends || []), appDir, '@nuxt/ui-pro'],
     modulesDir: [resolve(pkgDir, 'node_modules'), resolve(docsDir, 'node_modules')],
-    build: {
-      transpile: [appDir],
-    },
-    modules: [docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
+    modules: [fixLayers, docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
     // @ts-ignore
     docs: docsconfig,
     // @ts-ignore
@@ -58,6 +67,12 @@ export async function setupDocs(docsDir, opts = {}) {
     nitro: {
       static: true,
       publicAssets: [{ baseURL: '/', dir: resolve(docsDir, '.docs/public'), maxAge: 0 }],
+      serverAssets: [
+        {
+          baseName: 'public',
+          dir: resolve(docsDir, '.docs/public'),
+        },
+      ],
     },
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),

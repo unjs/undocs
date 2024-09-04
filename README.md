@@ -2,9 +2,15 @@
 
 Minimal Documentation Theme and CLI for shared usage across UnJS projects.
 
-Made with [Nuxt](https://nuxt.com/), [Nuxt Content](https://content.nuxt.com) and [Nuxt UI Pro](https://ui.nuxt.com/pro).
+<!-- automd:file src="./docs/.partials/warn.md" -->
 
-👉 Docs: https://undocs.pages.dev/
+> [!IMPORTANT]
+> Undocs is currently intended for UnJS docs only and is not fully customizable yet. <br>
+> Contributions are more than welcome but please consider that this project is not ready yet to be used. <br>
+> Make sure to use [Bun](https://bun.sh/) and [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) for Windows.
+> We don't guarantee stability yet and it is expected that it doesn't work time to time.
+
+<!-- /automd -->
 
 ## Contribution
 

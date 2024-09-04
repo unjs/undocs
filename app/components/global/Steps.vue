@@ -6,7 +6,6 @@ const steps = computed(() => {
   return s.map((step, index) => {
     return {
       idx: index + 1,
-      label: step.props?.label || `Step ${index + 1}`,
       component: step,
     }
   })
@@ -25,7 +24,7 @@ defineOptions({
         :class="{
           hidden: idx === steps.length - 1,
         }"
-      ></div>
+      />
       <div class="absolute ml-[-14px] py-2">
         <UBadge variant="soft" size="lg" color="gray">
           {{ step.idx }}
@@ -33,8 +32,7 @@ defineOptions({
       </div>
 
       <div class="w-full overflow-hidden pl-8 md:pl-12 pr-px">
-        <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-200">{{ step.label }}</p>
-        <component :is="step.component" />
+        <component :is="step.component" class="mt-2.5" />
       </div>
     </div>
   </div>

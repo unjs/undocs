@@ -34,12 +34,12 @@ export function useDocsNav() {
     })
   })
 
-  const activeLinks = computed(() => {
-    return links.value.find((l) => route.path.startsWith(l.originalTo))?.children || []
-  })
+  const activeSection = computed(() => links.value.find((l) => route.path.startsWith(l.originalTo)))
+  const activeLinks = computed(() => (activeSection.value?.children || []).filter(Boolean))
 
   return reactive({
     links,
+    activeSection,
     activeLinks,
   })
 }

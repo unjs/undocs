@@ -24,29 +24,46 @@ const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
     .findSurround(withoutTrailingSlash(route.path)),
 )
 
-useSeoMeta({
-  title: page.value?.title,
+usePageSEO({
+  title: `${page.value?.title} - ${appConfig.site.name}`,
+  ogTitle: page.value?.title,
   description: page.value?.description,
 })
 
-if (process.server) {
-  defineOgImageComponent('OgImageDocs')
-}
-
 const headline = computed(() => findPageHeadline(page.value))
 
-const tocOpen = ref(false)
-const tocLinks = computed(() =>
-  (page.value.body?.toc?.links || []).map((link) => ({
-    label: link.text,
-    href: `#${link.id}`,
-  })),
-)
+const tocLinks = computed(() => {
+  return (page.value.body?.toc?.links || []).map((link) => ({
+    ...link,
+    children: undefined,
+  }))
+})
 
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
-}
+const tocMobileOpen = ref(false)
+
+const tocMobileLinks = computed(() => {
+  return [
+    [
+      {
+        label: 'Return to top',
+        click: () => {
+          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
+        },
+      },
+    ],
+    (page.value.body?.toc?.links || []).map((link) => ({
+      label: link.text,
+      // href: `#${link.id}`,
+      click: () => {
+        tocMobileOpen.value = false
+        document.getElementById(link.id)?.scrollIntoView({ behavior: 'smooth' })
+      },
+    })),
+  ]
+})
+
 const isMobile = ref(false)
+
 onMounted(() => {
   isMobile.value = 'ontouchstart' in document.documentElement
 })
@@ -54,31 +71,35 @@ onMounted(() => {
 
 <template>
   <UPage v-if="page">
-    <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline">
-    </UPageHeader>
+    <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline" />
 
+    <!-- TOC -->
+    <!-- large screen -->
+    <template v-if="tocLinks.length > 0" #right>
+      <UContentToc title="On this page" :links="tocLinks" class="hidden lg:block" />
+    </template>
+    <!-- mobile -->
     <div
-      v-if="tocLinks.length > 1"
-      class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky"
+      v-if="tocMobileLinks.length > 1"
+      class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky mb-2 lg:hidden"
     >
       <UDropdown
-        :items="[[{ label: 'Return to top', click: scrollToTop }], tocLinks]"
+        v-model:open="tocMobileOpen"
+        :items="tocMobileLinks"
         :popper="{ placement: 'bottom-end' }"
         :mode="isMobile ? 'click' : 'hover'"
-        v-model:open="tocOpen"
       >
         <UButton
           color="white"
           label="On this page"
           :trailing="false"
-          :icon="`i-heroicons-chevron-${tocOpen ? 'down' : 'left'}-20-solid`"
+          :icon="`i-heroicons-chevron-${tocMobileOpen ? 'down' : 'left'}-20-solid`"
         />
       </UDropdown>
     </div>
 
     <UPageBody prose>
-      <br v-if="tocLinks.length > 1" />
-
+      <br v-if="tocMobileLinks.length > 1" class="lg:hidden mb-2" />
       <ContentRenderer v-if="page.body" :value="page" />
 
       <div class="space-y-6">

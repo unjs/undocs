@@ -9,10 +9,8 @@ const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
 export default defineNuxtConfig({
   ssr,
-  modules: ['@nuxt/fonts', 'nuxt-og-image', '@nuxt/content', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
-  ui: {
-    icons: [],
-  },
+  modules: ['@nuxt/fonts', '@nuxt/content', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
+  ui: {},
   fonts: {
     families: [{ name: 'Nunito', provider: 'local' }],
     defaults: {
@@ -62,11 +60,6 @@ export default defineNuxtConfig({
   },
   uiPro: {
     license: process.env.NUXT_UI_PRO_LICENSE || 'oss',
-  },
-  ogImage: {
-    enabled: ssr,
-    debug: false,
-    fonts: ['Nunito:400', 'Nunito:700'],
   },
   tailwindcss: {
     viewer: dev,
