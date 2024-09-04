@@ -9,6 +9,7 @@ export default createConfigForNuxt(
       'unicorn/prefer-module': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       'vue/html-self-closing': 'off',
+      'vue/first-attribute-linebreak': 'off',
     },
   },
 )
