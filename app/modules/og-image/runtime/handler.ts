@@ -7,7 +7,12 @@ export default defineLazyEventHandler(async () => {
 
   // Read server assets
   const storage = useStorage()
-  const fontNames = await storage.getKeys('assets:og-image:fonts:')
+  // https://github.com/unjs/unstorage/issues/477
+  // const fontNames = await storage.getKeys('assets:og-image:fonts:')
+  const fontNames = ['200', '300', '400', '500', '600', '700', '800', '900'].flatMap((weight) => [
+    `assets:og-image:fonts:nunito-latin-${weight}-normal.woff2`,
+    `assets:og-image:fonts:nunito-latin-ext-${weight}-normal.woff2`,
+  ])
   const fontBuffers = await Promise.all(fontNames.map((name) => storage.getItemRaw(name)))
 
   // Load icon
