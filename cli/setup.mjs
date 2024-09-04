@@ -101,8 +101,20 @@ function inferSiteURL() {
 }
 
 function getGitBranch() {
+  const envName =
+    process.env.CF_PAGES_BRANCH ||
+    process.env.CI_COMMIT_BRANCH ||
+    process.env.VERCEL_BRANCH_URL ||
+    process.env.BRANCH ||
+    process.env.GITHUB_REF_NAME
+  if (envName && envName !== 'HEAD') {
+    return envName
+  }
   try {
-    return execSync('git rev-parse --abbrev-ref HEAD').toString().trim()
+    const branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim()
+    if (branch && branch !== 'HEAD') {
+      return branch
+    }
   } catch {
     // Ignore
   }
