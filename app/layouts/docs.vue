@@ -4,7 +4,7 @@ const docsNav = useDocsNav()
 
 <template>
   <UContainer>
-    <UPage>
+    <UPage :ui="{ left: 'lg:col-span-2 pr-2 border-r border-gray-200 dark:border-gray-700' }">
       <template #left>
         <UAside :links="docsNav.links">
           <UDivider v-if="docsNav.activeLinks?.length" type="dashed" class="mb-6" />
