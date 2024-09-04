@@ -12,7 +12,7 @@ const { data: files } = useLazyFetch<ParsedContent[]>('/api/search.json', {
 
 const links = [
   {
-    label: 'Changlog',
+    label: 'Changelog',
     icon: 'solar:notes-minimalistic-bold-duotone',
     to: '/changelog',
   },
