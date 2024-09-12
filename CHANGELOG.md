@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.2.27
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.26...v0.2.27)
+
+### 🩹 Fixes
+
+- Disable jsdoc transform due to issues ([62ede86](https://github.com/unjs/undocs/commit/62ede86))
+
+### 🏡 Chore
+
+- **release:** V0.2.26 ([2d80666](https://github.com/unjs/undocs/commit/2d80666))
+- Update deps ([d146591](https://github.com/unjs/undocs/commit/d146591))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.26
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.25...v0.2.26)
