@@ -26,7 +26,7 @@ export default defineNitroPlugin((nitroApp) => {
       transformGithubAlert(node)
       transformStepsList(node)
       transformCodeGroups(idx, file.body?.children)
-      transformJSDocs(idx, file.body?.children)
+      // transformJSDocs(idx, file.body?.children)
     }
   })
 })
@@ -215,7 +215,7 @@ function _isNamedCodeBlock(children: ContentNode): boolean {
 
 // --- transform automd jsdocs ---
 
-function transformJSDocs(currChildIdx: number, children: ContentNode[] = []) {
+export function transformJSDocs(currChildIdx: number, children: ContentNode[] = []) {
   if (!children?.length || !_isJSDocBlock(children[currChildIdx])) {
     return
   }
