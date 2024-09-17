@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.2.28
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.27...v0.2.28)
+
+### 🩹 Fixes
+
+- Update page title with spa navigation ([2984c92](https://github.com/unjs/undocs/commit/2984c92))
+
+### 💅 Refactors
+
+- Make code blocks simpler ([d8bf888](https://github.com/unjs/undocs/commit/d8bf888))
+- Use `Inter` as main font family ([3e515f6](https://github.com/unjs/undocs/commit/3e515f6))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.27
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.26...v0.2.27)
