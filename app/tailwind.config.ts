@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss'
-import defaultTheme from 'tailwindcss/defaultTheme'
+// import defaultTheme from 'tailwindcss/defaultTheme'
 
 export default <Partial<Config>>{
   // Without empty content block, first build without `.nuxt` dir fails
@@ -9,7 +9,19 @@ export default <Partial<Config>>{
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Nunito', 'sans-serif', ...defaultTheme.fontFamily.sans],
+        sans: [
+          // Inspired from Vitpress theme
+          'Inter',
+          'ui-sans-serif',
+          'system-ui',
+          'sans-serif',
+          'Apple Color Emoji',
+          'Segoe UI Emoji',
+          'Segoe UI Symbol',
+          'Noto Color Emoji',
+        ],
+        mono: ['ui-monospace', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+        custom: ['Inter'],
       },
       colors: {
         yellow: {

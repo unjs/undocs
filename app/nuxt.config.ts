@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   modules: ['@nuxt/fonts', '@nuxt/content', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
   ui: {},
   fonts: {
-    families: [{ name: 'Nunito', provider: 'local' }],
+    families: [{ name: 'Inter' }],
     defaults: {
       weights: [400, 500, 600, 700],
     },
