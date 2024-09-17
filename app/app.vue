@@ -48,3 +48,10 @@ provide('navigation', navigation)
 
   <UNotifications />
 </template>
+
+<style>
+code {
+  border: none !important;
+  font-weight: normal !important;
+}
+</style>
