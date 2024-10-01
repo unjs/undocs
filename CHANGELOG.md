@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.2.29
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.28...v0.2.29)
+
+### 🚀 Enhancements
+
+- Add support for deno as package manager ([#147](https://github.com/unjs/undocs/pull/147))
+
+### 🏡 Chore
+
+- **release:** V0.2.28 ([0f6e735](https://github.com/unjs/undocs/commit/0f6e735))
+- Update jiti and c12 ([0fcfb22](https://github.com/unjs/undocs/commit/0fcfb22))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Bartek Iwańczuk <biwanczuk@gmail.com>
+
 ## v0.2.28
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.27...v0.2.28)
