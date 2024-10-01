@@ -45,6 +45,7 @@ const config = {
   npx: 'vscode-icons:file-type-npm',
   yarn: 'vscode-icons:file-type-yarn',
   bun: 'vscode-icons:file-type-bun',
+  deno: 'vscode-icons:file-type-deno',
   yml: 'vscode-icons:file-type-yaml',
   terminal: 'i-heroicons-command-line',
 }
