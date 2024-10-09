@@ -32,25 +32,30 @@ export default (driverOpts) => {
       // Automd transform
       if (docsConfig.automd) {
         if (key.endsWith('.md') && typeof val === 'string') {
-          if (!automdConfig) {
-            automdConfig = await loadConfig(docsConfig.dir, docsConfig.automd)
-          }
-          const url = pathToFileURL(join(driverOpts.base, key.replace(/:/g, '/')))
-          const res = await transform(val, automdConfig, url)
-          if (res.hasChanged && !res.hasIssues) {
-            _fs.setItem(key, res.contents).catch(console.error)
-          }
-          if (res.hasIssues) {
-            console.warn(
-              `[undocs] [automd] Issues for updating \`${key}\`:`,
-              res.updates
-                .flatMap((u) => u.result.issues)
-                .map((i) => `\n  - ${i}`)
-                .join('\n'),
-            )
+          try {
+            if (!automdConfig) {
+              automdConfig = await loadConfig(docsConfig.dir, docsConfig.automd)
+            }
+            const url = pathToFileURL(join(driverOpts.base, key.replace(/:/g, '/')))
+            const res = await transform(val, automdConfig, url)
+            if (res.hasChanged && !res.hasIssues) {
+              _fs.setItem(key, res.contents).catch(console.error)
+            }
+            if (res.hasIssues) {
+              console.warn(
+                `[undocs] [automd] Issues for updating \`${key}\`:`,
+                res.updates
+                  .flatMap((u) => u.result.issues)
+                  .map((i) => `\n  - ${i}`)
+                  .join('\n'),
+              )
+              return val // Fallback to original content
+            }
+            return res.contents
+          } catch (error) {
+            console.error(`[undocs] [automd] Error transforming \`${key}\`:`, error)
             return val // Fallback to original content
           }
-          return res.contents
         } else if (key.endsWith('.md$')) {
           return { mtime: new Date() }
         }
