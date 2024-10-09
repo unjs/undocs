@@ -59,15 +59,15 @@
   },
   "devDependencies": {
     "@nuxt/eslint-config": "^0.5.7",
-    "@nuxt/image": "^1.8.0",
-    "@types/node": "^22.7.3",
+    "@nuxt/image": "^1.8.1",
+    "@types/node": "^22.7.5",
     "changelogen": "^0.5.7",
-    "eslint": "^9.11.1",
+    "eslint": "^9.12.0",
     "eslint-config-unjs": "^0.4.1",
-    "jiti": "^2.0.0",
+    "jiti": "^2.3.3",
     "prettier": "^3.3.3",
-    "typescript": "^5.6.2",
+    "typescript": "^5.6.3",
     "vue-tsc": "^2.1.6"
   },
-  "packageManager": "bun@1.1.24"
+  "packageManager": "bun@1.1.30"
 }
