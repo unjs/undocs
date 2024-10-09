@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.2.30
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.29...v0.2.30)
+
+### 🩹 Fixes
+
+- Update automd ([7ee37d2](https://github.com/unjs/undocs/commit/7ee37d2))
+- Fallback in case of any errors with automd transform ([b36931c](https://github.com/unjs/undocs/commit/b36931c))
+
+### 🏡 Chore
+
+- Update deps ([0191858](https://github.com/unjs/undocs/commit/0191858))
+- Update automd ([9357a7b](https://github.com/unjs/undocs/commit/9357a7b))
+- Update @nuxt/fonts ([0403792](https://github.com/unjs/undocs/commit/0403792))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v0.2.29
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.28...v0.2.29)
