@@ -39,7 +39,7 @@
     "@nuxtjs/plausible": "^1.0.2",
     "@nuxtjs/tailwindcss": "^6.12.1",
     "@resvg/resvg-wasm": "^2.6.2",
-    "automd": "^0.3.8",
+    "automd": "^0.3.11",
     "c12": "^2.0.0",
     "citty": "^0.1.6",
     "consola": "^3.2.3",
