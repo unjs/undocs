@@ -40,7 +40,7 @@
     "@nuxtjs/tailwindcss": "^6.13.1",
     "@resvg/resvg-wasm": "^2.6.2",
     "automd": "^0.3.12",
-    "c12": "^2.0.2",
+    "c12": "^3.0.2",
     "citty": "^0.1.6",
     "consola": "^3.4.0",
     "defu": "^6.1.4",
