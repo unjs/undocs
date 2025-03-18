@@ -1,5 +1,5 @@
 @import "tailwindcss" theme(static);
-@import "@nuxt/ui";
+@import "@nuxt/ui-pro";
 
 @theme static {
   --font-sans: 'Nunito', sans-serif;

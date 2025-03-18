@@ -103,7 +103,7 @@ onMounted(() => {
       <ContentRenderer v-if="page.body" :value="page" />
 
       <div class="space-y-6">
-        <UDivider type="dashed" />
+        <USeparator type="dashed" />
         <div class="mb-4">
           <UPageLinks
             class="inline-block"
