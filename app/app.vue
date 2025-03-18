@@ -3,7 +3,7 @@ const appConfig = useAppConfig()
 
 const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('content'))
 const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSections('content'), {
-  server: false
+  server: false,
 })
 
 const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined

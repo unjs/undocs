@@ -7,5 +7,5 @@ export default defineAppConfig({
       x: 'unjsio',
     },
   },
-  ui: {}
+  ui: {},
 })

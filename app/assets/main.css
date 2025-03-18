@@ -1,20 +1,20 @@
-@import "tailwindcss" theme(static);
-@import "@nuxt/ui-pro";
+@import 'tailwindcss' theme(static);
+@import '@nuxt/ui-pro';
 
 @theme static {
   --font-sans: 'Nunito', sans-serif;
 
-  --color-yellow-50: #FEFDF7;
-  --color-yellow-100: #FDFCEF;
-  --color-yellow-200: #FAF6D6;
-  --color-yellow-300: #F7F1BD;
-  --color-yellow-400: #F2E78C;
-  --color-yellow-500: #ECDC5A;
-  --color-yellow-600: #D4C651;
-  --color-yellow-700: #8E8436;
-  --color-yellow-800: #6A6329;
-  --color-yellow-900: #47421B;
-  --color-yellow-950: #2F2C12;
+  --color-yellow-50: #fefdf7;
+  --color-yellow-100: #fdfcef;
+  --color-yellow-200: #faf6d6;
+  --color-yellow-300: #f7f1bd;
+  --color-yellow-400: #f2e78c;
+  --color-yellow-500: #ecdc5a;
+  --color-yellow-600: #d4c651;
+  --color-yellow-700: #8e8436;
+  --color-yellow-800: #6a6329;
+  --color-yellow-900: #47421b;
+  --color-yellow-950: #2f2c12;
 }
 
 ::-webkit-scrollbar {

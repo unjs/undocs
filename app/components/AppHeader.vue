@@ -51,7 +51,7 @@ const headerLinks = computed(() => {
         <UContentSearchButton />
       </UTooltip>
       <!-- <div class="flex items-center border-l border-slate-200 ml-6 pl-6 dark:border-slate-800"> -->
-<!--      <UColorModeButton />-->
+      <!--      <UColorModeButton />-->
       <SocialButtons />
       <!-- </div> -->
     </template>
