@@ -5,8 +5,6 @@
 
 const appConfig = useAppConfig()
 
-const metaSymbol = useShortcuts().metaSymbol
-
 const docsNav = useDocsNav()
 
 const headerLinks = computed(() => {
@@ -45,25 +43,21 @@ const headerLinks = computed(() => {
       </NuxtLink>
     </template>
 
-    <!-- Center -->
-    <template #center>
-      <!-- Nav links -->
-      <UHeaderLinks v-if="headerLinks.length > 1" :links="headerLinks" class="hidden md:flex mr-4"> </UHeaderLinks>
-    </template>
+    <UNavigationMenu v-if="headerLinks.length > 1" :items="headerLinks" variant="link" />
 
     <!-- Right -->
     <template #right>
-      <UTooltip text="Search" :shortcuts="[metaSymbol, 'K']">
-        <UContentSearchButton :label="null" />
+      <UTooltip text="Search" :kbds="['meta', 'K']">
+        <UContentSearchButton />
       </UTooltip>
       <!-- <div class="flex items-center border-l border-slate-200 ml-6 pl-6 dark:border-slate-800"> -->
-      <UColorModeButton />
+<!--      <UColorModeButton />-->
       <SocialButtons />
       <!-- </div> -->
     </template>
 
-    <template #panel>
-      <UNavigationTree :links="docsNav.links" default-open :multiple="false" />
+    <template #body>
+      <UContentNavigation :navigation="docsNav.links" default-open highlight />
     </template>
   </UHeader>
 </template>
