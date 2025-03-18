@@ -24,7 +24,6 @@ jobs:
       - run: bun install
       - run: bun run lint
       - run: bun run build
-      - uses: codecov/codecov-action@v4
       - name: nightly release
         if: |
           github.ref_name == 'main' &&
