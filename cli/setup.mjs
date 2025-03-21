@@ -44,9 +44,9 @@ export async function setupDocs(docsDir, opts = {}) {
     compatibilityDate: '2024-08-16',
     rootDir: docsSrcDir,
     srcDir: docsSrcDir,
-    extends: [...(opts.extends || []), appDir, '@nuxt/ui-pro'],
+    extends: [...(opts.extends || []), appDir],
     modulesDir: [resolve(pkgDir, 'node_modules'), resolve(docsDir, 'node_modules')],
-    modules: [fixLayers, docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
+    modules: ['@nuxt/ui-pro', fixLayers, docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
     // @ts-ignore
     docs: docsconfig,
     // @ts-ignore
