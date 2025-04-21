@@ -33,7 +33,7 @@ export function useDocsNav() {
     })
   })
 
-  const activeSection = computed(() => links.value.find((l) => route.path.startsWith(l.originalTo)))
+  const activeSection = computed(() => links.value.find((l) => route.path.startsWith(l.originalPath)))
   const activeLinks = computed(() => (activeSection.value?.children || []).filter(Boolean))
 
   return reactive({
