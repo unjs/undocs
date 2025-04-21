@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { withoutTrailingSlash } from 'ufo'
 import { kebabCase } from 'scule'
+import { findPageHeadline } from '#ui-pro/utils/content'
 
 definePageMeta({
   layout: 'docs',
@@ -9,13 +10,13 @@ definePageMeta({
 const appConfig = useAppConfig()
 const route = useRoute()
 
-const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('docs').path(route.path).first())
+const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('content').path(route.path).first())
 if (!page.value) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found', message: `${route.path} does not exist`, fatal: true })
 }
 
 const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround`, () => {
-  return queryCollectionItemSurroundings('docs', route.path, {
+  return queryCollectionItemSurroundings('content', route.path, {
     fields: ['description']
   })
 })
