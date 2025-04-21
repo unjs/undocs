@@ -3,11 +3,10 @@ const appConfig = useAppConfig()
 
 const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('content'))
 const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSections('content'), {
-  server: false,
+  server: false
 })
 
 const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
-
 const browserTabIcon = appConfig.docs?.logo || undefined
 
 useSeoMeta({
@@ -28,7 +27,7 @@ provide('navigation', navigation)
 
 <template>
   <UApp>
-    <NuxtLoadingIndicator color="rgb(252,211,77)" />
+    <NuxtLoadingIndicator color="var(--ui-primary)" />
     <AppHeader />
 
     <UMain class="min-h-[calc(100vh-var(--header-height)-78px)]">

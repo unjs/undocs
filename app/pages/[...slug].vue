@@ -76,7 +76,7 @@ onMounted(() => {
     <!-- TOC -->
     <!-- large screen -->
     <template v-if="tocLinks.length > 0" #right>
-      <UContentToc title="On this page" :links="tocLinks" class="hidden lg:block" />
+      <UPageToc title="On this page" :links="tocLinks" class="hidden lg:block" />
     </template>
     <!-- mobile -->
     <div

@@ -1,4 +1,7 @@
+import { createResolver } from 'nuxt/kit'
 import { defineNuxtConfig } from 'nuxt/config'
+
+const { resolve } = createResolver(import.meta.url)
 
 // Flag enabled when developing docs theme
 const dev = !!process.env.NUXT_DOCS_DEV
@@ -8,8 +11,13 @@ const isProd = process.env.NODE_ENV === 'production'
 const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
 export default defineNuxtConfig({
+  $meta: {
+    name: 'undocs'
+  },
   ssr,
   modules: ['@nuxt/ui-pro', '@nuxt/content', isProd && '@nuxtjs/plausible'],
+  css: [resolve('./assets/main.css')],
+  ui: {},
   fonts: {
     families: [{ name: 'Inter' }],
     defaults: {
@@ -25,6 +33,15 @@ export default defineNuxtConfig({
       templateParams: {
         separator: '·',
       },
+    },
+  },
+  content: {
+    build: {
+      markdown: {
+        highlight: {
+          langs: ['json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md'],
+        }
+      }
     },
   },
   nitro: {

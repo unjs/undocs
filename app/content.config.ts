@@ -4,7 +4,11 @@ export default defineContentConfig({
   collections: {
     content: defineCollection({
       type: 'page',
-      source: '**/*.md',
-    }),
-  },
+      source: {
+        cwd: globalThis.__DOCS_CWD__,
+        include: '**/*.md',
+        exclude: ['.**/*.md'],
+      }
+    })
+  }
 })

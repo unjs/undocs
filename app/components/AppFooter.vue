@@ -8,7 +8,6 @@
     </template>
 
     <template #right>
-      <ColorPicker />
       <SocialButtons />
     </template>
   </UFooter>

@@ -1,15 +1,13 @@
-import type { NavItem } from '@nuxt/content/dist/runtime/types'
+import type { ContentNavigationItem } from '@nuxt/content'
 
 export function useDocsNav() {
-  const navigation = inject<Ref<NavItem[]>>('navigation')
-
+  const navigation = inject<Ref<ContentNavigationItem[]>>('navigation')
   const route = useRoute()
-
   const isActive = (path: string) => route.path.startsWith(path)
 
   const links = computed(() => {
-    return mapContentNavigation(navigation.value).map((item) => {
-      // Flatren single child
+    return navigation.value.map((item) => {
+      // Flaten single child
       if (item.children?.length === 1) {
         item = {
           ...item,
@@ -19,17 +17,18 @@ export function useDocsNav() {
       }
 
       // Check if group index is not exists and default to first child
-      const originalTo = item.to as string
-      if (item.children?.length && !item.children.some((c) => c.to === originalTo)) {
-        item.to = item.children[0].to
+      const originalPath = item.path
+      if (item.children?.length && !item.children.some((c) => c.path === originalPath)) {
+        item.path = item.children[0].path
       }
 
       return {
         ...item,
-        originalTo,
-        hasIndex: item.to === originalTo,
-        label: titleCase(originalTo),
-        active: isActive(originalTo),
+        to: item.path,
+        originalPath,
+        hasIndex: item.path === originalPath,
+        label: titleCase(originalPath),
+        active: isActive(originalPath),
       }
     })
   })

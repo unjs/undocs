@@ -22,6 +22,8 @@ export async function setupDocs(docsDir, opts = {}) {
   // Normalize dir
   docsconfig.dir = docsDir = resolve(docsconfig.dir || docsDir)
 
+  globalThis.__DOCS_CWD__ = docsconfig.dir
+
   // URL is required for production build (SEO)
   if (!docsconfig.url && !opts.dev) {
     throw new Error('`url` config is required for production build!')
