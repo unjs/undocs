@@ -7,5 +7,9 @@ export default defineAppConfig({
       x: 'unjsio',
     },
   },
-  ui: {},
+  ui: {
+    colors: {
+      important: 'violet'
+    }
+  },
 })

@@ -26,9 +26,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <CodeGroup ref="codeGroup">
+  <ProseCodeGroup ref="codeGroup">
     <ProseCode v-for="(codeBlock, index) in codeBlocks" :key="index" v-bind="codeBlock">
       <pre><code>{{ codeBlock.code }}</code></pre>
     </ProseCode>
-  </CodeGroup>
+  </ProseCodeGroup>
 </template>

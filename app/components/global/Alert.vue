@@ -1,10 +1,10 @@
 <template>
   <!-- https://ui.nuxt.com/pro/components/prose/callout -->
   <!-- https://icon-sets.iconify.design/ph -->
-  <Callout :icon="icon" :color="color" :to="to" :target="target">
+  <ProseCallout :icon="icon" :color="color" :to="to" :target="target">
     <!-- <strong class="mr-1">{{ title }}</strong> -->
-    <ContentSlot :use="$slots.default" unwrap="p" />
-  </Callout>
+    <slot mdc-unwrap="p" />
+  </ProseCallout>
 </template>
 
 <script setup lang="ts">

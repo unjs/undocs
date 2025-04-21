@@ -1,8 +1,8 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
-  <Callout icon="i-ph-bookmark-simple-duotone" :to="to">
+  <ProseCallout icon="i-ph-bookmark-simple-duotone" :to="to">
     <MDCSlot unwrap="p"> Read more in <span class="font-bold" v-html="computedTitle" />. </MDCSlot>
-  </Callout>
+  </ProseCallout>
 </template>
 
 <script setup lang="ts">

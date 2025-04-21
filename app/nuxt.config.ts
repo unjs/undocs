@@ -17,7 +17,11 @@ export default defineNuxtConfig({
   ssr,
   modules: ['@nuxt/ui-pro', '@nuxt/content', isProd && '@nuxtjs/plausible'],
   css: [resolve('./assets/main.css')],
-  ui: {},
+  ui: {
+    theme: {
+      colors: ['primary', 'secondary', 'info', 'success', 'warning', 'error', 'important']
+    }
+  },
   fonts: {
     families: [{ name: 'Inter' }],
     defaults: {

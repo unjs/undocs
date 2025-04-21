@@ -80,19 +80,19 @@ onMounted(() => {
       v-if="tocMobileLinks.length > 1"
       class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky mb-2 lg:hidden"
     >
-      <UDropdown
+      <UDropdownMenu
         v-model:open="tocMobileOpen"
         :items="tocMobileLinks"
         :popper="{ placement: 'bottom-end' }"
         :mode="isMobile ? 'click' : 'hover'"
       >
         <UButton
-          color="white"
+          color="neutral"
           label="On this page"
           :trailing="false"
           :icon="`i-heroicons-chevron-${tocMobileOpen ? 'down' : 'left'}-20-solid`"
         />
-      </UDropdown>
+      </UDropdownMenu>
     </div>
 
     <UPageBody prose>
