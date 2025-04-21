@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { withoutTrailingSlash } from 'ufo'
+import { kebabCase } from 'scule'
 
 definePageMeta({
   layout: 'docs',
@@ -8,21 +9,16 @@ definePageMeta({
 const appConfig = useAppConfig()
 const route = useRoute()
 
-const { data: page } = await useAsyncData(route.path, () => queryContent(route.path).findOne())
-
+const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('docs').path(route.path).first())
 if (!page.value) {
-  showError({
-    statusCode: 404,
-    statusMessage: `Page not found: ${route.path}`,
-  })
+  throw createError({ statusCode: 404, statusMessage: 'Page not found', message: `${route.path} does not exist`, fatal: true })
 }
 
-const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
-  queryContent()
-    .where({ _extension: 'md', navigation: { $ne: false } })
-    .only(['title', 'description', '_path'])
-    .findSurround(withoutTrailingSlash(route.path)),
-)
+const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround`, () => {
+  return queryCollectionItemSurroundings('docs', route.path, {
+    fields: ['description']
+  })
+})
 
 usePageSEO({
   title: `${page.value?.title} - ${appConfig.site.name}`,
