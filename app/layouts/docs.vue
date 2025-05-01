@@ -4,7 +4,7 @@ const docsNav = useDocsNav()
 
 <template>
   <UContainer>
-    <UPage :ui="{ left: 'lg:col-span-2 pr-2 border-r border-(--ui-border)' }">
+    <UPage :ui="{ left: 'lg:col-span-2 pr-2 border-r border-default' }">
       <template #left>
         <UPageAside>
           <UPageAnchors :links="docsNav.links" />

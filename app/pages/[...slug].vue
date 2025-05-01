@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { withoutTrailingSlash } from 'ufo'
 import { kebabCase } from 'scule'
 import { findPageHeadline } from '#ui-pro/utils/content'
 
@@ -83,7 +82,6 @@ onMounted(() => {
       <UDropdownMenu
         v-model:open="tocMobileOpen"
         :items="tocMobileLinks"
-        :popper="{ placement: 'bottom-end' }"
         :mode="isMobile ? 'click' : 'hover'"
       >
         <UButton

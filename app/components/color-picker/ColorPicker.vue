@@ -3,7 +3,7 @@
   <UPopover mode="hover">
     <template #default="{ open }">
       <UButton
-        color="gray"
+        color="neutral"
         variant="ghost"
         square
         :class="[open && 'bg-gray-50 dark:bg-gray-800']"
