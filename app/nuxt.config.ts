@@ -12,15 +12,15 @@ const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
 export default defineNuxtConfig({
   $meta: {
-    name: 'undocs'
+    name: 'undocs',
   },
   ssr,
   modules: ['@nuxt/ui-pro', '@nuxt/content', isProd && '@nuxtjs/plausible'],
   css: [resolve('./assets/main.css')],
   ui: {
     theme: {
-      colors: ['primary', 'secondary', 'info', 'success', 'warning', 'error', 'important']
-    }
+      colors: ['primary', 'secondary', 'info', 'success', 'warning', 'error', 'important'],
+    },
   },
   fonts: {
     families: [{ name: 'Inter' }],
@@ -44,8 +44,8 @@ export default defineNuxtConfig({
       markdown: {
         highlight: {
           langs: ['json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md'],
-        }
-      }
+        },
+      },
     },
   },
   nitro: {

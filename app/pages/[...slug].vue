@@ -9,14 +9,21 @@ definePageMeta({
 const appConfig = useAppConfig()
 const route = useRoute()
 
-const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('content').path(route.path).first())
+const { data: page } = await useAsyncData(kebabCase(route.path), () =>
+  queryCollection('content').path(route.path).first(),
+)
 if (!page.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Page not found', message: `${route.path} does not exist`, fatal: true })
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Page not found',
+    message: `${route.path} does not exist`,
+    fatal: true,
+  })
 }
 
 const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround`, () => {
   return queryCollectionItemSurroundings('content', route.path, {
-    fields: ['description']
+    fields: ['description'],
   })
 })
 
@@ -79,11 +86,7 @@ onMounted(() => {
       v-if="tocMobileLinks.length > 1"
       class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky mb-2 lg:hidden"
     >
-      <UDropdownMenu
-        v-model:open="tocMobileOpen"
-        :items="tocMobileLinks"
-        :mode="isMobile ? 'click' : 'hover'"
-      >
+      <UDropdownMenu v-model:open="tocMobileOpen" :items="tocMobileLinks" :mode="isMobile ? 'click' : 'hover'">
         <UButton
           color="neutral"
           label="On this page"

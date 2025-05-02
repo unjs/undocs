@@ -9,8 +9,8 @@ export default defineAppConfig({
   },
   ui: {
     colors: {
-      important: 'violet'
-    }
+      important: 'violet',
+    },
   },
   uiPro: {
     prose: {
@@ -52,7 +52,7 @@ export default defineAppConfig({
         deno: 'vscode-icons:file-type-deno',
         yml: 'vscode-icons:file-type-yaml',
         terminal: 'i-heroicons-command-line',
-      }
-    }
-  }
+      },
+    },
+  },
 })
