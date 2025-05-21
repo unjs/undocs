@@ -9,7 +9,9 @@ export default defineAppConfig({
   },
   ui: {
     colors: {
+      primary: 'amber',
       important: 'violet',
+      neutral: 'neutral'
     },
   },
   uiPro: {
