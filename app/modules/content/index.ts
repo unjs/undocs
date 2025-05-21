@@ -1,6 +1,7 @@
 import { defineNuxtModule, createResolver, useNitro } from 'nuxt/kit'
 import type { ModuleOptions as ContentOptions } from '@nuxt/content'
 import type { DocsConfig } from '../../../schema/config'
+import { setupContentHooks } from './hooks'
 
 export default defineNuxtModule({
   setup(_, nuxt) {
@@ -15,6 +16,8 @@ export default defineNuxtModule({
     nuxt.options.nitro.externals ||= {}
     nuxt.options.nitro.externals.inline ||= []
     nuxt.options.nitro.externals.inline.push(resolver.resolve('./runtime'))
+
+    setupContentHooks(nuxt)
 
     if (docsConfig.landing === false) {
       nuxt.hooks.hook('pages:extend', (pages) => {

@@ -12,6 +12,7 @@ const headerLinks = computed(() => {
         return {
           ...link,
           children: undefined,
+          icon: '',
           // children: link.children?.filter((child) => !child.children || child.children.some((c) => c.to === child.to)),
         }
       }),
@@ -35,12 +36,12 @@ const headerLinks = computed(() => {
         <UContentSearchButton />
       </UTooltip>
       <!-- <div class="flex items-center border-l border-slate-200 ml-6 pl-6 dark:border-slate-800"> -->
-      <!--      <UColorModeButton />-->
+      <UColorModeButton />
       <SocialButtons />
     </template>
 
     <template #body>
-      <UContentNavigation :navigation="navigation" default-open :multiple="false" />
+      <UContentNavigation :navigation="navigation" default-open :multiple="true" />
     </template>
   </UHeader>
 </template>

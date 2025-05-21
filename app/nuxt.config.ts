@@ -22,12 +22,6 @@ export default defineNuxtConfig({
       colors: ['primary', 'secondary', 'info', 'success', 'warning', 'error', 'important'],
     },
   },
-  fonts: {
-    families: [{ name: 'Inter' }],
-    defaults: {
-      weights: [400, 500, 600, 700],
-    },
-  },
   app: {
     head: {
       htmlAttrs: {

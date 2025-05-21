@@ -7,6 +7,7 @@ export function useDocsNav() {
 
   const links = computed(() => {
     return navigation.value.map((item) => {
+      console.log(item)
       // Flaten single child
       if (item.children?.length === 1) {
         item = {

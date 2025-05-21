@@ -1,6 +1,9 @@
-// @ts-ignore
-export default defineNitroPlugin((nitroApp) => {
-  nitroApp.hooks.hook('content:file:beforeParse', (file) => {
+import type { ParsedContentFile, MarkdownRoot, MinimalNode, MinimalElement } from '@nuxt/content'
+import type { Nuxt } from 'nuxt/schema'
+import { CommonIcons } from './icons'
+
+export function setupContentHooks(nuxt: Nuxt) {
+  nuxt.hooks.hook('content:file:beforeParse', ({ file }) => {
     if (typeof file.body !== 'string') {
       return // can be json meta
     }
@@ -13,151 +16,138 @@ export default defineNitroPlugin((nitroApp) => {
       }
     }
   })
-  nitroApp.hooks.hook('content:file:afterParse', (file: ContentFile) => {
+  nuxt.hooks.hook('content:file:afterParse', ({ content }) => {
     // Filter out non-markdown files
-    if (!file._id?.endsWith('.md')) {
+    if (content.extension !== 'md') {
       return
     }
 
-    transformFile(file)
-    resolveFileIcon(file)
+    resolveFileIcon(content)
 
-    for (const [idx, node] of (file.body?.children || []).entries()) {
+    const body = content.body as MarkdownRoot
+    removeFirstH1AndBlockquote(body, content)
+    for (const node of body.value) {
+      if (typeof node === 'string') {
+        continue
+      }
       transformGithubAlert(node)
       transformStepsList(node)
-      transformCodeGroups(idx, file.body?.children)
+      // transformCodeGroups(idx, body.value)
       // transformJSDocs(idx, file.body?.children)
     }
   })
-})
+}
 
 // --- transform github alerts ---
 
 // Handle GitHub flavoured markdown blockquotes
 // https://github.com/orgs/community/discussions/16925
-function transformGithubAlert(node: ContentNode) {
-  const firstChildValue = node.children?.[0]?.children?.[0]?.children?.[0]?.value || ''
-  if (
-    node.tag === 'blockquote' && // blockquote > p x 2 > span > text
-    ['!NOTE', '!TIP', '!IMPORTANT', '!WARNING', '!CAUTION'].includes(firstChildValue)
-  ) {
-    node.type = 'element'
-    node.tag = firstChildValue.slice(1).toLowerCase()
-    node.children?.[0].children?.shift()
+function transformGithubAlert(node: MinimalNode) {
+  if (node[0] === 'blockquote'
+      && Array.isArray(node[2]) && node[2][0] === 'p'
+      && Array.isArray(node[2][2]) && node[2][2][0] === 'span'
+      && typeof node[2][2][2] === 'string' && ['!NOTE', '!TIP', '!IMPORTANT', '!WARNING', '!CAUTION'].includes(node[2][2][2])) {
+    // @ts-ignore - ignore type error for now
+    node[0] = node[2][2][2].slice(1).toLowerCase()
+    node[2][2].shift()
   }
 }
 
 // --- transform steps list ---
+function transformStepsList(node: MinimalNode) {
+  // CONVERT OL->LI to Steps
+  if (Array.isArray(node) && node[0] === 'ol' && node.length > 3
+      && Array.isArray(node[2]) && node[2][0] === 'li') {
+    const stepsChildren = node.slice(2).map((li: MinimalNode) => {
+      return ['h4', {}, ...li.slice(2)] as MinimalElement
+    })
+    console.log('stepsChildren', stepsChildren)
+    node.splice(0, Infinity, 'steps', { level: '4' }, ...stepsChildren)
+    console.log(node)
+  }
 
-function transformStepsList(node: ContentNode) {
+
   // CONVERT OL->LI to Steps
   // TODO: Find a way to opt out of this transformation if needed within markdown.
-  if (node.tag === 'ol' && (node.children?.length || 0) > 0 && node.children?.[0].tag === 'li') {
-    const stepsChildren = node.children.map((li) => {
-      const children = li.children || []
+  // if (node.tag === 'ol' && (node.children?.length || 0) > 0 && node.children?.[0].tag === 'li') {
+  //   const stepsChildren = node.children.map((li) => {
+  //     const children = li.children || []
 
-      // console.log(JSON.stringify(children, undefined, 2))
+  //     // console.log(JSON.stringify(children, undefined, 2))
 
-      return {
-        type: 'element',
-        tag: 'div',
-        children,
-      }
-    })
+  //     return {
+  //       type: 'element',
+  //       tag: 'div',
+  //       children,
+  //     }
+  //   })
 
-    const lastLeadingSpaceOnStep = stepsChildren
-      .map((step) => {
-        let lastLeadingSpace = -1
+  //   const lastLeadingSpaceOnStep = stepsChildren
+  //     .map((step) => {
+  //       let lastLeadingSpace = -1
 
-        for (let i = 0; i < step.children.length; i++) {
-          const child = step.children[i]
-          const prevChild = step.children[i - 1]
-          if (
-            (child?.type === 'text' && child.value?.startsWith(' ')) ||
-            (prevChild?.type === 'text' && prevChild?.value?.endsWith(' '))
-          ) {
-            lastLeadingSpace = i
-          }
-        }
+  //       for (let i = 0; i < step.children.length; i++) {
+  //         const child = step.children[i]
+  //         const prevChild = step.children[i - 1]
+  //         if (
+  //           (child?.type === 'text' && child.value?.startsWith(' ')) ||
+  //           (prevChild?.type === 'text' && prevChild?.value?.endsWith(' '))
+  //         ) {
+  //           lastLeadingSpace = i
+  //         }
+  //       }
 
-        return lastLeadingSpace
-      })
-      .filter((step) => step > -1)
+  //       return lastLeadingSpace
+  //     })
+  //     .filter((step) => step > -1)
 
-    const stepsHaveContent = stepsChildren.some((step) => {
-      if (lastLeadingSpaceOnStep.length > 0) {
-        return step.children.slice(lastLeadingSpaceOnStep[0], lastLeadingSpaceOnStep[0]).length > 1
-      }
+  //   const stepsHaveContent = stepsChildren.some((step) => {
+  //     if (lastLeadingSpaceOnStep.length > 0) {
+  //       return step.children.slice(lastLeadingSpaceOnStep[0], lastLeadingSpaceOnStep[0]).length > 1
+  //     }
 
-      return step.children.length > 1
-    })
+  //     return step.children.length > 1
+  //   })
 
-    if (stepsHaveContent) {
-      node.type = 'element'
-      node.tag = 'Steps'
-      node.props = {}
-      node.children = stepsChildren
-    }
-  }
+  //   if (stepsHaveContent) {
+  //     node.type = 'element'
+  //     node.tag = 'Steps'
+  //     node.props = {}
+  //     node.children = stepsChildren
+  //   }
+  // }
 }
 
 // --- transform first h1 and blockquote ---
 
-function transformFile(file: ContentFile) {
+function removeFirstH1AndBlockquote(body: MarkdownRoot, content: ParsedContentFile) {
   // Remove first h1 from markdown files as it is added to front-matter as title
-  if (file.body?.children?.[0]?.tag === 'h1') {
-    const text = _getTextContents(file.body.children[0].children)
-    if (file.title === text) {
-      file.body.children.shift()
-    }
+  if (body.value?.[0]?.[0] === 'h1' && content.title === _getTextContent(body.value[0])) {
+    body.value.shift()
   }
 
-  // Only use the first blockquote as the description
-  const firstChild = file.body?.children?.[0]
-  const firstChildText = _getTextContents(firstChild?.children)
-  if (firstChild?.tag === 'blockquote' && firstChildText && !firstChildText.startsWith('!')) {
-    file.description = firstChildText
-    file.body?.children?.shift()
-  } else {
-    file.description = '' // Avoid duplication
+  // Only use the first p as the description
+  if (body.value?.[0]?.[0] === 'p' && content.description === _getTextContent(body.value[0])) {
+    body.value.shift()
+  }
+
+  // Fallback to the first blockquote as the description
+  const bloquoteText = _getTextContent(body.value[0])
+  if (body.value?.[0]?.[0] === 'blockquote' && content.description === '' && !bloquoteText.startsWith('!')) {
+    content.description = bloquoteText
+    body.value.shift()
   }
 }
 
 // --- resolve icon ---
 
-function resolveFileIcon(file: ContentFile) {
-  if (file.icon) {
+function resolveFileIcon(content: ParsedContentFile) {
+  if (content.navigation?.icon) {
     return
   }
-  file.icon = _resolveIcon(file._path)
+  content.navigation ||= {}
+  content.navigation.icon = _resolveIcon(content.path)
 }
-
-const _commonIcons = [
-  {
-    pattern: 'guide',
-    icon: 'ph:book-open-duotone',
-  },
-  {
-    pattern: 'components',
-    icon: 'bxs:component',
-  },
-  {
-    pattern: 'config',
-    icon: 'ri:settings-3-line',
-  },
-  {
-    pattern: 'configuration',
-    icon: 'ri:settings-3-line',
-  },
-  {
-    pattern: 'examples',
-    icon: 'ph:code',
-  },
-  {
-    pattern: 'utils',
-    icon: 'ph:function-bold',
-  },
-]
 
 function _resolveIcon(path: string = '') {
   // Split the path into parts and reverse it
@@ -165,7 +155,7 @@ function _resolveIcon(path: string = '') {
 
   // Search for icons in reverse order
   for (const p of paths) {
-    for (const icon of _commonIcons) {
+    for (const icon of CommonIcons) {
       if (p.includes(icon.pattern)) {
         return icon.icon
       }
@@ -306,41 +296,13 @@ function _parseJSDocType(node: ContentNode): string {
 
 // --- internal utils ---
 
-function _getTextContents(children: ContentNode[] = []): string {
-  return (children || [])
-    .map((child) => {
-      if (child.type === 'element') {
-        return _getTextContents(child.children)
-      }
-      return child.value
-    })
-    .join('')
+function _getTextContent(node: MinimalNode): string {
+  if (typeof node === 'string') {
+    return node
+  }
+  return node.slice(2).map(_getTextContent).join('')
 }
 
 function _emptyASTNode() {
   return { type: 'text', value: '' }
-}
-
-// --- types ---
-
-// TODO: @nuxt/content runtimes seems both not well typed and also crashes my TS server or might be doing it wrong.
-
-interface ContentNode {
-  type?: string
-  tag?: string
-
-  children?: ContentNode[]
-  props?: Record<string, any>
-  value?: string
-}
-
-interface ContentFile {
-  _id?: string
-  _path?: string
-  icon?: string
-  description?: string
-  title?: string
-  body?: {
-    children?: ContentNode[]
-  }
 }
