@@ -1,6 +1,9 @@
 import type { MarkdownRoot, MinimalNode, MinimalElement } from '@nuxt/content'
 import type { Nuxt } from 'nuxt/schema'
 import { CommonIcons } from './icons'
+import type { DocsConfig } from '../../../schema/config'
+import { pathToFileURL } from 'node:url'
+import { writeFile } from 'node:fs/promises'
 
 interface ParsedContentFile extends Record<string, unknown> {
   path?: string
@@ -9,13 +12,40 @@ interface ParsedContentFile extends Record<string, unknown> {
   }
 }
 
-export function setupContentHooks(nuxt: Nuxt) {
-  nuxt.hooks.hook('content:file:beforeParse', ({ file }) => {
+export async function setupContentHooks(nuxt: Nuxt, docsConfig: DocsConfig) {
+  let automdTransform: (content: string, path: string) => string | Promise<string> | undefined
+  if (docsConfig.automd) {
+    const automd = await import('automd')
+    const config = await automd.loadConfig(docsConfig.dir, docsConfig.automd)
+    automdTransform = async (content: string, path: string) => {
+      const res = await automd.transform(content, config, pathToFileURL(path).href)
+      if (!res.hasIssues) {
+        if (res.hasChanged) {
+          await writeFile(path, res.contents, 'utf-8')
+        }
+        return res.contents
+      }
+      console.warn(
+        `[undocs] [automd] Issues for updating \`${path}\`:`,
+        res.updates
+          .flatMap((u) => u.result.issues)
+          .map((i) => `\n  - ${i}`)
+          .join('\n'),
+      )
+      return content
+    }
+  }
+
+  nuxt.hooks.hook('content:file:beforeParse', async ({ file }) => {
     if (typeof file.body !== 'string') {
       return // can be json meta
     }
     if (file.body.includes('<!-- automd:')) {
-      // Add meta
+      // Transform
+      if (automdTransform) {
+        file.body = await automdTransform(file.body, file.path)
+      }
+      // Add meta (for rendering contribution hint)
       if (file.body.startsWith('---')) {
         file.body = file.body.replace('---', '---\nautomd: true\n')
       } else {
@@ -23,6 +53,7 @@ export function setupContentHooks(nuxt: Nuxt) {
       }
     }
   })
+
   nuxt.hooks.hook('content:file:afterParse', ({ content }) => {
     // Filter out non-markdown files
     if (content.extension !== 'md') {

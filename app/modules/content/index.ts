@@ -1,10 +1,9 @@
 import { defineNuxtModule, createResolver, useNitro } from 'nuxt/kit'
-import type { ModuleOptions as ContentOptions } from '@nuxt/content'
 import type { DocsConfig } from '../../../schema/config'
 import { setupContentHooks } from './hooks'
 
 export default defineNuxtModule({
-  setup(_, nuxt) {
+  async setup(_, nuxt) {
     if (nuxt.options._prepare) {
       return
     }
@@ -17,7 +16,7 @@ export default defineNuxtModule({
     nuxt.options.nitro.externals.inline ||= []
     nuxt.options.nitro.externals.inline.push(resolver.resolve('./runtime'))
 
-    setupContentHooks(nuxt)
+    await setupContentHooks(nuxt, docsConfig)
 
     if (docsConfig.landing === false) {
       nuxt.hooks.hook('pages:extend', (pages) => {
@@ -26,15 +25,6 @@ export default defineNuxtModule({
           pages.splice(index, 1)
         }
       })
-    }
-
-    const contentConfig = (nuxt.options as any).content as ContentOptions
-    contentConfig.sources = {
-      ...contentConfig.sources,
-      content: {
-        driver: resolver.resolve('./runtime/unstorage.mjs'),
-        base: docsConfig.dir,
-      },
     }
 
     // Inject globalThis.__undocs__ for same process + nitro runtime
