@@ -21,6 +21,7 @@ export async function setupContentHooks(nuxt: Nuxt, docsConfig: DocsConfig) {
       const res = await automd.transform(content, config, pathToFileURL(path).href)
       if (!res.hasIssues) {
         if (res.hasChanged) {
+          console.info(`[undocs] [automd] Updated \`${path}\` with automd transform, saving changes...`)
           await writeFile(path, res.contents, 'utf-8')
         }
         return res.contents
