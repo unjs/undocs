@@ -1,6 +1,6 @@
 # Components
 
-Highlights information that users should take into account, even when skimming.
+> Discover the components you can use in your markdown files.
 
 <!-- automd:file src="../.partials/warn.md" -->
 

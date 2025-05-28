@@ -1,6 +1,13 @@
-import type { ParsedContentFile, MarkdownRoot, MinimalNode, MinimalElement } from '@nuxt/content'
+import type { MarkdownRoot, MinimalNode, MinimalElement } from '@nuxt/content'
 import type { Nuxt } from 'nuxt/schema'
 import { CommonIcons } from './icons'
+
+interface ParsedContentFile extends Record<string, unknown> {
+  path?: string
+  navigation?: {
+    icon?: string
+  }
+}
 
 export function setupContentHooks(nuxt: Nuxt) {
   nuxt.hooks.hook('content:file:beforeParse', ({ file }) => {
@@ -43,10 +50,15 @@ export function setupContentHooks(nuxt: Nuxt) {
 // Handle GitHub flavoured markdown blockquotes
 // https://github.com/orgs/community/discussions/16925
 function transformGithubAlert(node: MinimalNode) {
-  if (node[0] === 'blockquote'
-      && Array.isArray(node[2]) && node[2][0] === 'p'
-      && Array.isArray(node[2][2]) && node[2][2][0] === 'span'
-      && typeof node[2][2][2] === 'string' && ['!NOTE', '!TIP', '!IMPORTANT', '!WARNING', '!CAUTION'].includes(node[2][2][2])) {
+  if (
+    node[0] === 'blockquote' &&
+    Array.isArray(node[2]) &&
+    node[2][0] === 'p' &&
+    Array.isArray(node[2][2]) &&
+    node[2][2][0] === 'span' &&
+    typeof node[2][2][2] === 'string' &&
+    ['!NOTE', '!TIP', '!IMPORTANT', '!WARNING', '!CAUTION'].includes(node[2][2][2])
+  ) {
     // @ts-ignore - ignore type error for now
     node[0] = node[2][2][2].slice(1).toLowerCase()
     node[2][2].shift()
@@ -56,16 +68,14 @@ function transformGithubAlert(node: MinimalNode) {
 // --- transform steps list ---
 function transformStepsList(node: MinimalNode) {
   // CONVERT OL->LI to Steps
-  if (Array.isArray(node) && node[0] === 'ol' && node.length > 3
-      && Array.isArray(node[2]) && node[2][0] === 'li') {
+  if (Array.isArray(node) && node[0] === 'ol' && node.length > 3 && Array.isArray(node[2]) && node[2][0] === 'li') {
     const stepsChildren = node.slice(2).map((li: MinimalNode) => {
       return ['h4', {}, ...li.slice(2)] as MinimalElement
     })
-    console.log('stepsChildren', stepsChildren)
+    // console.log('stepsChildren', stepsChildren)
     node.splice(0, Infinity, 'steps', { level: '4' }, ...stepsChildren)
-    console.log(node)
+    // console.log(node)
   }
-
 
   // CONVERT OL->LI to Steps
   // TODO: Find a way to opt out of this transformation if needed within markdown.
@@ -126,15 +136,21 @@ function removeFirstH1AndBlockquote(body: MarkdownRoot, content: ParsedContentFi
     body.value.shift()
   }
 
-  // Only use the first p as the description
-  if (body.value?.[0]?.[0] === 'p' && content.description === _getTextContent(body.value[0])) {
-    body.value.shift()
+  // Remove default inferred value for description
+  content.description = ''
+  if (content.seo) {
+    ;(content.seo as any).description = ''
   }
 
-  // Fallback to the first blockquote as the description
-  const bloquoteText = _getTextContent(body.value[0])
-  if (body.value?.[0]?.[0] === 'blockquote' && content.description === '' && !bloquoteText.startsWith('!')) {
+  // Use the first blockquote as the description
+  const firstEl = body.value[0]
+  const bloquoteText = _getTextContent(firstEl)
+
+  if (firstEl[0] === 'blockquote' && content.description === '' && !bloquoteText.startsWith('!')) {
     content.description = bloquoteText
+    if (content.seo) {
+      ;(content.seo as any).description = bloquoteText
+    }
     body.value.shift()
   }
 }
@@ -165,14 +181,14 @@ function _resolveIcon(path: string = '') {
 
 // --- transform code groups ---
 
-function transformCodeGroups(currChildIdx: number, children: ContentNode[] = []) {
+function transformCodeGroups(currChildIdx: number, children: MinimalNode[] = []) {
   if (!children?.length || !_isNamedCodeBlock(children[currChildIdx])) {
     return
   }
 
   const group: {
     idx: number
-    node: ContentNode
+    node: MinimalNode
   }[] = []
 
   for (let i = currChildIdx; i < children.length; i++) {
@@ -199,20 +215,20 @@ function transformCodeGroups(currChildIdx: number, children: ContentNode[] = [])
   }
 }
 
-function _isNamedCodeBlock(children: ContentNode): boolean {
+function _isNamedCodeBlock(children: MinimalNode): boolean {
   return children?.tag === 'pre' && children?.children?.[0]?.tag === 'code' && children?.props?.filename
 }
 
 // --- transform automd jsdocs ---
 
-export function transformJSDocs(currChildIdx: number, children: ContentNode[] = []) {
+export function transformJSDocs(currChildIdx: number, children: MinimalNode[] = []) {
   if (!children?.length || !_isJSDocBlock(children[currChildIdx])) {
     return
   }
 
-  const fields: ContentNode[] = []
+  const fields: MinimalNode[] = []
 
-  const generateFields = (i: number): ContentNode => {
+  const generateFields = (i: number): MinimalNode => {
     const name = _parseJSDocName(children[i])
     const type = _parseJSDocType(children[i + 1])
 
@@ -224,7 +240,7 @@ export function transformJSDocs(currChildIdx: number, children: ContentNode[] = 
       type,
     }
 
-    const content: ContentNode[] = []
+    const content: MinimalNode[] = []
 
     i++
 
@@ -275,17 +291,17 @@ export function transformJSDocs(currChildIdx: number, children: ContentNode[] = 
   }
 }
 
-function _isJSDocBlock(children: ContentNode): boolean {
+function _isJSDocBlock(children: MinimalNode): boolean {
   return (
     children?.tag === 'h3' && children?.children?.[0]?.tag === 'code' && children?.children?.[0]?.type === 'element'
   )
 }
 
-function _parseJSDocName(node: ContentNode): string {
+function _parseJSDocName(node: MinimalNode): string {
   // Code block || id prop || empty string
   return node.children?.[0]?.children?.[0]?.value || node?.props?.id || ''
 }
-function _parseJSDocType(node: ContentNode): string {
+function _parseJSDocType(node: MinimalNode): string {
   const hasType = !!node?.children?.[0]?.children?.[0]?.children?.[0]?.value
   if (!hasType) {
     return ''
