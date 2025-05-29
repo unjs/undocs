@@ -43,3 +43,7 @@
 .md a {
   color: var(--ui-primary);
 }
+
+pre .shiki span.line {
+  display: inline;
+}

@@ -41,8 +41,9 @@ export default defineNuxtConfig({
       markdown: {
         highlight: {
           theme: {
-            default: 'github-light',
+            default: 'github-dark',
             dark: 'github-dark',
+            light: 'github-light',
           },
           // prettier-ignore
           langs: ['json', 'json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md', 'vue', 'js', 'ts', 'javascript', 'typescript', 'ini'],

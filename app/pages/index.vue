@@ -124,7 +124,11 @@ const hero = computed(() => {
         </div>
       </template>
 
-      <PorsePre v-if="hero.code" class="mx-auto" v-html="hero.code.content"></PorsePre>
+      <ProseCodeGroup v-if="hero.code" class="mx-auto">
+        <ProsePre :filename="hero.code.title || 'Terminal'" :code="hero.code.content">
+          <span v-html="hero.code.contentHighlighted"></span>
+        </ProsePre>
+      </ProseCodeGroup>
 
       <div v-else-if="hero.withFeatures" class="flex flex-col gap-6">
         <UPageCard v-for="(item, index) of landing.features" :key="index" v-bind="item" />
@@ -160,11 +164,11 @@ const hero = computed(() => {
     </UPageSection>
 
     <UPageSection v-if="landing.contributors && landing._github" title="Made by community">
-      <UPageContainer class="flex justify-center">
+      <div class="flex justify-center">
         <a :href="`https://github.com/${landing._github}/graphs/contributors`" target="_blank">
           <img :src="`https://contrib.rocks/image?repo=${landing._github}`" />
         </a>
-      </UPageContainer>
+      </div>
     </UPageSection>
   </div>
 </template>

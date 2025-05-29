@@ -51,18 +51,19 @@ export async function setupDocs(docsDir, opts = {}) {
       }
     }
     const shiki = await import('shiki')
-    const highlighted = await shiki.codeToHtml(docsconfig.landing.heroCode.content, {
-      theme: {
-        default: 'github-light',
-        dark: 'github-dark',
-      },
-      lang: docsconfig.landing.heroCode.lang || 'shell',
-    })
-    docsconfig.landing.heroCode = {
-      lang: 'shell',
-      title: 'Terminal',
-      content: highlighted,
-    }
+    docsconfig.landing.heroCode.contentHighlighted = (
+      await shiki.codeToHtml(docsconfig.landing.heroCode.content, {
+        lang: docsconfig.landing.heroCode.lang || 'sh',
+        defaultColor: 'dark',
+        themes: {
+          default: 'github-dark',
+          dark: 'github-dark',
+          light: 'github-light',
+        },
+      })
+    )
+      .replace(/background-color:#[0-9a-fA-F]{6};/g, '')
+      .replaceAll(`<span class="line"></span>`, '')
   }
 
   // Module to fix layers (force add .docs as first)
