@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.3.2
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.1...v0.3.2)
+
+### 💅 Refactors
+
+- Remove logs ([767535f](https://github.com/unjs/undocs/commit/767535f))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.1
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.0...v0.3.1)
