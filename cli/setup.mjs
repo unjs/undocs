@@ -100,7 +100,10 @@ export async function setupDocs(docsDir, opts = {}) {
         description: docsconfig.description || '',
         url: docsconfig.url,
       },
-      docs: docsconfig,
+      docs: {
+        ...docsconfig,
+        dir: undefined,
+      },
     },
     nitro: {
       static: true,
