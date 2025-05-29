@@ -10,6 +10,9 @@ interface ParsedContentFile extends Record<string, unknown> {
   navigation?: {
     icon?: string
   }
+  meta?: {
+    icon?: string
+  }
 }
 
 export async function setupContentHooks(nuxt: Nuxt, docsConfig: DocsConfig) {
@@ -194,7 +197,7 @@ function resolveFileIcon(content: ParsedContentFile) {
     return
   }
   content.navigation ||= {}
-  content.navigation.icon = _resolveIcon(content.path)
+  content.navigation.icon = content.meta.icon || _resolveIcon(content.path)
 }
 
 function _resolveIcon(path: string = '') {

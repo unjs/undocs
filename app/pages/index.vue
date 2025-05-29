@@ -10,7 +10,7 @@ const docsConfig = appConfig.docs as DocsConfig
 
 // console.log('docsConfig', JSON.stringify(docsConfig, null, 2))
 
-const landing: LandingConfig = (defu(docsConfig.landing || {}, {
+const landing: LandingConfig & { _github: string } = (defu(docsConfig.landing || {}, {
   // Meta
   navigation: false,
 
@@ -77,29 +77,19 @@ function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
     .sort((a, b) => a!.order - b!.order) as any[]
 }
 
-function formatHeroCode(code: LandingConfig['heroCode']) {
-  if (!code) {
-    return
-  }
-  if (typeof code === 'string') {
-    code = { content: code }
-  }
-  return `${'`'.repeat(3)}${code.lang || 'sh'} [${code.title || 'Terminal'}]\n${code.content}\n${'`'.repeat(3)}`
-}
 
 const hero = computed(() => {
   if (!landing!._heroMdTitle) {
     return
   }
-  const code = formatHeroCode(landing!.heroCode)
-  const withFeatures = !code && landing.featuresLayout === 'hero' && landing.features?.length > 0
+  const withFeatures = !landing!.heroCode && landing.featuresLayout === 'hero' && landing.features?.length > 0
   return {
     title: landing!._heroMdTitle,
     description: landing!.heroDescription,
     links: nornalizeHeroLinks(landing!.heroLinks),
     withFeatures,
-    orientation: code || withFeatures ? 'horizontal' : 'vertical',
-    code,
+    orientation: landing!.heroCode || withFeatures ? 'horizontal' : 'vertical',
+    code: landing!.heroCode,
   } as const
 })
 </script>
@@ -113,15 +103,8 @@ const hero = computed(() => {
       wrapper: 'lg:min-h-[540px]'
     }">
 
-      <template #headline>
+      <template #top>
         <!-- <LandingBackground /> -->
-        <!-- <NuxtLink :to="'/todo'">
-          <UBadge variant="subtle" size="lg"
-            class="px-3 relative rounded-full font-semibold dark:hover:bg-primary-400/15 dark:hover:ring-primary-700">
-            {{ landing.heroTitle }}
-            <UIcon v-if="false" :name="'todo'" class="size-4 pointer-events-none" />
-          </UBadge>
-        </NuxtLink> -->
       </template>
 
       <template #title>
@@ -141,7 +124,7 @@ const hero = computed(() => {
         </div>
       </template>
 
-      <pre v-if="hero.code" class="prose prose-primary dark:prose-invert mx-auto" v-html="hero.code"></pre>
+      <PorsePre v-if="hero.code" class="mx-auto" v-html="hero.code.content"></PorsePre>
 
       <div v-else-if="hero.withFeatures" class="flex flex-col gap-6">
         <UPageCard v-for="(item, index) of landing.features" :key="index" v-bind="item" />
@@ -159,6 +142,14 @@ const hero = computed(() => {
       <template #features>
         <li v-for="(feature) in landing.features" :key="feature.title">
           <UPageFeature v-bind="feature" orientation="vertical">
+            <template #leading>
+              <template v-if="feature.icon">
+                <span v-if="/\p{Emoji}/u.test(feature.icon)" class="w-8 h-8 text-2xl">
+                  {{ feature.icon }}
+                </span>
+                <UIcon v-else :name="feature.icon" class="w-8 h-8" />
+              </template>
+            </template>
             <template #description>
               <!-- eslint-disable-next-line vue/no-v-html -->
               <span class="md" v-html="feature.description" />
@@ -168,26 +159,6 @@ const hero = computed(() => {
       </template>
     </UPageSection>
 
-    <!--
-    <template v-if="landing.features?.length > 0 && !hero.withFeatures">
-      <UPageSection :title="landing.featuresTitle">
-        <UPageGrid>
-          <UPageCard v-for="(item, index) of landing.features" :key="index" v-bind="item" :ui="{
-            icon: {
-              // If the icon is an emoji, we need to use a bigger size
-              base: /\p{Emoji}/u.test(item.icon)
-                ? '!text-2xl !w-auto !h-auto'
-                : 'w-8 h-8 flex-shrink-0 text-gray-900 dark:text-white',
-            },
-          }">
-            <template v-if="item.description" #description>
-              <MDC :value="item.description" tag="span" class="prose prose-primary dark:prose-invert" />
-            </template>
-          </UPageCard>
-        </UPageGrid>
-      </UPageSection>
-    </template>
- -->
     <UPageSection v-if="landing.contributors && landing._github" title="Made by community">
       <UPageContainer class="flex justify-center">
         <a :href="`https://github.com/${landing._github}/graphs/contributors`" target="_blank">

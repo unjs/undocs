@@ -2,7 +2,6 @@ import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
 import { execSync } from 'node:child_process'
 import { loadConfig, watchConfig } from 'c12'
-import { init as initMd4w, mdToHtml } from 'md4w'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 
@@ -34,12 +33,35 @@ export async function setupDocs(docsDir, opts = {}) {
   docsconfig.branch = docsconfig.branch || getGitBranch() || 'main'
 
   // Convert markdown to HTML for landing items
-  await initMd4w()
   if (docsconfig.landing?.features) {
+    const md4w = await import('md4w')
+    await md4w.init()
     for (const item of docsconfig.landing.features) {
       if (item.description) {
-        item.description = mdToHtml(item.description)
+        item.description = md4w.mdToHtml(item.description)
       }
+    }
+  }
+
+  // Normalize and format hero code
+  if (docsconfig.landing?.heroCode) {
+    if (typeof docsconfig.landing.heroCode === 'string') {
+      docsconfig.landing.heroCode = {
+        content: docsconfig.landing.heroCode,
+      }
+    }
+    const shiki = await import('shiki')
+    const highlighted = await shiki.codeToHtml(docsconfig.landing.heroCode.content, {
+      theme: {
+        default: 'github-light',
+        dark: 'github-dark',
+      },
+      lang: docsconfig.landing.heroCode.lang || 'shell',
+    })
+    docsconfig.landing.heroCode = {
+      lang: 'shell',
+      title: 'Terminal',
+      content: highlighted,
     }
   }
 

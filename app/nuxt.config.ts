@@ -34,11 +34,18 @@ export default defineNuxtConfig({
     },
   },
   content: {
+    experimental: {
+      nativeSqlite: true,
+    },
     build: {
       markdown: {
         highlight: {
+          theme: {
+            default: 'github-light',
+            dark: 'github-dark',
+          },
           // prettier-ignore
-          langs: ['json', 'json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md', 'vue'],
+          langs: ['json', 'json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md', 'vue', 'js', 'ts', 'javascript', 'typescript', 'ini'],
         },
       },
     },
