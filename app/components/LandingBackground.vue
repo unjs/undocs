@@ -22,18 +22,33 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg absolute inset-0 -z-10 transform-gpu blur-3xl overflow-hidden" aria-hidden="true">
+  <div class="bg" aria-hidden="true">
     <div
-      class="aspect-[1.7] h-full w-full bg-gradient-to-r from-[rgb(var(--color-primary-DEFAULT))] to-white/10 lg:opacity-30 xs:opacity-50"
-      :style="{ 'clip-path': `polygon(${poly})` }"
+      class="aspect-[1.7] h-full w-full lg:opacity-30 xs:opacity-50"
+      :style="{
+        'clip-path': `polygon(${poly})`,
+      }"
     />
   </div>
 </template>
 
 <style scoped>
+.bg {
+  position: absolute;
+  z-index: -10;
+  inset: 0;
+  transform: translate3d(0, 0, 0);
+  filter: blur(70px);
+}
+
 .bg > div {
   clip-path: circle(75%);
   transition: clip-path 3s;
+  background-image: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--ui-primary) 30%, transparent),
+    color-mix(in srgb, var(--ui-bg) 30%, transparent)
+  );
 }
 
 .light .bg > div {

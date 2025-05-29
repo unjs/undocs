@@ -106,7 +106,7 @@ const hero = computed(() => {
       }"
     >
       <template #top>
-        <!-- <LandingBackground /> -->
+        <LandingBackground />
       </template>
 
       <template #title>
