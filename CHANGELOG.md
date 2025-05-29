@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.3.0
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.2.30...v0.3.0)
+
+### 🚀 Enhancements
+
+- Migrate to @nuxt/ui-pro and @nuxt/content v3 ([#175](https://github.com/unjs/undocs/pull/175))
+
+### 🏡 Chore
+
+- Update dependencies ([2b62a52](https://github.com/unjs/undocs/commit/2b62a52))
+- Remove codecov action ([1ac0c33](https://github.com/unjs/undocs/commit/1ac0c33))
+- Update lockfile ([9d1922f](https://github.com/unjs/undocs/commit/9d1922f))
+- Lint ([94ad02d](https://github.com/unjs/undocs/commit/94ad02d))
+- Apply automated updates ([9494e50](https://github.com/unjs/undocs/commit/9494e50))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Hugo Richard ([@HugoRCD](https://github.com/HugoRCD))
+
 ## v0.2.30
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.29...v0.2.30)
