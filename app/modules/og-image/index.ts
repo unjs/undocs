@@ -12,11 +12,13 @@ export default defineNuxtModule({
       handler: resolver.resolve('./runtime/handler'),
     })
 
-    nuxt.options.nitro.serverAssets ??= []
-    nuxt.options.nitro.serverAssets.push({
-      baseName: 'og-image',
-      dir: resolver.resolve('./runtime/assets'),
-    })
+    nuxt.options.nitro.serverAssets = [
+      ...(nuxt.options.nitro.serverAssets || []).filter((asset) => asset.baseName !== 'og-image'),
+      {
+        baseName: 'og-image',
+        dir: resolver.resolve('./runtime/assets'),
+      },
+    ]
 
     nuxt.hook('nitro:init', (nitro) => {
       nitro.hooks.hook('prerender:generate', (route) => {

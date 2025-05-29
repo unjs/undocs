@@ -1,0 +1,49 @@
+@import 'tailwindcss';
+@import '@nuxt/ui-pro';
+
+@theme static {
+  --font-sans: 'Inter', sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 0.6em;
+  height: 0.6em;
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 0.6em;
+  @apply bg-gray-300 hover:bg-gray-400;
+}
+
+.dark {
+  & ::-webkit-scrollbar-track {
+    @apply bg-gray-800;
+  }
+
+  & ::-webkit-scrollbar-thumb {
+    @apply bg-gray-700 hover:bg-gray-600;
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.md a {
+  color: var(--ui-primary);
+}
+
+pre .shiki span.line {
+  display: inline;
+}

@@ -39,7 +39,7 @@ const socialLinks = computed(() => {
     :to="link.to"
     target="_blank"
     rel="noopener noreferrer"
-    color="gray"
+    color="neutral"
     variant="ghost"
   />
 </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { withoutTrailingSlash } from 'ufo'
+import { kebabCase } from 'scule'
+import { findPageHeadline } from '#ui-pro/utils/content'
 
 definePageMeta({
   layout: 'docs',
@@ -8,21 +9,23 @@ definePageMeta({
 const appConfig = useAppConfig()
 const route = useRoute()
 
-const { data: page } = await useAsyncData(route.path, () => queryContent(route.path).findOne())
-
+const { data: page } = await useAsyncData(kebabCase(route.path), () =>
+  queryCollection('content').path(route.path).first(),
+)
 if (!page.value) {
-  showError({
+  throw createError({
     statusCode: 404,
-    statusMessage: `Page not found: ${route.path}`,
+    statusMessage: 'Page not found',
+    message: `${route.path} does not exist`,
+    fatal: true,
   })
 }
 
-const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
-  queryContent()
-    .where({ _extension: 'md', navigation: { $ne: false } })
-    .only(['title', 'description', '_path'])
-    .findSurround(withoutTrailingSlash(route.path)),
-)
+const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround`, () => {
+  return queryCollectionItemSurroundings('content', route.path, {
+    fields: ['description'],
+  })
+})
 
 usePageSEO({
   title: `${page.value?.title} - ${appConfig.site.name}`,
@@ -83,19 +86,14 @@ onMounted(() => {
       v-if="tocMobileLinks.length > 1"
       class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky mb-2 lg:hidden"
     >
-      <UDropdown
-        v-model:open="tocMobileOpen"
-        :items="tocMobileLinks"
-        :popper="{ placement: 'bottom-end' }"
-        :mode="isMobile ? 'click' : 'hover'"
-      >
+      <UDropdownMenu v-model:open="tocMobileOpen" :items="tocMobileLinks" :mode="isMobile ? 'click' : 'hover'">
         <UButton
-          color="white"
+          color="neutral"
           label="On this page"
           :trailing="false"
           :icon="`i-heroicons-chevron-${tocMobileOpen ? 'down' : 'left'}-20-solid`"
         />
-      </UDropdown>
+      </UDropdownMenu>
     </div>
 
     <UPageBody prose>
@@ -103,7 +101,7 @@ onMounted(() => {
       <ContentRenderer v-if="page.body" :value="page" />
 
       <div class="space-y-6">
-        <UDivider type="dashed" />
+        <USeparator type="dashed" />
         <div class="mb-4">
           <UPageLinks
             class="inline-block"

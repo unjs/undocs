@@ -1,20 +1,25 @@
+import { createResolver } from 'nuxt/kit'
 import { defineNuxtConfig } from 'nuxt/config'
+
+const { resolve } = createResolver(import.meta.url)
 
 // Flag enabled when developing docs theme
 const dev = !!process.env.NUXT_DOCS_DEV
 
-// SSR enabled only for production build to save life (at least until our stack will be little bit lighter)
+// SSR enabled only for production build to save life (at least until our stack will be a little bit lighter)
 const isProd = process.env.NODE_ENV === 'production'
 const ssr = Boolean(isProd || process.env.NUXT_DOCS_SSR)
 
 export default defineNuxtConfig({
+  $meta: {
+    name: 'undocs',
+  },
   ssr,
-  modules: ['@nuxt/fonts', '@nuxt/content', isProd && '@nuxtjs/plausible', '@nuxt/ui'],
-  ui: {},
-  fonts: {
-    families: [{ name: 'Inter' }],
-    defaults: {
-      weights: [400, 500, 600, 700],
+  modules: ['@nuxt/ui-pro', '@nuxt/content', isProd && '@nuxtjs/plausible'],
+  css: [resolve('./assets/main.css')],
+  ui: {
+    theme: {
+      colors: ['primary', 'secondary', 'info', 'success', 'warning', 'error', 'important'],
     },
   },
   app: {
@@ -29,25 +34,22 @@ export default defineNuxtConfig({
     },
   },
   content: {
-    // .* and -* are ignored by default
-    ignores: [
-      'package.json',
-      'dist',
-      'package-lock.json',
-      'yarn.lock',
-      'bun.lockb',
-      'node_modules',
-      'pnpm-lock.yaml',
-      'pnpm-workspace.yaml',
-      'docs.config.json',
-      '\\.(js|mjs|ts)$',
-    ],
-    highlight: {
-      langs: ['json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md'],
+    experimental: {
+      nativeSqlite: true,
     },
-  },
-  routeRules: {
-    '/api/search.json': { prerender: true },
+    build: {
+      markdown: {
+        highlight: {
+          theme: {
+            default: 'github-dark',
+            dark: 'github-dark',
+            light: 'github-light',
+          },
+          // prettier-ignore
+          langs: ['json', 'json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md', 'vue', 'js', 'ts', 'javascript', 'typescript', 'ini'],
+        },
+      },
+    },
   },
   nitro: {
     prerender: {
@@ -60,10 +62,6 @@ export default defineNuxtConfig({
   },
   uiPro: {
     license: process.env.NUXT_UI_PRO_LICENSE || 'oss',
-  },
-  tailwindcss: {
-    viewer: dev,
-    quiet: !dev,
   },
   typescript: {
     strict: false,

@@ -1,17 +1,12 @@
 <script setup lang="ts">
-import type { ParsedContent } from '@nuxt/content/dist/runtime/types'
-
 const appConfig = useAppConfig()
 
-const { data: navigation } = await useAsyncData('navigation', () => fetchContentNavigation())
-
-const { data: files } = useLazyFetch<ParsedContent[]>('/api/search.json', {
-  default: () => [],
+const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('content'))
+const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSections('content'), {
   server: false,
 })
 
 const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
-
 const browserTabIcon = appConfig.docs?.logo || undefined
 
 useSeoMeta({
@@ -31,27 +26,20 @@ provide('navigation', navigation)
 </script>
 
 <template>
-  <NuxtLoadingIndicator color="rgb(252,211,77)" />
-  <AppHeader />
+  <UApp>
+    <NuxtLoadingIndicator color="var(--ui-primary)" />
+    <AppHeader />
 
-  <UMain class="min-h-[calc(100vh-var(--header-height)-78px)]">
-    <NuxtLayout>
-      <NuxtPage />
-    </NuxtLayout>
-  </UMain>
+    <UMain class="min-h-[calc(100vh-var(--header-height)-78px)]">
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
+    </UMain>
 
-  <AppFooter />
+    <AppFooter />
 
-  <ClientOnly>
-    <LazyUContentSearch :files="files" :navigation="navigation" />
-  </ClientOnly>
-
-  <UNotifications />
+    <ClientOnly>
+      <LazyUContentSearch :files="files" :navigation="navigation" shortcut="meta_k" />
+    </ClientOnly>
+  </UApp>
 </template>
-
-<style>
-code {
-  border: none !important;
-  font-weight: normal !important;
-}
-</style>

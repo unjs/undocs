@@ -1,25 +1,59 @@
 <script setup lang="ts">
 import type { DocsConfig } from '../../schema/config'
+import { defu } from 'defu'
 
-type LandingConfig = NonNullable<DocsConfig['landing']>
-
-const { data: page } = (await useAsyncData('index', () => queryContent('/').findOne())) as unknown as {
-  data: Ref<LandingConfig>
-}
-
-if (!page.value) {
-  showError({
-    statusCode: 404,
-    statusMessage: 'Home page not found!',
-  })
-}
+type LandingConfig = Exclude<DocsConfig['landing'], false | undefined>
 
 const appConfig = useAppConfig()
 
+const docsConfig = appConfig.docs as DocsConfig
+
+// console.log('docsConfig', JSON.stringify(docsConfig, null, 2))
+
+const landing: LandingConfig & { _github: string } = (defu(docsConfig.landing || {}, {
+  // Meta
+  navigation: false,
+
+  // Page
+  title: docsConfig.name,
+  description: docsConfig.description,
+
+  // Hero
+  heroTitle: docsConfig.name,
+  heroSubtitle: docsConfig.shortDescription,
+  heroDescription: docsConfig.description,
+  heroLinks: {
+    primary: {
+      label: 'Get Started',
+      icon: 'i-heroicons-rocket-launch',
+      to: '/guide',
+      order: 0,
+    },
+    github: {
+      label: 'View on GitHub',
+      icon: 'i-simple-icons-github',
+      color: 'white',
+      to: `https://github.com/${docsConfig.github}`,
+      target: '_blank',
+      order: 100,
+    },
+  },
+
+  // Features
+  featuresTitle: '',
+  features: [],
+
+  _github: docsConfig.github,
+}))
+
+landing._heroMdTitle =
+  landing._heroMdTitle || `[${landing.heroTitle}]{.text-primary} :br [${landing.heroSubtitle}]{.text-4xl}`
+
+
 usePageSEO({
-  title: `${appConfig.site.name} - ${page.value!.heroSubtitle}`,
-  ogTitle: page.value!.heroSubtitle,
-  description: page.value!.description,
+  title: `${appConfig.site.name} - ${landing!.heroSubtitle}`,
+  ogTitle: landing!.heroSubtitle,
+  description: landing!.description,
 })
 
 function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
@@ -43,79 +77,98 @@ function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
     .sort((a, b) => a!.order - b!.order) as any[]
 }
 
-function formatHeroCode(code: LandingConfig['heroCode']) {
-  if (!code) {
-    return
-  }
-  if (typeof code === 'string') {
-    code = { content: code }
-  }
-  return `${'`'.repeat(3)}${code.lang || 'sh'} [${code.title || 'Terminal'}]\n${code.content}\n${'`'.repeat(3)}`
-}
 
 const hero = computed(() => {
-  if (!page.value!._heroMdTitle) {
+  if (!landing!._heroMdTitle) {
     return
   }
-  const code = formatHeroCode(page.value!.heroCode)
-  const withFeatures = !code && page.value.featuresLayout === 'hero' && page.value.features?.length > 0
+  const withFeatures = !landing!.heroCode && landing.featuresLayout === 'hero' && landing.features?.length > 0
   return {
-    title: page.value!._heroMdTitle,
-    description: page.value!.heroDescription,
-    links: nornalizeHeroLinks(page.value!.heroLinks),
+    title: landing!._heroMdTitle,
+    description: landing!.heroDescription,
+    links: nornalizeHeroLinks(landing!.heroLinks),
     withFeatures,
-    orientation: code || withFeatures ? 'horizontal' : 'vertical',
-    code,
+    orientation: landing!.heroCode || withFeatures ? 'horizontal' : 'vertical',
+    code: landing!.heroCode,
   } as const
 })
 </script>
 
 <template>
   <div>
-    <ULandingHero v-if="hero" v-bind="hero" :orientation="hero.orientation">
+    <!-- Hero -->
+    <UPageHero v-if="hero" :orientation="hero.orientation" class="relative" :ui="{
+      container: '!pb-20 py-24 sm:py-32 lg:py-40',
+      title: 'text-5xl sm:text-7xl',
+      wrapper: 'lg:min-h-[540px]'
+    }">
+
       <template #top>
-        <LandingBackground />
+        <!-- <LandingBackground /> -->
       </template>
+
       <template #title>
-        <MDC :value="hero.title" />
+        {{ landing.heroTitle }}<br><span class="text-primary text-4xl">{{ landing.heroSubtitle }}</span>
       </template>
 
-      <MDC v-if="hero.code" :value="hero.code" tag="pre" class="prose prose-primary dark:prose-invert mx-auto" />
+      <template #description>
+        {{ landing.heroDescription }}
+      </template>
+
+      <template #links>
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center flex-wrap gap-2">
+            <UButton v-for="link in hero.links" :key="link.label" v-bind="link" class="!px-6 !py-3">
+            </UButton>
+          </div>
+        </div>
+      </template>
+
+      <ProseCodeGroup v-if="hero.code" class="mx-auto">
+        <ProsePre :filename="hero.code.title || 'Terminal'" :code="hero.code.content">
+          <span v-html="hero.code.contentHighlighted"></span>
+        </ProsePre>
+      </ProseCodeGroup>
+
       <div v-else-if="hero.withFeatures" class="flex flex-col gap-6">
-        <ULandingCard v-for="(item, index) of page.features" :key="index" v-bind="item" />
+        <UPageCard v-for="(item, index) of landing.features" :key="index" v-bind="item" />
       </div>
-    </ULandingHero>
+    </UPageHero>
 
-    <template v-if="page.features?.length > 0 && !hero.withFeatures">
-      <ULandingSection :title="page.featuresTitle">
-        <UPageGrid>
-          <ULandingCard
-            v-for="(item, index) of page.features"
-            :key="index"
-            v-bind="item"
-            :ui="{
-              icon: {
-                // If the icon is an emoji, we need to use a bigger size
-                base: /\p{Emoji}/u.test(item.icon)
-                  ? '!text-2xl !w-auto !h-auto'
-                  : 'w-8 h-8 flex-shrink-0 text-gray-900 dark:text-white',
-              },
-            }"
-          >
-            <template v-if="item.description" #description>
-              <MDC :value="item.description" tag="span" class="prose prose-primary dark:prose-invert" />
+    <!-- Features -->
+
+    <UPageSection :title="landing?.featuresTitle" :description="''" :ui="{
+      title: 'text-left',
+      description: 'text-left',
+      root: 'bg-gradient-to-b border-t border-default from-muted dark:from-muted/40 to-default',
+      features: 'xl:grid-cols-4 lg:gap-10'
+    }">
+      <template #features>
+        <li v-for="(feature) in landing.features" :key="feature.title">
+          <UPageFeature v-bind="feature" orientation="vertical">
+            <template #leading>
+              <template v-if="feature.icon">
+                <span v-if="/\p{Emoji}/u.test(feature.icon)" class="w-8 h-8 text-2xl">
+                  {{ feature.icon }}
+                </span>
+                <UIcon v-else :name="feature.icon" class="w-8 h-8" />
+              </template>
             </template>
-          </ULandingCard>
-        </UPageGrid>
-      </ULandingSection>
-    </template>
+            <template #description>
+              <!-- eslint-disable-next-line vue/no-v-html -->
+              <span class="md" v-html="feature.description" />
+            </template>
+          </UPageFeature>
+        </li>
+      </template>
+    </UPageSection>
 
-    <ULandingSection v-if="page.contributors && page._github" title="Made by community">
-      <UContainer>
-        <a :href="`https://github.com/${page._github}/graphs/contributors`" target="_blank">
-          <img :src="`https://contrib.rocks/image?repo=${page._github}`" />
+    <UPageSection v-if="landing.contributors && landing._github" title="Made by community">
+      <div class="flex justify-center">
+        <a :href="`https://github.com/${landing._github}/graphs/contributors`" target="_blank">
+          <img :src="`https://contrib.rocks/image?repo=${landing._github}`" />
         </a>
-      </UContainer>
-    </ULandingSection>
+      </div>
+    </UPageSection>
   </div>
 </template>

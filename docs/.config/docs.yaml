@@ -15,6 +15,7 @@ landing:
       icon: 'i-heroicons-play'
       to: 'https://stackblitz.com/github/unjs/docs/tree/main/template'
   contributors: true
+  heroCode: 'npx giget gh:unjs/undocs/template docs --install'
   # featuresLayout: 'hero'
   features:
     - title: 'Easy to use'

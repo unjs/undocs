@@ -1,5 +1,5 @@
 ---
-icon: bi:stars
+navigation.icon: i-lucide-sparkles
 ---
 
 # Content Transformation
@@ -65,33 +65,12 @@ https://github.com/orgs/community/discussions/16925
 If you have code blocks right after each other, they will be grouped together using [`code-group`](https://ui.nuxt.com/pro/prose/code-group).
 
 ````md
-    ```ts [nuxt.config.ts]
-    export default defineNuxtConfig({
-      modules: [],
-    })
-    ```
-
-    ```ts [server/api/hello.get.ts]
-    export default defineEventHandler(() => {
-      return {
-        hello: 'world'
-      }
-    })
-    ```
-
-    ```vue [app.vue]
-    <template>
-      <div>
-      <h1>Welcome to the homepage</h1>
-      </div>
-    </template>
-    ```
-````
-
-```ts [nuxt.config.ts]
-export default defineNuxtConfig({
-  modules: [],
-})
+```json [package.json]
+{
+  "scripts": {
+    "dev": "undocs dev"
+  }
+}
 ```
 
 ```ts [server/api/hello.get.ts]
@@ -102,7 +81,32 @@ export default defineEventHandler(() => {
 })
 ```
 
-```vue [app.vue]
+```html [index.html]
+<template>
+  <div>
+    <h1>Welcome to the homepage</h1>
+  </div>
+</template>
+```
+````
+
+```json [package.json]
+{
+  "scripts": {
+    "dev": "undocs dev"
+  }
+}
+```
+
+```ts [server/api/hello.get.ts]
+export default defineEventHandler(() => {
+  return {
+    hello: 'world',
+  }
+})
+```
+
+```html [index.html]
 <template>
   <div>
     <h1>Welcome to the homepage</h1>

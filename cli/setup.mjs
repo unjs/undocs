@@ -22,9 +22,48 @@ export async function setupDocs(docsDir, opts = {}) {
   // Normalize dir
   docsconfig.dir = docsDir = resolve(docsconfig.dir || docsDir)
 
+  globalThis.__DOCS_CWD__ = docsconfig.dir
+
   // URL is required for production build (SEO)
   if (!docsconfig.url && !opts.dev) {
     throw new Error('`url` config is required for production build!')
+  }
+
+  // Guess branch
+  docsconfig.branch = docsconfig.branch || getGitBranch() || 'main'
+
+  // Convert markdown to HTML for landing items
+  if (docsconfig.landing?.features) {
+    const md4w = await import('md4w')
+    await md4w.init()
+    for (const item of docsconfig.landing.features) {
+      if (item.description) {
+        item.description = md4w.mdToHtml(item.description)
+      }
+    }
+  }
+
+  // Normalize and format hero code
+  if (docsconfig.landing?.heroCode) {
+    if (typeof docsconfig.landing.heroCode === 'string') {
+      docsconfig.landing.heroCode = {
+        content: docsconfig.landing.heroCode,
+      }
+    }
+    const shiki = await import('shiki')
+    docsconfig.landing.heroCode.contentHighlighted = (
+      await shiki.codeToHtml(docsconfig.landing.heroCode.content, {
+        lang: docsconfig.landing.heroCode.lang || 'sh',
+        defaultColor: 'dark',
+        themes: {
+          default: 'github-dark',
+          dark: 'github-dark',
+          light: 'github-light',
+        },
+      })
+    )
+      .replace(/background-color:#[0-9a-fA-F]{6};/g, '')
+      .replaceAll(`<span class="line"></span>`, '')
   }
 
   // Module to fix layers (force add .docs as first)
@@ -44,9 +83,9 @@ export async function setupDocs(docsDir, opts = {}) {
     compatibilityDate: '2024-08-16',
     rootDir: docsSrcDir,
     srcDir: docsSrcDir,
-    extends: [...(opts.extends || []), appDir, '@nuxt/ui-pro'],
+    extends: [...(opts.extends || []), appDir],
     modulesDir: [resolve(pkgDir, 'node_modules'), resolve(docsDir, 'node_modules')],
-    modules: [fixLayers, docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
+    modules: ['@nuxt/ui-pro', fixLayers, docsconfig.buildCache ? 'nuxt-build-cache' : undefined].filter(Boolean),
     // @ts-ignore
     docs: docsconfig,
     // @ts-ignore
@@ -61,10 +100,7 @@ export async function setupDocs(docsDir, opts = {}) {
         description: docsconfig.description || '',
         url: docsconfig.url,
       },
-      docs: {
-        github: docsconfig.github,
-        branch: docsconfig.branch || getGitBranch() || 'main',
-      },
+      docs: docsconfig,
     },
     nitro: {
       static: true,

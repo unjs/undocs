@@ -4,12 +4,19 @@ const docsNav = useDocsNav()
 
 <template>
   <UContainer>
-    <UPage :ui="{ left: 'lg:col-span-2 pr-2 border-r border-gray-200 dark:border-gray-700' }">
+    <UPage :ui="{ left: 'lg:col-span-2 pr-2 border-r border-default' }">
       <template #left>
-        <UAside :links="docsNav.links">
-          <UDivider v-if="docsNav.activeLinks?.length" type="dashed" class="mb-6" />
-          <UNavigationTree :links="docsNav.activeLinks" />
-        </UAside>
+        <UPageAside>
+          <UPageAnchors :links="docsNav.links" />
+          <USeparator v-if="docsNav.activeLinks?.length" type="dashed" class="py-6" />
+          <UContentNavigation
+            :navigation="docsNav.activeLinks"
+            default-open
+            trailing-icon="i-lucide-chevron-right"
+            :ui="{ linkTrailingIcon: 'group-data-[state=open]:rotate-90' }"
+            highlight
+          />
+        </UPageAside>
       </template>
       <slot />
     </UPage>
