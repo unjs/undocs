@@ -284,6 +284,9 @@ function _parseJSDocType(node: MinimalNode): string {
 // --- internal utils ---
 
 function _getTextContent(node: MinimalNode): string {
+  if (!node) {
+    return ''
+  }
   if (typeof node === 'string') {
     return node
   }
