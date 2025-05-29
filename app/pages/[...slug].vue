@@ -82,38 +82,29 @@ onMounted(() => {
       <UContentToc title="On this page" :links="tocLinks" class="hidden lg:block" />
     </template>
     <!-- mobile -->
-    <div
-      v-if="tocMobileLinks.length > 1"
-      class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky mb-2 lg:hidden"
-    >
+    <div v-if="tocMobileLinks.length > 1"
+      class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky mb-2 lg:hidden">
       <UDropdownMenu v-model:open="tocMobileOpen" :items="tocMobileLinks" :mode="isMobile ? 'click' : 'hover'">
-        <UButton
-          color="neutral"
-          label="On this page"
-          :trailing="false"
-          :icon="`i-heroicons-chevron-${tocMobileOpen ? 'down' : 'left'}-20-solid`"
-        />
+        <UButton color="neutral" label="On this page" :trailing="false"
+          :icon="`i-heroicons-chevron-${tocMobileOpen ? 'down' : 'left'}-20-solid`" />
       </UDropdownMenu>
     </div>
 
-    <UPageBody prose>
+    <UPageBody prose class="break-words">
       <br v-if="tocMobileLinks.length > 1" class="lg:hidden mb-2" />
       <ContentRenderer v-if="page.body" :value="page" />
 
       <div class="space-y-6">
         <USeparator type="dashed" />
         <div class="mb-4">
-          <UPageLinks
-            class="inline-block"
-            :links="[
-              {
-                icon: 'i-ph-pen-duotone',
-                label: `Edit this page ${page.automd ? '(some contents are generated with automd from source)' : ''}`,
-                to: `https://github.com/${appConfig.docs.github}/edit/${appConfig.docs.branch || 'main'}/docs/${page._file}`,
-                target: '_blank',
-              },
-            ]"
-          />
+          <UPageLinks class="inline-block" :links="[
+            {
+              icon: 'i-ph-pen-duotone',
+              label: `Edit this page ${page.automd ? '(some contents are generated with automd from source)' : ''}`,
+              to: `https://github.com/${appConfig.docs.github}/edit/${appConfig.docs.branch || 'main'}/docs/${page._file}`,
+              target: '_blank',
+            },
+          ]" />
         </div>
         <UContentSurround v-if="surround?.length" class="mb-4" :surround="surround" />
       </div>
