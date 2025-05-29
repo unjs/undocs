@@ -1,5 +1,6 @@
 import { createResolver } from 'nuxt/kit'
 import { defineNuxtConfig } from 'nuxt/config'
+import { eventHandler } from 'h3'
 
 const { resolve } = createResolver(import.meta.url)
 
@@ -52,6 +53,12 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
+    devHandlers: [
+      {
+        route: '/.well-known/appspecific/com.chrome.devtools.json',
+        handler: eventHandler(() => ({})),
+      },
+    ],
     prerender: {
       autoSubfolderIndex: false,
       failOnError: false,
