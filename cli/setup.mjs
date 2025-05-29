@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
 import { execSync } from 'node:child_process'
 import { loadConfig, watchConfig } from 'c12'
+import { init as initMd4w, mdToHtml } from 'md4w'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 
@@ -27,6 +28,19 @@ export async function setupDocs(docsDir, opts = {}) {
   // URL is required for production build (SEO)
   if (!docsconfig.url && !opts.dev) {
     throw new Error('`url` config is required for production build!')
+  }
+
+  // Guess branch
+  docsconfig.branch = docsconfig.branch || getGitBranch() || 'main'
+
+  // Convert markdown to HTML for landing items
+  await initMd4w()
+  if (docsconfig.landing?.features) {
+    for (const item of docsconfig.landing.features) {
+      if (item.description) {
+        item.description = mdToHtml(item.description)
+      }
+    }
   }
 
   // Module to fix layers (force add .docs as first)
@@ -63,10 +77,7 @@ export async function setupDocs(docsDir, opts = {}) {
         description: docsconfig.description || '',
         url: docsconfig.url,
       },
-      docs: {
-        github: docsconfig.github,
-        branch: docsconfig.branch || getGitBranch() || 'main',
-      },
+      docs: docsconfig,
     },
     nitro: {
       static: true,
