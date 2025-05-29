@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.3.1
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.0...v0.3.1)
+
+### 🏡 Chore
+
+- **release:** V0.3.0 ([9934427](https://github.com/unjs/undocs/commit/9934427))
+- Apply automated updates ([e163409](https://github.com/unjs/undocs/commit/e163409))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.0
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.2.30...v0.3.0)
