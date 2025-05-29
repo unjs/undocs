@@ -95,16 +95,11 @@ const hero = computed(() => {
 <template>
   <div>
     <!-- Hero -->
-    <UPageHero
-      v-if="hero"
-      :orientation="hero.orientation"
-      class="relative"
-      :ui="{
-        container: '!pb-20 py-24 sm:py-32 lg:py-40',
-        title: 'text-5xl sm:text-7xl',
-        wrapper: 'lg:min-h-[540px]',
-      }"
-    >
+    <UPageHero v-if="hero" :orientation="hero.orientation" class="relative" :ui="{
+      container: '!pb-20 py-24 sm:py-32 lg:py-40',
+      title: 'text-5xl sm:text-7xl',
+      wrapper: 'lg:min-h-[540px]',
+    }">
       <template #top>
         <LandingBackground />
       </template>
@@ -139,16 +134,12 @@ const hero = computed(() => {
 
     <!-- Features -->
 
-    <UPageSection
-      :title="landing?.featuresTitle"
-      :description="''"
-      :ui="{
-        title: 'text-left',
-        description: 'text-left',
-        root: 'bg-gradient-to-b border-t border-default from-muted dark:from-muted/40 to-default',
-        features: 'xl:grid-cols-4 lg:gap-10',
-      }"
-    >
+    <UPageSection v-if="landing.features?.length > 0" :title="landing?.featuresTitle" :description="''" :ui="{
+      title: 'text-left',
+      description: 'text-left',
+      root: '',
+      features: 'xl:grid-cols-4 lg:gap-10',
+    }">
       <template #features>
         <li v-for="feature in landing.features" :key="feature.title">
           <UPageFeature v-bind="feature" orientation="vertical">

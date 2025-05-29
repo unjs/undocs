@@ -47,3 +47,7 @@
 pre .shiki span.line {
   display: inline;
 }
+
+main {
+  min-height: calc(100vh - 150px);
+}

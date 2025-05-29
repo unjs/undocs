@@ -30,7 +30,7 @@ provide('navigation', navigation)
     <NuxtLoadingIndicator color="var(--ui-primary)" />
     <AppHeader />
 
-    <UMain class="min-h-[calc(100vh-var(--header-height)-78px)]">
+    <UMain>
       <NuxtLayout>
         <NuxtPage />
       </NuxtLayout>
