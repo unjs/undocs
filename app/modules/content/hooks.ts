@@ -68,13 +68,13 @@ export async function setupContentHooks(nuxt: Nuxt, docsConfig: DocsConfig) {
 
     const body = content.body as MarkdownRoot
     removeFirstH1AndBlockquote(body, content)
+    body.value = mergeCodeGroups(body.value)
     for (const node of body.value) {
       if (typeof node === 'string') {
         continue
       }
+      transformStepsList(node) // should be before alerts
       transformGithubAlert(node)
-      transformStepsList(node)
-      // transformCodeGroups(idx, body.value)
       // transformJSDocs(idx, file.body?.children)
     }
   })
@@ -94,73 +94,23 @@ function transformGithubAlert(node: MinimalNode) {
     typeof node[2][2][2] === 'string' &&
     ['!NOTE', '!TIP', '!IMPORTANT', '!WARNING', '!CAUTION'].includes(node[2][2][2])
   ) {
-    // @ts-ignore - ignore type error for now
+    // @ts-expect-error read-only
     node[0] = node[2][2][2].slice(1).toLowerCase()
-    node[2][2].shift()
+    // @ts-expect-error read-only
+    node[2] = ['p', {}, ...node[2].slice(3)] as MinimalElement
   }
 }
 
 // --- transform steps list ---
+
 function transformStepsList(node: MinimalNode) {
   // CONVERT OL->LI to Steps
   if (Array.isArray(node) && node[0] === 'ol' && node.length > 3 && Array.isArray(node[2]) && node[2][0] === 'li') {
     const stepsChildren = node.slice(2).map((li: MinimalNode) => {
       return ['h4', {}, ...li.slice(2)] as MinimalElement
     })
-    // console.log('stepsChildren', stepsChildren)
     node.splice(0, Infinity, 'steps', { level: '4' }, ...stepsChildren)
-    // console.log(node)
   }
-
-  // CONVERT OL->LI to Steps
-  // TODO: Find a way to opt out of this transformation if needed within markdown.
-  // if (node.tag === 'ol' && (node.children?.length || 0) > 0 && node.children?.[0].tag === 'li') {
-  //   const stepsChildren = node.children.map((li) => {
-  //     const children = li.children || []
-
-  //     // console.log(JSON.stringify(children, undefined, 2))
-
-  //     return {
-  //       type: 'element',
-  //       tag: 'div',
-  //       children,
-  //     }
-  //   })
-
-  //   const lastLeadingSpaceOnStep = stepsChildren
-  //     .map((step) => {
-  //       let lastLeadingSpace = -1
-
-  //       for (let i = 0; i < step.children.length; i++) {
-  //         const child = step.children[i]
-  //         const prevChild = step.children[i - 1]
-  //         if (
-  //           (child?.type === 'text' && child.value?.startsWith(' ')) ||
-  //           (prevChild?.type === 'text' && prevChild?.value?.endsWith(' '))
-  //         ) {
-  //           lastLeadingSpace = i
-  //         }
-  //       }
-
-  //       return lastLeadingSpace
-  //     })
-  //     .filter((step) => step > -1)
-
-  //   const stepsHaveContent = stepsChildren.some((step) => {
-  //     if (lastLeadingSpaceOnStep.length > 0) {
-  //       return step.children.slice(lastLeadingSpaceOnStep[0], lastLeadingSpaceOnStep[0]).length > 1
-  //     }
-
-  //     return step.children.length > 1
-  //   })
-
-  //   if (stepsHaveContent) {
-  //     node.type = 'element'
-  //     node.tag = 'Steps'
-  //     node.props = {}
-  //     node.children = stepsChildren
-  //   }
-  // }
 }
 
 // --- transform first h1 and blockquote ---
@@ -214,45 +164,30 @@ function _resolveIcon(path: string = '') {
   }
 }
 
-// --- transform code groups ---
+// --- Merge code groups ---
 
-// TODO
-function _transformCodeGroups(currChildIdx: number, children: MinimalNode[] = []) {
-  if (!children?.length || !_isNamedCodeBlock(children[currChildIdx])) {
-    return
+function mergeCodeGroups(children: MinimalNode[] = []): MinimalNode[] {
+  const newChildren: MinimalNode[] = []
+
+  let codeBlocks: MinimalNode[] = []
+
+  for (let i = 0; i < children.length; i++) {
+    if (_isNamedCodeBlock(children[i])) {
+      codeBlocks.push(children[i])
+      continue
+    }
+    if (codeBlocks.length > 0) {
+      newChildren.push(codeBlocks.length > 1 ? ['CodeGroup', {}, ...codeBlocks] : codeBlocks[0])
+      codeBlocks = []
+    }
+    newChildren.push(children[i])
   }
 
-  const group: {
-    idx: number
-    node: MinimalNode
-  }[] = []
-
-  for (let i = currChildIdx; i < children.length; i++) {
-    const nextNode = children[i]
-    if (!_isNamedCodeBlock(nextNode)) {
-      break
-    }
-    group.push({ idx: i, node: nextNode })
-  }
-
-  // Replace current children with the new code group if it has two or more code blocks
-  if (group.length > 1) {
-    // Only  reset children if we have more than one code block
-    // Code here is to avoid empty text nodes in the markdown AST
-    for (const { idx } of group) {
-      children[idx] = { type: 'text', value: '' }
-    }
-
-    children[currChildIdx] = {
-      type: 'element',
-      tag: 'CodeGroup',
-      children: group.map((g) => g.node),
-    }
-  }
+  return newChildren
 }
 
-function _isNamedCodeBlock(children: MinimalNode): boolean {
-  return children?.tag === 'pre' && children?.children?.[0]?.tag === 'code' && children?.props?.filename
+function _isNamedCodeBlock(node: MinimalNode): boolean {
+  return node[0] === 'pre' && (node[1] as any)?.filename && node[2]?.[0] === 'code'
 }
 
 // --- transform automd jsdocs ---

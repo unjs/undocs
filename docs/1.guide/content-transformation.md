@@ -116,10 +116,10 @@ export default defineEventHandler(() => {
 
 ## Steps
 
-Generate steps by useing standard markdown numbered lists!
+Generate steps by using standard markdown numbered lists!
 
 > [!IMPORTANT]
-> In order to generate this component, you need to have content inside at least one of the lists. The list can't be a child of another component & also any content within a Mardown list will need at least 2 tabs to be considered as a child of the list.
+> In order to generate this component, you need to have content inside at least one of the lists. The list can't be a child of another component & also any content within a Markdown list will need at least 2 tabs to be considered as a child of the list.
 
 ```md
 1. Install Package
