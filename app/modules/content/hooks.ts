@@ -216,7 +216,8 @@ function _resolveIcon(path: string = '') {
 
 // --- transform code groups ---
 
-function transformCodeGroups(currChildIdx: number, children: MinimalNode[] = []) {
+// TODO
+function _transformCodeGroups(currChildIdx: number, children: MinimalNode[] = []) {
   if (!children?.length || !_isNamedCodeBlock(children[currChildIdx])) {
     return
   }

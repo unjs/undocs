@@ -10,7 +10,7 @@ const docsConfig = appConfig.docs as DocsConfig
 
 // console.log('docsConfig', JSON.stringify(docsConfig, null, 2))
 
-const landing: LandingConfig & { _github: string } = (defu(docsConfig.landing || {}, {
+const landing: LandingConfig & { _github: string } = defu(docsConfig.landing || {}, {
   // Meta
   navigation: false,
 
@@ -44,11 +44,10 @@ const landing: LandingConfig & { _github: string } = (defu(docsConfig.landing ||
   features: [],
 
   _github: docsConfig.github,
-}))
+})
 
 landing._heroMdTitle =
   landing._heroMdTitle || `[${landing.heroTitle}]{.text-primary} :br [${landing.heroSubtitle}]{.text-4xl}`
-
 
 usePageSEO({
   title: `${appConfig.site.name} - ${landing!.heroSubtitle}`,
@@ -77,7 +76,6 @@ function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
     .sort((a, b) => a!.order - b!.order) as any[]
 }
 
-
 const hero = computed(() => {
   if (!landing!._heroMdTitle) {
     return
@@ -97,18 +95,22 @@ const hero = computed(() => {
 <template>
   <div>
     <!-- Hero -->
-    <UPageHero v-if="hero" :orientation="hero.orientation" class="relative" :ui="{
-      container: '!pb-20 py-24 sm:py-32 lg:py-40',
-      title: 'text-5xl sm:text-7xl',
-      wrapper: 'lg:min-h-[540px]'
-    }">
-
+    <UPageHero
+      v-if="hero"
+      :orientation="hero.orientation"
+      class="relative"
+      :ui="{
+        container: '!pb-20 py-24 sm:py-32 lg:py-40',
+        title: 'text-5xl sm:text-7xl',
+        wrapper: 'lg:min-h-[540px]',
+      }"
+    >
       <template #top>
         <!-- <LandingBackground /> -->
       </template>
 
       <template #title>
-        {{ landing.heroTitle }}<br><span class="text-primary text-4xl">{{ landing.heroSubtitle }}</span>
+        {{ landing.heroTitle }}<br /><span class="text-primary text-4xl">{{ landing.heroSubtitle }}</span>
       </template>
 
       <template #description>
@@ -118,14 +120,14 @@ const hero = computed(() => {
       <template #links>
         <div class="flex flex-col gap-4">
           <div class="flex items-center flex-wrap gap-2">
-            <UButton v-for="link in hero.links" :key="link.label" v-bind="link" class="!px-6 !py-3">
-            </UButton>
+            <UButton v-for="link in hero.links" :key="link.label" v-bind="link" class="!px-6 !py-3"> </UButton>
           </div>
         </div>
       </template>
 
       <ProseCodeGroup v-if="hero.code" class="mx-auto">
         <ProsePre :filename="hero.code.title || 'Terminal'" :code="hero.code.content">
+          <!-- eslint-disable-next-line vue/no-v-html -->
           <span v-html="hero.code.contentHighlighted"></span>
         </ProsePre>
       </ProseCodeGroup>
@@ -137,14 +139,18 @@ const hero = computed(() => {
 
     <!-- Features -->
 
-    <UPageSection :title="landing?.featuresTitle" :description="''" :ui="{
-      title: 'text-left',
-      description: 'text-left',
-      root: 'bg-gradient-to-b border-t border-default from-muted dark:from-muted/40 to-default',
-      features: 'xl:grid-cols-4 lg:gap-10'
-    }">
+    <UPageSection
+      :title="landing?.featuresTitle"
+      :description="''"
+      :ui="{
+        title: 'text-left',
+        description: 'text-left',
+        root: 'bg-gradient-to-b border-t border-default from-muted dark:from-muted/40 to-default',
+        features: 'xl:grid-cols-4 lg:gap-10',
+      }"
+    >
       <template #features>
-        <li v-for="(feature) in landing.features" :key="feature.title">
+        <li v-for="feature in landing.features" :key="feature.title">
           <UPageFeature v-bind="feature" orientation="vertical">
             <template #leading>
               <template v-if="feature.icon">
