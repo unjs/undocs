@@ -1,7 +1,5 @@
 <script lang="ts" setup>
 const appConfig = useAppConfig()
-
-console.log(JSON.stringify(appConfig.docs, null, 2))
 </script>
 
 <template>
@@ -19,7 +17,7 @@ console.log(JSON.stringify(appConfig.docs, null, 2))
     &middot; Generated with
     <NuxtLink class="font-medium hover:text-primary" to="https://undocs.unjs.io" target="_blank">UnDocs </NuxtLink>
     and
-    <NuxtLink class="font-medium hover:text-primary" to="https://ui.nuxt.com/pro" target="_blank">Nuxt UI Pro</NuxtLink
-    >.
+    <NuxtLink class="font-medium hover:text-primary" to="https://ui.nuxt.com/pro" target="_blank">Nuxt UI Pro</NuxtLink>
+    .
   </p>
 </template>

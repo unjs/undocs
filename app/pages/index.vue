@@ -8,8 +8,6 @@ const appConfig = useAppConfig()
 
 const docsConfig = appConfig.docs as DocsConfig
 
-// console.log('docsConfig', JSON.stringify(docsConfig, null, 2))
-
 const landing: LandingConfig & { _github: string } = defu(docsConfig.landing || {}, {
   // Meta
   navigation: false,
