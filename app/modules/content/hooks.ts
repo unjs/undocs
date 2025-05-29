@@ -129,14 +129,15 @@ function removeFirstH1AndBlockquote(body: MarkdownRoot, content: ParsedContentFi
 
   // Use the first blockquote as the description
   const firstEl = body.value[0]
-  const bloquoteText = _getTextContent(firstEl)
-
-  if (firstEl[0] === 'blockquote' && content.description === '' && !bloquoteText.startsWith('!')) {
-    content.description = bloquoteText
-    if (content.seo) {
-      ;(content.seo as any).description = bloquoteText
+  if (firstEl) {
+    const bloquoteText = _getTextContent(firstEl)
+    if (firstEl[0] === 'blockquote' && content.description === '' && !bloquoteText.startsWith('!')) {
+      content.description = bloquoteText
+      if (content.seo) {
+        ;(content.seo as any).description = bloquoteText
+      }
+      body.value.shift()
     }
-    body.value.shift()
   }
 }
 
