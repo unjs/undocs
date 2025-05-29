@@ -8,7 +8,7 @@ export default defineContentConfig({
         cwd: globalThis.__DOCS_CWD__,
         include: '**/*.md',
         exclude: ['.**/*.md'],
-      }
+      },
     }),
   },
 })

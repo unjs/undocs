@@ -37,7 +37,8 @@ export default defineNuxtConfig({
     build: {
       markdown: {
         highlight: {
-          langs: ['json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md'],
+          // prettier-ignore
+          langs: ['json', 'json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md', 'vue'],
         },
       },
     },

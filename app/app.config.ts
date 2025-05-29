@@ -11,12 +11,12 @@ export default defineAppConfig({
     colors: {
       primary: 'amber',
       important: 'violet',
-      neutral: 'neutral'
+      neutral: 'neutral',
     },
   },
   uiPro: {
     prose: {
-      icon: {
+      codeIcon: {
         '.config': 'vscode-icons:file-type-config',
         // '.plugin': 'vscode-icons:file-type-plugin',
         'package.json': 'vscode-icons:file-type-node',

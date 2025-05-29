@@ -10,19 +10,13 @@ const codeBlocks = computed(() =>
     key: pm.name,
   })),
 )
-
-const codeGroup = ref()
-onMounted(() => {
-  if (codeGroup.value) {
-    useSyncedPackageManager(codeBlocks, toRef(codeGroup.value, 'selectedIndex'))
-  }
-})
 </script>
 
 <template>
-  <ProseCodeGroup ref="codeGroup">
-    <ProseCode v-for="(codeBlock, index) in codeBlocks" :key="index" v-bind="codeBlock">
-      <MDC :value="codeBlock.code" />
-    </ProseCode>
+  <ProseCodeGroup sync="pm">
+    <ProsePre v-for="(codeBlock, index) in codeBlocks" :key="index" v-bind="codeBlock">
+      <span style="color: var(--ui-primary)">{{ codeBlock.code.split(' ')[0] }}</span>
+      <span style="color: var(--ui-text)">&nbsp;{{ codeBlock.code.split(' ').slice(1).join(' ') }}</span>
+    </ProsePre>
   </ProseCodeGroup>
 </template>
