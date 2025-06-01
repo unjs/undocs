@@ -30,6 +30,13 @@
       "type": "string",
       "description": "The GitHub repository for the documentation site."
     },
+    "socials": {
+      "type": "object",
+      "description": "Social media links for the documentation site.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "branch": {
       "type": "string",
       "description": "The branch of the GitHub repository for the documentation site."

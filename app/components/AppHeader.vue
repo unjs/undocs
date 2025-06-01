@@ -35,7 +35,6 @@ const headerLinks = computed(() => {
       <UTooltip text="Search" :kbds="['meta', 'K']">
         <UContentSearchButton />
       </UTooltip>
-      <!-- <div class="flex items-center border-l border-slate-200 ml-6 pl-6 dark:border-slate-800"> -->
       <UColorModeButton />
       <SocialButtons />
     </template>

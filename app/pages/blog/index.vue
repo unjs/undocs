@@ -10,7 +10,7 @@ if (!page.value) {
   })
 }
 
-const articles = await useAsyncData(() =>
+const { data: articles } = await useAsyncData(() =>
   queryCollection('content')
     .where('path', 'LIKE', '/blog/%')
     .order('id', 'DESC')
@@ -42,9 +42,9 @@ usePageSEO({
             :to="article.path"
             :title="article.title"
             :description="article.description"
-            :date="article.meta.date"
+            :date="article.meta?.date"
             :badge="
-              article.meta.category ? { label: article.meta.category, color: 'primary', variant: 'subtle' } : undefined
+              article.meta?.category ? { label: article.meta.category, color: 'primary', variant: 'subtle' } : undefined
             "
             :variant="index > 0 ? 'outline' : 'subtle'"
             :orientation2="index === 0 ? 'horizontal' : 'vertical'"
