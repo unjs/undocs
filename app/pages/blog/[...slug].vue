@@ -27,8 +27,6 @@ usePageSEO({
   ogTitle: page.value?.title,
   description: page.value?.description,
 })
-
-console.log(JSON.stringify(page.value, null, 2))
 </script>
 
 <template>
