@@ -23,4 +23,8 @@ export const CommonIcons = [
     pattern: 'utils',
     icon: 'i-lucide-square-function',
   },
+  {
+    pattern: 'blog',
+    icon: 'i-lucide-file-text',
+  },
 ]
