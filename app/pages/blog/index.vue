@@ -10,11 +10,13 @@ if (!page.value) {
   })
 }
 
-const articles = await queryCollection('content')
-  .where('path', 'LIKE', '/blog/%')
-  .order('id', 'DESC')
-  .all()
-  .then((res) => res)
+const articles = await useAsyncData(() =>
+  queryCollection('content')
+    .where('path', 'LIKE', '/blog/%')
+    .order('id', 'DESC')
+    .all()
+    .then((res) => res),
+)
 
 const appConfig = useAppConfig()
 

@@ -88,6 +88,14 @@ const hero = computed(() => {
     code: landing!.heroCode,
   } as const
 })
+
+const { data: latest } = await useAsyncData(() =>
+  queryCollection('content')
+    .where('path', 'LIKE', '/blog/%')
+    .order('id', 'DESC')
+    .first()
+    .then((res) => res),
+)
 </script>
 
 <template>
@@ -105,6 +113,18 @@ const hero = computed(() => {
     >
       <template #top>
         <LandingBackground />
+      </template>
+
+      <template #headline>
+        <NuxtLink v-if="latest" :to="latest.path">
+          <UBadge
+            variant="subtle"
+            size="lg"
+            class="px-3 relative rounded-full font-semibold dark:hover:bg-primary-400/15 dark:hover:ring-primary-700"
+          >
+            {{ latest.title }}
+          </UBadge>
+        </NuxtLink>
       </template>
 
       <template #title>
