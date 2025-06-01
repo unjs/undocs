@@ -33,71 +33,28 @@ usePageSEO({
   description: page.value?.description,
 })
 
-const headline = computed(() => findPageHeadline(page.value))
-
-const tocLinks = computed(() => {
-  return (page.value.body?.toc?.links || []).map((link) => ({
-    ...link,
-    children: undefined,
-  }))
-})
-
-const tocMobileOpen = ref(false)
-
-const tocMobileLinks = computed(() => {
-  return [
-    [
-      {
-        label: 'Return to top',
-        click: () => {
-          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
-        },
-      },
-    ],
-    (page.value.body?.toc?.links || []).map((link) => ({
-      label: link.text,
-      // href: `#${link.id}`,
-      click: () => {
-        tocMobileOpen.value = false
-        document.getElementById(link.id)?.scrollIntoView({ behavior: 'smooth' })
-      },
-    })),
-  ]
-})
-
-const isMobile = ref(false)
-
 onMounted(() => {
-  isMobile.value = 'ontouchstart' in document.documentElement
+  const hash = window.location.hash
+  if (hash) {
+    document.querySelector(hash)?.scrollIntoView()
+  }
 })
 </script>
 
 <template>
   <UPage v-if="page">
-    <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline" />
+    <UPageHeader
+      :title="page.title"
+      :description="page.description"
+      :links="page.links"
+      :headline="findPageHeadline(page)"
+    />
 
-    <!-- TOC -->
-    <!-- large screen -->
-    <template v-if="tocLinks.length > 0" #right>
-      <UContentToc title="On this page" :links="tocLinks" class="hidden lg:block" />
+    <template #right>
+      <UContentToc title="On this page" :links="page.body?.toc?.links || []" highlight />
     </template>
-    <!-- mobile -->
-    <div
-      v-if="tocMobileLinks.length > 1"
-      class="float-right mt-4 top-[calc(var(--header-height)_+_0.5rem)] z-10 flex justify-end sticky mb-2 lg:hidden"
-    >
-      <UDropdownMenu v-model:open="tocMobileOpen" :items="tocMobileLinks" :mode="isMobile ? 'click' : 'hover'">
-        <UButton
-          color="neutral"
-          label="On this page"
-          :trailing="false"
-          :icon="`i-heroicons-chevron-${tocMobileOpen ? 'down' : 'left'}-20-solid`"
-        />
-      </UDropdownMenu>
-    </div>
 
     <UPageBody prose class="break-words">
-      <br v-if="tocMobileLinks.length > 1" class="lg:hidden mb-2" />
       <ContentRenderer v-if="page.body" :value="page" />
 
       <div class="space-y-6">
