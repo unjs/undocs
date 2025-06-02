@@ -4,6 +4,7 @@ name: 'UnDocs'
 shortDescription: 'Docs, made easy.'
 description: 'Elegant documentation tooling for UnJS ecosystem.'
 github: 'unjs/docs'
+themeColor: blue
 socials:
   twitter: 'https://twitter.com/unjsio'
   bluesky: 'https://bsky.app/profile/unjs.io'

@@ -104,6 +104,11 @@ export async function setupDocs(docsDir, opts = {}) {
         ...docsconfig,
         dir: undefined,
       },
+      ui: {
+        colors: {
+          primary: docsconfig.themeColor || 'amber',
+        },
+      },
     },
     nitro: {
       static: true,

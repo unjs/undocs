@@ -7,7 +7,7 @@ export default defineAppConfig({
   },
   ui: {
     colors: {
-      primary: 'amber',
+      // primary: 'amber', // set in setup.mjs
       important: 'violet',
       neutral: 'neutral',
     },
