@@ -49,6 +49,7 @@ export default defineAppConfig({
         npx: 'vscode-icons:file-type-npm',
         yarn: 'vscode-icons:file-type-yarn',
         bun: 'vscode-icons:file-type-bun',
+        node: 'vscode-icons:file-type-node',
         deno: 'vscode-icons:file-type-deno',
         yml: 'vscode-icons:file-type-yaml',
         terminal: 'i-heroicons-command-line',
