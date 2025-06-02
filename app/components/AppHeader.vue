@@ -18,6 +18,25 @@ const headerLinks = computed(() => {
       }),
   ]
 })
+
+const mobileLinks = computed(() => {
+  return navigation.value.map((item) => {
+    if (item.path === '/blog') {
+      return {
+        ...item,
+        children: undefined,
+      }
+    }
+    if (item.children?.length === 1) {
+      return item.children[0]
+    }
+    const originalPath = item.path
+    if (item.children?.length && item.children.some((c) => c.path === originalPath)) {
+      item.title = titleCase(originalPath)
+    }
+    return item
+  })
+})
 </script>
 
 <template>
@@ -40,7 +59,7 @@ const headerLinks = computed(() => {
     </template>
 
     <template #body>
-      <UContentNavigation :navigation="navigation" default-open :multiple="true" />
+      <UContentNavigation :navigation="mobileLinks" default-open :multiple="true" />
     </template>
   </UHeader>
 </template>
