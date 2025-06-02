@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.3.3
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.2...v0.3.3)
+
+### 🚀 Enhancements
+
+- Simple blog section ([#178](https://github.com/unjs/undocs/pull/178))
+- Add social media config ([4fd7e72](https://github.com/unjs/undocs/commit/4fd7e72))
+- Sponsors support for landing ([0592ac3](https://github.com/unjs/undocs/commit/0592ac3))
+
+### 💅 Refactors
+
+- Update toc ([5193310](https://github.com/unjs/undocs/commit/5193310))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.2
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.1...v0.3.2)
