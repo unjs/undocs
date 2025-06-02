@@ -11,6 +11,7 @@ export interface DocsConfig {
   redirects?: Record<string, string>
   automd?: unknown
   buildCache?: boolean
+  sponsors?: { api: string }
   landing?:
     | false
     | {

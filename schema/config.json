@@ -37,6 +37,15 @@
         "type": "string"
       }
     },
+    "sponsors": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string",
+          "description": "The URL to the sponsors JSON API."
+        }
+      }
+    },
     "branch": {
       "type": "string",
       "description": "The branch of the GitHub repository for the documentation site."

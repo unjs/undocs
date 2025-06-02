@@ -96,6 +96,8 @@ const { data: latest } = await useAsyncData(() =>
     .first()
     .then((res) => res),
 )
+
+const { data: sponsors } = await useAsyncData(() => useSponsors())
 </script>
 
 <template>
@@ -188,11 +190,49 @@ const { data: latest } = await useAsyncData(() =>
       </template>
     </UPageSection>
 
-    <UPageSection v-if="landing.contributors && landing._github" title="Made by community">
+    <UPageSection v-if="landing.contributors && landing._github" title="💛 Contributors">
       <div class="flex justify-center">
         <a :href="`https://github.com/${landing._github}/graphs/contributors`" target="_blank">
           <img :src="`https://contrib.rocks/image?repo=${landing._github}`" />
         </a>
+      </div>
+    </UPageSection>
+
+    <UPageSection v-if="sponsors?.sponsors.length" title="💜 Sponsors">
+      <div class="flex flex-col items-center">
+        <div
+          v-for="(tier, i) of sponsors.sponsors"
+          :key="i"
+          class="flex flex-wrap justify-center gap-4 mb-6 mt-6 max-w-4xl"
+        >
+          <div v-for="s in tier" :key="s.name" class="flex items-center gap-2 max-w-[300px]">
+            <a
+              :href="s.website"
+              target="_blank"
+              class="flex items-center gap-2"
+              :class="`font-size-${i === 0 ? '4xl' : i === 1 ? '3xl' : 'lg'}`"
+            >
+              <img
+                v-if="s.image"
+                :src="s.image"
+                :alt="s.name"
+                class="object-contain rounded-lg"
+                :class="`w-${i === 0 ? 16 : 8} h-${i === 0 ? 16 : 8}`"
+              />
+              <span v-if="i < 2" class="text-lg font-semibold">{{ s.name }}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="text-center">
+        <UButton
+          v-if="sponsors.username"
+          :to="`https://github.com/sponsors/${sponsors.username}`"
+          target="_blank"
+          color="neutral"
+        >
+          Become a Sponsor
+        </UButton>
       </div>
     </UPageSection>
   </div>

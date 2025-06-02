@@ -8,6 +8,8 @@ socials:
   twitter: 'https://twitter.com/unjsio'
   bluesky: 'https://bsky.app/profile/unjs.io'
   discord: '#'
+sponsors:
+  api: https://sponsors.pi0.io/sponsors.json
 url: 'https://undocs.pages.dev'
 redirects:
   '/docs': '/docs/getting-started'
