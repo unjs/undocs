@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.3.4
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.3...v0.3.4)
+
+### 🩹 Fixes
+
+- Respect `themeColor` config ([20213cc](https://github.com/unjs/undocs/commit/20213cc))
+- Add codeIcon for `node` ([c5bfb65](https://github.com/unjs/undocs/commit/c5bfb65))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.3
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.2...v0.3.3)
