@@ -32,13 +32,6 @@ usePageSEO({
   ogTitle: page.value?.title,
   description: page.value?.description,
 })
-
-onMounted(() => {
-  const hash = window.location.hash
-  if (hash) {
-    document.querySelector(hash)?.scrollIntoView()
-  }
-})
 </script>
 
 <template>

@@ -22,6 +22,29 @@ useHead({
   ],
 })
 
+const nuxtApp = useNuxtApp()
+
+const route = useRoute()
+
+onMounted(() => {
+  watch(
+    route,
+    () => {
+      const hash = window.location.hash
+      if (hash) {
+        let attempts = 0
+        const interval = setInterval(() => {
+          document.querySelector(hash)?.scrollIntoView()
+          if (attempts++ > 5) {
+            clearInterval(interval)
+          }
+        }, 100)
+      }
+    },
+    { immediate: true },
+  )
+})
+
 provide('navigation', navigation)
 </script>
 

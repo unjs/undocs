@@ -190,8 +190,8 @@ const { data: sponsors } = await useAsyncData(() => useSponsors())
       </template>
     </UPageSection>
 
-    <UPageSection v-if="landing.contributors && landing._github" title="💛 Contributors">
-      <div class="flex justify-center">
+    <UPageSection v-if="landing.contributors && landing._github" id="contributors" title="💛 Contributors">
+      <div id="contributors" class="flex justify-center">
         <a :href="`https://github.com/${landing._github}/graphs/contributors`" target="_blank">
           <img :src="`https://contrib.rocks/image?repo=${landing._github}`" />
         </a>
@@ -199,7 +199,7 @@ const { data: sponsors } = await useAsyncData(() => useSponsors())
     </UPageSection>
 
     <UPageSection v-if="sponsors?.sponsors.length" title="💜 Sponsors">
-      <div class="flex flex-col items-center">
+      <div id="sponsors" class="flex flex-col items-center">
         <div
           v-for="(tier, i) of sponsors.sponsors"
           :key="i"

@@ -27,7 +27,6 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: {
         dir: 'ltr',
-        class: 'scroll-smooth',
       },
       templateParams: {
         separator: '·',
