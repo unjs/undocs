@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.3.5
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.4...v0.3.5)
+
+### 🩹 Fixes
+
+- Better handle mobile navigation ([e3cb9be](https://github.com/unjs/undocs/commit/e3cb9be))
+- Use patched content module ([de5504d](https://github.com/unjs/undocs/commit/de5504d))
+- Ugly workaround for anchor scroll behavior ([3a750f7](https://github.com/unjs/undocs/commit/3a750f7))
+- Edit page link ([df0be5b](https://github.com/unjs/undocs/commit/df0be5b))
+
+### 🏡 Chore
+
+- Add missing sponsors section in config ([73a3ae8](https://github.com/unjs/undocs/commit/73a3ae8))
+- Lint ([3c1ff89](https://github.com/unjs/undocs/commit/3c1ff89))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Sébastien Chopin ([@atinux](https://github.com/atinux))
+
 ## v0.3.4
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.3...v0.3.4)
