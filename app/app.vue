@@ -22,8 +22,6 @@ useHead({
   ],
 })
 
-const nuxtApp = useNuxtApp()
-
 const route = useRoute()
 
 onMounted(() => {
