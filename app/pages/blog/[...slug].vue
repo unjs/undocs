@@ -59,5 +59,21 @@ usePageSEO({
       </div>
     </UPageHeader>
     <ContentRenderer v-if="page.body" :value="page" />
-  </UPage>
+
+    <div class="space-y-6">
+      <USeparator type="dashed" />
+      <div class="mb-4">
+        <UPageLinks
+          class="inline-block"
+          :links="[
+            {
+              icon: 'i-ph-pen-duotone',
+              label: `Edit this page ${page.automd ? '(some contents are generated with automd from source)' : ''}`,
+              to: `https://github.com/${appConfig.docs.github}/edit/${appConfig.docs.branch || 'main'}/docs/${page.id.replace(/^content\//, '')}`,
+              target: '_blank',
+            },
+          ]"
+        />
+      </div></div
+  ></UPage>
 </template>

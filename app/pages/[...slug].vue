@@ -59,7 +59,7 @@ usePageSEO({
               {
                 icon: 'i-ph-pen-duotone',
                 label: `Edit this page ${page.automd ? '(some contents are generated with automd from source)' : ''}`,
-                to: `https://github.com/${appConfig.docs.github}/edit/${appConfig.docs.branch || 'main'}/docs/${page._file}`,
+                to: `https://github.com/${appConfig.docs.github}/edit/${appConfig.docs.branch || 'main'}/docs/${page.id.replace(/^content\//, '')}`,
                 target: '_blank',
               },
             ]"
