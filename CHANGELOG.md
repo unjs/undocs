@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.3.6
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.5...v0.3.6)
+
+### 🚀 Enhancements
+
+- Also list past sponsors ([8c9b6ac](https://github.com/unjs/undocs/commit/8c9b6ac))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.5
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.4...v0.3.5)
