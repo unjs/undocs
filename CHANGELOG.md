@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.3.7
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.6...v0.3.7)
+
+### 🩹 Fixes
+
+- Use `sqliteConnector: native` option ([083c88f](https://github.com/unjs/undocs/commit/083c88f))
+- Add better-sqlite3 although should not be needed ([bd98f8c](https://github.com/unjs/undocs/commit/bd98f8c))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.6
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.5...v0.3.6)
