@@ -3,6 +3,7 @@ export interface Sponsors {
   sponsors: {
     name: string
     image: string
+    inactive?: boolean
     website: string
   }[][]
 }

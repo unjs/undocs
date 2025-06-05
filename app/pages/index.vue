@@ -201,7 +201,7 @@ const { data: sponsors } = await useAsyncData(() => useSponsors())
     <UPageSection v-if="sponsors?.sponsors.length" title="💜 Sponsors">
       <div id="sponsors" class="flex flex-col items-center">
         <div
-          v-for="(tier, i) of sponsors.sponsors"
+          v-for="(tier, i) of sponsors.sponsors.slice(0, 2)"
           :key="i"
           class="flex flex-wrap justify-center gap-4 mb-6 mt-6 max-w-4xl"
         >
@@ -217,12 +217,26 @@ const { data: sponsors } = await useAsyncData(() => useSponsors())
                 :src="s.image"
                 :alt="s.name"
                 class="object-contain rounded-lg"
-                :class="`w-${i === 0 ? 16 : 8} h-${i === 0 ? 16 : 8}`"
+                :class="`w-${i === 0 ? 16 : 10} h-${i === 0 ? 16 : 10}`"
               />
               <span v-if="i < 2" class="text-lg font-semibold">{{ s.name }}</span>
             </a>
           </div>
         </div>
+        <UAvatarGroup class="flex flex-wrap justify-center gap-4 mb-6 mt-6">
+          <UTooltip v-for="s in sponsors.sponsors[2]" :key="s.name" :text="s.name" placement="top">
+            <a :href="s.website" target="_blank">
+              <UAvatar :alt="s.name" :src="s.image" size="lg" />
+            </a>
+          </UTooltip>
+        </UAvatarGroup>
+        <UAvatarGroup class="flex flex-wrap justify-center gap-4 mb-6 mt-6">
+          <UTooltip v-for="s in sponsors.sponsors[3]" :key="s.name" :text="s.name" placement="top">
+            <a :href="s.website" target="_blank">
+              <UAvatar :alt="s.name" :src="s.image" style="opacity: 0.5" />
+            </a>
+          </UTooltip>
+        </UAvatarGroup>
       </div>
       <div class="text-center">
         <UButton
