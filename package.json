@@ -33,7 +33,7 @@
     "@headlessui/vue": "^1.7.23",
     "@iconify-json/logos": "^1.2.4",
     "@iconify-json/simple-icons": "^1.2.37",
-    "@nuxt/content": "https://pkg.pr.new/@nuxt/content@3390",
+    "@nuxt/content": "https://pkg.pr.new/@nuxt/content@3390?c5a9c95",
     "@nuxt/fonts": "^0.11.4",
     "@nuxt/ui-pro": "^3.1.3",
     "@nuxtjs/plausible": "^1.2.0",
