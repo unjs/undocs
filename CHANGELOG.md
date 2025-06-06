@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.3.8
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.7...v0.3.8)
+
+### 🚀 Enhancements
+
+- Nested 3 level navigation ([bdb424b](https://github.com/unjs/undocs/commit/bdb424b))
+- Add tooltip for social icons ([e72fb30](https://github.com/unjs/undocs/commit/e72fb30))
+
+### 🩹 Fixes
+
+- **content:** Include `yml` files for navigation ([a941002](https://github.com/unjs/undocs/commit/a941002))
+
+### 💅 Refactors
+
+- Update content hooks ([ac10629](https://github.com/unjs/undocs/commit/ac10629))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.7
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.6...v0.3.7)
