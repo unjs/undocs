@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { kebabCase } from 'scule'
-import { findPageHeadline } from '#ui-pro/utils/content'
+import type { ContentNavigationItem } from '@nuxt/content'
 
 definePageMeta({
   layout: 'docs',
@@ -27,6 +27,30 @@ const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround
   })
 })
 
+const navigation = inject<Ref<ContentNavigationItem[]>>('navigation')
+
+// console.log(JSON.stringify(navigation?.value, null, 2))
+
+function makeBreadcrumb(items: ContentNavigationItem[], path: string, level = 0) {
+  const parent = [...items].find((i) => path.startsWith(i.path) && i.children?.length > 0)
+  if (!parent) {
+    return []
+  }
+  if (level === 0) {
+    return makeBreadcrumb(parent.children, path, level + 1)
+  }
+  return [
+    {
+      label: parent.title,
+      icon: parent.icon as string,
+      to: parent.page !== false ? parent.path : '',
+    },
+    ...makeBreadcrumb(parent.children, path, level + 1),
+  ]
+}
+
+const breadcrumb = computed(() => makeBreadcrumb(navigation?.value || [], page.value.path))
+
 usePageSEO({
   title: `${page.value?.title} - ${appConfig.site.name}`,
   ogTitle: page.value?.title,
@@ -36,12 +60,11 @@ usePageSEO({
 
 <template>
   <UPage v-if="page">
-    <UPageHeader
-      :title="page.title"
-      :description="page.description"
-      :links="page.links"
-      :headline="findPageHeadline(page)"
-    />
+    <UPageHeader :title="page.title" :description="page.description" :links="page.links">
+      <template #headline>
+        <UBreadcrumb :items="breadcrumb" />
+      </template>
+    </UPageHeader>
 
     <template #right>
       <UContentToc title="On this page" :links="page.body?.toc?.links || []" highlight />
