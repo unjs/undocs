@@ -1,4 +1,4 @@
-import type { MarkdownRoot, MinimalNode, MinimalElement } from '@nuxt/content'
+import type { MarkdownRoot, MinimarkNode, MinimarkElement } from '@nuxt/content'
 import type { Nuxt } from 'nuxt/schema'
 import { CommonIcons } from './icons'
 import type { DocsConfig } from '../../../schema/config'
@@ -64,6 +64,7 @@ export async function setupContentHooks(nuxt: Nuxt, docsConfig: DocsConfig) {
       return
     }
 
+    // Infer icon for top level navigation
     resolveFileIcon(content)
 
     const body = content.body as MarkdownRoot
@@ -84,7 +85,7 @@ export async function setupContentHooks(nuxt: Nuxt, docsConfig: DocsConfig) {
 
 // Handle GitHub flavoured markdown blockquotes
 // https://github.com/orgs/community/discussions/16925
-function transformGithubAlert(node: MinimalNode) {
+function transformGithubAlert(node: MinimarkNode) {
   if (
     node[0] === 'blockquote' &&
     Array.isArray(node[2]) &&
@@ -97,17 +98,17 @@ function transformGithubAlert(node: MinimalNode) {
     // @ts-expect-error read-only
     node[0] = node[2][2][2].slice(1).toLowerCase()
     // @ts-expect-error read-only
-    node[2] = ['p', {}, ...node[2].slice(3)] as MinimalElement
+    node[2] = ['p', {}, ...node[2].slice(3)] as MinimarkElement
   }
 }
 
 // --- transform steps list ---
 
-function transformStepsList(node: MinimalNode) {
+function transformStepsList(node: MinimarkNode) {
   // CONVERT OL->LI to Steps
   if (Array.isArray(node) && node[0] === 'ol' && node.length > 3 && Array.isArray(node[2]) && node[2][0] === 'li') {
-    const stepsChildren = node.slice(2).map((li: MinimalNode) => {
-      return ['h4', {}, ...li.slice(2)] as MinimalElement
+    const stepsChildren = node.slice(2).map((li: MinimarkNode) => {
+      return ['h4', {}, ...li.slice(2)] as MinimarkElement
     })
     node.splice(0, Infinity, 'steps', { level: '4' }, ...stepsChildren)
   }
@@ -155,6 +156,11 @@ function _resolveIcon(path: string = '') {
   // Split the path into parts and reverse it
   const paths = path.slice(1).split('/').reverse()
 
+  // Skip 2+ levels of directories
+  if (paths.length > 2) {
+    return
+  }
+
   // Search for icons in reverse order
   for (const p of paths) {
     for (const icon of CommonIcons) {
@@ -167,10 +173,10 @@ function _resolveIcon(path: string = '') {
 
 // --- Merge code groups ---
 
-function mergeCodeGroups(children: MinimalNode[] = []): MinimalNode[] {
-  const newChildren: MinimalNode[] = []
+function mergeCodeGroups(children: MinimarkNode[] = []): MinimarkNode[] {
+  const newChildren: MinimarkNode[] = []
 
-  let codeBlocks: MinimalNode[] = []
+  let codeBlocks: MinimarkNode[] = []
 
   for (let i = 0; i < children.length; i++) {
     if (_isNamedCodeBlock(children[i])) {
@@ -187,20 +193,20 @@ function mergeCodeGroups(children: MinimalNode[] = []): MinimalNode[] {
   return newChildren
 }
 
-function _isNamedCodeBlock(node: MinimalNode): boolean {
+function _isNamedCodeBlock(node: MinimarkNode): boolean {
   return node[0] === 'pre' && (node[1] as any)?.filename && node[2]?.[0] === 'code'
 }
 
 // --- transform automd jsdocs ---
 
-export function transformJSDocs(currChildIdx: number, children: MinimalNode[] = []) {
+export function transformJSDocs(currChildIdx: number, children: MinimarkNode[] = []) {
   if (!children?.length || !_isJSDocBlock(children[currChildIdx])) {
     return
   }
 
-  const fields: MinimalNode[] = []
+  const fields: MinimarkNode[] = []
 
-  const generateFields = (i: number): MinimalNode => {
+  const generateFields = (i: number): MinimarkNode => {
     const name = _parseJSDocName(children[i])
     const type = _parseJSDocType(children[i + 1])
 
@@ -212,7 +218,7 @@ export function transformJSDocs(currChildIdx: number, children: MinimalNode[] = 
       type,
     }
 
-    const content: MinimalNode[] = []
+    const content: MinimarkNode[] = []
 
     i++
 
@@ -263,17 +269,17 @@ export function transformJSDocs(currChildIdx: number, children: MinimalNode[] = 
   }
 }
 
-function _isJSDocBlock(children: MinimalNode): boolean {
+function _isJSDocBlock(children: MinimarkNode): boolean {
   return (
     children?.tag === 'h3' && children?.children?.[0]?.tag === 'code' && children?.children?.[0]?.type === 'element'
   )
 }
 
-function _parseJSDocName(node: MinimalNode): string {
+function _parseJSDocName(node: MinimarkNode): string {
   // Code block || id prop || empty string
   return node.children?.[0]?.children?.[0]?.value || node?.props?.id || ''
 }
-function _parseJSDocType(node: MinimalNode): string {
+function _parseJSDocType(node: MinimarkNode): string {
   const hasType = !!node?.children?.[0]?.children?.[0]?.children?.[0]?.value
   if (!hasType) {
     return ''
@@ -284,7 +290,7 @@ function _parseJSDocType(node: MinimalNode): string {
 
 // --- internal utils ---
 
-function _getTextContent(node: MinimalNode): string {
+function _getTextContent(node: MinimarkNode): string {
   if (!node) {
     return ''
   }
