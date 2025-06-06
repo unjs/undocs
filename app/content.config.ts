@@ -6,7 +6,7 @@ export default defineContentConfig({
       type: 'page',
       source: {
         cwd: globalThis.__DOCS_CWD__,
-        include: '**/*.md',
+        include: '**/*.{md,yml}',
         exclude: ['**/.**/**', '**/node_modules/**', '**/dist/**', '**/.docs/**'],
       },
     }),
