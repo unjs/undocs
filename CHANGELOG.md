@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.3.9
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.8...v0.3.9)
+
+### 🚀 Enhancements
+
+- Show nested breadcrumb ([3126d0d](https://github.com/unjs/undocs/commit/3126d0d))
+
+### 🩹 Fixes
+
+- Always assign auto icons ([679ed55](https://github.com/unjs/undocs/commit/679ed55))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.8
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.7...v0.3.8)
