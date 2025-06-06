@@ -1,14 +1,6 @@
 <script setup lang="ts">
 const appConfig = useAppConfig()
 
-// const props = defineProps({
-//   socials: {
-//     type: Array,
-//     required: false,
-//     default: () => ['github', 'twitter', 'discord'],
-//   },
-// })
-
 const socialLinks = computed(() => {
   return (
     Object.entries({ github: appConfig.docs.github, ...appConfig.docs.socials })
@@ -22,7 +14,7 @@ const socialLinks = computed(() => {
           return {
             // Workaround: i-simple-icons-x i-simple-icons-github
             icon: `i-simple-icons-${key}`,
-            label: value,
+            label: titleCase(key),
             to: /^https?:\/\//.test(value) ? value : `https://${key}.com/${value}`,
           }
         }
@@ -33,15 +25,15 @@ const socialLinks = computed(() => {
 })
 </script>
 <template>
-  <UButton
-    v-for="link of socialLinks"
-    :key="link.label"
-    :aria-label="link.label"
-    :icon="link.icon"
-    :to="link.to"
-    target="_blank"
-    rel="noopener noreferrer"
-    color="neutral"
-    variant="ghost"
-  />
+  <UTooltip v-for="link of socialLinks" :key="link.label" :text="link.label">
+    <UButton
+      :aria-label="link.label"
+      :icon="link.icon"
+      :to="link.to"
+      target="_blank"
+      rel="noopener noreferrer"
+      color="neutral"
+      variant="ghost"
+    />
+  </UTooltip>
 </template>
