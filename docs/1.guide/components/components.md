@@ -2,7 +2,7 @@
 
 > Discover the components you can use in your markdown files.
 
-<!-- automd:file src="../.partials/warn.md" -->
+<!-- automd:file src="../../.partials/warn.md" -->
 
 > [!IMPORTANT]
 > Undocs is currently intended for UnJS docs only and is not fully customizable yet. <br>

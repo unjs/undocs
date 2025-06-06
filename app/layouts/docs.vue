@@ -9,13 +9,7 @@ const docsNav = useDocsNav()
         <UPageAside>
           <UPageAnchors :links="docsNav.links.filter((l) => l.title !== 'Blog')" />
           <USeparator v-if="docsNav.activeLinks?.length" type="dashed" class="py-6" />
-          <UContentNavigation
-            :navigation="docsNav.activeLinks"
-            default-open
-            trailing-icon="i-lucide-chevron-right"
-            :ui="{ linkTrailingIcon: 'group-data-[state=open]:rotate-90' }"
-            highlight
-          />
+          <UContentNavigation :navigation="docsNav.activeLinks" :collapsible="false" />
         </UPageAside>
       </template>
       <slot />

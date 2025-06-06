@@ -1,12 +1,8 @@
----
-navigation.icon: i-lucide-sparkles
----
-
-# Content Transformation
+# Content Transform
 
 > Discover ways that undocs transforms content to make it more easier to just write documentation.
 
-<!-- automd:file src="../.partials/warn.md" -->
+<!-- automd:file src="../../.partials/warn.md" -->
 
 > [!IMPORTANT]
 > Undocs is currently intended for UnJS docs only and is not fully customizable yet. <br>

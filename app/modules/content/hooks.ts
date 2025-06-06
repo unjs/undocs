@@ -13,6 +13,9 @@ interface ParsedContentFile extends Record<string, unknown> {
   meta?: {
     icon?: string
   }
+  body?: {
+    icon?: string
+  }
 }
 
 export async function setupContentHooks(nuxt: Nuxt, docsConfig: DocsConfig) {
@@ -59,13 +62,13 @@ export async function setupContentHooks(nuxt: Nuxt, docsConfig: DocsConfig) {
   })
 
   nuxt.hooks.hook('content:file:afterParse', ({ content }) => {
+    // Infer icon for top level navigation
+    inferIcons(content)
+
     // Filter out non-markdown files
     if (content.extension !== 'md') {
       return
     }
-
-    // Infer icon for top level navigation
-    resolveFileIcon(content)
 
     const body = content.body as MarkdownRoot
     removeFirstH1AndBlockquote(body, content)
@@ -144,17 +147,29 @@ function removeFirstH1AndBlockquote(body: MarkdownRoot, content: ParsedContentFi
 
 // --- resolve icon ---
 
-function resolveFileIcon(content: ParsedContentFile) {
-  if (content.navigation?.icon) {
-    return
+function inferIcons(content: ParsedContentFile) {
+  const icon = content.meta?.icon || content.navigation?.icon || content.body?.icon || _resolveIcon(content.path)
+
+  if (content.navigation && !content.navigation.icon) {
+    content.navigation.icon = icon
   }
-  content.navigation ||= {}
-  content.navigation.icon = content.meta.icon || _resolveIcon(content.path)
+
+  if (content.body && !content.body.icon) {
+    content.body.icon = icon
+  }
+
+  if (content.meta && !content.meta.icon) {
+    content.meta.icon = icon
+  }
 }
 
 function _resolveIcon(path: string = '') {
   // Split the path into parts and reverse it
-  const paths = path.slice(1).split('/').reverse()
+  const paths = path
+    .slice(1)
+    .split('/')
+    .reverse()
+    .filter((p) => p && !p.startsWith('.'))
 
   // Skip 2+ levels of directories
   if (paths.length > 2) {
