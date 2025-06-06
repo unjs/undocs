@@ -150,17 +150,14 @@ function removeFirstH1AndBlockquote(body: MarkdownRoot, content: ParsedContentFi
 function inferIcons(content: ParsedContentFile) {
   const icon = content.meta?.icon || content.navigation?.icon || content.body?.icon || _resolveIcon(content.path)
 
-  if (content.navigation && !content.navigation.icon) {
-    content.navigation.icon = icon
-  }
+  content.body ??= {}
+  content.body.icon ??= icon
 
-  if (content.body && !content.body.icon) {
-    content.body.icon = icon
-  }
+  content.meta ??= {}
+  content.meta.icon ??= icon
 
-  if (content.meta && !content.meta.icon) {
-    content.meta.icon = icon
-  }
+  content.navigation ??= {}
+  content.navigation.icon ??= icon
 }
 
 function _resolveIcon(path: string = '') {
