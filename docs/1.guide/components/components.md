@@ -124,6 +124,31 @@ The component is used to create a link to another page.
 ::
 <!-- prettier-ignore-end -->
 
+## Mermaid Graphs
+
+````
+  ```mermaid
+  graph TD
+  A[Getting Started] --> B[Components]
+  B --> C[Content Transform]
+
+      click A "/guide"
+      click B "/guide/components/components"
+      click C "/guide/components/content-transformation"
+  ```
+````
+
+```mermaid
+%%{init: {'theme':'neutral'}}%%
+graph TD
+    A[Getting Started] --> B[Components]
+    B --> C[Content Transform]
+
+    click A "/guide"
+    click B "/guide/components/components"
+    click C "/guide/components/content-transformation"
+```
+
 ## UI Pro
 
 You can use all the Prose components from [Nuxt UI Pro](https://ui.nuxt.com/pro/components/prose/callout) in your markdown files.
@@ -136,3 +161,7 @@ You can use all the Prose components from [Nuxt UI Pro](https://ui.nuxt.com/pro/
 - [Collapsible](https://ui.nuxt.com/pro/components/prose/collapsible)
 - [Shortcut](https://ui.nuxt.com/pro/components/prose/shortcut)
 - [Tabs](https://ui.nuxt.com/pro/components/prose/tabs)
+
+```
+
+```

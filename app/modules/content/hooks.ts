@@ -79,6 +79,7 @@ export async function setupContentHooks(nuxt: Nuxt, docsConfig: DocsConfig) {
       }
       transformStepsList(node) // should be before alerts
       transformGithubAlert(node)
+      transformMermaid(node)
       // transformJSDocs(idx, file.body?.children)
     }
   })
@@ -102,6 +103,21 @@ function transformGithubAlert(node: MinimarkNode) {
     node[0] = node[2][2][2].slice(1).toLowerCase()
     // @ts-expect-error read-only
     node[2] = ['p', {}, ...node[2].slice(3)] as MinimarkElement
+  }
+}
+
+// --- transform mermaid code tags ---
+
+// https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams
+function transformMermaid(node: MinimarkNode) {
+  // @ts-expect-error
+  if (node[0] === 'pre' && node[1]?.language === 'mermaid') {
+    // @ts-expect-error
+    node[0] = 'mermaid'
+    // @ts-expect-error
+    node[1] = { code: node[1].code || '' }
+    // @ts-expect-error
+    node[2] = []
   }
 }
 
