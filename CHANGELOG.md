@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.3.10
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.9...v0.3.10)
+
+### 🚀 Enhancements
+
+- Basic mermaid support ([f6790e5](https://github.com/unjs/undocs/commit/f6790e5))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.9
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.8...v0.3.9)
