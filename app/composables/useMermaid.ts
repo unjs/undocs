@@ -1,4 +1,5 @@
-import { watch, type WatchSource } from 'vue'
+import { watch } from 'vue'
+import type { WatchSource } from 'vue'
 import mermaid from 'mermaid/dist/mermaid.esm.min.mjs'
 
 const mermaidCache: Record<string, Record<string, string>> = Object.create(null)

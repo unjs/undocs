@@ -1,4 +1,5 @@
-import { defineGenerator, type Config } from 'automd'
+import { defineGenerator  } from 'automd'
+import type {Config} from 'automd';
 
 export default <Config>{
   generators: {
