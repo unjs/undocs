@@ -80,7 +80,7 @@ export async function setupDocs(docsDir, opts = {}) {
 
   // Prepare loadNuxt overrides
   const nuxtConfig = {
-    compatibilityDate: '2024-08-16',
+    compatibilityDate: 'latest',
     rootDir: docsSrcDir,
     srcDir: docsSrcDir,
     extends: [...(opts.extends || []), appDir],
