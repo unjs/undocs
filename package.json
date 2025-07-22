@@ -64,7 +64,7 @@
   "devDependencies": {
     "@nuxt/eslint-config": "^1.4.1",
     "@nuxt/image": "^1.10.0",
-    "@types/node": "^22.15.29",
+    "@types/node": "^24.1.0",
     "changelogen": "^0.6.1",
     "eslint": "^9.28.0",
     "eslint-config-unjs": "^0.4.2",
