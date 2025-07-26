@@ -6,7 +6,7 @@ const props = defineProps({
 const codeBlocks = computed(() =>
   packageManagers.map((pm) => ({
     filename: pm.name,
-    code: `${pm.command} ${pm.install} ${props.name}`,
+    code: `${pm.command} ${pm.install}${props.name}`,
     key: pm.name,
   })),
 )
