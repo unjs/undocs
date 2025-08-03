@@ -39,7 +39,6 @@
     "@nuxtjs/plausible": "^1.2.0",
     "@resvg/resvg-wasm": "^2.6.2",
     "automd": "^0.4.0",
-    "better-sqlite3": "^12.2.0",
     "c12": "^3.0.4",
     "citty": "^0.1.6",
     "consola": "^3.4.2",
