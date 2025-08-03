@@ -53,7 +53,7 @@ usePageSEO({
   description: landing!.description,
 })
 
-function nornalizeHeroLinks(links: LandingConfig['heroLinks']) {
+function normalizeHeroLinks(links: LandingConfig['heroLinks']) {
   return Object.entries(links || {})
     .map(([key, link], order) => {
       if (!link) {
@@ -82,7 +82,7 @@ const hero = computed(() => {
   return {
     title: landing!._heroMdTitle,
     description: landing!.heroDescription,
-    links: nornalizeHeroLinks(landing!.heroLinks),
+    links: normalizeHeroLinks(landing!.heroLinks),
     withFeatures,
     orientation: landing!.heroCode || withFeatures ? 'horizontal' : 'vertical',
     code: landing!.heroCode,
@@ -139,7 +139,7 @@ const { data: sponsors } = await useAsyncData(() => useSponsors())
 
       <template #links>
         <div class="flex flex-col gap-4">
-          <div class="flex items-center flex-wrap gap-2">
+          <div class="flex items-center flex-wrap gap-2" :class="{ 'justify-center': !hero.code }">
             <UButton v-for="link in hero.links" :key="link.label" v-bind="link" class="!px-6 !py-3"> </UButton>
           </div>
         </div>
