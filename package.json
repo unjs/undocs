@@ -39,7 +39,7 @@
     "@nuxtjs/plausible": "^1.2.0",
     "@resvg/resvg-wasm": "^2.6.2",
     "automd": "^0.4.0",
-    "better-sqlite3": "^11.10.0",
+    "better-sqlite3": "^12.2.0",
     "c12": "^3.0.4",
     "citty": "^0.1.6",
     "consola": "^3.4.2",
@@ -62,16 +62,16 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
-    "@nuxt/eslint-config": "^1.4.1",
-    "@nuxt/image": "^1.10.0",
+    "@nuxt/eslint-config": "^1.7.1",
+    "@nuxt/image": "^1.11.0",
     "@types/node": "^24.1.0",
-    "changelogen": "^0.6.1",
-    "eslint": "^9.28.0",
-    "eslint-config-unjs": "^0.4.2",
-    "jiti": "^2.4.2",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3",
-    "vue-tsc": "^2.2.10"
+    "changelogen": "^0.6.2",
+    "eslint": "^9.32.0",
+    "eslint-config-unjs": "^0.5.0",
+    "jiti": "^2.5.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vue-tsc": "^3.0.5"
   },
-  "packageManager": "bun@1.2.9"
+  "packageManager": "bun@1.2.19"
 }
