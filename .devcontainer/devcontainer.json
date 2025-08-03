@@ -17,6 +17,6 @@
     }
   },
   "runArgs": ["--privileged"],
-  "postStartCommand": "corepack enable && bun install",
+  "postStartCommand": "corepack enable && pnpm install",
   "mounts": ["type=volume,target=${containerWorkspaceFolder}/node_modules"]
 }

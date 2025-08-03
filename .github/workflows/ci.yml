@@ -13,17 +13,18 @@ on:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    runs-on: upnpmtu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
-      - uses: oven-sh/setup-bun@v2
+      - run: npm i -fg corepack && corepack enable
+      - uses: actions/setup-node@v4
         with:
-          bun-version: latest
-      - run: bun install
-      - run: bun run lint
-      - run: bun run build
+          node-version: 24
+          cache: 'pnpm'
+      - run: pnpm run lint
+      - run: pnpm run build
       - name: nightly release
         if: |
           github.ref_name == 'main' &&
@@ -31,7 +32,7 @@ jobs:
           !startsWith(github.event.head_commit.message, 'docs')
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc &&
-          bun run changelogen --canary nightly --publish
+          pnpm run changelogen --canary nightly --publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: false

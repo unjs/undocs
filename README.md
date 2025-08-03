@@ -7,7 +7,6 @@ Minimal Documentation Theme and CLI for shared usage across UnJS projects.
 > [!IMPORTANT]
 > Undocs is currently intended for UnJS docs only and is not fully customizable yet. <br>
 > Contributions are more than welcome but please consider that this project is not ready yet to be used. <br>
-> Make sure to use [Bun](https://bun.sh/) and [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) for Windows.
 > We don't guarantee stability yet and it is expected that it doesn't work time to time.
 
 <!-- /automd -->
@@ -20,8 +19,8 @@ Minimal Documentation Theme and CLI for shared usage across UnJS projects.
 - Clone this repository
 - Install the latest LTS version of [Node.js](https://nodejs.org/en/)
 - Enable [Corepack](https://github.com/nodejs/corepack) using `corepack enable`
-- Install dependencies using `bun install`
-- Run tests using `bun dev`
+- Install dependencies using `pnpm install`
+- Run tests using `pnpm dev`
 
 </details>
 

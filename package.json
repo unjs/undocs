@@ -16,17 +16,17 @@
   ],
   "scripts": {
     "build": "true",
-    "dev": "bun run docs:dev",
-    "docs:build": "bun run undocs build docs",
-    "docs:dev": "NUXT_DOCS_DEV=1 bun run undocs dev docs",
+    "dev": "pnpm run docs:dev",
+    "docs:build": "pnpm run undocs build docs",
+    "docs:dev": "NUXT_DOCS_DEV=1 pnpm run undocs dev docs",
     "lint": "eslint --cache . && prettier -c app cli schema",
     "lint:fix": "eslint --cache . --fix && prettier -c -w app cli schema",
-    "prepack": "bun run build",
-    "profile:0x": "bunx 0x -o cli/main.mjs dev docs",
-    "profile:0x-kernel": "bun run profile:0x --kernel-tracing",
+    "prepack": "pnpm run build",
+    "profile:0x": "pnpx 0x -o cli/main.mjs dev docs",
+    "profile:0x-kernel": "pnpm run profile:0x --kernel-tracing",
     "profile:cpu": "rm -rf .profile && node --cpu-prof --diagnostic-dir ../.profile bin/cli.mjs dev docs",
-    "release": "bun run lint && changelogen --release && npm publish && git push --follow-tags",
-    "template:dev": "bun run undocs dev template",
+    "release": "pnpm run lint && changelogen --release && npm publish && git push --follow-tags",
+    "template:dev": "pnpm run undocs dev template",
     "undocs": "./cli/main.mjs"
   },
   "dependencies": {
@@ -72,5 +72,5 @@
     "typescript": "^5.9.2",
     "vue-tsc": "^3.0.5"
   },
-  "packageManager": "bun@1.2.19"
+  "packageManager": "pnpm@10.14.0"
 }
