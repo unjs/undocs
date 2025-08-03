@@ -18,6 +18,7 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
+      - run: pnpm install
       - run: pnpm lint:fix
       - run: pnpm run automd
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
