@@ -49,7 +49,7 @@
     "mermaid": "^11.6.0",
     "nitropack": "^2.11.12",
     "nuxi": "^3.25.1",
-    "nuxt": "^3.17.4",
+    "nuxt": "^4.0.2",
     "nuxt-build-cache": "^0.1.1",
     "nuxt-llms": "^0.1.2",
     "pkg-types": "^2.1.0",
