@@ -26,7 +26,7 @@ useHead({
 
 if (scripts.length > 0) {
   useHead({
-    script: scripts
+    script: scripts,
   })
 }
 
