@@ -30,9 +30,8 @@ export default defineLazyEventHandler(async () => {
   const storage = useStorage()
   // https://github.com/unjs/unstorage/issues/477
   // const fontNames = await storage.getKeys('assets:og-image:fonts:')
-  const fontNames = ['200', '300', '400', '500', '600', '700', '800', '900'].flatMap((weight) => [
-    `assets:og-image:fonts:nunito-latin-${weight}-normal.woff2`,
-    `assets:og-image:fonts:nunito-latin-ext-${weight}-normal.woff2`,
+  const fontNames = ['Black', 'Bold', 'ExtraLight', 'Light', 'Medium', 'Regular', 'Thin'].flatMap((v) => [
+    `assets:og-image:fonts:PublicSans-${v}.woff2`,
   ])
   const fontBuffers = await Promise.all(fontNames.map((name) => storage.getItemRaw(name)))
 
@@ -53,7 +52,7 @@ export default defineLazyEventHandler(async () => {
     const themeColor = docsConfig.themeColor || 'yellow'
     const themeColorValue = themeColorMap[themeColor] || themeColor
 
-    const descriptionLines = _wrapLine(decodeURIComponent(description), 45)
+    const descriptionLines = _wrapLine(decodeURIComponent(description), 55)
     const titleDecoded = decodeURIComponent(title)
     const nameDecoded = decodeURIComponent(name)
     const svg = svgTemplate
@@ -64,7 +63,7 @@ export default defineLazyEventHandler(async () => {
       .replace('{description2}', descriptionLines[1] || '')
       .replace('{description3}', descriptionLines[2] || '')
       .replace('{description4}', descriptionLines[3] || '')
-      .replace('{color}', themeColorValue)
+      .replace(/yellow/g, themeColorValue)
       .replace('{icon}', updateSvg(iconSvg, { x: 1000, y: 450, width: 120, height: 120 }))
 
     // https://github.com/yisibl/resvg-js
