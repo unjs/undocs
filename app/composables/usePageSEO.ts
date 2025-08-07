@@ -33,6 +33,7 @@ export function usePageSEO(page: PageMeta) {
       type: 'image/png',
       alt: page.description || appConfig.site.description,
     },
+    twitterCard: 'summary_large_image',
     twitterImage: {
       url: ogURL.href,
       width: 1200,
