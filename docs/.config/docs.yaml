@@ -3,7 +3,7 @@
 name: 'UnDocs'
 shortDescription: 'Docs, made easy.'
 description: 'Elegant documentation tooling for UnJS ecosystem.'
-github: 'unjs/docs'
+github: 'unjs/undocs'
 themeColor: blue
 socials:
   twitter: 'https://twitter.com/unjsio'
@@ -20,7 +20,7 @@ landing:
   heroLinks:
     stackblitz:
       icon: 'i-heroicons-play'
-      to: 'https://stackblitz.com/github/unjs/docs/tree/main/template'
+      to: 'https://stackblitz.com/github/unjs/undocs/tree/main/template'
   heroCode: 'npx giget gh:unjs/undocs/template docs --install'
   contributors: true
   features:
