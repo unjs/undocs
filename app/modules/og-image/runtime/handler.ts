@@ -1,4 +1,25 @@
 import { defineLazyEventHandler, setHeader, getQuery } from 'h3'
+
+const themeColorMap = {
+  red: '#ff6467',
+  orange: '#ff8904',
+  amber: '#ffb900',
+  yellow: '#fdc700',
+  lime: '#9ae600',
+  green: '#05df72',
+  emerald: '#00d492',
+  teal: '#00d5be',
+  cyan: '#00d3f2',
+  sky: '#00bcff',
+  blue: '#50a2ff',
+  indigo: '#7c86ff',
+  violet: '#a684ff',
+  purple: '#c27aff',
+  fuchsia: '#ed6aff',
+  pink: '#fb64b6',
+  rose: '#ff637e',
+}
+
 export default defineLazyEventHandler(async () => {
   // const { Resvg } = await import('@resvg/resvg-js')
   const { default: ResvgWasm } = await import('@resvg/resvg-wasm/index_bg.wasm?module' as any)
@@ -28,6 +49,10 @@ export default defineLazyEventHandler(async () => {
 
     const { name = '', title = '', description = '' } = getQuery(event) as Record<string, string>
 
+    const docsConfig = useAppConfig().docs
+    const themeColor = docsConfig.themeColor || 'yellow'
+    const themeColorValue = themeColorMap[themeColor] || themeColor
+
     const descriptionLines = _wrapLine(decodeURIComponent(description), 45)
     const titleDecoded = decodeURIComponent(title)
     const nameDecoded = decodeURIComponent(name)
@@ -39,6 +64,7 @@ export default defineLazyEventHandler(async () => {
       .replace('{description2}', descriptionLines[1] || '')
       .replace('{description3}', descriptionLines[2] || '')
       .replace('{description4}', descriptionLines[3] || '')
+      .replace('{color}', themeColorValue)
       .replace('{icon}', updateSvg(iconSvg, { x: 1000, y: 450, width: 120, height: 120 }))
 
     // https://github.com/yisibl/resvg-js
