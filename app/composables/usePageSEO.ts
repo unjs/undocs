@@ -26,6 +26,8 @@ export function usePageSEO(page: PageMeta) {
   ogURL.searchParams.set('description', page.description || appConfig.site.description || '')
 
   useSeoMeta({
+    ogTitle: page.title,
+    ogDescription: page.description,
     ogImage: {
       url: ogURL.href,
       width: 1200,
