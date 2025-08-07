@@ -4,6 +4,7 @@ const svg = useMermaid(() => props.code)
 </script>
 
 <template>
+  <!-- eslint-disable-next-line vue/no-v-html -->
   <div v-if="svg" class="mermaid" v-html="svg"></div>
   <div v-else>
     <div class="grid gap-2">
