@@ -98,6 +98,7 @@ const { data: latest } = await useAsyncData(() =>
 )
 
 const { data: sponsors } = await useAsyncData(() => useSponsors())
+const { data: contributors } = await useAsyncData(() => useContributors())
 </script>
 
 <template>
@@ -190,48 +191,43 @@ const { data: sponsors } = await useAsyncData(() => useSponsors())
       </template>
     </UPageSection>
 
-    <UPageSection v-if="landing.contributors && landing._github" id="contributors" title="💛 Contributors">
-      <div id="contributors" class="flex justify-center">
-        <a :href="`https://github.com/${landing._github}/graphs/contributors`" target="_blank">
-          <img :src="`https://contrib.rocks/image?repo=${landing._github}`" />
-        </a>
-      </div>
-    </UPageSection>
-
-    <UPageSection v-if="sponsors?.sponsors.length" title="💜 Sponsors">
+    <UPageSection v-if="sponsors?.sponsors.length" title="Sponsors">
       <div id="sponsors" class="flex flex-col items-center">
         <div
           v-for="(tier, i) of sponsors.sponsors.slice(0, 2)"
           :key="i"
-          class="flex flex-wrap justify-center gap-4 mb-6 mt-6 max-w-4xl"
+          class="flex flex-wrap justify-center gap-4 max-w-4xl mb-8 mt-8"
         >
           <div v-for="s in tier" :key="s.name" class="flex items-center gap-2 max-w-[300px]">
             <a
               :href="s.website"
               target="_blank"
               class="flex items-center gap-2"
-              :class="`font-size-${i === 0 ? '4xl' : i === 1 ? '3xl' : 'lg'}`"
+              :class="`font-size-${i === 0 ? '3xl' : i === 1 ? 'xl' : 'lg'}`"
             >
               <img
                 v-if="s.image"
                 :src="s.image"
                 :alt="s.name"
                 class="object-contain rounded-lg"
-                :class="`w-${i === 0 ? 16 : 10} h-${i === 0 ? 16 : 10}`"
+                :style="{
+                  width: i === 0 ? '80px' : '48px',
+                  height: i === 0 ? '80px' : '48px',
+                }"
               />
               <span v-if="i < 2" class="text-lg font-semibold">{{ s.name }}</span>
             </a>
           </div>
         </div>
-        <UAvatarGroup class="flex flex-wrap justify-center gap-4 mb-6 mt-6">
+        <UAvatarGroup class="flex flex-wrap justify-center gap-4">
           <UTooltip v-for="s in sponsors.sponsors[2]" :key="s.name" :text="s.name" placement="top">
             <a :href="s.website" target="_blank">
               <UAvatar :alt="s.name" :src="s.image" size="lg" />
             </a>
           </UTooltip>
         </UAvatarGroup>
-        <UAvatarGroup class="flex flex-wrap justify-center gap-4 mb-6 mt-6">
-          <UTooltip v-for="s in sponsors.sponsors[3]" :key="s.name" :text="s.name" placement="top">
+        <UAvatarGroup class="flex flex-wrap justify-center gap-4">
+          <UTooltip v-for="s in sponsors.sponsors[3]" :key="s.name" :text="s.name">
             <a :href="s.website" target="_blank">
               <UAvatar :alt="s.name" :src="s.image" style="opacity: 0.5" />
             </a>
@@ -246,6 +242,21 @@ const { data: sponsors } = await useAsyncData(() => useSponsors())
           color="neutral"
         >
           Become a Sponsor
+        </UButton>
+      </div>
+    </UPageSection>
+
+    <UPageSection v-if="contributors?.length" id="contributors" title="Contributors">
+      <UAvatarGroup class="flex flex-wrap justify-center gap-4">
+        <UTooltip v-for="c in contributors" :key="c.username" :text="c.name">
+          <a :href="c.profile" target="_blank">
+            <UAvatar :alt="c.name" :src="c.avatar" size="3xl" />
+          </a>
+        </UTooltip>
+      </UAvatarGroup>
+      <div class="text-center">
+        <UButton v-if="sponsors.username" :to="`https://github.com/${landing._github}`" target="_blank" color="neutral">
+          Contribute on GitHub
         </UButton>
       </div>
     </UPageSection>
