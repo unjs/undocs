@@ -44,6 +44,16 @@ export function usePageSEO(page: PageMeta) {
     },
   })
 
+  useHead({
+    link: [
+      {
+        rel: 'icon',
+        type: 'image/svg+xml',
+        href: '/icon.svg',
+      },
+    ],
+  })
+
   if (import.meta.prerender) {
     prerenderRoutes(ogURL.pathname + ogURL.search)
     ogURL.searchParams.delete('name')
