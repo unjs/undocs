@@ -1,5 +1,47 @@
 # Changelog
 
+## v0.4.0
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.3.9...v0.4.0)
+
+### 🚀 Enhancements
+
+- Basic mermaid support ([f6790e5](https://github.com/unjs/undocs/commit/f6790e5))
+- **og:** Use themeColor ([4105c5a](https://github.com/unjs/undocs/commit/4105c5a))
+- Add /icon.svg by default ([2337836](https://github.com/unjs/undocs/commit/2337836))
+
+### 🩹 Fixes
+
+- Justify-center hero links when there is no hero code ([#190](https://github.com/unjs/undocs/pull/190))
+- Correct the install command for deno ([#189](https://github.com/unjs/undocs/pull/189))
+- Use `summary_large_image` for twitter seo meta ([a79cb6c](https://github.com/unjs/undocs/commit/a79cb6c))
+- Add `og:title` and `og:description` ([8fa9961](https://github.com/unjs/undocs/commit/8fa9961))
+
+### 💅 Refactors
+
+- Set `compatibilityDate` to `latest` ([67a7f23](https://github.com/unjs/undocs/commit/67a7f23))
+- Update og image ([ae6fa5b](https://github.com/unjs/undocs/commit/ae6fa5b))
+- Update landing sponsors/contributors ([f8cc963](https://github.com/unjs/undocs/commit/f8cc963))
+
+### 🏡 Chore
+
+- **release:** V0.3.10 ([754e200](https://github.com/unjs/undocs/commit/754e200))
+- Update deps ([6d140e0](https://github.com/unjs/undocs/commit/6d140e0))
+- Update package.json ([c16a6a2](https://github.com/unjs/undocs/commit/c16a6a2))
+- Update content module ([af390d7](https://github.com/unjs/undocs/commit/af390d7))
+- Migrate to pnpm ([239154f](https://github.com/unjs/undocs/commit/239154f))
+- Fix ci ([65397fc](https://github.com/unjs/undocs/commit/65397fc))
+- Fix ci ([f1149f7](https://github.com/unjs/undocs/commit/f1149f7))
+- Update deps ([986e27f](https://github.com/unjs/undocs/commit/986e27f))
+- Update repo name ([616597e](https://github.com/unjs/undocs/commit/616597e))
+- Fix lint warning ([294477e](https://github.com/unjs/undocs/commit/294477e))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Keito ([@mst-mkt](https://github.com/mst-mkt))
+- Makito <sumimakito@hotmail.com>
+
 ## v0.3.10
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.9...v0.3.10)
