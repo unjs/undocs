@@ -13,26 +13,28 @@ on:
 
 jobs:
   ci:
-    runs-on: upnpmtu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
-      - run: npm i -fg corepack && corepack enable
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'pnpm'
+
+      - run: corepack enable
       - run: pnpm install
       - run: pnpm run lint
       - run: pnpm run build
+
       - name: nightly release
-        if: |
-          github.ref_name == 'main' &&
-          !contains(github.event.head_commit.message, '[skip-release]') &&
-          !startsWith(github.event.head_commit.message, 'docs')
+        if: github.ref_name == 'main' &&
+            !contains(github.event.head_commit.message, '[skip-release]') &&
+            !startsWith(github.event.head_commit.message, 'docs')
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc &&
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
           pnpm run changelogen --canary nightly --publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
