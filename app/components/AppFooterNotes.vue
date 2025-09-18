@@ -12,12 +12,6 @@ const appConfig = useAppConfig()
         >{{ appConfig.site.name }}
       </NuxtLink>
     </span>
-    &nbsp;<span class="text-muted">{{ appConfig.docs.shortDescription.replace(/\.$/, '') }}</span>
-
-    &middot; Generated with
-    <NuxtLink class="font-medium hover:text-primary" to="https://undocs.unjs.io" target="_blank">UnDocs </NuxtLink>
-    and
-    <NuxtLink class="font-medium hover:text-primary" to="https://ui.nuxt.com" target="_blank">Nuxt UI</NuxtLink>
-    .
+    &nbsp;<span class="text-muted">{{ appConfig.docs.shortDescription.replace(/\.$/, '') }}</span>.
   </p>
 </template>
