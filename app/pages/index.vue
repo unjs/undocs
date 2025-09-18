@@ -251,7 +251,7 @@ const { data: contributors } = await useAsyncData(() => useContributors())
         </UTooltip>
       </UAvatarGroup>
       <div class="text-center">
-        <UButton v-if="sponsors.username" :to="`https://github.com/${landing._github}`" target="_blank" color="neutral">
+        <UButton v-if="landing._github" :to="`https://github.com/${landing._github}`" target="_blank" color="neutral">
           Contribute on GitHub
         </UButton>
       </div>
