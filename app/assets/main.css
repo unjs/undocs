@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
 
+@source '../**/*.vue';
+
 @theme static {
   --font-sans: 'Inter', sans-serif;
 }
