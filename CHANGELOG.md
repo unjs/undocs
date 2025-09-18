@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.4.1
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.0...v0.4.1)
+
+### 🚀 Enhancements
+
+- Upgrade to Nuxt UI v4 ([#200](https://github.com/unjs/undocs/pull/200))
+
+### 🏡 Chore
+
+- Update ci ([#192](https://github.com/unjs/undocs/pull/192))
+- Update ci ([22c12c5](https://github.com/unjs/undocs/commit/22c12c5))
+- Update deps ([3401886](https://github.com/unjs/undocs/commit/3401886))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Sébastien Chopin <seb@nuxt.com>
+- Nguyen Long Nhat ([@torn4dom4n](https://github.com/torn4dom4n))
+
 ## v0.4.0
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.3.9...v0.4.0)
