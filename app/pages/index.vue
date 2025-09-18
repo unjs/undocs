@@ -104,34 +104,28 @@ const { data: contributors } = await useAsyncData(() => useContributors())
 <template>
   <div>
     <!-- Hero -->
-    <UPageHero
-      v-if="hero"
-      :orientation="hero.orientation"
-      class="relative"
-      :ui="{
-        container: '!pb-20 py-24 sm:py-32 lg:py-40',
-        title: 'text-5xl sm:text-7xl',
-        wrapper: 'lg:min-h-[540px]',
-      }"
-    >
+    <UPageHero v-if="hero" :orientation="hero.orientation" class="relative" :links="hero.links">
       <template #top>
         <LandingBackground />
       </template>
 
       <template #headline>
-        <NuxtLink v-if="latest" :to="latest.path">
-          <UBadge
-            variant="subtle"
-            size="lg"
-            class="px-3 relative rounded-full font-semibold dark:hover:bg-primary-400/15 dark:hover:ring-primary-700"
-          >
-            {{ latest.title }}
-          </UBadge>
-        </NuxtLink>
+        <UButton
+          v-if="latest"
+          :to="latest.path"
+          variant="subtle"
+          size="sm"
+          trailing-icon="i-lucide-arrow-right"
+          class="rounded-full"
+        >
+          {{ latest.title }}
+        </UButton>
       </template>
 
       <template #title>
-        {{ landing.heroTitle }}<br /><span class="text-primary text-4xl">{{ landing.heroSubtitle }}</span>
+        {{ landing.heroTitle }}<br /><span v-if="landing.heroSubtitle" class="text-primary text-4xl">{{
+          landing.heroSubtitle
+        }}</span>
       </template>
 
       <template #description>
@@ -139,11 +133,7 @@ const { data: contributors } = await useAsyncData(() => useContributors())
       </template>
 
       <template #links>
-        <div class="flex flex-col gap-4">
-          <div class="flex items-center flex-wrap gap-2" :class="{ 'justify-center': !hero.code }">
-            <UButton v-for="link in hero.links" :key="link.label" v-bind="link" class="!px-6 !py-3"> </UButton>
-          </div>
-        </div>
+        <UButton v-for="link in hero.links" :key="link.label" v-bind="link" />
       </template>
 
       <ProseCodeGroup v-if="hero.code" class="mx-auto" style="max-width: 100%">
@@ -162,13 +152,9 @@ const { data: contributors } = await useAsyncData(() => useContributors())
 
     <UPageSection
       v-if="landing.features?.length > 0"
-      :title="landing?.featuresTitle"
-      :description="''"
       :ui="{
-        title: 'text-left',
-        description: 'text-left',
-        root: '',
-        features: 'xl:grid-cols-4 lg:gap-10',
+        container: 'pt-4 sm:pt-8 lg:pt-12',
+        body: 'mt-0',
       }"
     >
       <template #features>
@@ -191,18 +177,18 @@ const { data: contributors } = await useAsyncData(() => useContributors())
       </template>
     </UPageSection>
 
-    <UPageSection v-if="sponsors?.sponsors.length" title="Sponsors">
+    <UPageSection v-if="sponsors?.sponsors.length" title="Sponsors" class="bg-muted/30 border-y border-default">
       <div id="sponsors" class="flex flex-col items-center gap-8">
         <div
           v-for="(tier, i) of sponsors.sponsors.slice(0, 2)"
           :key="i"
-          class="flex flex-wrap justify-center gap-4 max-w-4xl mb-4"
+          class="flex flex-wrap justify-center gap-8 max-w-4xl"
         >
-          <div v-for="s in tier" :key="s.name" class="flex items-center gap-2 max-w-[300px]">
+          <div v-for="s in tier" :key="s.name" class="flex items-center gap-6 max-w-[300px]">
             <a
               :href="s.website"
               target="_blank"
-              class="flex items-center gap-2"
+              class="flex items-center gap-2 opacity-80 hover:opacity-100"
               :class="`font-size-${i === 0 ? '3xl' : i === 1 ? 'xl' : 'lg'}`"
             >
               <img
@@ -215,24 +201,29 @@ const { data: contributors } = await useAsyncData(() => useContributors())
                   height: i === 0 ? '80px' : '48px',
                 }"
               />
-              <span v-if="i < 2" class="text-lg font-semibold">{{ s.name }}</span>
+              <span v-if="i < 2" class="font-semibold" :class="`text-${i === 0 ? '2xl' : 'xl'}`">{{ s.name }}</span>
             </a>
           </div>
         </div>
-        <div class="flex flex-wrap justify-center gap-4">
-          <UTooltip v-for="s in sponsors.sponsors[2]" :key="s.name" :text="s.name" placement="top">
-            <UAvatar :alt="s.name" :src="s.image" size="2xl" :to="s.website" target="_blank" />
+        <div class="flex flex-wrap justify-center gap-2">
+          <UTooltip v-for="s in sponsors.sponsors[2]" :key="s.name" :text="s.name" :delay-duration="0">
+            <a :href="s.website" target="_blank" class="opacity-80 hover:opacity-100">
+              <UAvatar :alt="s.name" :src="s.image" size="2xl" />
+            </a>
           </UTooltip>
         </div>
-        <div class="flex flex-wrap justify-center gap-4">
-          <UTooltip v-for="s in sponsors.sponsors[3]" :key="s.name" :text="s.name">
-            <UAvatar :alt="s.name" :src="s.image" :to="s.website" target="_blank" />
+        <div class="flex flex-wrap justify-center gap-1">
+          <UTooltip v-for="s in sponsors.sponsors[3]" :key="s.name" :text="s.name" :delay-duration="0">
+            <a :href="s.website" target="_blank" class="opacity-80 hover:opacity-100">
+              <UAvatar :alt="s.name" :src="s.image" />
+            </a>
           </UTooltip>
         </div>
       </div>
       <div class="text-center">
         <UButton
           v-if="sponsors.username"
+          icon="i-lucide-heart-handshake"
           :to="`https://github.com/sponsors/${sponsors.username}`"
           target="_blank"
           color="neutral"
@@ -243,15 +234,21 @@ const { data: contributors } = await useAsyncData(() => useContributors())
     </UPageSection>
 
     <UPageSection v-if="contributors?.length" id="contributors" title="Contributors">
-      <UAvatarGroup class="flex flex-wrap justify-center gap-4">
-        <UTooltip v-for="c in contributors" :key="c.username" :text="c.name">
-          <a :href="c.profile" target="_blank">
+      <div class="flex flex-wrap justify-center gap-2">
+        <UTooltip v-for="c in contributors" :key="c.username" :text="c.name" :delay-duration="0">
+          <a :href="c.profile" target="_blank" class="opacity-80 hover:opacity-100">
             <UAvatar :alt="c.name" :src="c.avatar" size="3xl" />
           </a>
         </UTooltip>
-      </UAvatarGroup>
+      </div>
       <div class="text-center">
-        <UButton v-if="landing._github" :to="`https://github.com/${landing._github}`" target="_blank" color="neutral">
+        <UButton
+          v-if="landing._github"
+          :to="`https://github.com/${landing._github}`"
+          target="_blank"
+          color="neutral"
+          icon="i-lucide-git-pull-request"
+        >
           Contribute on GitHub
         </UButton>
       </div>
