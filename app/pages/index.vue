@@ -153,7 +153,7 @@ const { data: contributors } = await useAsyncData(() => useContributors())
     <UPageSection
       v-if="landing.features?.length > 0"
       :ui="{
-        container: 'py-8 sm:py-12 lg:py-16',
+        container: 'pt-4 sm:pt-8 lg:pt-12',
         body: 'mt-0',
       }"
     >
