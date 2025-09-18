@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.2
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.1...v0.4.2)
+
+### 🩹 Fixes
+
+- Optional access to sponsors config ([3525f0a](https://github.com/unjs/undocs/commit/3525f0a))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.1
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.0...v0.4.1)
