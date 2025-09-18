@@ -1,9 +1,20 @@
 <script setup lang="ts">
 const appConfig = useAppConfig()
 
+const props = defineProps({
+  githubOnly: {
+    type: Boolean,
+    default: false,
+  },
+})
+
 const socialLinks = computed(() => {
   return (
-    Object.entries({ github: appConfig.docs.github, ...appConfig.docs.socials })
+    Object.entries(
+      props.githubOnly
+        ? { github: appConfig.docs.github }
+        : { github: appConfig.docs.github, ...appConfig.docs.socials },
+    )
       .reverse() // x<>github
       // .filter(([key]) => props.socials?.includes(key) || !props.socials)
       .map(([key, value]) => {

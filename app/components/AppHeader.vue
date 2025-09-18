@@ -55,7 +55,11 @@ const mobileLinks = computed(() => {
         <UContentSearchButton />
       </UTooltip>
       <UColorModeButton />
-      <SocialButtons />
+      <SocialButtons github-only />
+    </template>
+
+    <template #toggle="{ open, toggle }">
+      <IconMenuToggle :open="open" class="lg:hidden" @click="toggle" />
     </template>
 
     <template #body>
