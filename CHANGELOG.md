@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.4
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.3...v0.4.4)
+
+### 💅 Refactors
+
+- Landing improvements ([#202](https://github.com/unjs/undocs/pull/202))
+
+### ❤️ Contributors
+
+- Sébastien Chopin <seb@nuxt.com>
+
 ## v0.4.3
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.2...v0.4.3)
