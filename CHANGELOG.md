@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.3
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.2...v0.4.3)
+
+### 🩹 Fixes
+
+- Fix contribute button rendering ([c70bd23](https://github.com/unjs/undocs/commit/c70bd23))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.2
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.1...v0.4.2)
