@@ -12,6 +12,7 @@ const appConfig = useAppConfig()
         >{{ appConfig.site.name }}
       </NuxtLink>
     </span>
-    &nbsp;<span class="text-muted">{{ appConfig.docs.shortDescription.replace(/\.$/, '') }}</span>.
+    &nbsp;<span class="text-muted">{{ appConfig.docs.shortDescription.replace(/\.$/, '') }}</span
+    >.
   </p>
 </template>
