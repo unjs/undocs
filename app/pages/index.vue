@@ -104,24 +104,28 @@ const { data: contributors } = await useAsyncData(() => useContributors())
 <template>
   <div>
     <!-- Hero -->
-    <UPageHero
-      v-if="hero"
-      :orientation="hero.orientation"
-      class="relative"
-      :links="hero.links"
-    >
+    <UPageHero v-if="hero" :orientation="hero.orientation" class="relative" :links="hero.links">
       <template #top>
         <LandingBackground />
       </template>
 
       <template #headline>
-        <UButton v-if="latest" :to="latest.path" variant="subtle" size="sm" trailing-icon="i-lucide-arrow-right" class="rounded-full">
+        <UButton
+          v-if="latest"
+          :to="latest.path"
+          variant="subtle"
+          size="sm"
+          trailing-icon="i-lucide-arrow-right"
+          class="rounded-full"
+        >
           {{ latest.title }}
         </UButton>
       </template>
 
       <template #title>
-        {{ landing.heroTitle }}<br /><span v-if="landing.heroSubtitle" class="text-primary text-4xl">{{ landing.heroSubtitle }}</span>
+        {{ landing.heroTitle }}<br /><span v-if="landing.heroSubtitle" class="text-primary text-4xl">{{
+          landing.heroSubtitle
+        }}</span>
       </template>
 
       <template #description>
@@ -150,7 +154,7 @@ const { data: contributors } = await useAsyncData(() => useContributors())
       v-if="landing.features?.length > 0"
       :ui="{
         container: 'py-8 sm:py-12 lg:py-16',
-        body: 'mt-0'
+        body: 'mt-0',
       }"
     >
       <template #features>
@@ -204,7 +208,7 @@ const { data: contributors } = await useAsyncData(() => useContributors())
         <div class="flex flex-wrap justify-center gap-2">
           <UTooltip v-for="s in sponsors.sponsors[2]" :key="s.name" :text="s.name" :delay-duration="0">
             <a :href="s.website" target="_blank" class="opacity-80 hover:opacity-100">
-              <UAvatar :alt="s.name" :src="s.image" size="2xl"/>
+              <UAvatar :alt="s.name" :src="s.image" size="2xl" />
             </a>
           </UTooltip>
         </div>
@@ -238,7 +242,13 @@ const { data: contributors } = await useAsyncData(() => useContributors())
         </UTooltip>
       </div>
       <div class="text-center">
-        <UButton v-if="landing._github" :to="`https://github.com/${landing._github}`" target="_blank" color="neutral" icon="i-lucide-git-pull-request">
+        <UButton
+          v-if="landing._github"
+          :to="`https://github.com/${landing._github}`"
+          target="_blank"
+          color="neutral"
+          icon="i-lucide-git-pull-request"
+        >
           Contribute on GitHub
         </UButton>
       </div>
