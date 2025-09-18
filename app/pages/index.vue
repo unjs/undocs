@@ -192,11 +192,11 @@ const { data: contributors } = await useAsyncData(() => useContributors())
     </UPageSection>
 
     <UPageSection v-if="sponsors?.sponsors.length" title="Sponsors">
-      <div id="sponsors" class="flex flex-col items-center">
+      <div id="sponsors" class="flex flex-col items-center gap-8">
         <div
           v-for="(tier, i) of sponsors.sponsors.slice(0, 2)"
           :key="i"
-          class="flex flex-wrap justify-center gap-4 max-w-4xl mb-8 mt-8"
+          class="flex flex-wrap justify-center gap-4 max-w-4xl mb-4"
         >
           <div v-for="s in tier" :key="s.name" class="flex items-center gap-2 max-w-[300px]">
             <a
@@ -219,20 +219,16 @@ const { data: contributors } = await useAsyncData(() => useContributors())
             </a>
           </div>
         </div>
-        <UAvatarGroup class="flex flex-wrap justify-center gap-4">
+        <div class="flex flex-wrap justify-center gap-4">
           <UTooltip v-for="s in sponsors.sponsors[2]" :key="s.name" :text="s.name" placement="top">
-            <a :href="s.website" target="_blank">
-              <UAvatar :alt="s.name" :src="s.image" size="lg" />
-            </a>
+            <UAvatar :alt="s.name" :src="s.image" size="2xl" :to="s.website" target="_blank" />
           </UTooltip>
-        </UAvatarGroup>
-        <UAvatarGroup class="flex flex-wrap justify-center gap-4">
+        </div>
+        <div class="flex flex-wrap justify-center gap-4">
           <UTooltip v-for="s in sponsors.sponsors[3]" :key="s.name" :text="s.name">
-            <a :href="s.website" target="_blank">
-              <UAvatar :alt="s.name" :src="s.image" style="opacity: 0.5" />
-            </a>
+            <UAvatar :alt="s.name" :src="s.image" :to="s.website" target="_blank" />
           </UTooltip>
-        </UAvatarGroup>
+        </div>
       </div>
       <div class="text-center">
         <UButton
