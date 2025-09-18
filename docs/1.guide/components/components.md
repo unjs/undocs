@@ -148,19 +148,8 @@ graph TD
     click C "/guide/components/content-transformation"
 ```
 
-## UI Pro
+## Nuxt UI
 
-You can use all the Prose components from [Nuxt UI Pro](https://ui.nuxt.com/pro/components/prose/callout) in your markdown files.
+You can use all the Prose components from Nuxt UI in your markdown files.
 
-- [Callout](https://ui.nuxt.com/pro/components/prose/callout)
-- [Card](https://ui.nuxt.com/pro/components/prose/card)
-- [CardGroup](https://ui.nuxt.com/pro/components/prose/card-group)
-- [Field](https://ui.nuxt.com/pro/components/prose/field)
-- [FieldGroup](https://ui.nuxt.com/pro/components/prose/field-group)
-- [Collapsible](https://ui.nuxt.com/pro/components/prose/collapsible)
-- [Shortcut](https://ui.nuxt.com/pro/components/prose/shortcut)
-- [Tabs](https://ui.nuxt.com/pro/components/prose/tabs)
-
-```
-
-```
+Read more on https://ui4.nuxt.com/docs/typography

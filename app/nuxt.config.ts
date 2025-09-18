@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     name: 'undocs',
   },
   ssr,
-  modules: ['@nuxt/ui-pro', '@nuxt/content', isProd && '@nuxtjs/plausible'],
+  modules: ['@nuxt/ui', '@nuxt/content', isProd && '@nuxtjs/plausible'],
   css: [resolve('./assets/main.css')],
   ui: {
     theme: {
@@ -65,9 +65,6 @@ export default defineNuxtConfig({
   },
   devtools: {
     enabled: dev,
-  },
-  uiPro: {
-    license: process.env.NUXT_UI_PRO_LICENSE || 'oss',
   },
   typescript: {
     strict: false,

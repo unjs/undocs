@@ -11,8 +11,6 @@ export default defineAppConfig({
       important: 'violet',
       neutral: 'neutral',
     },
-  },
-  uiPro: {
     prose: {
       codeIcon: {
         '.config': 'vscode-icons:file-type-config',
