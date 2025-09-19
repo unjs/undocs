@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { loadConfig, watchConfig } from 'c12'
 
@@ -129,10 +130,11 @@ export async function setupDocs(docsDir, opts = {}) {
           prefix: 'undocs',
           dir: resolve(appDir, 'assets/icons'),
         },
-        {
-          prefix: 'custom',
-          dir: resolve(docsDir, '.docs/assets/icons'),
-        },
+        ...(existsSync(resolve(docsDir, '.docs/icons')) ? [{
+            prefix: 'custom',
+            dir: resolve(docsDir, '.docs/icons'),
+          },
+        ] : []),
       ],
     },
   }
