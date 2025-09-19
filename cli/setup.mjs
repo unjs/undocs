@@ -130,11 +130,14 @@ export async function setupDocs(docsDir, opts = {}) {
           prefix: 'undocs',
           dir: resolve(appDir, 'assets/icons'),
         },
-        ...(existsSync(resolve(docsDir, '.docs/icons')) ? [{
-            prefix: 'custom',
-            dir: resolve(docsDir, '.docs/icons'),
-          },
-        ] : []),
+        ...(existsSync(resolve(docsDir, '.docs/icons'))
+          ? [
+              {
+                prefix: 'custom',
+                dir: resolve(docsDir, '.docs/icons'),
+              },
+            ]
+          : []),
       ],
     },
   }
