@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.4.5
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.4...v0.4.5)
+
+### 🚀 Enhancements
+
+- Add undocs + custom icons library ([#204](https://github.com/unjs/undocs/pull/204))
+
+### 💅 Refactors
+
+- Imporve header ([#203](https://github.com/unjs/undocs/pull/203))
+
+### ❤️ Contributors
+
+- Sébastien Chopin <seb@nuxt.com>
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.4
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.3...v0.4.4)
