@@ -126,10 +126,6 @@ export async function setupDocs(docsDir, opts = {}) {
     icon: {
       customCollections: [
         {
-          prefix: 'undocs',
-          dir: resolve(appDir, 'assets/icons'),
-        },
-        {
           prefix: 'custom',
           dir: resolve(docsDir, '.docs/assets/icons'),
         },

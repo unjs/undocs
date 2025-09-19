@@ -31,7 +31,6 @@ export default defineAppConfig({
         '.nuxtignore': 'vscode-icons:file-type-nuxt',
         'nuxt.config.ts': 'vscode-icons:file-type-nuxt',
         'nuxt.schema.ts': 'vscode-icons:file-type-nuxt',
-        'nitro.config.ts': 'i-undocs-nitro',
         'tailwind.config.js': 'vscode-icons:file-type-tailwind',
         'tailwind.config.ts': 'vscode-icons:file-type-tailwind',
         ts: 'vscode-icons:file-type-typescript',
