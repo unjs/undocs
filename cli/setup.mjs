@@ -123,6 +123,15 @@ export async function setupDocs(docsDir, opts = {}) {
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
     },
+    icon: {
+      customCollections: [{
+        prefix: 'undocs',
+        dir: resolve(appDir, 'assets/icons')
+      }, {
+        prefix: 'custom',
+        dir: resolve(docsDir, '.docs/assets/icons')
+      }]
+    }
   }
 
   return {
