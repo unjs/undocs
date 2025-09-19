@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { loadConfig, watchConfig } from 'c12'
 
@@ -122,6 +123,22 @@ export async function setupDocs(docsDir, opts = {}) {
     },
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
+    },
+    icon: {
+      customCollections: [
+        {
+          prefix: 'undocs',
+          dir: resolve(appDir, 'assets/icons'),
+        },
+        ...(existsSync(resolve(docsDir, '.docs/icons'))
+          ? [
+              {
+                prefix: 'custom',
+                dir: resolve(docsDir, '.docs/icons'),
+              },
+            ]
+          : []),
+      ],
     },
   }
 
