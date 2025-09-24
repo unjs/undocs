@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.4.6
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.5...v0.4.6)
+
+### 🩹 Fixes
+
+- Add missing diff language ([fd88c31](https://github.com/unjs/undocs/commit/fd88c31))
+
+### 🏡 Chore
+
+- Set container to 90rem ([38a484b](https://github.com/unjs/undocs/commit/38a484b))
+
+### ❤️ Contributors
+
+- Sébastien Chopin ([@atinux](https://github.com/atinux))
+
 ## v0.4.5
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.4...v0.4.5)
