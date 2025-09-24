@@ -7,6 +7,10 @@
   --font-sans: 'Inter', sans-serif;
 }
 
+:root {
+  --ui-container: 90rem;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease-in-out;
