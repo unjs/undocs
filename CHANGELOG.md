@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.4.10
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.9...v0.4.10)
+
+### 🚀 Enhancements
+
+- Add support for setting lang attribute ([c7e7ea1](https://github.com/unjs/undocs/commit/c7e7ea1))
+- Set default robots.txt for SEO at 100 ([5a774a4](https://github.com/unjs/undocs/commit/5a774a4))
+
+### 🏡 Chore
+
+- Improve accessibility to 100 ([4768bc6](https://github.com/unjs/undocs/commit/4768bc6))
+- Lint fix ([3ac374b](https://github.com/unjs/undocs/commit/3ac374b))
+
+### ❤️ Contributors
+
+- Sébastien Chopin ([@atinux](https://github.com/atinux))
+
 ## v0.4.9
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.8...v0.4.9)
