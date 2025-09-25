@@ -66,7 +66,7 @@ usePageSEO({
       </template>
     </UPageHeader>
 
-    <template #right>
+    <template v-if="page.body?.toc?.links?.length" #right>
       <UContentToc title="On this page" :links="page.body?.toc?.links || []" highlight />
     </template>
 
