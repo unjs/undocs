@@ -7,7 +7,7 @@ export interface Contributor {
 
 export async function useContributors(): Promise<Contributor[] | undefined> {
   const { docs: docsConfig } = useAppConfig()
-  if (!docsConfig.github || !docsConfig.landing?.contributors) {
+  if (!docsConfig.github) {
     return
   }
   const { contributors = [] } = await await $fetch<{ contributors: { username: string }[] }>(
