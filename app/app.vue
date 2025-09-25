@@ -14,6 +14,9 @@ useSeoMeta({
 })
 
 useHead({
+  htmlAttrs: {
+    lang: appConfig.docs.lang || 'en',
+  },
   link: [
     {
       rel: 'icon',

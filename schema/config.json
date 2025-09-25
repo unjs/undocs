@@ -10,6 +10,11 @@
       "type": "string",
       "description": "Documentation directory\n\nNote: This option will be automatically set"
     },
+    "lang": {
+      "type": "string",
+      "description": "The language of the documentation site.",
+      "default": "en"
+    },
     "name": {
       "type": "string",
       "description": "The name of the documentation site."
