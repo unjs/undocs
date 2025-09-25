@@ -27,7 +27,7 @@ export function useDocsNav() {
         to: item.path,
         originalPath,
         hasIndex: item.path === originalPath,
-        label: titleCase(originalPath),
+        label: item.title || titleCase(originalPath),
         active: isActive(originalPath),
       }
     })
