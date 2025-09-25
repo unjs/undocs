@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.9
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.8...v0.4.9)
+
+### 🩹 Fixes
+
+- Toc is optional ([40afbb4](https://github.com/unjs/undocs/commit/40afbb4))
+
+### ❤️ Contributors
+
+- Sébastien Chopin ([@atinux](https://github.com/atinux))
+
 ## v0.4.8
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.7...v0.4.8)
