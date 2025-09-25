@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.4.7
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.6...v0.4.7)
+
+### 🩹 Fixes
+
+- Add vite config icon ([478de0b](https://github.com/unjs/undocs/commit/478de0b))
+
+### 📖 Documentation
+
+- Use X instead of Twitter ([6900300](https://github.com/unjs/undocs/commit/6900300))
+
+### ❤️ Contributors
+
+- Sébastien Chopin ([@atinux](https://github.com/atinux))
+
 ## v0.4.6
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.5...v0.4.6)
