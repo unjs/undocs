@@ -32,7 +32,7 @@ const state = computed(() => (props.open ? 'close' : 'normal'))
 </script>
 
 <template>
-  <UButton size="sm" variant="ghost" color="neutral" class="-me-1.5" square>
+  <UButton size="sm" variant="ghost" color="neutral" class="-me-1.5" square :aria-label="open ? 'Close menu' : 'Open menu'">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       class="size-5"
