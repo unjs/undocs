@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.4.8
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.7...v0.4.8)
+
+### 🚀 Enhancements
+
+- Expose sponsors and contributors as page components ([49bddc0](https://github.com/unjs/undocs/commit/49bddc0))
+
+### 🩹 Fixes
+
+- Support scanning docs markdown and custom components ([1cd2590](https://github.com/unjs/undocs/commit/1cd2590))
+
+### ❤️ Contributors
+
+- Sébastien Chopin ([@atinux](https://github.com/atinux))
+
 ## v0.4.7
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.6...v0.4.7)
