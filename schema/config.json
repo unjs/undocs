@@ -55,6 +55,148 @@
       "type": "string",
       "description": "The branch of the GitHub repository for the documentation site."
     },
+    "banner": {
+      "type": "object",
+      "description": "Banner configuration",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A unique id saved to local storage to remember if the banner has been dismissed. Change this value to show the banner again."
+        },
+        "icon": {
+          "type": "string",
+          "description": "The icon displayed next to the title (e.g., 'i-lucide-info')."
+        },
+        "title": {
+          "type": "string",
+          "description": "The banner title text."
+        },
+        "actions": {
+          "type": "array",
+          "description": "Display a list of action buttons next to the title.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Button label text"
+              },
+              "icon": {
+                "type": "string",
+                "description": "Button icon"
+              },
+              "to": {
+                "type": "string",
+                "description": "Button link destination"
+              },
+              "target": {
+                "type": "string",
+                "enum": ["_blank", "_parent", "_self", "_top"],
+                "description": "Link target attribute"
+              },
+              "color": {
+                "type": "string",
+                "enum": ["primary", "secondary", "success", "info", "warning", "error", "neutral"],
+                "description": "Button color"
+              },
+              "size": {
+                "type": "string",
+                "enum": ["xs", "sm", "md", "lg", "xl"],
+                "description": "Button size"
+              },
+              "variant": {
+                "type": "string",
+                "enum": ["solid", "outline", "soft", "subtle", "ghost", "link"],
+                "description": "Button variant"
+              }
+            }
+          }
+        },
+        "to": {
+          "type": "string",
+          "description": "Link destination URL or route path."
+        },
+        "target": {
+          "type": "string",
+          "enum": ["_blank", "_parent", "_self", "_top"],
+          "description": "Link target attribute."
+        },
+        "color": {
+          "type": "string",
+          "enum": ["primary", "secondary", "success", "info", "warning", "error", "neutral"],
+          "description": "Banner color theme.",
+          "default": "primary"
+        },
+        "close": {
+          "oneOf": [
+            {
+              "type": "boolean",
+              "description": "Display a close button to dismiss the banner."
+            },
+            {
+              "type": "object",
+              "description": "Close button configuration.",
+              "properties": {
+                "size": {
+                  "type": "string",
+                  "enum": ["xs", "sm", "md", "lg", "xl"],
+                  "description": "Close button size"
+                },
+                "color": {
+                  "type": "string",
+                  "enum": ["primary", "secondary", "success", "info", "warning", "error", "neutral"],
+                  "description": "Close button color"
+                },
+                "variant": {
+                  "type": "string",
+                  "enum": ["solid", "outline", "soft", "subtle", "ghost", "link"],
+                  "description": "Close button variant"
+                }
+              }
+            }
+          ]
+        },
+        "closeIcon": {
+          "type": "string",
+          "description": "The icon displayed in the close button (e.g., 'i-lucide-x').",
+          "default": "i-lucide-x"
+        },
+        "ui": {
+          "type": "object",
+          "description": "UI customization classes for banner components.",
+          "properties": {
+            "root": {
+              "description": "Root element classes"
+            },
+            "container": {
+              "description": "Container element classes"
+            },
+            "left": {
+              "description": "Left section classes"
+            },
+            "center": {
+              "description": "Center section classes"
+            },
+            "right": {
+              "description": "Right section classes"
+            },
+            "icon": {
+              "description": "Icon element classes"
+            },
+            "title": {
+              "description": "Title element classes"
+            },
+            "actions": {
+              "description": "Actions container classes"
+            },
+            "close": {
+              "description": "Close button classes"
+            }
+          }
+        }
+      }
+    },
     "themeColor": {
       "type": "string",
       "description": "The theme color of the documentation site.\nIt will be used as the `theme-color` meta tag and a full palette of colors will be generated from it."

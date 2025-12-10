@@ -1,3 +1,5 @@
+import type { BannerProps } from '@nuxt/ui'
+
 export interface DocsConfig {
   dir?: string
   name?: string
@@ -7,6 +9,7 @@ export interface DocsConfig {
   github?: string
   socials?: Record<string, string>
   branch?: string
+  banner?: BannerProps
   themeColor?: string
   redirects?: Record<string, string>
   automd?: unknown
