@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.4.11
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.10...v0.4.11)
+
+### 🚀 Enhancements
+
+- Add support for versions select ([#209](https://github.com/unjs/undocs/pull/209))
+- Add support for adding a Banner ([#208](https://github.com/unjs/undocs/pull/208))
+
+### ❤️ Contributors
+
+- Sébastien Chopin <seb@nuxt.com>
+
 ## v0.4.10
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.9...v0.4.10)
