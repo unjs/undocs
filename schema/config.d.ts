@@ -7,6 +7,7 @@ export interface DocsConfig {
   github?: string
   socials?: Record<string, string>
   branch?: string
+  versions?: { label: string; to: string; active?: boolean }[]
   themeColor?: string
   redirects?: Record<string, string>
   automd?: unknown
