@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { BannerProps } from '@nuxt/ui'
+
 const appConfig = useAppConfig()
 
 const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('content'))
@@ -52,6 +54,7 @@ provide('navigation', navigation)
 <template>
   <UApp>
     <NuxtLoadingIndicator color="var(--ui-primary)" />
+    <UBanner v-if="appConfig.docs.banner?.title" v-bind="appConfig.docs.banner as BannerProps" />
     <AppHeader />
 
     <UMain>
