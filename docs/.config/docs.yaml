@@ -11,8 +11,6 @@ socials:
   discord: '#'
 sponsors:
   api: https://sponsors.pi0.io/sponsors.json
-banner:
-  title: "UnDocs released!"
 url: 'https://undocs.pages.dev'
 redirects:
   '/docs': '/docs/getting-started'
