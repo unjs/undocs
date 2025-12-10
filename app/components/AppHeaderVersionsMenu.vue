@@ -1,20 +1,24 @@
 <script setup lang="ts">
 const appConfig = useAppConfig()
 
+const activeVersion = computed(() => {
+  return appConfig.docs.versions.find((version) => version.active) || appConfig.docs.versions[0]
+})
 const items = computed(() => {
   return appConfig.docs.versions.map((version) => {
+    if (activeVersion.value === version) {
+      return {
+        label: version.label,
+        type: 'checkbox' as const,
+        color: 'primary' as const,
+        checked: true,
+      }
+    }
     return {
       label: version.label,
       to: version.to,
-      active: version.active,
-      type: 'checkbox' as const,
-      color: 'primary' as const,
-      checked: version.active,
     }
   })
-})
-const activeVersion = computed(() => {
-  return appConfig.docs.versions.find((version) => version.active) || appConfig.docs.versions[0]
 })
 </script>
 
