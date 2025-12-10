@@ -10,6 +10,7 @@ export interface DocsConfig {
   socials?: Record<string, string>
   branch?: string
   banner?: BannerProps
+  versions?: { label: string; to: string; active?: boolean }[]
   themeColor?: string
   redirects?: Record<string, string>
   automd?: unknown

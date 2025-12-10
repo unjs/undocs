@@ -5,6 +5,7 @@ export default defineAppConfig({
     github: undefined,
     socials: {},
     banner: {},
+    versions: [],
   },
   ui: {
     colors: {

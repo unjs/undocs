@@ -197,6 +197,27 @@
         }
       }
     },
+    "versions": {
+      "type": "array",
+      "description": "The versions of the documentation site.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "The label of the version."
+          },
+          "to": {
+            "type": "string",
+            "description": "The URL to the version."
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Whether the version is active on this documentation site."
+          }
+        }
+      }
+    },
     "themeColor": {
       "type": "string",
       "description": "The theme color of the documentation site.\nIt will be used as the `theme-color` meta tag and a full palette of colors will be generated from it."
