@@ -41,11 +41,14 @@ const mobileLinks = computed(() => {
 
 <template>
   <UHeader to="/">
-    <template #title>
-      <img :src="appConfig.docs.logo" :alt="`${appConfig.site.name} logo`" class="h-7 w-7" />
-      <span>
-        {{ appConfig.site.name }}
-      </span>
+    <template #left>
+      <NuxtLink to="/" class="focus-visible:outline-primary shrink-0 font-bold text-xl text-highlighted flex items-end gap-1.5" :aria-label="appConfig.site.name">
+        <img :src="appConfig.docs.logo" :alt="`${appConfig.site.name} logo`" class="h-7 w-7" />
+        <span>
+          {{ appConfig.site.name }}
+        </span>
+      </NuxtLink>
+      <AppHeaderVersionsMenu v-if="appConfig.docs.versions?.length" />
     </template>
 
     <UNavigationMenu v-if="headerLinks.length > 1" :items="headerLinks" variant="link" />

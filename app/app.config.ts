@@ -4,6 +4,7 @@ export default defineAppConfig({
     logo: '/icon.svg',
     github: undefined,
     socials: {},
+    versions: [],
   },
   ui: {
     colors: {
