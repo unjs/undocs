@@ -80,6 +80,24 @@ export async function setupDocs(docsDir, opts = {}) {
   }
 
   // Prepare loadNuxt overrides
+  const llmsDefaults = {
+    domain: docsconfig.url,
+    title: docsconfig.name || '',
+    description: docsconfig.description || '',
+    full: {
+      title: docsconfig.name || '',
+      description: docsconfig.description || '',
+    },
+  }
+  const llmsConfig = {
+    ...llmsDefaults,
+    ...(docsconfig.llms || {}),
+    full: {
+      ...llmsDefaults.full,
+      ...((docsconfig.llms && docsconfig.llms.full) || {}),
+    },
+  }
+
   const nuxtConfig = {
     compatibilityDate: 'latest',
     rootDir: docsSrcDir,
@@ -95,6 +113,8 @@ export async function setupDocs(docsDir, opts = {}) {
       description: docsconfig.description || '',
       url: docsconfig.url,
     },
+    // @ts-ignore
+    llms: llmsConfig,
     appConfig: {
       site: {
         name: docsconfig.name || '',
@@ -120,6 +140,9 @@ export async function setupDocs(docsDir, opts = {}) {
           dir: resolve(docsDir, '.docs/public'),
         },
       ],
+      prerender: {
+        routes: ['/llms.txt', '/llms-full.txt'],
+      },
     },
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),

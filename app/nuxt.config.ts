@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     name: 'undocs',
   },
   ssr,
-  modules: ['@nuxt/ui', '@nuxt/content', isProd && '@nuxtjs/plausible'],
+  modules: ['@nuxt/ui', '@nuxt/content', isProd && '@nuxtjs/plausible', 'nuxt-llms'],
   css: [resolve('./assets/main.css')],
   ui: {
     theme: {
