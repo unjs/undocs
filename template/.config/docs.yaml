@@ -5,6 +5,14 @@ shortDescription: ''
 description: ''
 github: 'unjs/packageName'
 # url: 'https://packageName.unjs.io'
+# llms:
+#   # Generate `/llms.txt` and `/llms-full.txt`
+#   domain: 'https://packageName.unjs.io'
+#   title: 'packageName'
+#   description: ''
+#   full:
+#     title: 'packageName'
+#     description: ''
 # redirects:
 #   "/from": "/to"
 # automd: true
