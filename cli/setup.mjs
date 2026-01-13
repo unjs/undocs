@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import { existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { loadConfig, watchConfig } from 'c12'
+import { defu } from 'defu'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 
@@ -80,7 +81,7 @@ export async function setupDocs(docsDir, opts = {}) {
   }
 
   // Prepare loadNuxt overrides
-  const llmsDefaults = {
+  const llmsConfig = defu(docsconfig.llms, {
     domain: docsconfig.url,
     title: docsconfig.name || '',
     description: docsconfig.description || '',
@@ -88,15 +89,7 @@ export async function setupDocs(docsDir, opts = {}) {
       title: docsconfig.name || '',
       description: docsconfig.description || '',
     },
-  }
-  const llmsConfig = {
-    ...llmsDefaults,
-    ...(docsconfig.llms || {}),
-    full: {
-      ...llmsDefaults.full,
-      ...((docsconfig.llms && docsconfig.llms.full) || {}),
-    },
-  }
+  })
 
   const nuxtConfig = {
     compatibilityDate: 'latest',
