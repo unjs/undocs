@@ -9,9 +9,6 @@ export interface DocsConfig {
   github?: string
   socials?: Record<string, string>
   llms?: {
-    domain?: string
-    title?: string
-    description?: string
     full?: {
       title?: string
       description?: string
