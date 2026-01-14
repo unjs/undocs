@@ -60,9 +60,20 @@ usePageSEO({
 
 <template>
   <UPage v-if="page">
-    <UPageHeader :title="page.title" :description="page.description" :links="page.links">
+    <UPageHeader
+      :title="page.title"
+      :description="page.description"
+      :ui="{
+        wrapper: 'flex-row items-center flex-wrap justify-between',
+      }"
+    >
       <template #headline>
         <UBreadcrumb :items="breadcrumb" />
+      </template>
+      <template #links>
+        <UButton v-for="(link, index) in page.links" :key="index" size="sm" v-bind="link" />
+
+        <PageHeaderLinks />
       </template>
     </UPageHeader>
 
