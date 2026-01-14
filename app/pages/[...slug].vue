@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import { joinURL } from 'ufo'
 import { kebabCase } from 'scule'
 import type { ContentNavigationItem } from '@nuxt/content'
 
@@ -55,6 +56,18 @@ usePageSEO({
   title: `${page.value?.title} - ${appConfig.site.name}`,
   ogTitle: page.value?.title,
   description: page.value?.description,
+})
+
+const path = computed(() => route.path.replace(/\/$/, ''))
+prerenderRoutes([joinURL('/raw', `${path.value}.md`)])
+useHead({
+  link: [
+    {
+      rel: 'alternate',
+      href: joinURL(appConfig.site.url, 'raw', `${path.value}.md`),
+      type: 'text/markdown'
+    }
+  ]
 })
 </script>
 
