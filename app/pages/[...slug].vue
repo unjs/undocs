@@ -60,15 +60,6 @@ usePageSEO({
 
 const path = computed(() => route.path.replace(/\/$/, ''))
 prerenderRoutes([joinURL('/raw', `${path.value}.md`)])
-useHead({
-  link: [
-    {
-      rel: 'alternate',
-      href: joinURL(appConfig.site.url, 'raw', `${path.value}.md`),
-      type: 'text/markdown',
-    },
-  ],
-})
 </script>
 
 <template>
