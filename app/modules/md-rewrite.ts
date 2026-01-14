@@ -7,8 +7,7 @@ export default defineNuxtModule((_options, nuxt) => {
     }
     nitro.hooks.hook('compiled', async () => {
       const { resolve } = process.getBuiltinModule('node:path')
-      const { readFile, writeFile }
-        = process.getBuiltinModule('node:fs/promises')
+      const { readFile, writeFile } = process.getBuiltinModule('node:fs/promises')
       const vcJSON = resolve(nitro.options.output.dir, 'config.json')
       const vcConfig = JSON.parse(await readFile(vcJSON, 'utf8'))
       vcConfig.routes.unshift({

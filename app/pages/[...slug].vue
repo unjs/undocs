@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { joinURL } from 'ufo'
+import { joinURL } from 'ufo'
 import { kebabCase } from 'scule'
 import type { ContentNavigationItem } from '@nuxt/content'
 
@@ -65,9 +65,9 @@ useHead({
     {
       rel: 'alternate',
       href: joinURL(appConfig.site.url, 'raw', `${path.value}.md`),
-      type: 'text/markdown'
-    }
-  ]
+      type: 'text/markdown',
+    },
+  ],
 })
 </script>
 
