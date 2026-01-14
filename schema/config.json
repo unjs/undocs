@@ -35,6 +35,40 @@
       "type": "string",
       "description": "The GitHub repository for the documentation site."
     },
+    "llms": {
+      "type": "object",
+      "description": "Configuration for `nuxt-llms` generation (`/llms.txt` and `/llms-full.txt`).",
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "type": "string",
+          "description": "Public site domain (e.g. https://example.com)."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title used in `/llms.txt`."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description used in `/llms.txt`."
+        },
+        "full": {
+          "type": "object",
+          "description": "Metadata for `/llms-full.txt`.",
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Title used in `/llms-full.txt`."
+            },
+            "description": {
+              "type": "string",
+              "description": "Description used in `/llms-full.txt`."
+            }
+          }
+        }
+      }
+    },
     "socials": {
       "type": "object",
       "description": "Social media links for the documentation site.",
