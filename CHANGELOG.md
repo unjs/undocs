@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.13
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.12...v0.4.13)
+
+### 🚀 Enhancements
+
+- Also match curl user agent ([f067ed1](https://github.com/unjs/undocs/commit/f067ed1))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.12
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.11...v0.4.12)
