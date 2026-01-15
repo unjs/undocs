@@ -47,7 +47,7 @@
     "md4w": "^0.2.7",
     "mermaid": "^11.12.2",
     "motion-v": "^1.9.0",
-    "nitropack": "^2.13.0",
+    "nitropack": "^2.13.1",
     "nuxi": "^3.32.0",
     "nuxt": "^4.2.2",
     "nuxt-build-cache": "^0.1.1",
@@ -57,7 +57,7 @@
     "shiki": "^3.21.0",
     "tailwindcss": "^4.1.18",
     "unctx": "^2.5.0",
-    "unstorage": "^1.17.3",
+    "unstorage": "^1.17.4",
     "vue": "^3.5.26",
     "vue-router": "^4.6.4"
   },
@@ -69,7 +69,7 @@
     "eslint": "^9.39.2",
     "eslint-config-unjs": "^0.6.2",
     "jiti": "^2.6.1",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.0",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.2.2"
   },
