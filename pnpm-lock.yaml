@@ -24,7 +24,7 @@ importers:
         specifier: ^0.12.1
         version: 0.12.1(db0@0.3.4)(ioredis@5.9.1)(magicast@0.5.1)(vite@7.3.1(@types/node@25.0.8)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.2))
       '@nuxt/ui':
-        specifier: ^4.3.0
+        specifier: 4.3.0
         version: 4.3.0(80ad37e7c9831b1c0f599625b0ea98c4)
       '@nuxtjs/plausible':
         specifier: ^2.0.1
