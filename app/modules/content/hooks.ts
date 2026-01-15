@@ -116,8 +116,8 @@ function transformMermaid(node: MinimarkNode) {
     node[0] = 'mermaid'
     // @ts-expect-error
     node[1] = { code: node[1].code || '' }
-    // @ts-expect-error
-    node[2] = []
+    // Remove all children (splice instead of node[2] = [] which would create an invalid empty array child)
+    node.splice(2)
   }
 }
 

@@ -8,6 +8,12 @@ export interface DocsConfig {
   url?: string
   github?: string
   socials?: Record<string, string>
+  llms?: {
+    full?: {
+      title?: string
+      description?: string
+    }
+  }
   branch?: string
   banner?: BannerProps
   versions?: { label: string; to: string; active?: boolean }[]

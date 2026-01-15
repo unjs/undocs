@@ -58,8 +58,11 @@ export function createCLI(opts) {
       process.chdir(appDir)
       process.on('exit', () => unwatch())
 
-      const { runCommand } = await import('nuxi')
-      await runCommand('dev', [appDir, '--no-fork', '--port', process.env.PORT || '4000'], { overrides: nuxtConfig })
+      const { runCommand, main } = await import('nuxi')
+      const cmd = await main.subCommands.dev()
+      await runCommand(cmd, [appDir, '--no-fork', '--port', process.env.PORT || '4000'], {
+        overrides: nuxtConfig,
+      })
     },
   })
 
@@ -74,8 +77,9 @@ export function createCLI(opts) {
 
       process.chdir(appDir)
 
-      const { runCommand } = await import('nuxi')
-      await runCommand('generate', [appDir], { overrides: nuxtConfig })
+      const { runCommand, main } = await import('nuxi')
+      const cmd = await main.subCommands.generate()
+      await runCommand(cmd, [appDir], { overrides: nuxtConfig })
     },
   })
 

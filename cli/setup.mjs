@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import { existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { loadConfig, watchConfig } from 'c12'
+import { defu } from 'defu'
 
 const appDir = fileURLToPath(new URL('../app', import.meta.url))
 
@@ -80,6 +81,16 @@ export async function setupDocs(docsDir, opts = {}) {
   }
 
   // Prepare loadNuxt overrides
+  const llmsConfig = defu(docsconfig.llms, {
+    domain: docsconfig.url,
+    title: docsconfig.name || '',
+    description: docsconfig.description || '',
+    full: {
+      title: docsconfig.name || '',
+      description: docsconfig.description || '',
+    },
+  })
+
   const nuxtConfig = {
     compatibilityDate: 'latest',
     rootDir: docsSrcDir,
@@ -95,6 +106,8 @@ export async function setupDocs(docsDir, opts = {}) {
       description: docsconfig.description || '',
       url: docsconfig.url,
     },
+    // @ts-ignore
+    llms: llmsConfig,
     appConfig: {
       site: {
         name: docsconfig.name || '',
@@ -120,6 +133,9 @@ export async function setupDocs(docsDir, opts = {}) {
           dir: resolve(docsDir, '.docs/public'),
         },
       ],
+      prerender: {
+        routes: ['/llms.txt', '/llms-full.txt'],
+      },
     },
     routeRules: {
       ...Object.fromEntries(Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }])),
