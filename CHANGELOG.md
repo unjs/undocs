@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.4.12
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.11...v0.4.12)
+
+### 🚀 Enhancements
+
+- Add `llms.txt`, `llms-full.txt` generation and `Copy page` ([#210](https://github.com/unjs/undocs/pull/210))
+
+### 🩹 Fixes
+
+- Update dependencies and latest nuxi compat ([#211](https://github.com/unjs/undocs/pull/211))
+- Pin nuxt-ui to 4.2 ([#212](https://github.com/unjs/undocs/pull/212))
+
+### 🏡 Chore
+
+- **release:** V0.4.11 ([d1ee98a](https://github.com/unjs/undocs/commit/d1ee98a))
+- Sync docs ([7afc7be](https://github.com/unjs/undocs/commit/7afc7be))
+- Update deps ([bcb7d54](https://github.com/unjs/undocs/commit/bcb7d54))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Hugo <hugo.richard@vercel.com>
+- Sébastien Chopin ([@atinux](https://github.com/atinux))
+
 ## v0.4.11
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.10...v0.4.11)
