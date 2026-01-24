@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.4.14
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.13...v0.4.14)
+
+### 🩹 Fixes
+
+- Avoid markdown rewriting for landing page ([94e7f7d](https://github.com/unjs/undocs/commit/94e7f7d))
+
+### 🏡 Chore
+
+- Update deps ([9ead16a](https://github.com/unjs/undocs/commit/9ead16a))
+- Unpin nuxt/ui ([32c8f33](https://github.com/unjs/undocs/commit/32c8f33))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.13
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.12...v0.4.13)
