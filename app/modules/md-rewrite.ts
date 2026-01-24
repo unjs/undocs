@@ -21,13 +21,13 @@ function mdRewrite(): NitroModule {
         const vcConfig = JSON.parse(await readFile(vcJSON, 'utf8'))
         vcConfig.routes.unshift(
           {
-            src: '^/(.*)$',
+            src: '^/(.+)$',
             dest: '/raw/$1.md',
             has: [{ type: 'header', key: 'accept', value: '(.*)text/markdown(.*)' }],
             check: true,
           },
           {
-            src: '^/(.*)$',
+            src: '^/(.+)$',
             dest: '/raw/$1.md',
             has: [{ type: 'header', key: 'user-agent', value: 'curl/.*' }],
             check: true,
