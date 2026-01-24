@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.15
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.14...v0.4.15)
+
+### 🩹 Fixes
+
+- Limit md rewrite to /docs/* for now ([792b0ea](https://github.com/unjs/undocs/commit/792b0ea))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.14
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.13...v0.4.14)
