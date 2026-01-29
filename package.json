@@ -32,13 +32,13 @@
   "dependencies": {
     "@headlessui/vue": "^1.7.23",
     "@iconify-json/logos": "^1.2.10",
-    "@iconify-json/simple-icons": "^1.2.67",
+    "@iconify-json/simple-icons": "^1.2.68",
     "@nuxt/content": "^3.11.0",
     "@nuxt/fonts": "^0.13.0",
     "@nuxt/ui": "^4.4.0",
     "@nuxtjs/plausible": "^2.0.1",
     "@resvg/resvg-wasm": "^2.6.2",
-    "automd": "^0.4.2",
+    "automd": "^0.4.3",
     "c12": "^3.3.3",
     "citty": "^0.2.0",
     "consola": "^3.4.2",
@@ -46,7 +46,7 @@
     "is-buffer": "^2.0.5",
     "md4w": "^0.2.7",
     "mermaid": "^11.12.2",
-    "motion-v": "^1.9.0",
+    "motion-v": "^1.10.2",
     "nitropack": "^2.13.1",
     "nuxi": "^3.32.0",
     "nuxt": "^4.3.0",
@@ -64,14 +64,14 @@
   "devDependencies": {
     "@nuxt/eslint-config": "^1.13.0",
     "@nuxt/image": "^2.0.0",
-    "@types/node": "^25.0.10",
+    "@types/node": "^25.1.0",
     "changelogen": "^0.6.2",
     "eslint": "^9.39.2",
     "eslint-config-unjs": "^0.6.2",
     "jiti": "^2.6.1",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
-    "vue-tsc": "^3.2.3"
+    "vue-tsc": "^3.2.4"
   },
-  "packageManager": "pnpm@10.28.1"
+  "packageManager": "pnpm@10.28.2"
 }
