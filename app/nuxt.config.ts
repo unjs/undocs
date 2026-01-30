@@ -46,7 +46,7 @@ export default defineNuxtConfig({
             light: 'github-light',
           },
           // prettier-ignore
-          langs: ['json', 'json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md', 'vue', 'js', 'ts', 'javascript', 'typescript', 'ini', 'diff'],
+          langs: ['json', 'json5', 'jsonc', 'toml', 'yaml', 'html', 'sh', 'shell', 'bash', 'mdc', 'markdown', 'md', 'vue', 'js', 'ts', 'javascript', 'typescript', 'ini', 'diff', 'jsx', 'tsx'],
         },
       },
     },
