@@ -11,6 +11,8 @@ const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSe
 const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
 const browserTabIcon = appConfig.docs?.logo || undefined
 
+const scripts = appConfig.docs?.scripts || []
+
 useSeoMeta({
   twitterSite: twitterSite ? `@${twitterSite}` : undefined,
 })
@@ -26,6 +28,12 @@ useHead({
     },
   ],
 })
+
+if (scripts.length > 0) {
+  useHead({
+    script: scripts,
+  })
+}
 
 const route = useRoute()
 
