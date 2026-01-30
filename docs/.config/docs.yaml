@@ -13,8 +13,7 @@ sponsors:
   api: https://sponsors.pi0.io/sponsors.json
 url: "https://undocs.pages.dev"
 redirects:
-  "/docs": "/docs/getting-started"
-  "/old": "/docs"
+  "/docs": "/guide"
 automd: true
 landing:
   heroLinks:
