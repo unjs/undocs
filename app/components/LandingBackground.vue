@@ -1,5 +1,9 @@
 <script setup lang="ts">
-const points = useState(() => Array.from({ length: 16 }).fill(0).map(() => [Math.random(), Math.random()]));
+const points = useState(() =>
+  Array.from({ length: 16 })
+    .fill(0)
+    .map(() => [Math.random(), Math.random()]),
+);
 
 const poly = computed(() => points.value.map(([x, y]) => `${x * 100}% ${y * 100}%`).join(", "));
 

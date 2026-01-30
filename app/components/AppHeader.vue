@@ -6,15 +6,15 @@ const navigation = inject("navigation");
 
 const headerLinks = computed(() => {
   return docsNav.links
-      .filter((link) => link.hasIndex)
-      .map((link) => {
-        return {
-          ...link,
-          children: undefined,
-          icon: "",
-          // children: link.children?.filter((child) => !child.children || child.children.some((c) => c.to === child.to)),
-        };
-      });
+    .filter((link) => link.hasIndex)
+    .map((link) => {
+      return {
+        ...link,
+        children: undefined,
+        icon: "",
+        // children: link.children?.filter((child) => !child.children || child.children.some((c) => c.to === child.to)),
+      };
+    });
 });
 
 const mobileLinks = computed(() => {
