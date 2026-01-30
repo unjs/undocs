@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  undocs: link:.
+
 importers:
 
   .:
@@ -99,6 +102,18 @@ importers:
       vue-tsc:
         specifier: ^3.2.4
         version: 3.2.4(typescript@5.9.3)
+
+  docs:
+    devDependencies:
+      undocs:
+        specifier: link:..
+        version: link:..
+
+  template:
+    devDependencies:
+      undocs:
+        specifier: link:..
+        version: link:..
 
 packages:
 

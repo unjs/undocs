@@ -63,5 +63,8 @@
     "typescript": "^5.9.3",
     "vue-tsc": "^3.2.4"
   },
+  "resolutions": {
+    "undocs": "link:."
+  },
   "packageManager": "pnpm@10.28.2"
 }

@@ -1,3 +1,6 @@
+packages:
+  - docs
+  - template
 ignoredBuiltDependencies:
   - "@parcel/watcher"
   - esbuild
