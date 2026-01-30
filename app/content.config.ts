@@ -1,14 +1,14 @@
-import { defineContentConfig, defineCollection } from '@nuxt/content'
+import { defineContentConfig, defineCollection } from "@nuxt/content";
 
 export default defineContentConfig({
   collections: {
     content: defineCollection({
-      type: 'page',
+      type: "page",
       source: {
         cwd: globalThis.__DOCS_CWD__,
-        include: '**/*.{md,yml}',
-        exclude: ['**/.**/**', '**/node_modules/**', '**/dist/**', '**/.docs/**'],
+        include: "**/*.{md,yml}",
+        exclude: ["**/.**/**", "**/node_modules/**", "**/dist/**", "**/.docs/**"],
       },
     }),
   },
-})
+});

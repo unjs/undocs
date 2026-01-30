@@ -1,42 +1,40 @@
 <script setup lang="ts">
-const appConfig = useAppConfig()
-const docsNav = useDocsNav()
+const appConfig = useAppConfig();
+const docsNav = useDocsNav();
 
-const navigation = inject('navigation')
+const navigation = inject("navigation");
 
 const headerLinks = computed(() => {
-  return [
-    ...docsNav.links
+  return docsNav.links
       .filter((link) => link.hasIndex)
       .map((link) => {
         return {
           ...link,
           children: undefined,
-          icon: '',
+          icon: "",
           // children: link.children?.filter((child) => !child.children || child.children.some((c) => c.to === child.to)),
-        }
-      }),
-  ]
-})
+        };
+      });
+});
 
 const mobileLinks = computed(() => {
   return navigation.value.map((item) => {
-    if (item.path === '/blog') {
+    if (item.path === "/blog") {
       return {
         ...item,
         children: undefined,
-      }
+      };
     }
     if (item.children?.length === 1) {
-      return item.children[0]
+      return item.children[0];
     }
-    const originalPath = item.path
+    const originalPath = item.path;
     if (item.children?.length && item.children.some((c) => c.path === originalPath)) {
-      item.title = titleCase(originalPath)
+      item.title = titleCase(originalPath);
     }
-    return item
-  })
-})
+    return item;
+  });
+});
 </script>
 
 <template>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { DocsConfig } from '../../schema/config'
-import { defu } from 'defu'
+import type { DocsConfig } from "../../schema/config";
+import { defu } from "defu";
 
-type LandingConfig = Exclude<DocsConfig['landing'], false | undefined>
+type LandingConfig = Exclude<DocsConfig["landing"], false | undefined>;
 
-const appConfig = useAppConfig()
+const appConfig = useAppConfig();
 
-const docsConfig = appConfig.docs as DocsConfig
+const docsConfig = appConfig.docs as DocsConfig;
 
 const landing: LandingConfig & { _github: string } = defu(docsConfig.landing || {}, {
   // Meta
@@ -22,80 +22,82 @@ const landing: LandingConfig & { _github: string } = defu(docsConfig.landing || 
   heroDescription: docsConfig.description,
   heroLinks: {
     primary: {
-      label: 'Get Started',
-      icon: 'i-heroicons-rocket-launch',
-      to: '/guide',
+      label: "Get Started",
+      icon: "i-heroicons-rocket-launch",
+      to: "/guide",
       order: 0,
     },
     github: {
-      label: 'View on GitHub',
-      icon: 'i-simple-icons-github',
-      color: 'white',
+      label: "View on GitHub",
+      icon: "i-simple-icons-github",
+      color: "white",
       to: `https://github.com/${docsConfig.github}`,
-      target: '_blank',
+      target: "_blank",
       order: 100,
     },
   },
 
   // Features
-  featuresTitle: '',
+  featuresTitle: "",
   features: [],
 
   _github: docsConfig.github,
-})
+});
 
 landing._heroMdTitle =
-  landing._heroMdTitle || `[${landing.heroTitle}]{.text-primary} :br [${landing.heroSubtitle}]{.text-4xl}`
+  landing._heroMdTitle ||
+  `[${landing.heroTitle}]{.text-primary} :br [${landing.heroSubtitle}]{.text-4xl}`;
 
 usePageSEO({
   title: `${appConfig.site.name} - ${landing!.heroSubtitle}`,
   ogTitle: landing!.heroSubtitle,
   description: landing!.description,
-})
+});
 
-function normalizeHeroLinks(links: LandingConfig['heroLinks']) {
+function normalizeHeroLinks(links: LandingConfig["heroLinks"]) {
   return Object.entries(links || {})
     .map(([key, link], order) => {
       if (!link) {
-        return
+        return;
       }
-      if (typeof link === 'string') {
-        link = { to: link }
+      if (typeof link === "string") {
+        link = { to: link };
       }
       return {
         label: titleCase(key),
         order,
-        size: 'lg',
-        target: link.to?.startsWith('https') ? '_blank' : undefined,
+        size: "lg",
+        target: link.to?.startsWith("https") ? "_blank" : undefined,
         ...link,
-      }
+      };
     })
     .filter(Boolean)
-    .sort((a, b) => a!.order - b!.order) as any[]
+    .sort((a, b) => a!.order - b!.order) as any[];
 }
 
 const hero = computed(() => {
   if (!landing!._heroMdTitle) {
-    return
+    return;
   }
-  const withFeatures = !landing!.heroCode && landing.featuresLayout === 'hero' && landing.features?.length > 0
+  const withFeatures =
+    !landing!.heroCode && landing.featuresLayout === "hero" && landing.features?.length > 0;
   return {
     title: landing!._heroMdTitle,
     description: landing!.heroDescription,
     links: normalizeHeroLinks(landing!.heroLinks),
     withFeatures,
-    orientation: landing!.heroCode || withFeatures ? 'horizontal' : 'vertical',
+    orientation: landing!.heroCode || withFeatures ? "horizontal" : "vertical",
     code: landing!.heroCode,
-  } as const
-})
+  } as const;
+});
 
 const { data: latest } = await useAsyncData(() =>
-  queryCollection('content')
-    .where('path', 'LIKE', '/blog/%')
-    .order('id', 'DESC')
+  queryCollection("content")
+    .where("path", "LIKE", "/blog/%")
+    .order("id", "DESC")
     .first()
     .then((res) => res),
-)
+);
 </script>
 
 <template>
@@ -120,9 +122,11 @@ const { data: latest } = await useAsyncData(() =>
       </template>
 
       <template #title>
-        {{ landing.heroTitle }}<br /><span v-if="landing.heroSubtitle" class="text-primary text-4xl">{{
-          landing.heroSubtitle
-        }}</span>
+        {{ landing.heroTitle }}<br /><span
+          v-if="landing.heroSubtitle"
+          class="text-primary text-4xl"
+          >{{ landing.heroSubtitle }}</span
+        >
       </template>
 
       <template #description>

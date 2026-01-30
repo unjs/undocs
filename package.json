@@ -1,9 +1,8 @@
 {
   "name": "undocs",
   "version": "0.4.15",
-  "repository": "unjs/undocs",
   "license": "MIT",
-  "type": "module",
+  "repository": "unjs/undocs",
   "bin": {
     "undocs": "./cli/main.mjs"
   },
@@ -14,13 +13,14 @@
     "!app/**/node_modules",
     "!app/**/tsconfig.json"
   ],
+  "type": "module",
   "scripts": {
     "build": "true",
     "dev": "pnpm run docs:dev",
     "docs:build": "pnpm run undocs build docs",
     "docs:dev": "NUXT_DOCS_DEV=1 pnpm run undocs dev docs",
-    "lint": "eslint --cache . && prettier -c app cli schema",
-    "lint:fix": "eslint --cache . --fix && prettier -c -w app cli schema",
+    "lint": "oxlint --cache . && oxfmt --check app cli schema",
+    "lint:fix": "oxlint --cache . --fix && oxfmt --check -w app cli schema",
     "prepack": "pnpm run build",
     "profile:0x": "pnpx 0x -o cli/main.mjs dev docs",
     "profile:0x-kernel": "pnpm run profile:0x --kernel-tracing",
@@ -66,10 +66,10 @@
     "@nuxt/image": "^2.0.0",
     "@types/node": "^25.1.0",
     "changelogen": "^0.6.2",
-    "eslint": "^9.39.2",
     "eslint-config-unjs": "^0.6.2",
     "jiti": "^2.6.1",
-    "prettier": "^3.8.1",
+    "oxfmt": "^0.27.0",
+    "oxlint": "^1.42.0",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.2.4"
   },

@@ -179,7 +179,15 @@
                 },
                 "color": {
                   "type": "string",
-                  "enum": ["primary", "secondary", "success", "info", "warning", "error", "neutral"],
+                  "enum": [
+                    "primary",
+                    "secondary",
+                    "success",
+                    "info",
+                    "warning",
+                    "error",
+                    "neutral"
+                  ],
                   "description": "Close button color"
                 },
                 "variant": {

@@ -1,6 +1,6 @@
 {
-  "private": true,
   "name": "docs",
+  "private": true,
   "scripts": {
     "dev": "undocs dev",
     "build": "undocs build"

@@ -11,37 +11,37 @@
  * https://github.com/nuxt/nuxt.com/blob/main/components/content/ReadMore.vue
  * https://github.com/nuxt/nuxt.com/blob/main/utils/index.ts
  */
-import { splitByCase, upperFirst } from 'scule'
+import { splitByCase, upperFirst } from "scule";
 
 const props = defineProps({
   to: {
     type: String,
     required: false,
-    default: '',
+    default: "",
   },
   title: {
     type: String,
     required: false,
-    default: '',
+    default: "",
   },
-})
+});
 
-const createBreadcrumb = (link: string = 'here') => {
-  if (link.startsWith('http')) {
-    return link.replace(/^https?:\/\//, '')
+const createBreadcrumb = (link: string = "here") => {
+  if (link.startsWith("http")) {
+    return link.replace(/^https?:\/\//, "");
   }
   return link
-    .split('/')
+    .split("/")
     .filter(Boolean)
     .map((part) =>
       splitByCase(part)
         .map((p) => upperFirst(p))
-        .join(' '),
+        .join(" "),
     )
-    .join(' > ')
-    .replace('Api', 'API')
-}
+    .join(" > ")
+    .replace("Api", "API");
+};
 
 // Guess title from link!
-const computedTitle = computed<string>(() => props.title || createBreadcrumb(props.to))
+const computedTitle = computed<string>(() => props.title || createBreadcrumb(props.to));
 </script>

@@ -1,9 +1,9 @@
-import type { ContentNavigationItem } from '@nuxt/content'
+import type { ContentNavigationItem } from "@nuxt/content";
 
 export function useDocsNav() {
-  const navigation = inject<Ref<ContentNavigationItem[]>>('navigation')
-  const route = useRoute()
-  const isActive = (path: string) => route.path.startsWith(path)
+  const navigation = inject<Ref<ContentNavigationItem[]>>("navigation");
+  const route = useRoute();
+  const isActive = (path: string) => route.path.startsWith(path);
 
   const links = computed(() => {
     return navigation.value.map((item) => {
@@ -13,13 +13,13 @@ export function useDocsNav() {
           ...item,
           ...item.children[0],
           children: undefined,
-        }
+        };
       }
 
       // Check if group index is not exists and default to first child
-      const originalPath = item.path
+      const originalPath = item.path;
       if (item.children?.length && !item.children.some((c) => c.path === originalPath)) {
-        item.path = item.children[0].path
+        item.path = item.children[0].path;
       }
 
       return {
@@ -29,16 +29,18 @@ export function useDocsNav() {
         hasIndex: item.path === originalPath,
         label: item.title || titleCase(originalPath),
         active: isActive(originalPath),
-      }
-    })
-  })
+      };
+    });
+  });
 
-  const activeSection = computed(() => links.value.find((l) => route.path.startsWith(l.originalPath)))
-  const activeLinks = computed(() => (activeSection.value?.children || []).filter(Boolean))
+  const activeSection = computed(() =>
+    links.value.find((l) => route.path.startsWith(l.originalPath)),
+  );
+  const activeLinks = computed(() => (activeSection.value?.children || []).filter(Boolean));
 
   return reactive({
     links,
     activeSection,
     activeLinks,
-  })
+  });
 }

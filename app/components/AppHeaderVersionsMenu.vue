@@ -1,25 +1,25 @@
 <script setup lang="ts">
-const appConfig = useAppConfig()
+const appConfig = useAppConfig();
 
 const activeVersion = computed(() => {
-  return appConfig.docs.versions.find((version) => version.active) || appConfig.docs.versions[0]
-})
+  return appConfig.docs.versions.find((version) => version.active) || appConfig.docs.versions[0];
+});
 const items = computed(() => {
   return appConfig.docs.versions.map((version) => {
     if (activeVersion.value === version) {
       return {
         label: version.label,
-        type: 'checkbox' as const,
-        color: 'primary' as const,
+        type: "checkbox" as const,
+        color: "primary" as const,
         checked: true,
-      }
+      };
     }
     return {
       label: version.label,
       to: version.to,
-    }
-  })
-})
+    };
+  });
+});
 </script>
 
 <template>
@@ -40,7 +40,9 @@ const items = computed(() => {
       class="-mb-[6px] font-semibold rounded-full truncate"
       :class="[open && 'bg-primary/15']"
       :ui="{
-        trailingIcon: ['transition-transform duration-200', open ? 'rotate-180' : undefined].filter(Boolean).join(' '),
+        trailingIcon: ['transition-transform duration-200', open ? 'rotate-180' : undefined]
+          .filter(Boolean)
+          .join(' '),
       }"
     />
   </UDropdownMenu>

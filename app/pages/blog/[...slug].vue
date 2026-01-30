@@ -1,32 +1,32 @@
 <script setup lang="ts">
-import { kebabCase } from 'scule'
+import { kebabCase } from "scule";
 
 definePageMeta({
-  layout: 'blog',
-})
+  layout: "blog",
+});
 
-const route = useRoute()
+const route = useRoute();
 
 const { data: page } = await useAsyncData(kebabCase(route.path), () =>
-  queryCollection('content').path(route.path).first(),
-)
+  queryCollection("content").path(route.path).first(),
+);
 
 if (!page.value) {
   throw createError({
     statusCode: 404,
-    statusMessage: 'Page not found',
+    statusMessage: "Page not found",
     message: `${route.path} does not exist`,
     fatal: true,
-  })
+  });
 }
 
-const appConfig = useAppConfig()
+const appConfig = useAppConfig();
 
 usePageSEO({
   title: `${page.value?.title} - ${appConfig.site.name}`,
   ogTitle: page.value?.title,
   description: page.value?.description,
-})
+});
 </script>
 
 <template>
@@ -34,7 +34,10 @@ usePageSEO({
     <UPageHeader v-bind="page" :ui="{ headline: 'flex flex-col gap-y-8 items-start' }">
       <template #headline>
         <UBreadcrumb
-          :items="[{ label: 'Blog', icon: 'i-lucide-newspaper', to: '/blog' }, { label: page.title }]"
+          :items="[
+            { label: 'Blog', icon: 'i-lucide-newspaper', to: '/blog' },
+            { label: page.title },
+          ]"
           class="max-w-full"
         />
         <div class="flex items-center space-x-2">

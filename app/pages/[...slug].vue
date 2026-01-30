@@ -1,74 +1,74 @@
 <script setup lang="ts">
-import { joinURL } from 'ufo'
-import { kebabCase } from 'scule'
-import type { ContentNavigationItem } from '@nuxt/content'
+import { joinURL } from "ufo";
+import { kebabCase } from "scule";
+import type { ContentNavigationItem } from "@nuxt/content";
 
 definePageMeta({
-  layout: 'docs',
-})
+  layout: "docs",
+});
 
-const appConfig = useAppConfig()
-const route = useRoute()
+const appConfig = useAppConfig();
+const route = useRoute();
 
 const { data: page } = await useAsyncData(kebabCase(route.path), () =>
-  queryCollection('content').path(route.path).first(),
-)
+  queryCollection("content").path(route.path).first(),
+);
 if (!page.value) {
   throw createError({
     statusCode: 404,
-    statusMessage: 'Page not found',
+    statusMessage: "Page not found",
     message: `${route.path} does not exist`,
     fatal: true,
-  })
+  });
 }
 
 const { data: surround } = await useAsyncData(`${kebabCase(route.path)}-surround`, () => {
-  return queryCollectionItemSurroundings('content', route.path, {
-    fields: ['description'],
-  })
-})
+  return queryCollectionItemSurroundings("content", route.path, {
+    fields: ["description"],
+  });
+});
 
-const navigation = inject<Ref<ContentNavigationItem[]>>('navigation')
+const navigation = inject<Ref<ContentNavigationItem[]>>("navigation");
 
 // console.log(JSON.stringify(navigation?.value, null, 2))
 
 function makeBreadcrumb(items: ContentNavigationItem[], path: string, level = 0) {
-  const parent = [...items].find((i) => path.startsWith(i.path) && i.children?.length > 0)
+  const parent = [...items].find((i) => path.startsWith(i.path) && i.children?.length > 0);
   if (!parent) {
-    return []
+    return [];
   }
   if (level === 0) {
-    return makeBreadcrumb(parent.children, path, level + 1)
+    return makeBreadcrumb(parent.children, path, level + 1);
   }
   return [
     {
       label: parent.title,
       icon: parent.icon as string,
-      to: parent.page !== false ? parent.path : '',
+      to: parent.page !== false ? parent.path : "",
     },
     ...makeBreadcrumb(parent.children, path, level + 1),
-  ]
+  ];
 }
 
-const breadcrumb = computed(() => makeBreadcrumb(navigation?.value || [], page.value.path))
+const breadcrumb = computed(() => makeBreadcrumb(navigation?.value || [], page.value.path));
 
 usePageSEO({
   title: `${page.value?.title} - ${appConfig.site.name}`,
   ogTitle: page.value?.title,
   description: page.value?.description,
-})
+});
 
-const path = computed(() => route.path.replace(/\/$/, ''))
-prerenderRoutes([joinURL('/raw', `${path.value}.md`)])
+const path = computed(() => route.path.replace(/\/$/, ""));
+prerenderRoutes([joinURL("/raw", `${path.value}.md`)]);
 useHead({
   link: [
     {
-      rel: 'alternate',
-      href: joinURL(appConfig.site.url, 'raw', `${path.value}.md`),
-      type: 'text/markdown',
+      rel: "alternate",
+      href: joinURL(appConfig.site.url, "raw", `${path.value}.md`),
+      type: "text/markdown",
     },
   ],
-})
+});
 </script>
 
 <template>

@@ -1,35 +1,35 @@
 # yaml-language-server: $schema=https://unpkg.com/undocs/schema/config.json
 
-name: 'UnDocs'
-shortDescription: 'Docs, made easy.'
-description: 'Elegant documentation tooling for UnJS ecosystem.'
-github: 'unjs/undocs'
+name: "UnDocs"
+shortDescription: "Docs, made easy."
+description: "Elegant documentation tooling for UnJS ecosystem."
+github: "unjs/undocs"
 themeColor: blue
 socials:
-  x: 'https://x.com/unjsio'
-  bluesky: 'https://bsky.app/profile/unjs.io'
-  discord: '#'
+  x: "https://x.com/unjsio"
+  bluesky: "https://bsky.app/profile/unjs.io"
+  discord: "#"
 sponsors:
   api: https://sponsors.pi0.io/sponsors.json
-url: 'https://undocs.pages.dev'
+url: "https://undocs.pages.dev"
 redirects:
-  '/docs': '/docs/getting-started'
-  '/old': '/docs'
+  "/docs": "/docs/getting-started"
+  "/old": "/docs"
 automd: true
 landing:
   heroLinks:
     stackblitz:
-      icon: 'i-heroicons-play'
-      to: 'https://stackblitz.com/github/unjs/undocs/tree/main/template'
-  heroCode: 'npx giget gh:unjs/undocs/template docs --install'
+      icon: "i-heroicons-play"
+      to: "https://stackblitz.com/github/unjs/undocs/tree/main/template"
+  heroCode: "npx giget gh:unjs/undocs/template docs --install"
   contributors: true
   features:
-    - title: 'Easy to use'
-      icon: '⚡'
-      description: 'Focus on writing your *documentation* with Markdown, not tooling.'
-    - title: 'Nuxt powered'
-      icon: 'logos:nuxt-icon'
-      description: 'Made with [Nuxt](https://nuxt.com), [Nuxt Content](https://content.nuxt.com), and [Nuxt UI](https://ui.nuxt.com).'
-    - title: 'Deploy anywhere'
-      icon: '✨'
-      description: 'The documentation can be hosted on any static hosting.'
+    - title: "Easy to use"
+      icon: "⚡"
+      description: "Focus on writing your *documentation* with Markdown, not tooling."
+    - title: "Nuxt powered"
+      icon: "logos:nuxt-icon"
+      description: "Made with [Nuxt](https://nuxt.com), [Nuxt Content](https://content.nuxt.com), and [Nuxt UI](https://ui.nuxt.com)."
+    - title: "Deploy anywhere"
+      icon: "✨"
+      description: "The documentation can be hosted on any static hosting."

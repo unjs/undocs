@@ -71,9 +71,9 @@ If you have code blocks right after each other, they will be grouped together us
 ```ts [server/api/hello.get.ts]
 export default defineEventHandler(() => {
   return {
-    hello: 'world',
-  }
-})
+    hello: "world",
+  };
+});
 ```
 
 ```html [index.html]
@@ -96,9 +96,9 @@ export default defineEventHandler(() => {
 ```ts [server/api/hello.get.ts]
 export default defineEventHandler(() => {
   return {
-    hello: 'world',
-  }
-})
+    hello: "world",
+  };
+});
 ```
 
 ```html [index.html]

@@ -1,9 +1,13 @@
 <script setup lang="ts">
-const { data: sponsors } = await useAsyncData(() => useSponsors())
+const { data: sponsors } = await useAsyncData(() => useSponsors());
 </script>
 
 <template>
-  <UPageSection v-if="sponsors?.sponsors.length" title="Sponsors" class="bg-muted/30 border-y border-default">
+  <UPageSection
+    v-if="sponsors?.sponsors.length"
+    title="Sponsors"
+    class="bg-muted/30 border-y border-default"
+  >
     <div id="sponsors" class="flex flex-col items-center gap-8">
       <div
         v-for="(tier, i) of sponsors.sponsors.slice(0, 2)"
@@ -27,19 +31,31 @@ const { data: sponsors } = await useAsyncData(() => useSponsors())
                 height: i === 0 ? '80px' : '48px',
               }"
             />
-            <span v-if="i < 2" class="font-semibold" :class="`text-${i === 0 ? '2xl' : 'xl'}`">{{ s.name }}</span>
+            <span v-if="i < 2" class="font-semibold" :class="`text-${i === 0 ? '2xl' : 'xl'}`">{{
+              s.name
+            }}</span>
           </a>
         </div>
       </div>
       <div class="flex flex-wrap justify-center gap-2">
-        <UTooltip v-for="s in sponsors.sponsors[2]" :key="s.name" :text="s.name" :delay-duration="0">
+        <UTooltip
+          v-for="s in sponsors.sponsors[2]"
+          :key="s.name"
+          :text="s.name"
+          :delay-duration="0"
+        >
           <a :href="s.website" target="_blank" class="opacity-80 hover:opacity-100">
             <UAvatar :alt="s.name" :src="s.image" size="2xl" />
           </a>
         </UTooltip>
       </div>
       <div class="flex flex-wrap justify-center gap-1">
-        <UTooltip v-for="s in sponsors.sponsors[3]" :key="s.name" :text="s.name" :delay-duration="0">
+        <UTooltip
+          v-for="s in sponsors.sponsors[3]"
+          :key="s.name"
+          :text="s.name"
+          :delay-duration="0"
+        >
           <a :href="s.website" target="_blank" class="opacity-80 hover:opacity-100">
             <UAvatar :alt="s.name" :src="s.image" />
           </a>

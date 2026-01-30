@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const docsNav = useDocsNav()
+const docsNav = useDocsNav();
 </script>
 
 <template>

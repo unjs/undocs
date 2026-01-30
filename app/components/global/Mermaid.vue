@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const props = defineProps<{ code: string }>()
-const svg = useMermaid(() => props.code)
+const props = defineProps<{ code: string }>();
+const svg = useMermaid(() => props.code);
 </script>
 
 <template>

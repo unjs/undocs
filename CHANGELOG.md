@@ -6,7 +6,7 @@
 
 ### 🩹 Fixes
 
-- Limit md rewrite to /docs/* for now ([792b0ea](https://github.com/unjs/undocs/commit/792b0ea))
+- Limit md rewrite to /docs/\* for now ([792b0ea](https://github.com/unjs/undocs/commit/792b0ea))
 
 ### ❤️ Contributors
 

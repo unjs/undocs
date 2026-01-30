@@ -1,54 +1,56 @@
 <script setup lang="ts">
-import type { BannerProps } from '@nuxt/ui'
+import type { BannerProps } from "@nuxt/ui";
 
-const appConfig = useAppConfig()
+const appConfig = useAppConfig();
 
-const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('content'))
-const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSections('content'), {
+const { data: navigation } = await useAsyncData("navigation", () =>
+  queryCollectionNavigation("content"),
+);
+const { data: files } = useLazyAsyncData("search", () => queryCollectionSearchSections("content"), {
   server: false,
-})
+});
 
-const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined
-const browserTabIcon = appConfig.docs?.logo || undefined
+const twitterSite = appConfig.docs.socials?.twitter || appConfig.docs.socials?.x || undefined;
+const browserTabIcon = appConfig.docs?.logo || undefined;
 
 useSeoMeta({
   twitterSite: twitterSite ? `@${twitterSite}` : undefined,
-})
+});
 
 useHead({
   htmlAttrs: {
-    lang: appConfig.docs.lang || 'en',
+    lang: appConfig.docs.lang || "en",
   },
   link: [
     {
-      rel: 'icon',
+      rel: "icon",
       href: browserTabIcon,
     },
   ],
-})
+});
 
-const route = useRoute()
+const route = useRoute();
 
 onMounted(() => {
   watch(
     route,
     () => {
-      const hash = window.location.hash
+      const hash = window.location.hash;
       if (hash) {
-        let attempts = 0
+        let attempts = 0;
         const interval = setInterval(() => {
-          document.querySelector(hash)?.scrollIntoView()
+          document.querySelector(hash)?.scrollIntoView();
           if (attempts++ > 5) {
-            clearInterval(interval)
+            clearInterval(interval);
           }
-        }, 100)
+        }, 100);
       }
     },
     { immediate: true },
-  )
-})
+  );
+});
 
-provide('navigation', navigation)
+provide("navigation", navigation);
 </script>
 
 <template>

@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
-import { createCLI } from './cli.mjs'
+import { createCLI } from "./cli.mjs";
 
 const cli = createCLI({
-  name: 'undocs',
-  description: 'UnJS Docs Tool',
+  name: "undocs",
+  description: "UnJS Docs Tool",
   setup: {
     defaults: {
-      github: 'unjs',
-      themeColor: 'amber',
+      github: "unjs",
+      themeColor: "amber",
     },
   },
-})
+});
 
-cli.runMain()
+cli.runMain();

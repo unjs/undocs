@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const docsConfig = useAppConfig().docs
-const { data: contributors } = await useAsyncData(() => useContributors())
+const docsConfig = useAppConfig().docs;
+const { data: contributors } = await useAsyncData(() => useContributors());
 </script>
 
 <template>

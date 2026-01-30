@@ -1,30 +1,32 @@
 <script setup lang="ts">
-const { data: page } = await useAsyncData('/blog', () => queryCollection('content').path('/blog').first())
+const { data: page } = await useAsyncData("/blog", () =>
+  queryCollection("content").path("/blog").first(),
+);
 
 if (!page.value) {
   throw createError({
     statusCode: 404,
-    statusMessage: 'Page not found',
-    message: '/blog does not exist',
+    statusMessage: "Page not found",
+    message: "/blog does not exist",
     fatal: true,
-  })
+  });
 }
 
 const { data: articles } = await useAsyncData(() =>
-  queryCollection('content')
-    .where('path', 'LIKE', '/blog/%')
-    .order('id', 'DESC')
+  queryCollection("content")
+    .where("path", "LIKE", "/blog/%")
+    .order("id", "DESC")
     .all()
     .then((res) => res),
-)
+);
 
-const appConfig = useAppConfig()
+const appConfig = useAppConfig();
 
 usePageSEO({
   title: `${page.value?.title} - ${appConfig.site.name}`,
   ogTitle: page.value?.title,
   description: page.value?.description,
-})
+});
 </script>
 
 <template>
@@ -44,7 +46,9 @@ usePageSEO({
             :description="article.description"
             :date="article.meta?.date"
             :badge="
-              article.meta?.category ? { label: article.meta.category, color: 'primary', variant: 'subtle' } : undefined
+              article.meta?.category
+                ? { label: article.meta.category, color: 'primary', variant: 'subtle' }
+                : undefined
             "
             :variant="index > 0 ? 'outline' : 'subtle'"
             :orientation2="index === 0 ? 'horizontal' : 'vertical'"

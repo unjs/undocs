@@ -1,18 +1,18 @@
-import { defineNuxtModule } from 'nuxt/kit'
-import type { DocsConfig } from '../../schema/config'
+import { defineNuxtModule } from "nuxt/kit";
+import type { DocsConfig } from "../../schema/config";
 
 export default defineNuxtModule({
   setup(_, nuxt) {
     if (nuxt.options._prepare) {
-      return
+      return;
     }
 
-    const docsConfig = (nuxt.options as any).docs as DocsConfig
+    const docsConfig = (nuxt.options as any).docs as DocsConfig;
 
     const uiConfig = {
-      primary: docsConfig.themeColor || 'amber',
-      gray: 'neutral',
-    }
+      primary: docsConfig.themeColor || "amber",
+      gray: "neutral",
+    };
 
     // if (docsConfig.themeColor) {
     //   const { getColors } = await import('theme-colors')
@@ -30,11 +30,11 @@ export default defineNuxtModule({
     //   }
     // }
 
-    nuxt.hook('ready', () => {
+    nuxt.hook("ready", () => {
       nuxt.options.appConfig.ui = {
         ...nuxt.options.appConfig.ui,
         ...uiConfig,
-      }
-    })
+      };
+    });
   },
-})
+});

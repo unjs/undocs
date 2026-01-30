@@ -1,12 +1,12 @@
 <script setup lang="ts">
-const appConfig = useAppConfig()
+const appConfig = useAppConfig();
 
 const props = defineProps({
   githubOnly: {
     type: Boolean,
     default: false,
   },
-})
+});
 
 const socialLinks = computed(() => {
   return (
@@ -18,22 +18,22 @@ const socialLinks = computed(() => {
       .reverse() // x<>github
       // .filter(([key]) => props.socials?.includes(key) || !props.socials)
       .map(([key, value]) => {
-        if (typeof value === 'object') {
-          return value
+        if (typeof value === "object") {
+          return value;
         }
-        if (typeof value === 'string' && value) {
+        if (typeof value === "string" && value) {
           return {
             // Workaround: i-simple-icons-x i-simple-icons-github
             icon: `i-simple-icons-${key}`,
             label: titleCase(key),
             to: /^https?:\/\//.test(value) ? value : `https://${key}.com/${value}`,
-          }
+          };
         }
-        return undefined
+        return undefined;
       })
       .filter(Boolean)
-  )
-})
+  );
+});
 </script>
 <template>
   <UTooltip v-for="link of socialLinks" :key="link.label" :text="link.label">

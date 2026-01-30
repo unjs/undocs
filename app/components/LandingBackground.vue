@@ -1,24 +1,24 @@
 <script setup lang="ts">
-const points = useState(() => new Array(16).fill(0).map(() => [Math.random(), Math.random()]))
+const points = useState(() => Array.from({ length: 16 }).fill(0).map(() => [Math.random(), Math.random()]));
 
-const poly = computed(() => points.value.map(([x, y]) => `${x * 100}% ${y * 100}%`).join(', '))
+const poly = computed(() => points.value.map(([x, y]) => `${x * 100}% ${y * 100}%`).join(", "));
 
 function jumpVal(val: number) {
-  return Math.random() > 0.5 ? val + (Math.random() - 0.5) / 2 : Math.random()
+  return Math.random() > 0.5 ? val + (Math.random() - 0.5) / 2 : Math.random();
 }
 
-let timeout
+let timeout;
 function jumpPoints() {
   for (let i = 0; i < points.value.length; i++) {
-    points.value[i] = [jumpVal(points.value[i][0]), jumpVal(points.value[i][1])]
+    points.value[i] = [jumpVal(points.value[i][0]), jumpVal(points.value[i][1])];
   }
-  timeout = setTimeout(jumpPoints, 2000 + Math.random() * 1000)
+  timeout = setTimeout(jumpPoints, 2000 + Math.random() * 1000);
 }
 
 onMounted(() => {
-  jumpPoints()
-  onUnmounted(() => clearTimeout(timeout))
-})
+  jumpPoints();
+  onUnmounted(() => clearTimeout(timeout));
+});
 </script>
 
 <template>
