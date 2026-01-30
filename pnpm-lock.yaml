@@ -84,9 +84,6 @@ importers:
       changelogen:
         specifier: ^0.6.2
         version: 0.6.2(magicast@0.5.1)
-      jiti:
-        specifier: ^2.6.1
-        version: 2.6.1
       nitropack:
         specifier: ^2.13.1
         version: 2.13.1
