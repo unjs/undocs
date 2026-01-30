@@ -97,12 +97,7 @@ export async function setupDocs(docsDir, opts = {}) {
     srcDir: docsSrcDir,
     extends: [...(opts.extends || []), appDir],
     modulesDir: [resolve(pkgDir, "node_modules"), resolve(docsDir, "node_modules")],
-    modules: [
-      "@nuxt/ui",
-      fixLayers,
-      "@nuxt/content",
-      docsconfig.buildCache ? "nuxt-build-cache" : undefined,
-    ].filter(Boolean),
+    modules: ["@nuxt/ui", fixLayers, "@nuxt/content"].filter(Boolean),
     // @ts-ignore
     docs: docsconfig,
     // @ts-ignore
@@ -143,8 +138,8 @@ export async function setupDocs(docsDir, opts = {}) {
       },
     },
     routeRules: Object.fromEntries(
-        Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }]),
-      ),
+      Object.entries(docsconfig.redirects || {}).map(([from, to]) => [from, { redirect: to }]),
+    ),
     icon: {
       customCollections: [
         {
