@@ -20,7 +20,7 @@
     "docs:build": "pnpm run undocs build docs",
     "docs:dev": "NUXT_DOCS_DEV=1 pnpm run undocs dev docs",
     "lint": "oxlint && oxfmt --check",
-    "lint:fix": "oxlint --fix && oxfmt",
+    "fmt": "oxlint --fix && oxfmt",
     "prepack": "pnpm run build",
     "profile:0x": "pnpx 0x -o cli/main.mjs dev docs",
     "profile:0x-kernel": "pnpm run profile:0x --kernel-tracing",

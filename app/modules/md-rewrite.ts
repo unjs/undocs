@@ -21,9 +21,9 @@ function mdRewrite(): NitroModule {
       }
 
       const publicDir = resolve(
-          nitro.options.output.dir,
-          nitro.options.output.publicDir || "public",
-        );
+        nitro.options.output.dir,
+        nitro.options.output.publicDir || "public",
+      );
 
       nitro.hooks.hook("prerender:done", async () => {
         await genMarkdown(publicDir);
