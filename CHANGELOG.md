@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.4.16
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.15...v0.4.16)
+
+### 🚀 Enhancements
+
+- Jsx & tsx highlighting ([#215](https://github.com/unjs/undocs/pull/215))
+- Improve raw markdown generation ([da11390](https://github.com/unjs/undocs/commit/da11390))
+
+### 🩹 Fixes
+
+- Load `@nuxt/content` after `.docs` layer registered ([#213](https://github.com/unjs/undocs/pull/213))
+- Update vercel route rewrites ([110935f](https://github.com/unjs/undocs/commit/110935f))
+- Respect output.publicDir ([5237623](https://github.com/unjs/undocs/commit/5237623))
+
+### 💅 Refactors
+
+- Improve llm redirects ([fded9e3](https://github.com/unjs/undocs/commit/fded9e3))
+
+### 📦 Build
+
+- Remove extra deps ([47393f4](https://github.com/unjs/undocs/commit/47393f4))
+
+### 🏡 Chore
+
+- Migrate to  oxlint and oxfmt ([54932df](https://github.com/unjs/undocs/commit/54932df))
+- Lint ([aa43c8f](https://github.com/unjs/undocs/commit/aa43c8f))
+- Update lockfile ([d58c7c1](https://github.com/unjs/undocs/commit/d58c7c1))
+- Add docs and template to workspace ([a83c68e](https://github.com/unjs/undocs/commit/a83c68e))
+- Lint ([aa7de37](https://github.com/unjs/undocs/commit/aa7de37))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Rihan Arfan ([@RihanArfan](https://github.com/RihanArfan))
+
 ## v0.4.15
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.14...v0.4.15)
