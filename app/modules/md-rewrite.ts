@@ -20,12 +20,14 @@ function mdRewrite(): NitroModule {
         return;
       }
 
-      // nitro.hooks.hook("prerender:init", (prerenderer) => {
       nitro.hooks.hook("prerender:done", async () => {
-        const publicDir = resolve(nitro.options.output.dir, "public");
+        const publicDir = resolve(
+          nitro.options.output.dir,
+          nitro.options.output.publicDir || "public",
+        );
         await genMarkdown(publicDir);
       });
-      // });
+
       nitro.hooks.hook("compiled", async () => {
         if (nitro.options.preset.includes("vercel")) {
           const vcJSON = resolve(nitro.options.output.dir, "config.json");
