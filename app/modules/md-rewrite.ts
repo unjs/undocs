@@ -8,8 +8,8 @@ import { htmlToMarkdown } from "mdream";
 import { defineNuxtModule } from "nuxt/kit";
 
 export default defineNuxtModule((_options, nuxt) => {
-  nuxt.options.nitro.modules ??= [];
-  nuxt.options.nitro.modules.push(mdRewrite());
+  nuxt.options.nitro!.modules ??= [];
+  nuxt.options.nitro!.modules.push(mdRewrite());
 });
 
 function mdRewrite(): NitroModule {
@@ -20,19 +20,31 @@ function mdRewrite(): NitroModule {
         return;
       }
 
-      nitro.hooks.hook("prerender:done", async () => {
-        const publicDir = resolve(
+      const publicDir = resolve(
           nitro.options.output.dir,
           nitro.options.output.publicDir || "public",
         );
+
+      nitro.hooks.hook("prerender:done", async () => {
         await genMarkdown(publicDir);
       });
 
       nitro.hooks.hook("compiled", async () => {
         if (nitro.options.preset.includes("vercel")) {
+          // https://vercel.com/docs/build-output-api/configuration#routes
           const vcJSON = resolve(nitro.options.output.dir, "config.json");
           const vcConfig = JSON.parse(await readFile(vcJSON, "utf8"));
           vcConfig.routes.unshift(
+            {
+              src: "^/$",
+              dest: "/llms.txt",
+              has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
+            },
+            {
+              src: "^/$",
+              dest: "/llms.txt",
+              has: [{ type: "header", key: "user-agent", value: "curl/.*" }],
+            },
             {
               src: "^/([^.]+)$",
               dest: "/raw/$1.md",
