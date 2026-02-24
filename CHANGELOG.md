@@ -25,7 +25,7 @@
 
 ### 🏡 Chore
 
-- Migrate to  oxlint and oxfmt ([54932df](https://github.com/unjs/undocs/commit/54932df))
+- Migrate to oxlint and oxfmt ([54932df](https://github.com/unjs/undocs/commit/54932df))
 - Lint ([aa43c8f](https://github.com/unjs/undocs/commit/aa43c8f))
 - Update lockfile ([d58c7c1](https://github.com/unjs/undocs/commit/d58c7c1))
 - Add docs and template to workspace ([a83c68e](https://github.com/unjs/undocs/commit/a83c68e))
