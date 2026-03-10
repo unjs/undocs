@@ -60,7 +60,7 @@ export default defineNuxtConfig({
     ],
     prerender: {
       autoSubfolderIndex: false,
-      failOnError: false,
+      failOnError: true,
     },
   },
   devtools: {
