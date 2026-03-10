@@ -68,18 +68,6 @@ export async function setupDocs(docsDir, opts = {}) {
       .replaceAll(`<span class="line"></span>`, "");
   }
 
-  // Module to fix layers (force add .docs as first)
-  const docsSrcDir = resolve(docsDir, ".docs");
-  const fixLayers = (_, nuxt) => {
-    nuxt.options._layers.unshift({
-      cwd: docsSrcDir,
-      config: {
-        rootDir: docsSrcDir,
-        srcDir: docsSrcDir,
-      },
-    });
-  };
-
   // Prepare loadNuxt overrides
   const llmsConfig = defu(docsconfig.llms, {
     domain: docsconfig.url,
@@ -91,13 +79,15 @@ export async function setupDocs(docsDir, opts = {}) {
     },
   });
 
+  const docsSrcDir = resolve(docsDir, ".docs");
+
   const nuxtConfig = {
     compatibilityDate: "latest",
     rootDir: docsSrcDir,
     srcDir: docsSrcDir,
-    extends: [...(opts.extends || []), appDir],
+    extends: [...(opts.extends || []), docsSrcDir, appDir],
     modulesDir: [resolve(pkgDir, "node_modules"), resolve(docsDir, "node_modules")],
-    modules: ["@nuxt/ui", fixLayers, "@nuxt/content"].filter(Boolean),
+    modules: ["@nuxt/ui", "@nuxt/content"].filter(Boolean),
     // @ts-ignore
     docs: docsconfig,
     // @ts-ignore
