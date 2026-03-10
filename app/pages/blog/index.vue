@@ -53,6 +53,10 @@ if (page.value) {
   </UContainer>
 
   <UContainer v-else>
-    <UPageHero title="Blog" description="No blog articles yet. Check back soon!" orientation="horizontal" />
+    <UPageHero
+      title="Blog"
+      description="No blog articles yet. Check back soon!"
+      orientation="horizontal"
+    />
   </UContainer>
 </template>
