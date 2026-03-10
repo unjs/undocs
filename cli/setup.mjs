@@ -80,6 +80,15 @@ export async function setupDocs(docsDir, opts = {}) {
   });
 
   const docsSrcDir = resolve(docsDir, ".docs");
+  const fixLayers = (_, nuxt) => {
+    nuxt.options._layers.unshift({
+      cwd: docsSrcDir,
+      config: {
+        rootDir: docsSrcDir,
+        srcDir: docsSrcDir,
+      },
+    });
+  };
 
   const nuxtConfig = {
     compatibilityDate: "latest",
@@ -87,7 +96,7 @@ export async function setupDocs(docsDir, opts = {}) {
     srcDir: docsSrcDir,
     extends: [...(opts.extends || []), docsSrcDir, appDir],
     modulesDir: [resolve(pkgDir, "node_modules"), resolve(docsDir, "node_modules")],
-    modules: ["@nuxt/ui", "@nuxt/content"].filter(Boolean),
+    modules: [fixLayers, "@nuxt/ui", "@nuxt/content"].filter(Boolean),
     // @ts-ignore
     docs: docsconfig,
     // @ts-ignore
