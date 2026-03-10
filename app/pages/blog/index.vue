@@ -3,15 +3,6 @@ const { data: page } = await useAsyncData("/blog", () =>
   queryCollection("content").path("/blog").first(),
 );
 
-if (!page.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: "Page not found",
-    message: "/blog does not exist",
-    fatal: true,
-  });
-}
-
 const { data: articles } = await useAsyncData(() =>
   queryCollection("content")
     .where("path", "LIKE", "/blog/%")
@@ -22,11 +13,13 @@ const { data: articles } = await useAsyncData(() =>
 
 const appConfig = useAppConfig();
 
-usePageSEO({
-  title: `${page.value?.title} - ${appConfig.site.name}`,
-  ogTitle: page.value?.title,
-  description: page.value?.description,
-});
+if (page.value) {
+  usePageSEO({
+    title: `${page.value.title} - ${appConfig.site.name}`,
+    ogTitle: page.value.title,
+    description: page.value.description,
+  });
+}
 </script>
 
 <template>
@@ -57,5 +50,9 @@ usePageSEO({
         </UBlogPosts>
       </UContainer>
     </UPageBody>
+  </UContainer>
+
+  <UContainer v-else>
+    <UPageHero title="Blog" description="No blog articles yet. Check back soon!" orientation="horizontal" />
   </UContainer>
 </template>
