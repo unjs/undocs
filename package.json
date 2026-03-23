@@ -62,7 +62,7 @@
     "nitropack": "^2.13.1",
     "oxfmt": "^0.37.0",
     "oxlint": "^1.52.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "vue-tsc": "^3.2.5"
   },
   "resolutions": {
