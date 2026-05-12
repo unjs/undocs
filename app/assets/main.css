@@ -24,6 +24,11 @@ pre .shiki span.line {
   display: inline;
 }
 
+html.light .shiki,
+html.light .shiki span {
+  color: var(--shiki-light) !important;
+}
+
 main {
   min-height: calc(100vh - 150px);
 }
