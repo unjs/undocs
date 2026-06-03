@@ -18,7 +18,7 @@
     "build": "true",
     "dev": "pnpm run docs:dev",
     "docs:build": "pnpm run undocs build docs",
-    "docs:dev": "NUXT_DOCS_DEV=1 pnpm run undocs dev docs",
+    "docs:dev": "cross-env NUXT_DOCS_DEV=1 pnpm run undocs dev docs",
     "lint": "oxlint && oxfmt --check",
     "fmt": "oxlint --fix && oxfmt",
     "prepack": "pnpm run build",
@@ -27,7 +27,7 @@
     "profile:cpu": "rm -rf .profile && node --cpu-prof --diagnostic-dir ../.profile bin/cli.mjs dev docs",
     "release": "pnpm run lint && changelogen --release && npm publish && git push --follow-tags",
     "template:dev": "pnpm run undocs dev template",
-    "undocs": "./cli/main.mjs"
+    "undocs": "node ./cli/main.mjs"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.23",
@@ -59,6 +59,7 @@
     "@nuxt/eslint-config": "^1.15.2",
     "@types/node": "^25.6.0",
     "changelogen": "^0.6.2",
+    "cross-env": "^10.1.0",
     "nitropack": "^2.13.3",
     "oxfmt": "^0.44.0",
     "oxlint": "^1.59.0",

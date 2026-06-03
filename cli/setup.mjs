@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { execSync } from "node:child_process";
 import { loadConfig, watchConfig } from "c12";
 import { defu } from "defu";
@@ -37,7 +38,12 @@ export async function setupDocs(docsDir, opts = {}) {
   // Convert markdown to HTML for landing items
   if (docsconfig.landing?.features) {
     const md4w = await import("md4w");
-    await md4w.init();
+    // On Windows, md4w.init() uses url.pathname which produces /C:/path
+    // that gets misinterpreted by fs.readFile as C:\C:\path
+    const md4wWasmPath = fileURLToPath(
+      new URL("./md4w-fast.wasm", import.meta.resolve("md4w")),
+    );
+    await md4w.init(await readFile(md4wWasmPath));
     for (const item of docsconfig.landing.features) {
       if (item.description) {
         item.description = md4w.mdToHtml(item.description);
