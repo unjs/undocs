@@ -1,4 +1,6 @@
 import { defineLazyEventHandler, setHeader, getQuery } from "h3";
+import { render } from "takumi-js";
+import { container, image, text, googleFonts } from "takumi-js/helpers";
 
 const themeColorMap = {
   red: "#ff6467",
@@ -21,84 +23,93 @@ const themeColorMap = {
 };
 
 export default defineLazyEventHandler(async () => {
-  // const { Resvg } = await import('@resvg/resvg-js')
-  const { default: ResvgWasm } = await import("@resvg/resvg-wasm/index_bg.wasm?module" as any);
-  const { Resvg, initWasm } = await import("@resvg/resvg-wasm");
-  await initWasm(ResvgWasm);
-
-  // Read server assets
   const storage = useStorage();
-  // https://github.com/unjs/unstorage/issues/477
-  // const fontNames = await storage.getKeys('assets:og-image:fonts:')
-  const fontNames = ["Black", "Bold", "ExtraLight", "Light", "Medium", "Regular", "Thin"].flatMap(
-    (v) => [`assets:og-image:fonts:PublicSans-${v}.woff2`],
-  );
-  const fontBuffers = await Promise.all(fontNames.map((name) => storage.getItemRaw(name)));
 
-  // Load icon
   const iconSvg: string =
     (await storage.getItem("assets:public:icon.svg")) ||
     (await storage.getItem("assets:og-image:unjs.svg"));
 
-  let svgTemplate = (await storage.getItem("assets:og-image:template.svg")) as string;
-
   return defineEventHandler(async (event) => {
-    if (import.meta.dev) {
-      svgTemplate = (await useStorage().getItem("assets:og-image:template.svg")) as string;
-    }
-
     const { name = "", title = "", description = "" } = getQuery(event) as Record<string, string>;
 
     const docsConfig = useAppConfig().docs;
     const themeColor = docsConfig.themeColor || "yellow";
     const themeColorValue = themeColorMap[themeColor] || themeColor;
 
-    const descriptionLines = _wrapLine(decodeURIComponent(description), 55);
-    const titleDecoded = decodeURIComponent(title);
-    const nameDecoded = decodeURIComponent(name);
-    const svg = svgTemplate
-      .replace("{name}", nameDecoded)
-      .replace("{title}", titleDecoded)
-      .replace("{titleSize}", String(titleDecoded.length > 30 ? 4 : 5))
-      .replace("{description1}", descriptionLines[0] || "")
-      .replace("{description2}", descriptionLines[1] || "")
-      .replace("{description3}", descriptionLines[2] || "")
-      .replace("{description4}", descriptionLines[3] || "")
-      .replace(/yellow/g, themeColorValue)
-      .replace("{icon}", updateSvg(iconSvg, { x: 1000, y: 450, width: 120, height: 120 }));
+    const decoded = {
+      name: decodeURIComponent(name),
+      title: decodeURIComponent(title),
+      description: decodeURIComponent(description),
+    };
 
-    // https://github.com/yisibl/resvg-js
-    const resvg = new Resvg(svg, { font: { fontBuffers } });
-    const pngData = resvg.render();
-    const pngBuffer = pngData.asPng();
+    const fonts = await googleFonts({
+      families: [
+        { family: "Public Sans", weight: [400, 700] },
+        { family: "Noto Sans TC", weight: [400, 700] },
+      ],
+    });
+
+    const png = await render(template({ ...decoded, themeColor: themeColorValue, icon: iconSvg }), {
+      width: 1200,
+      height: 600,
+      format: "png",
+      fonts,
+    });
 
     setHeader(event, "Content-Type", "image/png");
-    return pngBuffer;
+    return Buffer.from(png);
   });
 });
 
-function updateSvg(
-  svg: string,
-  { x, y, width, height }: { x: number; y: number; width: number; height: number },
-) {
-  const match = svg.match(/<svg[^>]*>/);
-  if (!match) return svg;
-  svg = svg.replace(/width="[^"]*"/, `width="${width}"`);
-  svg = svg.replace(/height="[^"]*"/, `height="${height}"`);
-  svg = svg.replace("<svg", `<svg x="${x}" y="${y}"`);
-  return svg;
-}
-
-function _wrapLine(input: string, width: number) {
-  const lines: string[] = [];
-  let line: string = "";
-  for (const word of input.split(" ")) {
-    if (line.length + word.length >= width) {
-      lines.push(line);
-      line = "";
-    }
-    line += word + " ";
-  }
-  lines.push(line);
-  return lines;
+function template({
+  name,
+  title,
+  description,
+  themeColor,
+  icon,
+}: {
+  name: string;
+  title: string;
+  description: string;
+  themeColor: string;
+  icon: string;
+}) {
+  return container({
+    style: {
+      position: "relative",
+      width: 1200,
+      height: 600,
+      display: "flex",
+      flexDirection: "column",
+      padding: "90px 85px",
+      backgroundColor: "#181818",
+      color: "white",
+      fontFamily: "Public Sans",
+    },
+    children: [
+      container({
+        style: {
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `radial-gradient(600px 600px at 600px -180px, ${themeColor} 0%, transparent 70%)`,
+        },
+        children: [],
+      }),
+      text(name, { fontSize: 72, fontWeight: 700, color: themeColor }),
+      text(title, { fontSize: 80, fontWeight: 700, marginTop: 16 }),
+      text(description, {
+        fontSize: 36,
+        fontWeight: 400,
+        lineHeight: 1.4,
+        marginTop: 40,
+        maxWidth: 880,
+      }),
+      image({
+        src: icon,
+        width: 120,
+        height: 120,
+        style: { position: "absolute", right: 85, bottom: 60 },
+      }),
+    ],
+  });
 }
