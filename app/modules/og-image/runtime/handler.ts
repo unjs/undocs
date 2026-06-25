@@ -44,8 +44,8 @@ export default defineLazyEventHandler(async () => {
 
     const fonts = await googleFonts({
       families: [
-        { family: "Public Sans", weight: [400, 700] },
-        { family: "Noto Sans TC", weight: [400, 700] },
+        { name: "Public Sans", weight: [400, 700] },
+        { name: "Noto Sans TC", weight: [400, 700] },
       ],
     });
 
