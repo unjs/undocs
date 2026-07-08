@@ -58,7 +58,6 @@ export async function setupDocs(docsDir, opts = {}) {
         lang: docsconfig.landing.heroCode.lang || "sh",
         defaultColor: "dark",
         themes: {
-          default: "github-dark",
           dark: "github-dark",
           light: "github-light",
         },
