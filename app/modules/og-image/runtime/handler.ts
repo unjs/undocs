@@ -97,7 +97,13 @@ function template({
         children: [],
       }),
       text(name, { fontSize: 72, fontWeight: 700, color: themeColor }),
-      text(title, { fontSize: 80, fontWeight: 700, marginTop: 16 }),
+      // Takumi has no `text-fit` support, so scale the title down for long titles to avoid overflow.
+      text(title, {
+        fontSize: title.length > 45 ? 52 : title.length > 30 ? 64 : 80,
+        fontWeight: 700,
+        marginTop: 16,
+        maxWidth: 1030,
+      }),
       text(description, {
         fontSize: 36,
         fontWeight: 400,
