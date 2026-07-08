@@ -29,6 +29,14 @@ export default defineLazyEventHandler(async () => {
     (await storage.getItem("assets:public:icon.svg")) ||
     (await storage.getItem("assets:og-image:unjs.svg"));
 
+  // Load fonts once at startup and reuse them across requests.
+  const fonts = await googleFonts({
+    families: [
+      { name: "Public Sans", weight: [400, 700] },
+      { name: "Noto Sans TC", weight: [400, 700] },
+    ],
+  });
+
   return defineEventHandler(async (event) => {
     const { name = "", title = "", description = "" } = getQuery(event) as Record<string, string>;
 
@@ -41,13 +49,6 @@ export default defineLazyEventHandler(async () => {
       title: decodeURIComponent(title),
       description: decodeURIComponent(description),
     };
-
-    const fonts = await googleFonts({
-      families: [
-        { name: "Public Sans", weight: [400, 700] },
-        { name: "Noto Sans TC", weight: [400, 700] },
-      ],
-    });
 
     const png = await render(template({ ...decoded, themeColor: themeColorValue, icon: iconSvg }), {
       width: 1200,
