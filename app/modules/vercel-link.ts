@@ -6,13 +6,12 @@ import { existsSync } from "node:fs";
 import { defineNuxtModule } from "nuxt/kit";
 
 export default defineNuxtModule((_options, nuxt) => {
-  const rootDir = nuxt.options.rootDir;
-  const linkDirs = [rootDir, nuxt.options.workspaceDir];
+  const linkDirs = [nuxt.options.rootDir, nuxt.options.workspaceDir];
   nuxt.options.nitro!.modules ??= [];
-  nuxt.options.nitro!.modules.push(vercelLink(rootDir, linkDirs));
+  nuxt.options.nitro!.modules.push(vercelLink(linkDirs));
 });
 
-function vercelLink(rootDir: string, linkDirs: string[]): NitroModule {
+function vercelLink(linkDirs: string[]): NitroModule {
   return {
     name: "vercel-link",
     setup(nitro) {
@@ -22,16 +21,18 @@ function vercelLink(rootDir: string, linkDirs: string[]): NitroModule {
 
       nitro.hooks.hook("compiled", async () => {
         // For the vercel preset `output.dir` is the nested `.vercel/output`,
-        // so the `.vercel` directory is its parent.
+        // so the `.vercel` directory is its parent and the static output lives
+        // in `.vercel/output/static`.
         const vercelDir = resolve(nitro.options.output.dir, "..");
+        const staticDir = resolve(nitro.options.output.dir, "static");
 
-        // Expose the nested `.vercel` directory at the root and workspace.
+        // Expose the nested `.vercel` and static output (as `dist`) at both the
+        // root and the workspace so Vercel can find them regardless of the
+        // configured project root directory.
         for (const dir of new Set(linkDirs)) {
           await link(vercelDir, resolve(dir, ".vercel"));
+          await link(staticDir, resolve(dir, "dist"));
         }
-
-        // Expose the static output as `dist` at the root.
-        await link(resolve(nitro.options.output.dir, "static"), resolve(rootDir, "dist"));
       });
     },
   };
