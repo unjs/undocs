@@ -8,9 +8,11 @@ export function usePageSEO(page: PageMeta) {
   const route = useRoute();
   const appConfig = useAppConfig();
 
+  const description = page.description || appConfig.site.description || "";
+
   useSeoMeta({
     title: page.title,
-    description: page.description,
+    description,
   });
 
   if (!(import.meta.server || import.meta.dev || import.meta.prerender)) {
@@ -23,24 +25,25 @@ export function usePageSEO(page: PageMeta) {
 
   ogURL.searchParams.set("name", appConfig.site.name);
   ogURL.searchParams.set("title", page.ogTitle || page.title || appConfig.site.name);
-  ogURL.searchParams.set("description", page.description || appConfig.site.description || "");
+  ogURL.searchParams.set("description", description);
 
   useSeoMeta({
     ogTitle: page.title,
-    ogDescription: page.description,
+    ogDescription: description,
     ogImage: {
       url: ogURL.href,
       width: 1200,
-      height: 600,
+      height: 630,
       type: "image/png",
-      alt: page.description || appConfig.site.description,
+      alt: description,
     },
     twitterCard: "summary_large_image",
+    twitterDescription: description,
     twitterImage: {
       url: ogURL.href,
       width: 1200,
-      height: 600,
-      alt: page.description || appConfig.site.description,
+      height: 630,
+      alt: description,
     },
   });
 

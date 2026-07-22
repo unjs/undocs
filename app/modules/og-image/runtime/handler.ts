@@ -62,7 +62,7 @@ export default defineLazyEventHandler(async () => {
 
     const png = await render(template({ ...decoded, themeColor: themeColorValue, icon: iconSvg }), {
       width: 1200,
-      height: 600,
+      height: 630,
       format: "png",
       fonts,
     });
@@ -100,7 +100,7 @@ function template({
     style: {
       position: "relative",
       width: 1200,
-      height: 600,
+      height: 630,
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
