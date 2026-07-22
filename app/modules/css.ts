@@ -17,6 +17,7 @@ export default defineNuxtModule({
       conditions: ["style"],
     });
     const layerDir = resolver.resolve("../");
+    const mainCssPath = resolver.resolve("../assets/main.css");
 
     const cssTemplate = addTemplate({
       filename: "undocs.css",
@@ -26,7 +27,9 @@ export default defineNuxtModule({
 
 @source "${contentDir.replace(/\\/g, "/")}/**/*.md";
 @source "${layerDir.replace(/\\/g, "/")}/**/*";
-@source "../../app.config.ts";`;
+@source "../../app.config.ts";
+
+@import ${JSON.stringify(mainCssPath)};`;
       },
     });
 

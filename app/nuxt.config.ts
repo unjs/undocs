@@ -1,8 +1,5 @@
-import { createResolver } from "nuxt/kit";
 import { defineNuxtConfig } from "nuxt/config";
 import { eventHandler } from "h3";
-
-const { resolve } = createResolver(import.meta.url);
 
 // Flag enabled when developing docs theme
 const dev = !!process.env.NUXT_DOCS_DEV;
@@ -17,7 +14,6 @@ export default defineNuxtConfig({
   },
   ssr,
   modules: ["@nuxt/ui", isProd && "@nuxtjs/plausible", "nuxt-llms"],
-  css: [resolve("./assets/main.css")],
   ui: {
     theme: {
       colors: ["primary", "secondary", "info", "success", "warning", "error", "important"],
