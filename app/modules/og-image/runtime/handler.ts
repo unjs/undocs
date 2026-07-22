@@ -62,6 +62,17 @@ export default defineLazyEventHandler(async () => {
   });
 });
 
+// Append an alpha channel to a `#rrggbb` color; pass other color strings through untouched.
+function withAlpha(color: string, alpha: number) {
+  if (!/^#[0-9a-f]{6}$/i.test(color)) {
+    return color;
+  }
+  const a = Math.round(Math.max(0, Math.min(1, alpha)) * 255)
+    .toString(16)
+    .padStart(2, "0");
+  return `${color}${a}`;
+}
+
 function template({
   name,
   title,
@@ -82,42 +93,122 @@ function template({
       height: 600,
       display: "flex",
       flexDirection: "column",
-      padding: "90px 85px",
-      backgroundColor: "#181818",
+      justifyContent: "center",
+      padding: "80px 90px",
+      backgroundColor: "#0a0a0a",
       color: "white",
       fontFamily: "Public Sans",
+      // Crisp inner frame so the card reads as a deliberate surface, not a raw crop.
+      boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
     },
     children: [
+      // Primary theme glow, anchored off the top-right corner.
       container({
         style: {
           position: "absolute",
           inset: 0,
-          backgroundImage: `radial-gradient(600px 600px at 600px -180px, ${themeColor} 0%, transparent 70%)`,
+          opacity: 0.5,
+          backgroundImage: `radial-gradient(900px 620px at 960px -160px, ${themeColor} 0%, transparent 62%)`,
         },
         children: [],
       }),
-      text(name, { fontSize: 72, fontWeight: 700, color: themeColor }),
-      // Shrink the title to fit on a single line so long titles never overflow.
+      // Faint tech grid, masked to fade out toward the bottom-left so it stays subtle.
+      container({
+        style: {
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "repeating-linear-gradient(0deg, rgba(255,255,255,0.028) 0 1px, transparent 1px 52px), repeating-linear-gradient(90deg, rgba(255,255,255,0.028) 0 1px, transparent 1px 52px)",
+          maskImage: "radial-gradient(120% 120% at 82% 0%, #000 25%, transparent 72%)",
+          WebkitMaskImage: "radial-gradient(120% 120% at 82% 0%, #000 25%, transparent 72%)",
+        },
+        children: [],
+      }),
+      // Branded top accent hairline.
+      container({
+        style: {
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 5,
+          backgroundImage: `linear-gradient(to right, ${themeColor} 0%, ${withAlpha(themeColor, 0.15)} 45%, transparent 75%)`,
+        },
+        children: [],
+      }),
+      // Kicker: theme dot + package/section name.
+      ...(name
+        ? [
+            container({
+              style: {
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 18,
+                marginBottom: 26,
+              },
+              children: [
+                container({
+                  style: {
+                    width: 14,
+                    height: 14,
+                    borderRadius: 4,
+                    backgroundColor: themeColor,
+                    boxShadow: `0 0 22px ${themeColor}`,
+                  },
+                  children: [],
+                }),
+                text(name, {
+                  fontSize: 34,
+                  fontWeight: 700,
+                  color: themeColor,
+                  letterSpacing: 0.5,
+                }),
+              ],
+            }),
+          ]
+        : []),
+      // Title — shrink to a single line so long titles never overflow.
+      // NOTE: no `letterSpacing` here; it defeats takumi's `textFit` measurement
+      // and lets long titles overflow the frame.
       text(title, {
-        fontSize: 80,
+        fontSize: 84,
         fontWeight: 700,
-        marginTop: 16,
-        width: 1030,
+        lineHeight: 1.05,
+        width: 1020,
         whiteSpace: "nowrap",
         textFit: "shrink",
       }),
-      text(description, {
-        fontSize: 36,
-        fontWeight: 400,
-        lineHeight: 1.4,
-        marginTop: 40,
-        maxWidth: 880,
+      ...(description
+        ? [
+            text(description, {
+              fontSize: 34,
+              fontWeight: 400,
+              lineHeight: 1.42,
+              marginTop: 28,
+              maxWidth: 820,
+              color: "#a1a1aa",
+            }),
+          ]
+        : []),
+      // Soft glow behind the brand mark.
+      container({
+        style: {
+          position: "absolute",
+          right: 60,
+          bottom: 44,
+          width: 160,
+          height: 160,
+          opacity: 0.55,
+          backgroundImage: `radial-gradient(closest-side, ${themeColor} 0%, transparent 70%)`,
+        },
+        children: [],
       }),
       image({
         src: icon,
         width: 120,
         height: 120,
-        style: { position: "absolute", right: 85, bottom: 60 },
+        style: { position: "absolute", right: 80, bottom: 64 },
       }),
     ],
   });
