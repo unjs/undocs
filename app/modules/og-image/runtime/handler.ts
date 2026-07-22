@@ -1,6 +1,6 @@
 import { defineLazyEventHandler, setHeader, getQuery } from "h3";
 import { render } from "takumi-js";
-import { container, image, text, googleFonts } from "takumi-js/helpers";
+import { container, image, text } from "takumi-js/helpers";
 
 const themeColorMap = {
   red: "#ff6467",
@@ -29,13 +29,23 @@ export default defineLazyEventHandler(async () => {
     (await storage.getItem("assets:public:icon.svg")) ||
     (await storage.getItem("assets:og-image:unjs.svg"));
 
-  // Load fonts once at startup and reuse them across requests.
-  const fonts = await googleFonts({
-    families: [
-      { name: "Public Sans", weight: [400, 700] },
-      { name: "Noto Sans TC", weight: [400, 700] },
-    ],
-  });
+  // Load fonts once at startup from bundled assets and reuse them across requests.
+  // Kept local (no Google Fonts fetch) so rendering never depends on the network.
+  const loadFont = async (file: string, weight: number) => {
+    const data = (await storage.getItemRaw(`assets:og-image:fonts:${file}`)) as
+      | Uint8Array
+      | Buffer
+      | null;
+    if (!data) {
+      throw new Error(`[og-image] missing bundled font asset: fonts/${file}`);
+    }
+    return { name: "Public Sans", weight, data };
+  };
+
+  const fonts = await Promise.all([
+    loadFont("public-sans-400.ttf", 400),
+    loadFont("public-sans-700.ttf", 700),
+  ]);
 
   return defineEventHandler(async (event) => {
     const { name = "", title = "", description = "" } = getQuery(event) as Record<string, string>;
