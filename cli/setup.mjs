@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
-import { resolve } from "node:path";
-import { existsSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { existsSync, mkdirSync, symlinkSync, rmSync, lstatSync } from "node:fs";
+import { createRequire } from "node:module";
 import { execSync } from "node:child_process";
 import { loadConfig, watchConfig } from "c12";
 import { defu } from "defu";
@@ -79,6 +80,14 @@ export async function setupDocs(docsDir, opts = {}) {
   });
 
   const docsSrcDir = resolve(docsDir, ".docs");
+
+  // Ensure Nuxt (an undocs dependency) is resolvable from rootDir (`.docs`).
+  // `@nuxt/kit`'s `buildNuxt` imports `nuxt` with `{ url: rootDir }`, which walks
+  // up `node_modules` from `.docs` and ignores `modulesDir`. Under a strict
+  // (non-hoisted) pnpm layout Nuxt is only inside undocs' own store dir, so we
+  // symlink it into `.docs/node_modules` to make the resolution succeed.
+  linkNuxt(docsSrcDir);
+
   const fixLayers = (_, nuxt) => {
     nuxt.options._layers.unshift({
       cwd: docsSrcDir,
@@ -162,6 +171,29 @@ export async function setupDocs(docsDir, opts = {}) {
     nuxtConfig,
     unwatch,
   };
+}
+
+function linkNuxt(docsSrcDir) {
+  const require = createRequire(import.meta.url);
+  const nmDir = resolve(docsSrcDir, "node_modules");
+  for (const name of ["nuxt", "nuxt-nightly"]) {
+    let target;
+    try {
+      target = dirname(require.resolve(`${name}/package.json`));
+    } catch {
+      continue;
+    }
+    const link = resolve(nmDir, name);
+    try {
+      if (lstatSync(link, { throwIfNoEntry: false })) {
+        rmSync(link, { recursive: true, force: true });
+      }
+      mkdirSync(dirname(link), { recursive: true });
+      symlinkSync(target, link, "junction");
+    } catch {
+      // Best-effort: fall back to node's default resolution if linking fails.
+    }
+  }
 }
 
 function inferSiteURL() {
