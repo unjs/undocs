@@ -33,13 +33,17 @@
     "@headlessui/vue": "^1.7.23",
     "@nuxt/content": "^3.15.0",
     "@nuxt/fonts": "^0.14.0",
+    "@nuxt/kit": "^4.5.0",
     "@nuxt/ui": "^4.9.0",
+    "@nuxtjs/mdc": "^0.22.2",
     "@nuxtjs/plausible": "^3.0.2",
     "automd": "^0.4.3",
     "c12": "^4.0.0-beta.5",
     "citty": "^0.2.2",
     "consola": "^3.4.2",
     "defu": "^6.1.7",
+    "exsolve": "^1.1.0",
+    "h3": "^1.15.11",
     "md4w": "^0.2.7",
     "mdream": "^1.4.1",
     "mermaid": "^11.16.0",
@@ -52,7 +56,8 @@
     "shiki": "^4.3.1",
     "tailwindcss": "^4.3.2",
     "takumi-js": "^2.0.1",
-    "unctx": "^2.5.0",
+    "ufo": "^1.6.4",
+    "unctx": "^3.0.0",
     "vue": "^3.5.39"
   },
   "devDependencies": {
@@ -60,7 +65,7 @@
     "@types/node": "^26.1.1",
     "changelogen": "^0.6.2",
     "nitropack": "^2.13.4",
-    "oxfmt": "^0.58.0",
+    "oxfmt": ">=0.59.0",
     "oxlint": "^1.73.0",
     "typescript": "^7.0.2",
     "vue-tsc": "^3.3.7"
@@ -68,5 +73,5 @@
   "resolutions": {
     "undocs": "link:."
   },
-  "packageManager": "pnpm@11.10.0"
+  "packageManager": "pnpm@11.15.1"
 }
