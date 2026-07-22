@@ -6,7 +6,10 @@ import { existsSync } from "node:fs";
 import { defineNuxtModule } from "nuxt/kit";
 
 export default defineNuxtModule((_options, nuxt) => {
-  const linkDirs = [nuxt.options.rootDir, nuxt.options.workspaceDir];
+  const rootDir = nuxt.options.rootDir;
+  // Candidate roots covering any Vercel "Root Directory" project setting:
+  // the nuxt rootDir (`<docs>/.docs`), the docs dir (`<docs>`) and the workspace.
+  const linkDirs = [rootDir, resolve(rootDir, ".."), nuxt.options.workspaceDir];
   nuxt.options.nitro!.modules ??= [];
   nuxt.options.nitro!.modules.push(vercelLink(linkDirs));
 });
