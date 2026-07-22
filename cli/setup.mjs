@@ -93,7 +93,7 @@ export async function setupDocs(docsDir, opts = {}) {
     compatibilityDate: "latest",
     rootDir: docsSrcDir,
     srcDir: docsSrcDir,
-    extends: [...(opts.extends || []), docsSrcDir, appDir],
+    extends: [...(opts.extends || []), appDir],
     modulesDir: [resolve(pkgDir, "node_modules"), resolve(docsDir, "node_modules")],
     modules: [fixLayers, "@nuxt/ui", "@nuxt/content"].filter(Boolean),
     // @ts-ignore
