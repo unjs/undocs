@@ -1,5 +1,43 @@
 # Changelog
 
+## v0.4.17
+
+[compare changes](https://github.com/unjs/undocs/compare/v0.4.16...v0.4.17)
+
+### 🚀 Enhancements
+
+- Use takumi for OG generation ([#237](https://github.com/unjs/undocs/pull/237))
+- **og-image:** Redesign social card and use local fonts ([86546af](https://github.com/unjs/undocs/commit/86546af))
+- **vercel-link:** Link static output to dist and ignore .vercel ([676f6b3](https://github.com/unjs/undocs/commit/676f6b3))
+
+### 🩹 Fixes
+
+- Add docsSrcDir as layer to extends ([0302ce7](https://github.com/unjs/undocs/commit/0302ce7))
+- Still need to push layer ([c3c295a](https://github.com/unjs/undocs/commit/c3c295a))
+- Shiki light mode colors ([#229](https://github.com/unjs/undocs/pull/229))
+- Remove redundant `.docs` layer from extends ([7ded92d](https://github.com/unjs/undocs/commit/7ded92d))
+- Link .vercel/output to  root/workspace ([9388360](https://github.com/unjs/undocs/commit/9388360))
+- Symlink nuxt as implicit dep ([7d8ed05](https://github.com/unjs/undocs/commit/7d8ed05))
+- **css:** Fold main.css into tailwind entry so @theme compiles ([244ff2b](https://github.com/unjs/undocs/commit/244ff2b))
+- **vercel-link:** Also link dist at workspace root ([b4fbad8](https://github.com/unjs/undocs/commit/b4fbad8))
+- **vercel-link:** Also link at the docs dir (parent of rootDir) ([d435a9e](https://github.com/unjs/undocs/commit/d435a9e))
+- **seo:** Add meta/twitter description fallbacks and use 1200x630 og image ([e0c6521](https://github.com/unjs/undocs/commit/e0c6521))
+
+### 🏡 Chore
+
+- Update deps ([fd4703e](https://github.com/unjs/undocs/commit/fd4703e))
+- Update deps ([a4a49c4](https://github.com/unjs/undocs/commit/a4a49c4))
+- Update deps ([af3ff14](https://github.com/unjs/undocs/commit/af3ff14))
+- Update pnpm to v11 ([7c85171](https://github.com/unjs/undocs/commit/7c85171))
+- Apply automated updates ([bdaadc9](https://github.com/unjs/undocs/commit/bdaadc9))
+- Update deps and add implicit ones ([52867d1](https://github.com/unjs/undocs/commit/52867d1))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Kane Wang ([@yeecord](https://github.com/yeecord))
+- Anthony Fu <github@antfu.me>
+
 ## v0.4.16
 
 [compare changes](https://github.com/unjs/undocs/compare/v0.4.15...v0.4.16)
