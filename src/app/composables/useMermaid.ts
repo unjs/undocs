@@ -12,8 +12,7 @@ const mermaidCache: Record<string, Record<string, string>> = Object.create(null)
  * before we ever get here on the server).
  */
 let mermaidPromise: Promise<typeof import("mermaid-compact").default> | undefined;
-const loadMermaid = () =>
-  (mermaidPromise ??= import("mermaid-compact").then((m) => m.default));
+const loadMermaid = () => (mermaidPromise ??= import("mermaid-compact").then((m) => m.default));
 
 /**
  * Resolve a CSS expression (e.g. `var(--primary)`) to a concrete color mermaid's
