@@ -2,7 +2,6 @@
 import { readFile, glob } from "node:fs/promises";
 import { join, dirname, basename } from "node:path";
 import { pathToFileURL } from "node:url";
-import { writeFile } from "node:fs/promises";
 import * as md4x from "md4x/wasm";
 import { orderKey, slugify, stripPrefix, textContent, titleCase, toRoutePath } from "./utils";
 import { transformBody } from "./transforms";
@@ -357,9 +356,6 @@ async function createAutomd(dir: string, automdConfig: unknown) {
       try {
         const res = await automd.transform(content, config, pathToFileURL(path).href);
         if (!res.hasIssues) {
-          if (res.hasChanged) {
-            await writeFile(path, res.contents, "utf-8");
-          }
           return res.contents;
         }
       } catch {
