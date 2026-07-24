@@ -1,0 +1,273 @@
+@theme static {
+  --font-sans:
+    "Geist Variable", "Geist", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+:root {
+  --ui-container: 90rem;
+  /* Height reserved at the top of the page for the fixed status banner.
+     Published by `StatusBanner.vue` while it is shown (measured, so it tracks
+     wrapping), `0px` otherwise — so the offsets below are no-ops when hidden. */
+  --status-banner-height: 0px;
+}
+
+/* Base canvas — paint the page background/foreground from the theme tokens so
+   the `.dark` class actually themes the page (nothing else sets a body bg). */
+html {
+  background-color: var(--background);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Disable double-tap-to-zoom on touch devices (keeps pinch-to-zoom). */
+  touch-action: manipulation;
+  /* Reserve room for the fixed status banner (0 when none is shown). */
+  padding-top: var(--status-banner-height);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/*
+ * Prose typography. Tailwind's preflight strips heading/list/quote defaults, so
+ * markdown-rendered content (wrapped in `.md`, see `PageBody.vue`) needs its own
+ * type scale. These target native tags emitted by `MarkdownRenderer` — headings,
+ * paragraphs, lists, tables, inline code, etc. — which render as bare elements.
+ */
+.md {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--ui-text);
+}
+
+.md h1,
+.md h2,
+.md h3,
+.md h4,
+.md h5,
+.md h6 {
+  color: var(--ui-text-highlighted);
+  font-weight: 600;
+  line-height: 1.25;
+  scroll-margin-top: 6rem;
+}
+
+.md h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 1.5rem;
+}
+
+.md h2 {
+  font-size: 1.5rem;
+  letter-spacing: -0.025em;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--ui-border);
+}
+
+.md h3 {
+  font-size: 1.25rem;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.md h4 {
+  font-size: 1.125rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.md h5,
+.md h6 {
+  font-size: 1rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Clickable `#` deep-link anchor injected into each heading by
+ * `MarkdownRenderer`. Positioned in the left gutter; revealed on hover of the
+ * heading (`.group`) or when focused for keyboard users. */
+.md-heading {
+  position: relative;
+}
+
+.md .md-anchor {
+  position: absolute;
+  right: 100%;
+  padding-right: 0.5rem;
+  color: var(--ui-text-muted);
+  font-weight: 400;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.md .md-heading:hover .md-anchor,
+.md .md-anchor:focus {
+  opacity: 1;
+}
+
+.md .md-anchor:hover {
+  color: var(--ui-primary);
+}
+
+/* First heading in a block shouldn't push a top border/margin off the top.
+ * A leading `## ` (e.g. right after the page title/description are lifted out)
+ * would otherwise draw its own top border directly below the PageHeader's
+ * bottom border — two stacked lines. Scope to headings so a leading bordered
+ * box (e.g. a callout) keeps its own top margin/padding/border. */
+.md > :first-child:where(h1, h2, h3, h4, h5, h6),
+.md-body > :first-child:where(h1, h2, h3, h4, h5, h6) {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.md p {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.md ul,
+.md ol {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.md ul {
+  list-style-type: disc;
+}
+
+.md ol {
+  list-style-type: decimal;
+}
+
+.md li {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+}
+
+.md li > ul,
+.md li > ol {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+}
+
+.md a {
+  color: var(--ui-primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.md a:hover {
+  text-decoration: none;
+}
+
+/* Links inside mermaid diagrams (clickable nodes/edges) shouldn't inherit the
+   prose underline — the SVG carries its own styling. */
+.md .mermaid a {
+  text-decoration: none;
+}
+
+.md strong {
+  color: var(--ui-text-highlighted);
+  font-weight: 600;
+}
+
+.md blockquote {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--ui-border);
+  color: var(--ui-text-muted);
+  font-style: italic;
+}
+
+.md hr {
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+  border: 0;
+  border-top: 1px solid var(--ui-border);
+}
+
+/* Inline code (`:not(.shiki *)` keeps highlighted code blocks untouched). */
+.md :not(pre) > code {
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--ui-bg-muted);
+  border: 1px solid var(--ui-border);
+  font-family: var(--ui-font-mono);
+  font-size: 0.875em;
+}
+
+.md table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.md th,
+.md td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ui-border);
+  text-align: left;
+}
+
+.md th {
+  color: var(--ui-text-highlighted);
+  font-weight: 600;
+  background-color: var(--ui-bg-muted);
+}
+
+.md img {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+}
+
+pre .shiki span.line {
+  display: inline;
+}
+
+/*
+ * Shiki dual-theme switching (global). Every highlighted block (`highlightCode`,
+ * `defaultColor: false`) emits `--shiki-light`/`--shiki-dark` on tokens. Keying
+ * purely on `html.light`/`html.dark` + `.shiki` — instead of a component-scoped
+ * `:deep()` selector — switches the token colors consistently for every `.shiki`
+ * regardless of wrapper (ProsePre body, code group, package-manager tabs, hero).
+ *
+ * The `.shiki` background is intentionally left transparent so code blocks show
+ * their container's surface (`--ui-bg-muted`) instead of shiki's own theme bg.
+ */
+html.light .shiki,
+html.light .shiki span {
+  color: var(--shiki-light);
+}
+html.dark .shiki,
+html.dark .shiki span {
+  color: var(--shiki-dark);
+}
+
+main {
+  min-height: calc(100vh - 150px);
+}

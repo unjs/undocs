@@ -1,17 +1,23 @@
 packages:
   - docs
   - template
+
 allowBuilds:
   "@parcel/watcher": false
   esbuild: false
   unrs-resolver: false
   vue-demi: false
+
 ignoredBuiltDependencies:
   - "@parcel/watcher"
   - esbuild
   - sharp
   - unrs-resolver
   - vue-demi
+
+overrides:
+  undocs: link:.
+
 minimumReleaseAgeExclude:
   - "takumi-js@2.0.1"
   - "@takumi-rs/core@2.0.1"

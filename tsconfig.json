@@ -1,11 +1,11 @@
 {
+  "extends": "nitro/tsconfig",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
-    "moduleResolution": "Node",
-    "strict": true,
-    "types": ["node"]
+    "paths": {
+      "@app": ["./src/app"],
+      "@app/*": ["./src/app/*"],
+      "@server": ["./src/server"],
+      "@server/*": ["./src/server/*"]
+    }
   }
 }

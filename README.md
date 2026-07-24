@@ -1,48 +1,86 @@
-# UnJS Docs
+# UnDocs
 
-Minimal Documentation Theme and CLI for shared usage across UnJS projects.
+Minimal documentation theme and CLI for shared usage across UnJS/H3/Nitro projects.
 
-<!-- automd:file src="./docs/.partials/warn.md" -->
+Write your docs as Markdown, drop in a single config file, and get a fast,
+elegant, zero-config documentation site — dev server, production build, search,
+and `llms.txt` included.
 
-> [!IMPORTANT]
-> Undocs is currently intended for UnJS docs only and is not fully customizable yet. <br>
-> Contributions are more than welcome but please consider that this project is not ready yet to be used. <br>
-> We don't guarantee stability yet and it is expected that it doesn't work time to time.
+## Quick Start
 
-<!-- /automd -->
+A docs project is three files. Create them in a `docs/` folder:
 
-## Contribution
+**1. `docs/package.json`** — pulls in the CLI and wires up two scripts:
 
-<details>
-  <summary>Local development</summary>
+```json
+{
+  "name": "docs",
+  "private": true,
+  "scripts": {
+    "dev": "undocs dev",
+    "build": "undocs build"
+  },
+  "devDependencies": {
+    "undocs": "latest"
+  }
+}
+```
 
-- Clone this repository
-- Install the latest LTS version of [Node.js](https://nodejs.org/en/)
-- Enable [Corepack](https://github.com/nodejs/corepack) using `corepack enable`
-- Install dependencies using `pnpm install`
-- Run tests using `pnpm dev`
+**2. `docs/.config/docs.yaml`** — your site config:
 
-</details>
+```yaml
+# yaml-language-server: $schema=https://unpkg.com/undocs/schema/config.json
+name: "packageName"
+shortDescription: "One-line summary."
+description: "A longer description of your project."
+github: "unjs/packageName"
+```
 
-<!-- /automd -->
+**3. `docs/1.guide/1.index.md`** — your first page:
+
+```md
+# Getting Started
+
+Welcome to the docs!
+```
+
+Then install and start the dev server on [localhost:3000](http://localhost:3000):
+
+```sh
+cd docs
+npm install
+npm run dev
+```
+
+Build a static production bundle with `npm run build`.
+
+### Adding pages
+
+Every Markdown file becomes a page. Numeric prefixes (`1.`, `2.`) control the
+order in the sidebar and are stripped from the URL, so `1.guide/1.index.md`
+is served at `/guide`. Add folders and files to grow the navigation — no routing
+setup required:
+
+```
+docs/
+├─ .config/
+│  └─ docs.yaml
+├─ 1.guide/
+│  ├─ 1.index.md       → /guide
+│  └─ 2.usage.md       → /guide/usage
+└─ 2.config/
+   └─ 1.index.md       → /config
+```
+
+See the [configuration reference](https://undocs.pages.dev/config) for the full
+list of options (landing page, banner, socials, sponsors, `llms.txt`, and more).
+
+## Stack
+
+Undocs is currently powered by [Nitro](https://nitro.build), [Vite](https://vite.dev), [md4x](https://github.com/unjs/md4x), [shiki](https://github.com/shikijs/shiki), [Unhead](http://unhead.unjs.io/) and [Reka UI](https://reka-ui.com/).
+
+> UnDocs was originally based on [Nuxt](https://nuxt.com/), [Nuxt UI](https://ui.nuxt.com/), [Nuxt Content](https://content.nuxt.com/) ([Comark](https://comark.dev/)), [Vue Router](https://router.vuejs.org/), and other Nuxt ecosystem modules such as [nuxt-llms](https://github.com/nuxt-content/nuxt-llms) and [nuxt-icon](https://github.com/nuxt/icon) which inspired the new generation of undocs.
 
 ## License
 
-<!-- automd:contributors license=MIT author="pi0,atinux" -->
-
 Published under the [MIT](https://github.com/unjs/undocs/blob/main/LICENSE) license.
-Made by [@pi0](https://github.com/pi0), [@atinux](https://github.com/atinux) and [community](https://github.com/unjs/undocs/graphs/contributors) 💛
-<br><br>
-<a href="https://github.com/unjs/undocs/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=unjs/undocs" />
-</a>
-
-<!-- /automd -->
-
-<!-- automd:with-automd -->
-
----
-
-_🤖 auto updated with [automd](https://automd.unjs.io)_
-
-<!-- /automd -->

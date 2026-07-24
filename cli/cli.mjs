@@ -1,97 +1,108 @@
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { defineCommand, runMain } from "citty";
 import consola from "consola";
-// import { relative } from "pathe"
-import { getContext } from "unctx";
-import { setupDocs } from "./setup.mjs";
 
-const HMRKeys = new Set(["description", "shortDescription", "landing"]);
+// Root of the undocs package (contains vite.config.ts / nitro.config.ts / src).
+// When undocs is installed as a dependency, this points at the package dir
+// inside node_modules — NOT the user's cwd — so Vite always loads OUR config.
+const pkgRoot = fileURLToPath(new URL("..", import.meta.url));
+const viteConfig = resolve(pkgRoot, "vite.config.ts");
+
+/**
+ * Resolve the docs dir to an absolute path and expose it to the Vite/Nitro
+ * stack via `UNDOCS_DIR`. Both `nitro.config.ts` (config-time c12 load +
+ * `runtimeConfig.undocs.dir`) and `src/server/routes/config.get.ts` read it,
+ * so an arbitrary docs dir works with zero config duplication.
+ */
+function useDocsDir(dir) {
+  const abs = resolve(process.cwd(), dir || ".");
+  process.env.UNDOCS_DIR = abs;
+  return abs;
+}
 
 export function createCLI(opts) {
+  const logger = consola.withTag(opts.name || "undocs");
+
   const sharedArgs = {
     dir: {
       type: "positional",
       description: "Docs directory",
-      required: true,
+      required: false,
       default: ".",
+    },
+    port: {
+      type: "string",
+      description: "Port to listen on (dev)",
+      required: false,
+    },
+    host: {
+      type: "string",
+      description: "Host to listen on (dev)",
+      required: false,
     },
   };
 
   const dev = defineCommand({
-    meta: {
-      name: "dev",
-      description: "Start docs in development mode",
-    },
+    meta: { name: "dev", description: "Start docs in development mode" },
     args: { ...sharedArgs },
     async setup({ args }) {
-      // const cwd = process.cwd()
-      const logger = consola.withTag("undocs");
-      const { tryUse: tryUseNuxt } = getContext("nuxt");
+      const docsDir = useDocsDir(args.dir);
+      logger.info(`Starting dev server for \`${docsDir}\``);
 
-      const { appDir, nuxtConfig, unwatch } = await setupDocs(args.dir, {
-        ...opts.setup,
-        dev: true,
-        watch: {
-          // onWatch: (event) => {
-          // logger.info(`Config file ${event.type} \`${relative(cwd, event.path)}\``)
-          // },
-          acceptHMR({ getDiff }) {
-            const diff = getDiff().filter((entry) => entry.key !== "dir");
-            if (diff.length === 0) {
-              return true;
-            }
-          },
-          onUpdate({ getDiff, newConfig: { config } }) {
-            const diff = getDiff().filter((entry) => entry.key !== "dir");
-            logger.info("Config updated:\n" + diff.map((i) => " - " + i.toJSON()).join("\n"));
-            Object.assign(nuxtConfig.docs, config);
-            if (diff.some((entry) => !HMRKeys.has(entry.key.split(".")[0]))) {
-              logger.info("Full reloading...");
-              tryUseNuxt()?.callHook("restart");
-            } else {
-              logger.info("Fast reloading...");
-              tryUseNuxt()?.callHook("undocs:config", config);
-            }
-          },
+      const { createServer } = await import("vite");
+      const server = await createServer({
+        root: pkgRoot,
+        configFile: viteConfig,
+        server: {
+          port: Number(args.port || process.env.PORT || 3000),
+          // Bare `--host` parses to "" (citty) — treat it as Vite's "expose on
+          // all interfaces" (host: true), matching `vite --host`.
+          host: args.host === "" ? true : args.host || process.env.HOST,
         },
       });
+      await server.listen();
+      server.printUrls();
 
-      process.chdir(appDir);
-      process.on("exit", () => unwatch());
-
-      const { runCommand, main } = await import("nuxi");
-      const cmd = await main.subCommands.dev();
-      await runCommand(cmd, [appDir, "--no-fork", "--port", process.env.PORT || "4000"], {
-        overrides: nuxtConfig,
-      });
+      const shutdown = () => server.close().finally(() => process.exit(0));
+      process.on("SIGINT", shutdown);
+      process.on("SIGTERM", shutdown);
     },
   });
 
   const build = defineCommand({
-    meta: {
-      name: "build",
-      description: "Build static docs for production",
-    },
+    meta: { name: "build", description: "Build docs for production" },
     args: { ...sharedArgs },
     async setup({ args }) {
-      const { appDir, nuxtConfig } = await setupDocs(args.dir, opts.setup);
+      const docsDir = useDocsDir(args.dir);
+      logger.info(`Building docs for \`${docsDir}\``);
 
-      process.chdir(appDir);
+      // The `nitro()` vite plugin (preset: node-server) drives a
+      // multi-environment build: the `client` environment emits the hashed SPA
+      // assets into `.output/public`, and the `nitro` environment emits
+      // `.output/server/index.mjs`. This is the `buildApp` path — the single
+      // `build()` helper only builds one environment (client), so we use
+      // `createBuilder().buildApp()` (what the `vite build` CLI runs).
+      //
+      // The output lands under the DOCS dir (`<docsDir>/.output`, or the preset's
+      // equivalent) — Nitro's `rootDir` is `pkgRoot`, but the `rebaseOutput` nitro
+      // module (see `src/server/rebase-output.ts`) relocates the output tree onto
+      // `docsDir` so `undocs build <dir>` writes into the user's project.
+      const { createBuilder } = await import("vite");
+      const builder = await createBuilder({
+        root: pkgRoot,
+        configFile: viteConfig,
+      });
+      await builder.buildApp();
 
-      const { runCommand, main } = await import("nuxi");
-      const cmd = await main.subCommands.generate();
-      await runCommand(cmd, [appDir], { overrides: nuxtConfig });
+      const entry = resolve(docsDir, ".output/server/index.mjs");
+      logger.success(`Build complete → ${docsDir}/.output (run \`node ${entry}\`)`);
     },
   });
 
   const main = defineCommand({
-    meta: {
-      name: opts.name,
-      description: opts.description,
-    },
-    subCommands: {
-      dev,
-      build,
-    },
+    meta: { name: opts.name, description: opts.description },
+    subCommands: { dev, build },
   });
 
   return {

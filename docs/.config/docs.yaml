@@ -18,7 +18,7 @@ automd: true
 landing:
   heroLinks:
     stackblitz:
-      icon: "i-heroicons-play"
+      icon: "i-lucide-play"
       to: "https://stackblitz.com/github/unjs/undocs/tree/main/template"
   heroCode: "npx giget gh:unjs/undocs/template docs --install"
   contributors: true
@@ -26,9 +26,9 @@ landing:
     - title: "Easy to use"
       icon: "⚡"
       description: "Focus on writing your *documentation* with Markdown, not tooling."
-    - title: "Nuxt powered"
-      icon: "logos:nuxt-icon"
-      description: "Made with [Nuxt](https://nuxt.com), [Nuxt Content](https://content.nuxt.com), and [Nuxt UI](https://ui.nuxt.com)."
+    - title: "Nitro + Vite powered"
+      icon: "logos:vitejs"
+      description: "Made with [Nitro](https://nitro.build), [Vite](https://vite.dev), and [Reka UI](https://reka-ui.com)."
     - title: "Deploy anywhere"
       icon: "✨"
       description: "The documentation can be hosted on any static hosting."
