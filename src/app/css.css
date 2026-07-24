@@ -1,0 +1,57 @@
+/*
+ * CSS entry.
+ *
+ * The Tailwind v4 pipeline is wired by `@tailwindcss/vite`, so `@import
+ * "tailwindcss"` is resolved by it. The design tokens (`--ui-*`) are defined
+ * by our own shadcn token layer in `./assets/tokens.css`.
+ *
+ * The `@source` globs tell Tailwind which files to scan for class usage — the
+ * app sources (`src/**`), the app.config, and the local docs markdown.
+ *
+ * Paths are relative to this file (`src/app/css.css`):
+ *   ../        -> src/
+ *   ../../      -> rewrite/  (contains docs/)
+ *
+ * Note: docs markdown is scanned from the repo `docs/` dir here (build-time
+ * static). When the CLI drives an arbitrary docs dir, only classes present in
+ * `src/**` are guaranteed; markdown-authored utility classes from a foreign
+ * docs dir are not scanned (pre-existing limitation, tracked for the parity
+ * step).
+ */
+@import "tailwindcss";
+/* Reka UI enter/leave transitions (`animate-in`, `fade-in`, `zoom-in`, ...). */
+@import "tw-animate-css";
+
+/* Self-hosted variable fonts (bundled, no external request). These register the
+   `Geist Variable` / `Geist Mono Variable` families referenced by
+   `--font-sans` (main.css) and `--ui-font-mono` (tokens.css). */
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+@source "../**/*";
+@source "./app.config.ts";
+@source "../../docs/**/*.md";
+
+/* shadcn Tailwind-v4 token layer (`@theme inline` + `:root`/`.dark`). */
+@import "./assets/tokens.css";
+
+@import "./assets/main.css";
+
+/*
+ * Cross-page View Transitions (driven by `src/app/router.ts`). A gentle
+ * cross-fade — no positional movement, so nothing slides across the viewport.
+ * Respect reduced motion by disabling the animation entirely (the router also
+ * skips starting a transition when reduced motion is preferred).
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 160ms;
+  animation-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}

@@ -37,7 +37,7 @@
     },
     "llms": {
       "type": "object",
-      "description": "Configuration for `nuxt-llms` generation (`/llms.txt` and `/llms-full.txt`).",
+      "description": "Configuration for `llms.txt` generation (`/llms.txt` and `/llms-full.txt`).",
       "additionalProperties": false,
       "properties": {
         "domain": {

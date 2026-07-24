@@ -19,7 +19,7 @@ github: "unjs/packageName"
 landing:
   heroLinks:
     stackblitz:
-      icon: "i-heroicons-play"
+      icon: "i-lucide-play"
       to: "https://stackblitz.com/github/unjs/packageName/tree/main/playground"
   # contributors: true
   # features:

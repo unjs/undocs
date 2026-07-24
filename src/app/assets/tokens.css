@@ -1,0 +1,142 @@
+/*
+ * shadcn design-token layer (Tailwind v4).
+ *
+ * Defines the `--ui-*` variables consumed by the existing prose components.
+ *
+ * Structure:
+ *   1. `@theme inline` — maps the semantic token names to Tailwind color/utility
+ *      namespaces so `bg-background`, `text-foreground`, `border-border`,
+ *      `bg-primary`, `text-primary-foreground`, `ring-ring`, `rounded-lg`, ...
+ *      all resolve to the CSS variables defined below.
+ *   2. `:root` (light) / `.dark` — the actual token values. NEUTRAL gray base +
+ *      VIOLET primary (seeded from the old `important: "violet"` / `neutral`
+ *      config). Values are shadcn's neutral theme in oklch.
+ *   3. `--ui-*` aliases — backward-compat so the existing prose components,
+ *      `main.css`, and `Steps.vue` keep working WITHOUT edits.
+ *
+ * NOTE on the primary color: `--primary` here is a static VIOLET seed. At
+ * runtime `main.ts` overrides `--primary` / `--primary-foreground` from the
+ * docs `themeColor` (default "amber"), per-mode, by injecting a <style> tag.
+ * So the seed only shows before that runs / if themeColor is unset.
+ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  /* Violet primary seed (Tailwind violet-600). Overridden at runtime by main.ts. */
+  --primary: oklch(0.541 0.281 293.009);
+  --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+
+  /* ---------------------------------------------------------------------- */
+  /* Backward-compat `--ui-*` aliases, still used by prose components,       */
+  /* main.css and Steps.vue. Map onto the shadcn tokens above.                */
+  /* ---------------------------------------------------------------------- */
+  --ui-primary: var(--primary);
+  --ui-text: var(--foreground);
+  --ui-text-muted: var(--muted-foreground);
+  --ui-text-highlighted: var(--foreground);
+  --ui-border: var(--border);
+  --ui-bg: var(--background);
+  --ui-bg-muted: var(--muted);
+  --ui-bg-elevated: var(--card);
+
+  /* `--ui-container` is overridden to 90rem in main.css; `--ui-font-mono`
+     falls back to the browser mono stack where referenced. */
+  --ui-font-mono:
+    "Geist Mono Variable", "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+
+  /* Violet primary seed (Tailwind violet-500). Overridden at runtime by main.ts. */
+  --primary: oklch(0.606 0.25 292.717);
+  --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+
+  /* `--ui-*` aliases inherit the shadcn tokens re-declared above. `--card`
+     (0.205) sits above `--muted` (0.269) so `--ui-bg-elevated` stays visually
+     distinct from `--ui-bg-muted` in both modes. */
+}
