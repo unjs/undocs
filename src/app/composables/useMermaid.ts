@@ -11,9 +11,9 @@ const mermaidCache: Record<string, Record<string, string>> = Object.create(null)
  * actually renders (client-side — the `import.meta.server` guard below returns
  * before we ever get here on the server).
  */
-let mermaidPromise: Promise<typeof import("mermaid/dist/mermaid.esm.min.mjs").default> | undefined;
+let mermaidPromise: Promise<typeof import("mermaid-compact").default> | undefined;
 const loadMermaid = () =>
-  (mermaidPromise ??= import("mermaid/dist/mermaid.esm.min.mjs").then((m) => m.default));
+  (mermaidPromise ??= import("mermaid-compact").then((m) => m.default));
 
 /**
  * Resolve a CSS expression (e.g. `var(--primary)`) to a concrete color mermaid's

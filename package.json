@@ -55,7 +55,7 @@
     "consola": "^3.4.2",
     "defu": "^6.1.7",
     "md4x": "^0.0.25",
-    "mermaid": "^11.16.0",
+    "mermaid-compact": "^0.0.1",
     "minisearch": "^7.2.0",
     "motion-v": "^2.3.0",
     "nitro": "npm:nitro-nightly@3.0.1-20260722-224121-77b77ffb",

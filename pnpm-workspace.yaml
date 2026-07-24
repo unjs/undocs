@@ -55,3 +55,4 @@ minimumReleaseAgeExclude:
   - "@vue/language-core@3.3.7"
   - typescript@7.0.2
   - vue-tsc@3.3.7
+  - mermaid-compact@0.0.1
