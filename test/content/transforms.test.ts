@@ -29,6 +29,36 @@ describe("transformBody: steps", () => {
     expect((node[2] as MarkElement)[2]).toBe("First");
   });
 
+  it("keeps only the item's leading paragraph in the heading", () => {
+    const nodes: MarkNode[] = [
+      [
+        "ol",
+        {},
+        ["li", {}, ["p", {}, "First"], ["note", {}, ["p", {}, "hint"]], ["p", {}, "body"]],
+        ["li", {}, ["p", {}, "Second"]],
+      ],
+    ];
+    const [node] = transformBody(nodes) as MarkElement[];
+    expect(node.slice(2)).toEqual([
+      ["h4", {}, "First"],
+      ["note", {}, ["p", {}, "hint"]],
+      ["p", {}, "body"],
+      ["h4", {}, "Second"],
+    ]);
+  });
+
+  it("keeps a leading block in the body under an empty heading", () => {
+    const nodes: MarkNode[] = [
+      ["ol", {}, ["li", {}, ["note", {}, "hint"]], ["li", {}, ["p", {}, "Second"]]],
+    ];
+    const [node] = transformBody(nodes) as MarkElement[];
+    expect(node.slice(2)).toEqual([
+      ["h4", {}],
+      ["note", {}, "hint"],
+      ["h4", {}, "Second"],
+    ]);
+  });
+
   it("leaves a single-item ordered list alone", () => {
     const nodes: MarkNode[] = [["ol", {}, ["li", {}, "Only"]]];
     const [node] = transformBody(nodes) as MarkElement[];
