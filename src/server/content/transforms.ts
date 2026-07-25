@@ -206,23 +206,17 @@ function transformMermaid(node: MarkElement) {
 }
 
 // --- ordered list -> steps ---
-// Only the item's FIRST block becomes the step heading — the rest is the step's
-// body and stays a sibling. Wrapping the whole `li` in the `h4` would render the
-// entire step (notes, code blocks, prose) as heading text, i.e. bold.
+// An auto-generated step is just a list item styled better: its content is kept
+// verbatim inside a `.step` wrapper and the number comes from a CSS counter. It
+// deliberately does NOT synthesize a heading — that made the item's text (and,
+// before, its whole body) render bold and injected bogus `#` deep-links.
+// The hand-authored `::steps` form still numbers its own headings; see Steps.vue.
 function transformStepsList(node: MarkElement) {
   if (node[0] === "ol" && node.length > 3 && isEl(node[2]) && node[2][0] === "li") {
-    const stepsChildren = (node.slice(2) as MarkElement[]).flatMap((li) => {
-      const children = li.slice(2) as MarkNode[];
-      const [first] = children;
-      // A leading paragraph is unwrapped so the heading holds the inline title
-      // rather than a nested `<p>`; a leading block (code fence, callout, …) has
-      // no title to lift, so it stays in the body under an empty marker.
-      const isTitle = first !== undefined && (!isEl(first) || first[0] === "p");
-      const title =
-        isTitle && isEl(first) ? (first.slice(2) as MarkNode[]) : isTitle ? [first] : [];
-      return [["h4", {}, ...title] as MarkElement, ...children.slice(isTitle ? 1 : 0)];
-    });
-    node.splice(0, Infinity, "steps", { level: "4" }, ...stepsChildren);
+    const steps = (node.slice(2) as MarkElement[]).map(
+      (li) => ["div", { class: "step" }, ...li.slice(2)] as MarkElement,
+    );
+    node.splice(0, Infinity, "steps", {}, ...steps);
   }
 }
 

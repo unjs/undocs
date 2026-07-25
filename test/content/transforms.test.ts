@@ -24,12 +24,13 @@ describe("transformBody: steps", () => {
     const nodes: MarkNode[] = [["ol", {}, ["li", {}, "First"], ["li", {}, "Second"]]];
     const [node] = transformBody(nodes) as MarkElement[];
     expect(node[0]).toBe("steps");
-    expect(node[1].level).toBe("4");
-    expect((node[2] as MarkElement)[0]).toBe("h4");
-    expect((node[2] as MarkElement)[2]).toBe("First");
+    expect(node.slice(2)).toEqual([
+      ["div", { class: "step" }, "First"],
+      ["div", { class: "step" }, "Second"],
+    ]);
   });
 
-  it("keeps only the item's leading paragraph in the heading", () => {
+  it("keeps each item's content verbatim, without synthesizing a heading", () => {
     const nodes: MarkNode[] = [
       [
         "ol",
@@ -40,22 +41,14 @@ describe("transformBody: steps", () => {
     ];
     const [node] = transformBody(nodes) as MarkElement[];
     expect(node.slice(2)).toEqual([
-      ["h4", {}, "First"],
-      ["note", {}, ["p", {}, "hint"]],
-      ["p", {}, "body"],
-      ["h4", {}, "Second"],
-    ]);
-  });
-
-  it("keeps a leading block in the body under an empty heading", () => {
-    const nodes: MarkNode[] = [
-      ["ol", {}, ["li", {}, ["note", {}, "hint"]], ["li", {}, ["p", {}, "Second"]]],
-    ];
-    const [node] = transformBody(nodes) as MarkElement[];
-    expect(node.slice(2)).toEqual([
-      ["h4", {}],
-      ["note", {}, "hint"],
-      ["h4", {}, "Second"],
+      [
+        "div",
+        { class: "step" },
+        ["p", {}, "First"],
+        ["note", {}, ["p", {}, "hint"]],
+        ["p", {}, "body"],
+      ],
+      ["div", { class: "step" }, ["p", {}, "Second"]],
     ]);
   });
 
