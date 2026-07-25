@@ -15,10 +15,12 @@
  * refetched) and, with no `{ server: false }`, kicks the fetch off immediately.
  *
  * We walk the navigation tree from the top (the order the nav renders, so the
- * links a reader is most likely to reach first are warmed first), throttle the
- * work through `requestIdleCallback` so it never competes with the current
- * page, and bail out entirely on mobile / data-saver / slow connections where
- * speculative traffic isn't worth the bytes or battery.
+ * links a reader is most likely to reach first are warmed first), hold every
+ * request back until the current page has finished loading its own resources
+ * (see `whenPageIdle`), throttle the work through `requestIdleCallback` so it
+ * never competes with the current page, and bail out entirely on mobile /
+ * data-saver / slow connections where speculative traffic isn't worth the bytes
+ * or battery.
  *
  * Client-only: the whole module runs from `app.vue`'s `onMounted`, so it never
  * executes during SSR. It still guards defensively (`typeof window`) and the
@@ -43,6 +45,66 @@ function idle(): IdleFn {
     | ((cb: () => void, opts?: { timeout: number }) => void)
     | undefined;
   return ric ? (cb) => ric(cb, { timeout: 2000 }) : (cb) => setTimeout(cb, 200);
+}
+
+/** Quiet window (ms) the resource timeline must stay empty before we start. */
+const QUIET_MS = 500;
+/** Hard cap (ms) on the wait, so a chatty page never blocks prefetch forever. */
+const MAX_WAIT_MS = 8000;
+
+/**
+ * Run `cb` once the page is done loading *its own* stuff.
+ *
+ * Two conditions, in order:
+ *
+ * 1. **`load`** — the initial resource set (scripts, styles, fonts, images).
+ * 2. **A quiet resource timeline** — `load` is not the finish line for a
+ *    hydrating SPA: the lazy chunks a page kicks off while mounting (the mermaid
+ *    bundle is the fat one) are fetched with dynamic `import()`, which does not
+ *    delay `load`. So after `load` we watch `PerformanceObserver`'s `resource`
+ *    entries and only start once nothing new has been fetched for `QUIET_MS`.
+ *
+ * Otherwise up to `MAX_PREFETCH` speculative JSON requests pile into the
+ * connection pool right as the real page is still pulling the code it needs to
+ * render, and visibly delay it. `MAX_WAIT_MS` bounds the wait for pages with
+ * long-lived background traffic (dev HMR, polling) that never truly goes quiet.
+ */
+function whenPageIdle(cb: () => void): void {
+  let done = false;
+  let quietTimer: ReturnType<typeof setTimeout> | undefined;
+  let capTimer: ReturnType<typeof setTimeout> | undefined;
+  let observer: PerformanceObserver | undefined;
+
+  const finish = () => {
+    if (done) return;
+    done = true;
+    clearTimeout(quietTimer);
+    clearTimeout(capTimer);
+    observer?.disconnect();
+    cb();
+  };
+
+  const waitForQuiet = () => {
+    const arm = () => {
+      clearTimeout(quietTimer);
+      quietTimer = setTimeout(finish, QUIET_MS);
+    };
+    capTimer = setTimeout(finish, MAX_WAIT_MS);
+    try {
+      observer = new PerformanceObserver(arm);
+      observer.observe({ type: "resource", buffered: false });
+    } catch {
+      // No PerformanceObserver (or no `resource` entry type): the quiet timer
+      // alone still gives the page a beat before we start.
+    }
+    arm();
+  };
+
+  if (document.readyState === "complete") {
+    waitForQuiet();
+  } else {
+    window.addEventListener("load", waitForQuiet, { once: true });
+  }
 }
 
 /**
@@ -127,8 +189,9 @@ function warm(path: string): void {
 /**
  * Warm the global search index (`/api/docs/search`) under the shared "search"
  * async-data key, which `DocsSearch.vue`'s `loadIndex()` reads — so opening the
- * ⌘K palette finds the serialized index already fetched. Fired eagerly (not
- * through the idle page queue) so it races the page warms in parallel.
+ * ⌘K palette finds the serialized index already fetched. Fired first once the
+ * page is idle (not through the idle page queue), so it races the page warms in
+ * parallel.
  */
 function warmSearch(): void {
   const t0 = performance.now();
@@ -164,16 +227,20 @@ export function startPrefetch(nav: NavItem[], currentPath?: string): void {
 
   console.log(`[prefetch] plan (${queue.length} pages):`, [...queue]);
 
-  // Search index runs in parallel, right away — not queued behind the pages.
-  warmSearch();
+  // Nothing goes out until the current page has finished loading its own
+  // scripts/resources — including the chunks it lazy-loads while hydrating.
+  whenPageIdle(() => {
+    // Search index runs in parallel, right away — not queued behind the pages.
+    warmSearch();
 
-  const schedule = idle();
-  const pump = () => {
-    const next = queue.shift();
-    if (next === undefined) return;
-    warm(next);
-    if (queue.length) schedule(pump); // one page per idle slot — gentle on the main page
-  };
+    const schedule = idle();
+    const pump = () => {
+      const next = queue.shift();
+      if (next === undefined) return;
+      warm(next);
+      if (queue.length) schedule(pump); // one page per idle slot — gentle on the main page
+    };
 
-  schedule(pump);
+    schedule(pump);
+  });
 }
