@@ -98,7 +98,18 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     fetch(request)
-      .then((response) => {
+      .then(async (response) => {
+        // A 404 for a hashed `/_undocs/*` asset does not mean "missing" — it
+        // means "that build is gone", which is what a tab left open across a
+        // deploy sees when it lazily imports a chunk. `.catch()` below won't
+        // fire (the fetch succeeded, it just wasn't ok), so handle it here: if
+        // we still hold the old chunk, serving it keeps that tab working. When
+        // we don't, the 404 flows through and `vite:preloadError` in `main.ts`
+        // reloads the page onto the current build.
+        if (!response.ok && url.pathname.startsWith("/_undocs/")) {
+          const stale = await caches.match(request);
+          if (stale) return stale;
+        }
         // Stash a copy of successful responses for future offline use. Skip 206
         // (`response.ok` covers the whole 2xx range, but `cache.put` rejects on a
         // partial response) and keep the write alive past `respondWith` with

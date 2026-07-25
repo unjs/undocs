@@ -58,7 +58,41 @@ function applyRuntimePrimary(themeColor: unknown): void {
   document.head.append(style);
 }
 
+// ---------------------------------------------------------------------------
+// Stale-build recovery. A tab left open across a deploy keeps executing the old
+// bundle, but its not-yet-loaded chunks point at hashes the server no longer
+// serves (hosts serve assets per-deployment), so the next lazy import 404s and
+// that feature silently dies. Vite's `__vitePreload` fires `vite:preloadError`
+// on exactly that, and the only real cure is to reload onto the current build.
+//
+// The sessionStorage stamp guards against a reload loop: if a chunk is genuinely
+// gone rather than merely stale, reloading again won't help, so we let the error
+// surface in the console instead. Only the built `__vitePreload` helper
+// dispatches this event, so the whole thing is inert in dev.
+// ---------------------------------------------------------------------------
+const RELOAD_KEY = "undocs:stale-build-reload";
+const RELOAD_WINDOW = 10_000;
+
+function installStaleBuildReload(): void {
+  window.addEventListener("vite:preloadError", (event) => {
+    try {
+      const last = Number(sessionStorage.getItem(RELOAD_KEY)) || 0;
+      if (Date.now() - last < RELOAD_WINDOW) return; // already tried — don't loop
+      sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+    } catch {
+      // Storage blocked (private mode / blocked cookies). Without it we can't
+      // prove we haven't already reloaded, so don't risk the loop.
+      return;
+    }
+    event.preventDefault(); // handled — don't rethrow
+    location.reload();
+  });
+}
+
 function bootstrap(): void {
+  // Installed first, so it is listening before any chunk can fail to load.
+  installStaleBuildReload();
+
   // -------------------------------------------------------------------------
   // 0. Seed the async-data + state stores from the server payload, so awaited
   //    `useAsyncData` calls resolve with the server's data (no refetch) and the
