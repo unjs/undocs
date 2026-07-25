@@ -3,8 +3,7 @@
  * vue-router. The app only ever used a tiny slice of vue-router (reactive
  * `route.path`/`hash`/`fullPath`/`meta`, a single imperative `push`, one
  * `<router-view>` and one `<router-link>`), so a purpose-built router is far
- * smaller and lets client navigations animate through the native
- * **View Transitions API** (`document.startViewTransition`).
+ * smaller.
  *
  * Surface:
  *   - `createAppRouter(history?)` → an installable router (`app.use(router)`).
@@ -80,7 +79,7 @@ export interface AppRouter {
   /** Resolves once the initial route's component has been resolved. */
   isReady(): Promise<void>;
   install(app: App): void;
-  /** Internal: `AppPage`'s `<Suspense>` calls this on resolve to end a transition. */
+  /** Internal: `AppPage`'s `<Suspense>` calls this on resolve to clear `pending`. */
   _pageRendered(): void;
 }
 
@@ -202,29 +201,10 @@ function normalizeTarget(to: RouteTarget): string {
  * Are we running in a browser? A real runtime check — NOT `import.meta.client`,
  * which is only statically replaced in the production build; in dev it survives
  * as `undefined` at runtime, so relying on it here would pick memory history on
- * the client (breaking hydration) and disable view transitions. History
- * selection and transition support are genuine runtime concerns, so probe the
- * environment directly.
+ * the client (breaking hydration). History selection is a genuine runtime
+ * concern, so probe the environment directly.
  */
 const IS_BROWSER = typeof window !== "undefined";
-
-function supportsViewTransitions(): boolean {
-  return (
-    IS_BROWSER &&
-    typeof (document as any).startViewTransition === "function" &&
-    !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-  );
-}
-
-/**
- * Max time to hold the View Transition's frozen old-frame while waiting for the
- * new page's `<Suspense>` to resolve. Fast loads finish well within this and get
- * a clean cross-fade; a slower load hits the cap, the transition ends, and the
- * live DOM (old page + the animating loading bar) is revealed instead of a
- * frozen snapshot. Also guarantees the transition can't hang if a page errors
- * and never signals `_pageRendered`.
- */
-const VT_HOLD_TIMEOUT = 400;
 
 /**
  * Grace period before a navigation flags `pending` (and thus shows the loading
@@ -233,23 +213,6 @@ const VT_HOLD_TIMEOUT = 400;
  * common quick nav. Only a load slower than this reveals the bar.
  */
 const PENDING_BAR_DELAY = 150;
-
-/** Resolve when `p` settles, or after `ms` — whichever comes first. */
-function withTimeout(p: Promise<void>, ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    let settled = false;
-    const finish = () => {
-      if (settled) return;
-      settled = true;
-      resolve();
-    };
-    const timer = setTimeout(finish, ms);
-    void p.then(() => {
-      clearTimeout(timer);
-      finish();
-    });
-  });
-}
 
 // ---------------------------------------------------------------------------
 // Router
@@ -305,15 +268,10 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
   let readyResolve!: () => void;
   const ready = new Promise<void>((r) => (readyResolve = r));
 
-  // Set while a View-Transition navigation waits for the page's <Suspense> to
-  // resolve; `_pageRendered` (called by AppPage) resolves it.
-  let pageRendered: (() => void) | null = null;
-
   // Monotonic id for the latest navigation. Each `navigate` captures its id and
   // bails after any `await` if a newer navigation has since started, so a rapid
-  // second click can't drive a SECOND `startViewTransition` that collides with
-  // (and janks) the first. Assigned before the async `resolveComponent` gap that
-  // the old `if (pageRendered)` guard couldn't see into.
+  // second click can't let a slower, superseded navigation commit its route on
+  // top of the newer one.
   let navToken = 0;
 
   async function resolveComponent(record: RouteRecord): Promise<Component> {
@@ -347,7 +305,7 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
 
   async function navigate(
     loc: string,
-    opts: { transition?: boolean; savedScroll?: number } = {},
+    opts: { client?: boolean; savedScroll?: number } = {},
   ): Promise<void> {
     const token = ++navToken;
 
@@ -355,51 +313,32 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     // an abandoned nav can't flip the bar on after this one takes over.
     clearPendingTimer();
 
-    // End any in-flight transition before starting a new one (rapid clicks).
-    if (pageRendered) {
-      pageRendered();
-      pageRendered = null;
-    }
-
     const parsed = parseLocation(loc);
     const record = matchRoute(parsed.path);
 
     // Same-path nav (active link, hash-only, breadcrumb-to-self) never re-renders
     // AppPage's <Suspense> (keyed by `route.path`), so `_pageRendered` — the only
     // thing that clears `pending` — would never fire, hanging the bar forever.
-    // Handle it inline instead: update route/scroll, skip `pending` and transitions.
+    // Handle it inline instead: update route/scroll and skip `pending`.
     const samePath = navigated && parsed.path === route.path;
 
     // Real client navigation: arm the loading bar. It's deferred by
     // `PENDING_BAR_DELAY` so a quick load never flashes it; a slow load trips
     // the timer and `_pageRendered` clears it once the <Suspense> resolves. The
-    // initial route (`transition: false`) never arms — it's SSR hydration.
-    if (opts.transition && !samePath) schedulePending();
+    // initial route (`client: false`) never arms — it's SSR hydration.
+    if (opts.client && !samePath) schedulePending();
 
     const comp = await resolveComponent(record);
     // A newer navigation started during the dynamic import; abandon this one so
-    // it can't fire a second, colliding `startViewTransition`.
+    // it can't commit its route on top of the newer one.
     if (token !== navToken) return;
 
-    if (opts.transition && !samePath && supportsViewTransitions()) {
-      const rendered = new Promise<void>((res) => (pageRendered = res));
-      const vt = (document as any).startViewTransition(() => {
-        // The OLD DOM snapshot was taken before this callback ran. Mutating the
-        // route re-keys AppPage's <Suspense>; the returned promise holds the
-        // transition until `_pageRendered` resolves (new snapshot = fully
-        // rendered page) or `VT_HOLD_TIMEOUT` expires, releasing the frame.
-        applyState(parsed, record, comp);
-        return withTimeout(rendered, VT_HOLD_TIMEOUT);
-      });
-      await vt.updateCallbackDone.catch(() => {});
-    } else {
-      applyState(parsed, record, comp);
-      if (IS_BROWSER) await nextTick();
-      // Same-path (Suspense not re-keyed) or transitions skipped for a same-path
-      // nav: no `resolve` event is coming, so clear the loading bar ourselves.
-      // (A real path change here still re-keys <Suspense> → `_pageRendered`.)
-      if (samePath) stopPending();
-    }
+    applyState(parsed, record, comp);
+    if (IS_BROWSER) await nextTick();
+    // Same-path: <Suspense> isn't re-keyed, so no `resolve` event is coming and
+    // nothing else would clear the loading bar. (A real path change re-keys it →
+    // `_pageRendered`.)
+    if (samePath) stopPending();
 
     applyScroll(parsed, opts.savedScroll);
 
@@ -410,7 +349,7 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
   if (IS_BROWSER) {
     hist.listen((loc) => {
       const saved = scrollPositions.get(parseLocation(loc).fullPath);
-      void navigate(loc, { transition: true, savedScroll: saved });
+      void navigate(loc, { client: true, savedScroll: saved });
     });
   }
 
@@ -418,13 +357,13 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     const target = normalizeTarget(to);
     if (IS_BROWSER) scrollPositions.set(route.fullPath, window.scrollY);
     hist.push(target);
-    return navigate(target, { transition: true });
+    return navigate(target, { client: true });
   }
 
   function replace(to: RouteTarget): Promise<void> {
     const target = normalizeTarget(to);
     hist.replace(target);
-    return navigate(target, { transition: true });
+    return navigate(target, { client: true });
   }
 
   const router: AppRouter = {
@@ -434,7 +373,7 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     push,
     replace,
     isReady() {
-      if (!navigated) void navigate(hist.location, { transition: false });
+      if (!navigated) void navigate(hist.location, { client: false });
       return ready;
     },
     install(app: App) {
@@ -445,11 +384,6 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     },
     _pageRendered() {
       stopPending();
-      if (pageRendered) {
-        const done = pageRendered;
-        pageRendered = null;
-        done();
-      }
     },
   };
 

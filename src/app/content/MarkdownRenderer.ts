@@ -120,8 +120,8 @@ const HEADER_OFFSET = 80;
  * Click handler for a heading's `#` deep-link. Mirrors `DocsToc.scrollTo`:
  * smooth-scroll to the heading with the sticky-header offset and update the URL
  * hash via `replaceState` — WITHOUT letting the browser's native fragment jump
- * run, which would push a history entry and trip the router's navigation /
- * view-transition machinery. Plain left-clicks only; modified clicks (open in
+ * run, which would push a history entry and trip the router's navigation
+ * machinery. Plain left-clicks only; modified clicks (open in
  * new tab, etc.) fall through to the browser.
  */
 function onAnchorClick(event: MouseEvent, id: string): void {

@@ -15,7 +15,7 @@
  * previous page visible until the new page resolves — no blank flash.
  *
  * `<Suspense>`'s `resolve` event tells the router the new page is committed,
- * which ends any in-flight View Transition (see `router.ts`).
+ * which clears the navigation loading bar (see `router.ts`).
  */
 import { defineComponent, h, onErrorCaptured, Suspense } from "vue";
 import { useRouter, useRoute } from "@app/router";
@@ -28,8 +28,8 @@ export default defineComponent({
     const route = useRoute();
 
     // A rejected async setup (e.g. `createError(404)`) makes Suspense emit ERROR,
-    // not `resolve`, so `_pageRendered` would never fire and hang the View
-    // Transition. Release it here; error still propagates to main.ts's root boundary.
+    // not `resolve`, so `_pageRendered` would never fire and the loading bar would
+    // hang. Clear it here; error still propagates to main.ts's root boundary.
     onErrorCaptured(() => {
       router._pageRendered();
     });

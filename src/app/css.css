@@ -36,22 +36,3 @@
 @import "./assets/tokens.css";
 
 @import "./assets/main.css";
-
-/*
- * Cross-page View Transitions (driven by `src/app/router.ts`). A gentle
- * cross-fade — no positional movement, so nothing slides across the viewport.
- * Respect reduced motion by disabling the animation entirely (the router also
- * skips starting a transition when reduced motion is preferred).
- */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 160ms;
-  animation-timing-function: ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none;
-  }
-}

@@ -12,8 +12,7 @@ project supplies only Markdown + one config file.
 - **Vite** with two environments — `client` (browser bundle → `.output/public`)
   and `ssr` (`entry-server.ts`, whose `fetch` Nitro auto-wires as the renderer).
 - **From-scratch router** (`src/app/router.ts`) instead of vue-router — a tiny
-  reactive route + `AppLink`/`AppPage`/`AppLayout`, animating client navigations
-  via the native View Transitions API.
+  reactive route + `AppLink`/`AppPage`/`AppLayout`.
 - **`reka-ui`** (unstyled primitives) + **Tailwind v4** (`@tailwindcss/vite`).
 - **`md4x`** (Markdown → comark AST) + **shiki** (highlight), both server-only.
 
@@ -142,10 +141,10 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
   and security.
 - **Router uses a runtime `typeof window` check** (`IS_BROWSER`), not
   `import.meta.client` — the latter is `undefined` in the dev browser and would
-  pick memory history on the client, breaking hydration and View Transitions.
-- **View-Transition safety.** `AppPage`'s `<Suspense>` `onResolve` must call
-  `router._pageRendered()`, and the `VT_HOLD_TIMEOUT` cap must stay, or a slow/
-  errored page can freeze the transition frame.
+  pick memory history on the client, breaking hydration.
+- **Loading-bar release.** `AppPage`'s `<Suspense>` `onResolve` (and its
+  `onErrorCaptured`) must call `router._pageRendered()`, or a slow/errored page
+  leaves `router.pending` — and the nav loading bar — stuck on.
 - **Single shared highlighter.** Doc content and the landing hero both go through
   the one `highlightCode`/shiki instance. Its fine-grained `.mjs` lang/theme
   imports and `shiki/core` + oniguruma-only setup are deliberate (avoid rolldown

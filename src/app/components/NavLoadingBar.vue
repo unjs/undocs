@@ -6,11 +6,9 @@
  * async `<Suspense>` in flight) and clears it once the page commits. We trickle
  * a thin bar toward ~90%, then fill to 100% and fade out on finish.
  *
- * For a FAST navigation the bar's whole lifetime falls inside the View
- * Transition's frozen old-frame (see `router.ts`), so it stays hidden under the
- * transition snapshot and never flashes. It only becomes visible once a load
- * outlasts `VT_HOLD_TIMEOUT` (or when view transitions are unsupported / the
- * user prefers reduced motion) and the live DOM is revealed.
+ * A FAST navigation never flashes the bar: `pending` itself is deferred by
+ * `PENDING_BAR_DELAY` (see `router.ts`), so only a load slower than that ever
+ * flips it on.
  */
 import { onUnmounted, ref, watch } from "vue";
 import { useRouter } from "@app/router";
