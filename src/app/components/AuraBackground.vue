@@ -8,7 +8,9 @@
 // that spans from the true top of the document — so the aura sits *behind* the
 // sticky, translucent header (showing through its blur) instead of starting
 // below the navbar. It's top-anchored with an explicit height and fades out
-// downward (mask) so long content stays legible; it scrolls with the page.
+// downward (mask) so long content stays legible. The `hero` variant scrolls
+// away with the landing; the `docs` variant is `fixed`, so it stays in the
+// viewport's top-right for the whole page.
 //
 // The `isolate` wrapper is what lets `z-index:-10` sit behind content yet above
 // the `html`/`body` background (both paint `--background`) — a plain `fixed`
@@ -82,8 +84,15 @@ withDefaults(defineProps<{ variant?: "hero" | "docs" | "section" }>(), { variant
 }
 
 /* Docs / other pages: a faint glow pushed to the top-right corner, well out of
-   the way of the content column. */
+   the way of the content column. Unlike the hero it's `fixed`, so it stays
+   parked in the viewport's top-right while long pages scroll under it.
+   `isolation: isolate` on the app-shell wrapper does NOT create a containing
+   block for fixed children (only transform/filter/perspective/contain would),
+   so this still resolves against the viewport while staying inside that
+   stacking context — which is what keeps `z-index: -10` above the body
+   background instead of painting under it. */
 .aura--docs {
+  position: fixed;
   height: 40rem;
 }
 .aura--docs .aura__inner {
