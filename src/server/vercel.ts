@@ -55,6 +55,28 @@ async function rewriteRoutes(outputDir: string) {
       check: true,
     },
   );
+
+  // Nitro's vercel preset emits a header route that stamps
+  // `max-age=31536000, immutable` onto `/_undocs/*`. It matches by path BEFORE
+  // the filesystem phase, so a MISS is labelled immutable too — and then falls
+  // through to the ISR catch-all, which renders a 404 through the function and
+  // caches it at the edge. A single transient 404 (an asset requested during a
+  // deploy window, before the new build's files resolve) therefore sticks for a
+  // year: `immutable` means no browser ever revalidates it, and the edge serves
+  // the same 404 to everyone else in that region.
+  //
+  // Terminate asset misses right after the filesystem phase instead — routes
+  // there run only for requests no static file satisfied. `no-store` overrides
+  // the earlier header, and terminating here keeps the miss away from ISR.
+  const fsPhase = vcConfig.routes.findIndex((r: { handle?: string }) => r.handle === "filesystem");
+  if (fsPhase !== -1) {
+    vcConfig.routes.splice(fsPhase + 1, 0, {
+      src: "^/_undocs/(?:.*)$",
+      status: 404,
+      headers: { "cache-control": "no-store" },
+    });
+  }
+
   await writeFile(vcJSON, JSON.stringify(vcConfig, null, 2), "utf8");
 }
 
