@@ -4,6 +4,19 @@ import type { Plugin, ViteDevServer } from "vite";
 import { generateAppConfig } from "./src/server/app-config";
 import { BUILTIN_ICONS } from "./src/app/builtin-icons";
 
+// DEV: reload the browser AND Nitro's cached SSR entry.
+//
+// `server.ws.send` only reaches the browser. Nitro's dev worker imports the
+// `ssr` entry once and keeps that module namespace, so invalidating a module
+// the entry (transitively) imports is not enough — the entry must be re-imported
+// or it keeps rendering the old graph. See `ssrEntryReloadDev` for the full
+// story; `{ type: "full-reload" }` on the env's hot channel is what Nitro itself
+// sends for its own server-file changes.
+function fullReload(server: ViteDevServer): void {
+  server.ws.send({ type: "full-reload" });
+  server.environments.ssr?.hot.send({ type: "full-reload" });
+}
+
 // `virtual:undocs/builtin-icons` provider — the local, no-network icon set.
 //
 // Extracts the fixed icon set undocs' UI uses (`src/app/builtin-icons.ts`) from
@@ -79,7 +92,7 @@ export function undocsAppConfig(docsDir: string): Plugin {
           const mod = env.moduleGraph.getModuleById(RESOLVED_ID);
           if (mod) env.moduleGraph.invalidateModule(mod);
         }
-        server.ws.send({ type: "full-reload" });
+        fullReload(server);
       };
       server.watcher.on("change", onChange);
       server.watcher.on("add", onChange);
@@ -222,7 +235,7 @@ export function undocsUserTheme(docsDir: string): Plugin {
             if (mod) env.moduleGraph.invalidateModule(mod);
           }
         }
-        server.ws.send({ type: "full-reload" });
+        fullReload(server);
       };
       // Only ADD/UNLINK change the generated set; plain edits hot-update through
       // the real `.vue` module and must NOT force a full reload.
@@ -294,6 +307,45 @@ export function metaEnvFlagsDev(): Plugin {
       // `map: null` keeps Vite's own sourcemap for the module; the substitutions
       // are length-changing but dev-only, so precise mapping here isn't critical.
       return { code: out, map: null };
+    },
+  };
+}
+
+// DEV-ONLY: re-import the SSR entry after an app-source change.
+//
+// Nitro's dev worker imports the `ssr` entry ONCE and keeps that module
+// namespace (`ViteEnvRunner.entry`), refreshing it only on a `full-reload`
+// message. Vite's own HMR updates never reach that runner as a reload (the
+// env-runner transport only forwards `type: "custom"` payloads), so after any
+// edit the entry — and its whole STATICALLY imported graph (`app.vue`,
+// `router.ts`, `AppPage`, …) — stays stale, while the page components the
+// router pulls in via `import()` AT REQUEST TIME re-enter the module runner and
+// re-evaluate the invalidated graph fresh.
+//
+// That splits the render across two copies of `router.ts`: the stale entry
+// provides the OLD `Symbol("undocs-route")`, the freshly evaluated page injects
+// the NEW one — `useRoute()` throws "called outside of a router-enabled app"
+// and the page fails to SSR until the next hard restart.
+//
+// Sending `{ type: "full-reload" }` on an env hot channel is exactly what Nitro
+// does for its own server-file changes: it reaches the dev worker's IPC handler,
+// which re-imports every env entry. Debounced (and deferred a tick) so a save
+// touching several files reloads once, after Vite has invalidated the graph.
+export function ssrEntryReloadDev(): Plugin {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return {
+    name: "undocs:ssr-entry-reload-dev",
+    apply: "serve",
+    hotUpdate({ file }) {
+      const env = this.environment;
+      if (env.name !== "ssr") return;
+      // Read the SSR graph directly instead of trusting the `modules` we are
+      // handed: for a module shared with the client env, the update is routed as
+      // a client HMR update and the SSR list arrives filtered/empty — yet the
+      // stale SSR entry still needs re-importing.
+      if (!env.moduleGraph.getModulesByFile(file)?.size) return;
+      clearTimeout(timer);
+      timer = setTimeout(() => env.hot.send({ type: "full-reload" }), 50);
     },
   };
 }

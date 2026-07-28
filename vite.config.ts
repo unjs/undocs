@@ -12,6 +12,7 @@ import {
   excludeDocsFromTailwindDev,
   metaEnvFlagsDev,
   patchVueExclude,
+  ssrEntryReloadDev,
 } from "./vite.plugins";
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
@@ -140,6 +141,12 @@ export default defineConfig((configEnv) => ({
     // `import.meta.client` survives as `undefined` there, silently killing
     // `if (import.meta.client)` branches. `apply: "serve"` scopes it to dev.
     metaEnvFlagsDev(),
+
+    // DEV-ONLY: re-imports Nitro's cached SSR entry after an app-source edit.
+    // Without it the entry's static graph goes stale while request-time
+    // `import()`s (the router's page components) re-evaluate fresh — two copies
+    // of `router.ts`, so the page's `useRoute()` injection misses.
+    ssrEntryReloadDev(),
   ],
 
   environments: {

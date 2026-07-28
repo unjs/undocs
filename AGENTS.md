@@ -164,6 +164,18 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
   `compiled` hooks that read those paths.
 - **Dev-only stays dev-only.** `dev-watch`/`dev-ws`/`dev-reload` and
   `metaEnvFlagsDev` must never ship in `.output/server`.
+- **The dev SSR entry must be re-imported on every app change.** Nitro's dev
+  worker imports `entry-server.ts` ONCE and keeps that module namespace, so a
+  Vite HMR update leaves the entry — and its whole STATIC graph (`app.vue`,
+  `router.ts`, `AppPage`, …) — stale, while the page components the router pulls
+  in via `import()` at request time re-evaluate fresh. Two copies of `router.ts`
+  then meet in one render and the page's `useRoute()` injection misses
+  (`Symbol(undocs-route)` not found). `ssrEntryReloadDev` (vite.plugins.ts)
+  sends `{ type: "full-reload" }` on the `ssr` env's hot channel — the message
+  Nitro's worker reloads entries on — whenever a changed file is in the SSR
+  graph. Anything else that invalidates an SSR module by hand (the
+  `virtual:undocs/*` watchers) must reload through `fullReload(server)`, not a
+  bare `server.ws.send` (browser-only).
 
 ## Build flags
 
