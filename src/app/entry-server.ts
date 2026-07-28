@@ -184,12 +184,46 @@ const devLoadingOverlay = import.meta.dev
   ? /* html */ `<div id="__undocs_loading" aria-hidden="true"><span class="s"></span></div>`
   : "";
 
+// Recovery for HTML that outlived its assets. Bundle files are content-hashed,
+// `immutable` and per-deployment, so a document naming a build that is no longer
+// served has every `/_undocs/*` reference 404 — including the entry script, in
+// which case `main.ts` never runs and nothing in the bundle (not
+// `vite:preloadError`, not the service worker) can react. This inline listener
+// is the only code guaranteed to have executed by then, so recovery has to live
+// here: reload once onto whatever the server currently serves.
+//
+// Capture phase, because resource load errors don't bubble. The sessionStorage
+// stamp caps this at one attempt per 15s, so a deploy that is genuinely broken
+// (or HTML the edge keeps serving stale) fails visibly instead of looping. Prod
+// only — in dev a missing chunk is usually Vite mid-restart, and reloading would
+// fight HMR. `import.meta.dev` is compile-time, so this DCEs to `""` in dev.
+const assetRecoveryScript = import.meta.dev
+  ? ""
+  : /* html */ `<script>
+      (function () {
+        var K = "undocs:asset-recovery";
+        addEventListener("error", function (e) {
+          var t = e.target;
+          if (!t || (t.tagName !== "SCRIPT" && t.tagName !== "LINK")) return;
+          if ((t.src || t.href || "").indexOf("/_undocs/") === -1) return;
+          try {
+            if (Date.now() - (+sessionStorage.getItem(K) || 0) < 15000) return;
+            sessionStorage.setItem(K, "" + Date.now());
+          } catch (_) {
+            return;
+          }
+          location.reload();
+        }, true);
+      })();
+    </script>`;
+
 function htmlTemplate(appHtml: string, payload: string): string {
   return /* html */ `<!DOCTYPE html>
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    ${assetRecoveryScript}
     ${devLoadingStyle}
   </head>
   <body>
