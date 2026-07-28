@@ -99,16 +99,29 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(request)
       .then(async (response) => {
-        // A 404 for a hashed `/_undocs/*` asset does not mean "missing" — it
-        // means "that build is gone", which is what a tab left open across a
-        // deploy sees when it lazily imports a chunk. `.catch()` below won't
-        // fire (the fetch succeeded, it just wasn't ok), so handle it here: if
-        // we still hold the old chunk, serving it keeps that tab working. When
-        // we don't, the 404 flows through and `vite:preloadError` in `main.ts`
-        // reloads the page onto the current build.
+        // A 404 for a hashed `/_undocs/*` asset does not mean "missing". Either
+        // that build is gone (a tab left open across a deploy, lazily importing
+        // a chunk), or — worse — the 404 is a POISONED HTTP CACHE ENTRY: hosts
+        // stamp hashed assets `immutable`, so a transient 404 during a deploy
+        // window gets stored for a year and never revalidated. Our own `fetch()`
+        // reads that cache, so we'd keep serving the stale 404 forever; only a
+        // hard reload would clear it. `.catch()` below can't help (the fetch
+        // succeeded, it just wasn't ok), so handle both cases here.
         if (!response.ok && url.pathname.startsWith("/_undocs/")) {
-          const stale = await caches.match(request);
-          if (stale) return stale;
+          // 1. Re-request bypassing the HTTP cache. If the asset really is there
+          //    and we were served a poisoned entry, this recovers it AND
+          //    overwrites the bad entry. Fall through with the recovered
+          //    response so it takes the normal caching path below.
+          const fresh = await fetch(request, { cache: "reload" }).catch(() => null);
+          if (fresh?.ok) {
+            response = fresh;
+          } else {
+            // 2. Genuinely gone: serve the old chunk if we still hold it, which
+            //    keeps a stale tab working. Otherwise the 404 flows through and
+            //    `vite:preloadError` in `main.ts` reloads onto the current build.
+            const stale = await caches.match(request);
+            if (stale) return stale;
+          }
         }
         // Stash a copy of successful responses for future offline use. Skip 206
         // (`response.ok` covers the whole 2xx range, but `cache.put` rejects on a
