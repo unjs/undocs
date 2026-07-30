@@ -178,11 +178,6 @@ const results = computed<ResultRow[]>(() => {
   return rows;
 });
 
-// Reset selection whenever the result set changes.
-watch(results, () => {
-  activeIndex.value = 0;
-});
-
 // "Did you mean …": when even the relaxed pass finds nothing, ask MiniSearch for
 // the closest query it *could* satisfy. `autoSuggest` re-runs the search with the
 // given (fuzzy) options and assembles candidate query strings from the terms of
@@ -290,9 +285,9 @@ function routeFor(section: SearchSection): { path: string; hash?: string } {
 // entry that navigates to the page top) with the page's matching sections nested
 // beneath it. Only *consecutive* runs are merged, so relevance ranking is
 // preserved — a page whose sections rank far apart still appears as separate
-// groups. Both the header and every nested section stay individually selectable,
-// so `navList` re-flattens them into the keyboard-navigation order the render
-// uses, and `activeIndex` indexes into that flat list.
+// groups. `navList` re-flattens the groups in render order and `activeIndex`
+// indexes into that flat list; `selectable` is the subset of those indices that
+// are real hits (a synthesized lead is a label, not a result — see `move`).
 interface RenderSection {
   index: number;
   section: SearchSection;
@@ -314,7 +309,11 @@ interface RenderGroup {
   sections: RenderSection[];
 }
 
-const grouped = computed<{ groups: RenderGroup[]; nav: SearchSection[] }>(() => {
+const grouped = computed<{
+  groups: RenderGroup[];
+  nav: SearchSection[];
+  selectable: number[];
+}>(() => {
   // First pass: bucket consecutive rows by page path, splitting each page's own
   // level-1 hit (no `#anchor`) from its section hits.
   const buckets: { path: string; pageRow?: ResultRow; sections: ResultRow[] }[] = [];
@@ -333,6 +332,7 @@ const grouped = computed<{ groups: RenderGroup[]; nav: SearchSection[] }>(() => 
   // every entry gets its keyboard index in render order (header, then sections).
   const groups: RenderGroup[] = [];
   const nav: SearchSection[] = [];
+  const selectable: number[] = [];
   for (const b of buckets) {
     // Highlight the page title with every term matched anywhere in the group, so
     // a page that only matched via a section still highlights in the header.
@@ -359,6 +359,7 @@ const grouped = computed<{ groups: RenderGroup[]; nav: SearchSection[] }>(() => 
       isHit: !!b.pageRow,
     };
     nav.push(headerSection);
+    if (header.isHit) selectable.push(header.index);
     const sections = b.sections.map<RenderSection>((row) => {
       const item = {
         index: nav.length,
@@ -368,16 +369,23 @@ const grouped = computed<{ groups: RenderGroup[]; nav: SearchSection[] }>(() => 
         // Drop the leading page title (shown in the header) from the breadcrumb.
         crumb: (row.section.titles || []).slice(1).join(" › "),
       };
+      selectable.push(item.index);
       nav.push(row.section);
       return item;
     });
     groups.push({ path: b.path, header, sections });
   }
-  return { groups, nav };
+  return { groups, nav, selectable };
 });
 
 const renderGroups = computed(() => grouped.value.groups);
 const navList = computed(() => grouped.value.nav);
+
+// Reset the selection whenever the result set changes — onto the first selectable
+// entry, which isn't always index 0 (a group can open with a synthesized lead).
+watch(grouped, (value) => {
+  activeIndex.value = value.selectable[0] ?? 0;
+});
 
 function select(section: SearchSection | undefined) {
   if (!section) return;
@@ -396,21 +404,19 @@ function headerTarget(group: RenderGroup): SearchSection {
 }
 
 // --- keyboard navigation -----------------------------------------------------
-// Arrow keys jump between groups (page headers), not through every nested
-// section — stepping one heading at a time is tedious when a page matches many.
-// The mouse can still land on any nested section (`onItemMouseMove`); from such a
-// section, ↓ advances to the next group and ↑ to the previous one.
+// Arrow keys step through the real hits only, skipping synthesized group leads:
+// a lead has no content of its own and navigates to the same place as the first
+// section under it, so stopping on it would be a wasted keypress. Groups whose
+// header *is* a page-level hit are stepped onto normally.
 function move(delta: number) {
-  const headers = renderGroups.value.map((group) => group.header.index);
-  if (headers.length === 0) return;
-  // The group currently containing `activeIndex` is the last header at or before
-  // it (headers are in ascending render order).
-  let g = 0;
-  for (let i = 0; i < headers.length && headers[i] <= activeIndex.value; i++) {
-    g = i;
-  }
-  g = (g + delta + headers.length) % headers.length;
-  activeIndex.value = headers[g];
+  const items = grouped.value.selectable;
+  if (items.length === 0) return;
+  const current = items.indexOf(activeIndex.value);
+  activeIndex.value =
+    current === -1
+      ? // Selection is off the selectable list — enter from the edge we came from.
+        items[delta > 0 ? 0 : items.length - 1]
+      : items[(current + delta + items.length) % items.length];
   scrollActiveIntoView();
 }
 
@@ -449,11 +455,9 @@ function onInputKeydown(event: KeyboardEvent) {
     }
     case "Enter": {
       event.preventDefault();
-      // If the selection is on a group header, resolve it through `headerTarget`
-      // so a synthesized lead jumps to its first section; otherwise select the
-      // section at the active index directly.
-      const group = renderGroups.value.find((g) => g.header.index === activeIndex.value);
-      select(group ? headerTarget(group) : navList.value[activeIndex.value]);
+      // Only real hits are selectable, so the flat entry is always the target —
+      // no `headerTarget` indirection needed (that's for clicking a lead).
+      select(navList.value[activeIndex.value]);
       break;
     }
   }
@@ -553,7 +557,7 @@ onUnmounted(() => {
                     : 'text-foreground hover:bg-accent/50'
                 "
                 @click="select(headerTarget(group))"
-                @mousemove="onItemMouseMove($event, group.header.index)"
+                @mousemove="group.header.isHit && onItemMouseMove($event, group.header.index)"
               >
                 <span v-if="group.header.parents.length" class="text-xs text-muted-foreground">
                   {{ group.header.parents.join(" › ") }}
