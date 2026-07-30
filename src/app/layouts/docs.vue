@@ -33,15 +33,36 @@ const hasSidebar = computed(() =>
 onMounted(() => {
   watch(
     () => route.path,
-    () =>
-      nextTick(() => {
-        document
-          .querySelector("[data-active-docs-link]")
-          ?.scrollIntoView({ block: "center", behavior: "auto" });
-      }),
+    () => nextTick(revealActiveLink),
     { immediate: true },
   );
 });
+
+/**
+ * Centre the active link inside the sidebar's own scrollport. Deliberately NOT
+ * `el.scrollIntoView()`: that scrolls EVERY scrolling box up to the viewport, so
+ * it also moves the window to centre the link — undoing the router's
+ * scroll-to-top on every navigation, and yanking the page on a deep link.
+ */
+function revealActiveLink() {
+  const el = document.querySelector("[data-active-docs-link]");
+  const box = el && scrollport(el);
+  // No scrollport → the tree fits, so the link is already in view.
+  if (!el || !box) return;
+  const link = el.getBoundingClientRect();
+  const view = box.getBoundingClientRect();
+  box.scrollTop += link.top - view.top - (box.clientHeight - link.height) / 2;
+}
+
+/** Nearest ancestor that actually scrolls vertically. */
+function scrollport(el: Element): HTMLElement | undefined {
+  for (let p = el.parentElement; p; p = p.parentElement) {
+    const overflowY = getComputedStyle(p).overflowY;
+    if ((overflowY === "auto" || overflowY === "scroll") && p.scrollHeight > p.clientHeight) {
+      return p;
+    }
+  }
+}
 </script>
 
 <template>

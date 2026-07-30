@@ -261,8 +261,15 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
 
   // Resolved-component cache (dynamic-import modules are stable per record).
   const cache = new Map<RouteRecord, Component>();
-  // Scroll offsets keyed by fullPath, for back/forward restoration.
+  // Scroll offsets keyed by fullPath, for back/forward restoration. Kept current
+  // by the `scroll` listener below — a pop offers no chance to record the
+  // outgoing offset, since `popstate` fires with the location already changed.
   const scrollPositions = new Map<string, number>();
+  // Where to land once the INCOMING page has actually rendered. Until its
+  // `<Suspense>` resolves the document still holds the outgoing page, so a
+  // restore offset would clamp against the wrong height and a `#hash` target
+  // wouldn't exist yet. Consumed by `_pageRendered`.
+  let pendingScroll: { hash: string; top?: number } | null = null;
 
   let navigated = false;
   let readyResolve!: () => void;
@@ -292,20 +299,20 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     component.value = comp;
   }
 
-  function applyScroll(parsed: Omit<RouteLocation, "meta">, savedScroll?: number) {
+  function applyScroll(hash: string, top?: number) {
     if (!IS_BROWSER) return;
     // Hash anchors: `app.vue` also runs its own scroll-into-view retry loop for
     // async-rendered content; try an immediate scroll here too.
-    if (parsed.hash) {
-      document.querySelector(parsed.hash)?.scrollIntoView();
+    if (hash) {
+      document.querySelector(hash)?.scrollIntoView();
       return;
     }
-    window.scrollTo({ top: savedScroll ?? 0 });
+    window.scrollTo({ top: top ?? 0 });
   }
 
   async function navigate(
     loc: string,
-    opts: { client?: boolean; savedScroll?: number } = {},
+    opts: { client?: boolean; pop?: boolean; savedScroll?: number } = {},
   ): Promise<void> {
     const token = ++navToken;
 
@@ -340,16 +347,51 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     // `_pageRendered`.)
     if (samePath) stopPending();
 
-    applyScroll(parsed, opts.savedScroll);
+    // Scroll. Anything that needs the incoming page's DOM is queued for
+    // `_pageRendered` instead of run here: the new page hasn't rendered yet, so
+    // the document still has the OUTGOING page's height (a deep offset would
+    // clamp, a `#hash` target wouldn't exist), and effects that fire on the new
+    // render — the sidebar revealing its active entry, layout settling — would
+    // otherwise move the viewport after us.
+    if (samePath) {
+      // Same page, so the DOM is already right — nothing to wait for.
+      applyScroll(parsed.hash, opts.savedScroll);
+    } else if (opts.pop) {
+      // Back/forward: put the visitor back where they left this entry. With no
+      // record of it (a fresh entry after a reload) leave scroll alone — the
+      // browser's own restoration has already placed it.
+      if (parsed.hash || opts.savedScroll !== undefined) {
+        pendingScroll = { hash: parsed.hash, top: opts.savedScroll };
+      }
+    } else if (opts.client) {
+      // Forward navigation: the top of the new page. Right away, because the
+      // outgoing content is still on screen and waiting for the load would leave
+      // the visitor stranded mid-page — then again once the page renders.
+      pendingScroll = { hash: parsed.hash };
+      if (!parsed.hash) applyScroll("");
+    }
+    // The initial route (`client: false`) is SSR hydration: leave the visitor's
+    // scroll — and the browser's restore-on-reload — untouched.
 
     navigated = true;
     readyResolve();
   }
 
   if (IS_BROWSER) {
+    // Track the current page's offset as it changes, so back/forward can restore
+    // it in EITHER direction (`push` only ever sees the offset of the page being
+    // left forwards). Passive + a single map write, so scrolling stays free.
+    window.addEventListener(
+      "scroll",
+      () => {
+        scrollPositions.set(route.fullPath, window.scrollY);
+      },
+      { passive: true },
+    );
+
     hist.listen((loc) => {
       const saved = scrollPositions.get(parseLocation(loc).fullPath);
-      void navigate(loc, { client: true, savedScroll: saved });
+      void navigate(loc, { client: true, pop: true, savedScroll: saved });
     });
   }
 
@@ -384,6 +426,13 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     },
     _pageRendered() {
       stopPending();
+      const target = pendingScroll;
+      pendingScroll = null;
+      if (!target || !IS_BROWSER) return;
+      // `resolve` fires with the new page patched in; one more tick lets the
+      // effects it triggered (sidebar reveal, TOC) settle first, so ours is the
+      // last word on where the viewport sits.
+      void nextTick(() => applyScroll(target.hash, target.top));
     },
   };
 
