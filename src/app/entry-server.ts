@@ -234,7 +234,29 @@ function htmlTemplate(appHtml: string, payload: string): string {
 </html>`;
 }
 
+// Client bundle base (`build.assetsDir` in vite.config.ts). Requests under it
+// are static files; reaching this handler means no such file exists.
+const ASSETS_BASE = "/_undocs/";
+
 const handler = defineHandler(async (event): Promise<Response> => {
+  // A missing build asset must NOT render the SPA error page. Browsers enforce
+  // the MIME type of module scripts, so answering `main-<hash>.js` with
+  // `text/html` fails as "Expected a JavaScript-or-Wasm module script" rather
+  // than a plain 404 — and it wastes a full SSR render on a static 404. This
+  // happens whenever HTML outlives the build it names (a tab open across a
+  // deploy, or a stale cached document).
+  //
+  // `no-store` matters as much as the body: hosts stamp this path `immutable`
+  // by pattern, before knowing the file exists, so a cacheable 404 here gets
+  // stored for a year and never revalidated. Vercel gets the same treatment at
+  // the routing layer (`src/server/vercel.ts`); this covers every other preset.
+  if (event.url.pathname.startsWith(ASSETS_BASE)) {
+    return new Response("Not Found", {
+      status: 404,
+      headers: { "content-type": "text/plain;charset=utf-8", "cache-control": "no-store" },
+    });
+  }
+
   // Flush the client-bundle preloads as HTTP 103 Early Hints, ahead of the
   // buffered render, so the browser downloads the JS/CSS during it rather than
   // waiting for the first HTML byte. `writeEarlyHints` self-no-ops on runtimes
