@@ -192,27 +192,50 @@ const devLoadingOverlay = import.meta.dev
 // is the only code guaranteed to have executed by then, so recovery has to live
 // here: reload once onto whatever the server currently serves.
 //
-// Capture phase, because resource load errors don't bubble. The sessionStorage
-// stamp caps this at one attempt per 15s, so a deploy that is genuinely broken
-// (or HTML the edge keeps serving stale) fails visibly instead of looping. Prod
-// only — in dev a missing chunk is usually Vite mid-restart, and reloading would
-// fight HMR. `import.meta.dev` is compile-time, so this DCEs to `""` in dev.
+// Capture phase, because resource load errors don't bubble.
+//
+// The retry is DELAYED and escalating (1.5s, then 5s). The window this recovers
+// from is a deploy still settling, which lasts seconds — reloading the instant
+// the first asset fails just lands in the same broken window and wastes the
+// attempt. `scheduled` collapses the burst of errors (every asset in the
+// document fails at once) into a single reload.
+//
+// The attempt budget is keyed to the BUILD, taken from the entry script's
+// hashed URL. Reloading onto a genuinely new build resets it — a later deploy
+// gets full recovery. Reloading onto the SAME build twice means the mismatch is
+// persistent (stale HTML the edge keeps re-serving, or a chunk that is really
+// gone), so we stop and let it fail visibly rather than thrash. That is also
+// what stops a permanently-missing lazy chunk from reload-looping forever.
+//
+// Prod only — in dev a missing chunk is usually Vite mid-restart, and reloading
+// would fight HMR. `import.meta.dev` is compile-time, so this DCEs to `""`.
 const assetRecoveryScript = import.meta.dev
   ? ""
   : /* html */ `<script>
       (function () {
         var K = "undocs:asset-recovery";
+        var DELAYS = [1500, 5000];
+        var scheduled = false;
         addEventListener("error", function (e) {
           var t = e.target;
           if (!t || (t.tagName !== "SCRIPT" && t.tagName !== "LINK")) return;
           if ((t.src || t.href || "").indexOf("/_undocs/") === -1) return;
+          if (scheduled) return;
+          var entry = document.querySelector('script[type="module"][src*="/_undocs/"]');
+          var build = (entry && entry.getAttribute("src")) || "";
+          var n = 0;
           try {
-            if (Date.now() - (+sessionStorage.getItem(K) || 0) < 15000) return;
-            sessionStorage.setItem(K, "" + Date.now());
+            var prev = (sessionStorage.getItem(K) || "").split(" ");
+            if (prev[0] === build) n = +prev[1] || 0;
+            if (n >= DELAYS.length) return;
+            sessionStorage.setItem(K, build + " " + (n + 1));
           } catch (_) {
             return;
           }
-          location.reload();
+          scheduled = true;
+          setTimeout(function () {
+            location.reload();
+          }, DELAYS[n]);
         }, true);
       })();
     </script>`;
