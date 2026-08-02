@@ -17,6 +17,13 @@
 export const PAYLOAD_GLOBAL = "__UNDOCS__";
 
 export interface UndocsPayload {
+  /**
+   * Identifies the build that rendered this document. Compared against the
+   * `/_build.json` manifest to detect that the server has been redeployed since
+   * (see `utils/build.ts`) — a positive signal, rather than inferring it from a
+   * failed asset request.
+   */
+  buildId?: string;
   /** Resolved `useAsyncData` results, keyed by data key. */
   data: Record<string, unknown>;
   /** `useState` values, keyed by state key. */
@@ -49,6 +56,7 @@ export function serializePayload(payload: UndocsPayload): string {
 export function readPayload(): UndocsPayload {
   const raw = (globalThis as any)[PAYLOAD_GLOBAL] as UndocsPayload | undefined;
   return {
+    buildId: raw?.buildId,
     data: raw?.data ?? {},
     state: raw?.state ?? {},
     icons: raw?.icons ?? {},

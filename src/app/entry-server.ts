@@ -29,6 +29,7 @@ import { createHead, transformHtmlTemplate } from "@unhead/vue/server";
 import { $fetch as ofetch, type $Fetch } from "ofetch";
 import { getIcon, iconLoaded, loadIcon } from "@iconify/vue";
 import { defineHandler, writeEarlyHints } from "nitro/h3";
+import { useRuntimeConfig } from "nitro/runtime-config";
 
 // `?assets=client` is Nitro's fullstack virtual module: the client entry manifest
 // `{ entry, js: [{ href }], css: [{ href }] }` (hashed in prod, dev URLs in dev).
@@ -261,6 +262,16 @@ function htmlTemplate(appHtml: string, payload: string): string {
 // are static files; reaching this handler means no such file exists.
 const ASSETS_BASE = "/_undocs/";
 
+// Build identity, set by the `undocs:build-id` Nitro module (src/server/build-id.ts)
+// from `manifest.deploymentId`. The same value backs the `/_build.json` route, so
+// inlining it here lets the client tell "the server has moved on" from "my assets
+// are missing" — a positive signal, rather than inferring a redeploy from a failed
+// request. One source for both sides is the point: if they could disagree, a
+// prerendered page would report itself stale forever.
+function buildId(): string | undefined {
+  return (useRuntimeConfig().undocs as { buildId?: string } | undefined)?.buildId;
+}
+
 const handler = defineHandler(async (event): Promise<Response> => {
   // A missing build asset must NOT render the SPA error page. Browsers enforce
   // the MIME type of module scripts, so answering `main-<hash>.js` with
@@ -350,6 +361,9 @@ const handler = defineHandler(async (event): Promise<Response> => {
   }
 
   const payload: UndocsPayload = {
+    // The build this document was rendered by. Compared against `/_build.json`
+    // to detect that a deploy has happened since (see `utils/build.ts`).
+    buildId: buildId(),
     data: collectAsyncData(ctx),
     state: Object.fromEntries([...ctx.state].map(([key, ref]) => [key, ref.value])),
     icons: collectIcons(ctx),

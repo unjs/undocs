@@ -6,6 +6,7 @@ import { loadConfig } from "c12";
 import { vercel } from "./src/server/vercel";
 import { bundleDocs } from "./src/server/bundle-docs";
 import { rebaseOutput } from "./src/server/rebase-output";
+import { buildId } from "./src/server/build-id";
 import pkg from "./package.json" with { type: "json" };
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
@@ -83,7 +84,10 @@ export default defineNitroConfig({
   // so preset output would otherwise land next to undocs; this rebases
   // `output.*` onto `docsDir` instead. Listed first so its `setup` runs before
   // other modules' `compiled` hooks read those paths.
-  modules: [rebaseOutput(docsDir), vercel(vercelLinkDirs), bundleDocs(dir)],
+  //
+  // `buildId`: registers the `/_build.json` route and exposes the build
+  // identity to the SSR renderer (see `src/server/build-id.ts`).
+  modules: [rebaseOutput(docsDir), vercel(vercelLinkDirs), bundleDocs(dir), buildId()],
 
   // SSR serving: no `renderer.template` or `renderer.handler` is set. With an
   // `ssr` Vite environment present (see `vite.config.ts`), Nitro's vite plugin
