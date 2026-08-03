@@ -15,8 +15,8 @@ import { highlightCode } from "./content/highlight";
  *
  * It loads `<docsDir>/.config/docs.*` via c12, converts
  * `landing.features[].description` markdown → HTML (md4x), highlights
- * `landing.heroCode` via shiki (`contentHighlighted`), and infers `branch`
- * (default "main"). md4x/shiki are wrapped in try/catch so a highlight/markdown
+ * `landing.heroCode` (`contentHighlighted`), and infers `branch` (default
+ * "main"). md4x/the highlighter are wrapped in try/catch so a highlight/markdown
  * failure degrades gracefully instead of failing the build.
  */
 export interface UndocsAppConfig {
@@ -49,16 +49,17 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
 
   // Normalize and syntax-highlight the hero code sample. Reuses the doc-content
   // highlighter (`highlightCode`) so the landing hero renders with the exact
-  // same shiki instance, themes, and dual-theme (`--shiki-*`) output as every
-  // other code block — no separate config that drifts out of sync.
+  // same grammars, aliases and `.code-hl` token markup as every other block —
+  // no separate config that drifts out of sync.
   if (docs.landing && docs.landing.heroCode) {
     try {
       if (typeof docs.landing.heroCode === "string") {
         docs.landing.heroCode = { content: docs.landing.heroCode };
       }
-      docs.landing.heroCode.contentHighlighted = (
-        await highlightCode(docs.landing.heroCode.content, docs.landing.heroCode.lang || "sh")
-      ).replaceAll(`<span class="line"></span>`, "");
+      docs.landing.heroCode.contentHighlighted = highlightCode(
+        docs.landing.heroCode.content,
+        docs.landing.heroCode.lang || "sh",
+      );
     } catch (error) {
       console.error("[undocs] failed to highlight hero code:", error);
     }

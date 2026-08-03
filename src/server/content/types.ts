@@ -80,7 +80,7 @@ export interface BuildStats {
     automd: number; // automd transform (0 when unused)
     parse: number; // md4x.parseAST + parseMeta
     transform: number; // transformBody (AST rewrites)
-    highlight: number; // highlightBody (shiki)
+    highlight: number; // highlightBody (rangi)
     navigation: number; // buildNavigation
     search: number; // buildSearch
   };

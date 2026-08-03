@@ -100,18 +100,20 @@ export default defineNitroConfig({
   // storage (fonts, fallback mark, public icon overrides). See above.
   serverAssets,
 
-  // NOTE: no `rollupConfig.external`/`traceDeps` for md4x/shiki/automd — their
+  // NOTE: no `rollupConfig.external`/`traceDeps` for md4x/automd — their
   // WASM entries are bundled inline by Nitro's unwasm plugin, keeping
   // `.output/` self-contained (no project `node_modules`). Externalizing them
   // would break that; Nitro still auto-traces genuine native deps (e.g.
-  // @parcel/watcher) on its own.
+  // @parcel/watcher) on its own. `@speed-highlight/core` needs no special
+  // handling — it is dependency-free, wasm-free, and its dist entry inlines
+  // every grammar.
 
   // Force md4x to be BUNDLED so unwasm's `.wasm?module` transform runs on it:
   // `md4x/wasm` resolves via the `unwasm` condition to a `?module` import only
   // unwasm can handle. The prerender's rolldown pass previously externalized
   // md4x while still applying that condition, leaving the raw import to hit
   // plain Node → `ERR_PACKAGE_PATH_NOT_EXPORTED`. `noExternals` keeps md4x
-  // inline everywhere (like shiki).
+  // inline everywhere.
   noExternals: ["md4x"],
 
   // Explicit server-route registrations. `serverDir` defaults to `false` in

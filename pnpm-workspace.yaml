@@ -19,6 +19,7 @@ overrides:
   undocs: link:.
 
 minimumReleaseAgeExclude:
+  - "rangi@2.1.0"
   - "takumi-js@2.0.1"
   - "@takumi-rs/core@2.0.1"
   - "@takumi-rs/helpers@2.0.1"

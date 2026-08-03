@@ -130,7 +130,7 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     body = transformBody(body, rel);
     phases.transform += now() - mark;
     mark = now();
-    codeBlocks += await highlightBody(body);
+    codeBlocks += highlightBody(body);
     phases.highlight += now() - mark;
 
     // toc (nested h2 > h3)

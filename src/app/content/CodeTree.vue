@@ -8,9 +8,9 @@
  * Input shape mirrors `ProseCodeGroup` — the default slot is a set of child
  * `ProsePre` code blocks, each carrying a `filename` (path), `language` and
  * `icon` off its props. A `filename` with `/` (e.g. `server/routes/index.ts`)
- * nests into folders. The children are already shiki-highlighted by the content
- * pipeline, so we never run shiki on the client: we just DISPLAY the selected
- * child vnode.
+ * nests into folders. The children are already highlighted by the content
+ * pipeline, so we never run the highlighter on the client: we just DISPLAY the
+ * selected child vnode.
  *
  * Hydration parity: the selected file and the expanded folders are seeded
  * DETERMINISTICALLY in `setup` (from `defaultValue` / `expandAll`, else the
@@ -262,7 +262,7 @@ const rows = computed<Row[]>(() => {
  * (`.code-tree` max-h-96) and owns the vertical scroll; horizontal scroll stays
  * as a fallback for unbreakable tokens (see word-wrap below).
  */
-.code-tree-body :deep(.shiki-wrapper),
+.code-tree-body :deep(.code-hl-wrapper),
 .code-tree-body :deep(.prose-pre > pre) {
   flex: 1 1 0%;
   min-height: 0;
@@ -275,7 +275,7 @@ const rows = computed<Row[]>(() => {
  * unbreakable tokens, and the containers above keep `overflow-x: auto` so a
  * horizontal scrollbar still appears when a token truly cannot wrap.
  */
-.code-tree-body :deep(.shiki),
+.code-tree-body :deep(.code-hl),
 .code-tree-body :deep(.prose-pre > pre) {
   white-space: pre-wrap;
   overflow-wrap: anywhere;

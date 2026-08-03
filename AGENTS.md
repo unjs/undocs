@@ -14,7 +14,8 @@ project supplies only Markdown + one config file.
 - **From-scratch router** (`src/app/router.ts`) instead of vue-router — a tiny
   reactive route + `AppLink`/`AppPage`/`AppLayout`.
 - **`reka-ui`** (unstyled primitives) + **Tailwind v4** (`@tailwindcss/vite`).
-- **`md4x`** (Markdown → comark AST) + **shiki** (highlight), both server-only.
+- **`md4x`** (Markdown → comark AST) + **`rangi`** (highlight, synchronous),
+  both server-only.
 
 ## Layout (`src/`)
 
@@ -45,8 +46,7 @@ project supplies only Markdown + one config file.
 
 - `content/` — the content engine. `buildIndex()` (`builder.ts`) globs the docs
   dir, parses each file with `md4x`, runs block `transforms`, highlights with
-  `shiki`, builds navigation/search/TOC/surround, and returns a `ContentIndex`.
-  `store.ts` caches that index as a process singleton. `highlight.ts`, `icons.ts`,
+  `rangi`, builds navigation/search/TOC/surround, and returns a `ContentIndex`. `store.ts` caches that index as a process singleton. `highlight.ts`, `icons.ts`,
   `types.ts`, `utils.ts` support it.
 - `routes/api/docs/` — the content API (see below). Other routes: `raw/**` and
   `llms{,-full}.txt` (source Markdown for LLMs), `_og/**` (OG images via
@@ -117,7 +117,7 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
 
 ## Invariants (do not break)
 
-- **HTTP boundary.** node/wasm deps (`md4x`, `shiki`, `automd`, `takumi-js`,
+- **HTTP boundary.** node/wasm deps (`md4x`, `rangi`, `automd`, `takumi-js`,
   `node:*`, `c12`) live only under `src/server/`. The client reaches content
   solely through `/api/docs/*` and `virtual:undocs/app-config`. Verify no engine
   import leaks into the client bundle.
@@ -146,9 +146,37 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
   `onErrorCaptured`) must call `router._pageRendered()`, or a slow/errored page
   leaves `router.pending` — and the nav loading bar — stuck on.
 - **Single shared highlighter.** Doc content and the landing hero both go through
-  the one `highlightCode`/shiki instance. Its fine-grained `.mjs` lang/theme
-  imports and `shiki/core` + oniguruma-only setup are deliberate (avoid rolldown
-  bloat/panic).
+  the one `highlightCode` (`rangi`), so both get the same grammars and the same
+  fence-alias table. It is SYNCHRONOUS — rangi returns markup directly, not a
+  promise — and so are `highlightBody` and `highlightCode`.
+- **Token colours are styled, not inlined.** `highlightCode` runs rangi with
+  `classes: true`, so each token is `<span class="shj-<type>">` and the palette
+  lives in `assets/main.css` (~37% smaller markup raw, ~7% gzipped). The two
+  branches of each `light-dark()` there are rangi's own `default`/`dark` themes;
+  `test/content/theme.test.ts` is the drift guard, and also pins the italic on
+  `.shj-cmnt` that rangi's inline mode used to add for us. `html.light`/`html.dark`
+  map to CSS `color-scheme` in `main.css` — those two declarations are
+  LOAD-BEARING: without them `light-dark()` resolves to its light branch in dark
+  mode and every code block renders wrong. Our own `.code-hl` /
+  `.code-hl-lang-*` wrapper classes carry layout only.
+- **Prefer upstream over a local grammar.** rangi 2.1 absorbed four of the five
+  we used to carry (jsx/tsx, jsonc/json5, and the corrected `yaml` fork), each at
+  parity or better on measured coverage. Only `mdc` is left, because rangi ships
+  no equivalent. Before adding one, measure against the bundled grammar; before
+  keeping one, re-measure on upgrade.
+- **Local grammars are passed per call, never registered.** `grammars/index.ts`
+  builds a frozen `LOCAL_LANGUAGES` record handed to rangi via its `languages`
+  option (it applies to sub-languages too). There is no global registration step
+  and no shared mutable cache. A grammar named after one rangi ships REPLACES it
+  and must say why via `overridesBuiltin` — `registry.test.ts` enforces that.
+  Rules are TUPLES (`[match, type, sub]`), not objects; see `grammars/types.ts`.
+- **Aliases: rangi's first, ours only for the gaps.** rangi 2.1 spreads its own
+  39 aliases into the same `languages` record as the grammars, so they resolve
+  through `KNOWN_LANGS` for free. `LANG_ALIASES` in `highlight.ts` holds only
+  what rangi lacks — deliberate approximations (`mdx`→md, `console`→bash) and
+  vendor spellings (`shellscript`, `c++`). `BUNDLED_ALIASES` inverts rangi's
+  table by OBJECT IDENTITY (an alias entry IS its grammar, not a copy) so every
+  spelling collapses to one canonical `code-hl-lang-*` class.
 - **Prod docs-dir fallback.** The baked absolute `runtimeConfig.undocs.dir` may
   not exist on a deploy; `store.ts`'s `resolveDir` falls back to
   `<nitro-main>/docs`, populated by `bundle-docs.ts`. Keep the two glob/exclude

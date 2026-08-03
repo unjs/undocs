@@ -77,7 +77,7 @@ list of options (landing page, banner, socials, sponsors, `llms.txt`, and more).
 
 ## Stack
 
-Undocs is currently powered by [Nitro](https://nitro.build), [Vite](https://vite.dev), [md4x](https://github.com/unjs/md4x), [shiki](https://github.com/shikijs/shiki), [Unhead](http://unhead.unjs.io/) and [Reka UI](https://reka-ui.com/).
+Undocs is currently powered by [Nitro](https://nitro.build), [Vite](https://vite.dev), [md4x](https://github.com/unjs/md4x), [rangi](https://github.com/pi0/rangi), [Unhead](http://unhead.unjs.io/) and [Reka UI](https://reka-ui.com/).
 
 > UnDocs was originally based on [Nuxt](https://nuxt.com/), [Nuxt UI](https://ui.nuxt.com/), [Nuxt Content](https://content.nuxt.com/) ([Comark](https://comark.dev/)), [Vue Router](https://router.vuejs.org/), and other Nuxt ecosystem modules such as [nuxt-llms](https://github.com/nuxt-content/nuxt-llms) and [nuxt-icon](https://github.com/nuxt/icon) which inspired the new generation of undocs.
 

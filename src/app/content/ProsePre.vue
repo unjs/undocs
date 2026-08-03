@@ -58,7 +58,7 @@ async function copy() {
     </button>
 
     <!-- Body: prefer highlighted HTML, then slot content, then raw code. -->
-    <div v-if="highlighted" class="shiki-wrapper overflow-x-auto text-sm" v-html="highlighted" />
+    <div v-if="highlighted" class="code-hl-wrapper overflow-x-auto text-sm" v-html="highlighted" />
     <pre v-else-if="hasSlot" class="overflow-x-auto px-4 py-3 text-sm"><code><slot /></code></pre>
     <pre v-else class="overflow-x-auto px-4 py-3 text-sm"><code>{{ code }}</code></pre>
   </div>
@@ -66,16 +66,16 @@ async function copy() {
 
 <style scoped>
 /*
- * Layout only. Dual-theme color/background switching for `.shiki` lives in the
- * global stylesheet (`assets/main.css`, keyed on `html.light`/`html.dark`) so it
+ * Layout only. Dual-theme token coloring for `.code-hl` lives in the global
+ * stylesheet (`assets/main.css`, keyed on `html.light`/`html.dark`) so it
  * applies to every highlighted block, not just those wrapped by `.prose-pre`.
  */
-.prose-pre :deep(.shiki) {
+.prose-pre :deep(.code-hl) {
   margin: 0;
   padding: 0.75rem 1rem;
 }
 
-/* Plain (non-highlighted) fallback code — match the `.shiki` block padding. */
+/* Plain (non-highlighted) fallback code — match the `.code-hl` block padding. */
 .prose-pre :deep(pre) {
   margin: 0;
   padding: 0.75rem 1rem;
@@ -90,7 +90,7 @@ async function copy() {
  * the body keeps `overflow-x-auto` so a scrollbar still appears only when a
  * token truly cannot wrap.
  */
-.prose-pre :deep(.shiki),
+.prose-pre :deep(.code-hl),
 .prose-pre :deep(pre) {
   white-space: pre-wrap;
   overflow-wrap: anywhere;

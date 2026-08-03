@@ -18,6 +18,23 @@ html {
   background-color: var(--background);
 }
 
+/*
+ * Bind the CSS `color-scheme` to the app's own light/dark toggle.
+ *
+ * LOAD-BEARING for syntax highlighting: rangi inlines every token colour as
+ * `light-dark(<light>, <dark>)`, and the browser resolves that against the
+ * inherited `color-scheme` — NOT against `.dark` or a media query. Without
+ * these two declarations every highlighted token would render its light branch
+ * even in dark mode. It also gives form controls and scrollbars the right
+ * native appearance for free.
+ */
+html.light {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
@@ -207,7 +224,7 @@ body {
   border-top: 1px solid var(--ui-border);
 }
 
-/* Inline code (`:not(.shiki *)` keeps highlighted code blocks untouched). */
+/* Inline code (the `:not(pre) >` guard keeps highlighted code blocks untouched). */
 .md :not(pre) > code {
   padding: 0.125rem 0.375rem;
   border-radius: var(--radius-sm);
@@ -245,27 +262,73 @@ body {
   border-radius: var(--radius-md);
 }
 
-pre .shiki span.line {
-  display: inline;
-}
-
 /*
- * Shiki dual-theme switching (global). Every highlighted block (`highlightCode`,
- * `defaultColor: false`) emits `--shiki-light`/`--shiki-dark` on tokens. Keying
- * purely on `html.light`/`html.dark` + `.shiki` — instead of a component-scoped
- * `:deep()` selector — switches the token colors consistently for every `.shiki`
- * regardless of wrapper (ProsePre body, code group, package-manager tabs, hero).
+ * Syntax highlighting — the token palette.
  *
- * The `.shiki` background is intentionally left transparent so code blocks show
- * their container's surface (`--ui-bg-muted`) instead of shiki's own theme bg.
+ * `highlightCode` runs rangi in `classes: true` mode, so each token comes back
+ * as `<span class="shj-<type>">` and the colours live here instead of being
+ * inlined on every span. That keeps the HTML small: a page of code blocks
+ * repeats a short class name per token rather than a full `color:` declaration,
+ * and the palette is downloaded once in a file the browser caches.
+ *
+ * The two branches of each `light-dark()` are rangi's own bundled themes —
+ * `default` (light) and `dark` — so this reproduces exactly what the inline
+ * mode emitted. The browser picks a branch from the inherited `color-scheme`,
+ * NOT from `.dark`, which is why the `html.light` / `html.dark` rules at the top
+ * of this file are load-bearing.
+ *
+ * Keep these in step with rangi's themes when upgrading: nothing fails loudly if
+ * they drift, the colours just stop matching upstream. There is deliberately no
+ * `.shj-esc` rule — neither theme colours that token, so it inherits, exactly as
+ * it did inline.
+ *
+ * `.code-hl` / `.code-hl-lang-*` are ours, emitted by `highlightCode`, and carry
+ * layout only (see `ProsePre.vue`). The background stays transparent so code
+ * blocks show their container's surface (`--ui-bg-muted`).
  */
-html.light .shiki,
-html.light .shiki span {
-  color: var(--shiki-light);
+.shj-deleted {
+  color: light-dark(#f44, #ff5261);
 }
-html.dark .shiki,
-html.dark .shiki span {
-  color: var(--shiki-dark);
+.shj-err {
+  color: light-dark(#e16, #ff5261);
+}
+.shj-var {
+  color: light-dark(#f44, #ff5261);
+}
+.shj-section {
+  color: light-dark(#84f, #ff7cc6);
+}
+.shj-kwd {
+  color: light-dark(#e16, #ff7cc6);
+}
+.shj-class {
+  color: light-dark(#f60, #eab07c);
+}
+.shj-cmnt {
+  color: light-dark(#999, #7d828b);
+  /* rangi's inline mode applies this itself; in classes mode it is ours to add. */
+  font-style: italic;
+}
+.shj-insert {
+  color: light-dark(#7d8, #71d58a);
+}
+.shj-type {
+  color: light-dark(#5af, #71d58a);
+}
+.shj-func {
+  color: light-dark(#84f, #71d58a);
+}
+.shj-bool {
+  color: light-dark(#3bf, #71d58a);
+}
+.shj-num {
+  color: light-dark(#f60, #b581fd);
+}
+.shj-oper {
+  color: light-dark(#5af, #80c6ff);
+}
+.shj-str {
+  color: light-dark(#7d8, #4dacfa);
 }
 
 main {

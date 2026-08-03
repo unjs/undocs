@@ -11,8 +11,9 @@
  * class and re-persists (reactive watcher).
  *
  * `init()` runs lazily on first `useColorMode()` call; main.ts also calls it at
- * startup so the class is applied before the app mounts. The Shiki dual-theme
- * CSS (ProsePre.vue, main.css) keys off `.dark` — unchanged.
+ * startup so the class is applied before the app mounts. `main.css` maps those
+ * classes to CSS `color-scheme`, which is what resolves the `light-dark()`
+ * colours rangi inlines into every highlighted token.
  */
 import { reactive, watch } from "vue";
 
