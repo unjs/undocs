@@ -39,6 +39,11 @@ project supplies only Markdown + one config file.
 - `layouts/`, `pages/`, `utils/`, `assets/`, `public/`.
 - `ssr/` — the SSR state bridge: `server-context.ts` (per-request store via
   AsyncLocalStorage) and `payload.ts` (`window.__UNDOCS__` serialize/read).
+- `inline/` — blocking `<head>` programs (asset recovery, color mode, embed
+  theme). `.ts` source + the **committed compiled `.js`** rolldown emits;
+  `entry-server.ts` inlines the artifact via `?raw`. Order in the shell matters:
+  `color-mode` before `embed-theme` (an embedder's pinned mode must win). See
+  `inline/README.md`.
 - `env.d.ts` — types the `import.meta.{server,client,dev,prerender}` build flags
   and the `virtual:undocs/app-config` module.
 
@@ -71,6 +76,7 @@ pnpm build                     # vite build → docs/.output/{public,server}
 pnpm start                     # node docs/.output/server/index.mjs (:3000)
 node cli/main.mjs dev  <dir>   # dev on an arbitrary docs dir (sets UNDOCS_DIR)
 node cli/main.mjs build <dir>  # prod build → <dir>/.output
+pnpm build:inline              # rolldown src/app/inline/*.ts → committed *.js
 pnpm test                      # vitest run --coverage
 pnpm typecheck                 # tsc --noEmit  (bare tsc: .vue imports don't resolve)
 pnpm lint                      # oxlint && oxfmt --check   (fix: pnpm fmt)
@@ -135,6 +141,12 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
   with `import.meta.client` (or `!import.meta.server`) and node-only with
   `import.meta.server`. Payload seeding (`hydrateAsyncData`/`hydrateState`/
   `seedClientIcons`) MUST run before `createSSRApp`.
+  The inline `<head>` programs are the one exception, and only because they stay
+  OUTSIDE the hydration root: `inline/color-mode.ts` reads `localStorage` before
+  the first paint but only touches `<html>`'s class. Anything that RENDERS from
+  the mode (`ColorModeSwitch.vue`) must still show `DEFAULT_COLOR_MODE` on its
+  first client render and correct itself `onMounted` — the server always
+  rendered the default.
 - **Raw HTML is resolved server-side.** `transforms.ts`'s `liftRawHtml` turns raw
   HTML into `_html` nodes (md4x can't distinguish a real tag from a literal `<`);
   the client injects them with `v-html`. Moving this client-side breaks escaping
@@ -192,6 +204,14 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
   `compiled` hooks that read those paths.
 - **Dev-only stays dev-only.** `dev-watch`/`dev-ws`/`dev-reload` and
   `metaEnvFlagsDev` must never ship in `.output/server`.
+- **Inline `<head>` programs are compiled, never hand-written.** Edit
+  `src/app/inline/<name>.ts`, then `pnpm build:inline`; commit BOTH files. The
+  `.js` is what ships (inlined verbatim into every HTML response), so a stale
+  artifact silently serves old behaviour — `test/app/inline-build.test.ts` runs
+  the real build and fails on drift. They are excluded from oxlint/oxfmt
+  (`ignorePatterns`) because they are generated, and carry NO banner/comments —
+  the text ships on every HTML response. Keep them self-contained: every import
+  is inlined, and this is bytes on every page.
 - **The dev SSR entry must be re-imported on every app change.** Nitro's dev
   worker imports `entry-server.ts` ONCE and keeps that module namespace, so a
   Vite HMR update leaves the entry — and its whole STATIC graph (`app.vue`,

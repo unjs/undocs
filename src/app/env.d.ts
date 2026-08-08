@@ -23,6 +23,15 @@ declare module "*.vue" {
   export default component;
 }
 
+/**
+ * Vite's `?raw` suffix — the module's text instead of its exports. Used by
+ * `entry-server.ts` to inline the compiled `inline/*.js` programs into `<head>`.
+ */
+declare module "*?raw" {
+  const source: string;
+  export default source;
+}
+
 declare module "*?assets" {
   const assets: FullstackAssets;
   export default assets;

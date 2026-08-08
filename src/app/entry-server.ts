@@ -58,6 +58,15 @@ import {
 import { PAYLOAD_GLOBAL, serializePayload, type UndocsPayload } from "@app/ssr/payload";
 import { builtinIconNames, seedBuiltinIcons } from "@app/ssr/icons";
 import { primaryCss, STYLE_ID } from "@app/theme-primary";
+
+// The compiled inline `<head>` programs, imported as text. Sources live in
+// `src/app/inline/*.ts`; `scripts/build-inline.mjs` compiles them with rolldown
+// to the checked-in `.js` beside each one. See `src/app/inline/README.md`.
+import embedThemeCode from "@app/inline/embed-theme.js?raw";
+import assetRecoveryCode from "@app/inline/asset-recovery.js?raw";
+import colorModeCode from "@app/inline/color-mode.js?raw";
+import { ASSETS_BASE } from "@app/assets-base";
+import { DEFAULT_COLOR_MODE } from "@app/color-mode";
 import { useAppConfig } from "@app/composables/useAppConfig";
 import { registerUserComponents } from "@app/user-theme";
 
@@ -184,69 +193,38 @@ const devLoadingOverlay = import.meta.dev
   ? /* html */ `<div id="__undocs_loading" aria-hidden="true"><span class="s"></span></div>`
   : "";
 
-// Recovery for HTML that outlived its assets. Bundle files are content-hashed,
-// `immutable` and per-deployment, so a document naming a build that is no longer
-// served has every `/_undocs/*` reference 404 — including the entry script, in
-// which case `main.ts` never runs and nothing in the bundle (not
-// `vite:preloadError`, not the service worker) can react. This inline listener
-// is the only code guaranteed to have executed by then, so recovery has to live
-// here: reload once onto whatever the server currently serves.
+// Recovery for HTML that outlived its assets — see `inline/asset-recovery.ts`
+// for what it does and why it has to be inline.
 //
-// Capture phase, because resource load errors don't bubble.
-//
-// The retry is DELAYED and escalating (1.5s, then 5s). The window this recovers
-// from is a deploy still settling, which lasts seconds — reloading the instant
-// the first asset fails just lands in the same broken window and wastes the
-// attempt. `scheduled` collapses the burst of errors (every asset in the
-// document fails at once) into a single reload.
-//
-// The attempt budget is keyed to the BUILD, taken from the entry script's
-// hashed URL. Reloading onto a genuinely new build resets it — a later deploy
-// gets full recovery. Reloading onto the SAME build twice means the mismatch is
-// persistent (stale HTML the edge keeps re-serving, or a chunk that is really
-// gone), so we stop and let it fail visibly rather than thrash. That is also
-// what stops a permanently-missing lazy chunk from reload-looping forever.
-//
-// Prod only — in dev a missing chunk is usually Vite mid-restart, and reloading
+// Prod only: in dev a missing chunk is usually Vite mid-restart, and reloading
 // would fight HMR. `import.meta.dev` is compile-time, so this DCEs to `""`.
 const assetRecoveryScript = import.meta.dev
   ? ""
-  : /* html */ `<script>
-      (function () {
-        var K = "undocs:asset-recovery";
-        var DELAYS = [1500, 5000];
-        var scheduled = false;
-        addEventListener("error", function (e) {
-          var t = e.target;
-          if (!t || (t.tagName !== "SCRIPT" && t.tagName !== "LINK")) return;
-          if ((t.src || t.href || "").indexOf("/_undocs/") === -1) return;
-          if (scheduled) return;
-          var entry = document.querySelector('script[type="module"][src*="/_undocs/"]');
-          var build = (entry && entry.getAttribute("src")) || "";
-          var n = 0;
-          try {
-            var prev = (sessionStorage.getItem(K) || "").split(" ");
-            if (prev[0] === build) n = +prev[1] || 0;
-            if (n >= DELAYS.length) return;
-            sessionStorage.setItem(K, build + " " + (n + 1));
-          } catch (_) {
-            return;
-          }
-          scheduled = true;
-          setTimeout(function () {
-            location.reload();
-          }, DELAYS[n]);
-        }, true);
-      })();
-    </script>`;
+  : /* html */ `<script>${assetRecoveryCode}</script>`;
+
+// The visitor's color mode, applied before the first paint — the shell below
+// ships the default mode because the server can't know the preference. See
+// `inline/color-mode.ts`.
+const colorModeScript = /* html */ `<script>${colorModeCode}</script>`;
+
+// Per-embed theme override read from the URL fragment. Blocking and inline
+// because the fragment never reaches the server: SSR cannot pre-apply it, and
+// deferring to `main.ts` would flash the default theme first. See
+// `embed-theme.ts` for the payload format and the safety rules.
+//
+// MUST come after `colorModeScript`: its `m` key pins the mode for an embedder
+// and has to win over the visitor's stored preference.
+const embedThemeScript = /* html */ `<script>${embedThemeCode}</script>`;
 
 function htmlTemplate(appHtml: string, payload: string): string {
   return /* html */ `<!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="${DEFAULT_COLOR_MODE}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     ${assetRecoveryScript}
+    ${colorModeScript}
+    ${embedThemeScript}
     ${devLoadingStyle}
   </head>
   <body>
@@ -256,10 +234,6 @@ function htmlTemplate(appHtml: string, payload: string): string {
   </body>
 </html>`;
 }
-
-// Client bundle base (`build.assetsDir` in vite.config.ts). Requests under it
-// are static files; reaching this handler means no such file exists.
-const ASSETS_BASE = "/_undocs/";
 
 const handler = defineHandler(async (event): Promise<Response> => {
   // A missing build asset must NOT render the SPA error page. Browsers enforce

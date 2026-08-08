@@ -304,7 +304,14 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     // Hash anchors: `app.vue` also runs its own scroll-into-view retry loop for
     // async-rendered content; try an immediate scroll here too.
     if (hash) {
-      document.querySelector(hash)?.scrollIntoView();
+      // A hash is attacker/user-authorable and need not be a valid CSS selector
+      // (`#foo bar`, `#~<payload>`), in which case `querySelector` THROWS and
+      // would take the whole navigation down with it.
+      try {
+        document.querySelector(hash)?.scrollIntoView();
+      } catch {
+        // Not a selector — nothing to scroll to.
+      }
       return;
     }
     window.scrollTo({ top: top ?? 0 });

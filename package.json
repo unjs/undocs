@@ -21,6 +21,7 @@
   },
   "scripts": {
     "build": "vite build",
+    "build:inline": "node scripts/build-inline.mjs",
     "dev": "vite",
     "docs:build": "node ./cli/main.mjs build docs",
     "docs:dev": "node ./cli/main.mjs dev docs",
@@ -77,6 +78,7 @@
     "changelogen": "^0.6.2",
     "oxfmt": ">=0.60.0",
     "oxlint": "^1.75.0",
+    "rolldown": "^1.2.3",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },

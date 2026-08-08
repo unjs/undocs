@@ -26,10 +26,16 @@ const isDark = computed<boolean>({
     cm.preference = v ? "dark" : "light";
   },
 });
+
+// An embedder pinning the mode via the URL fragment makes the toggle a no-op —
+// hide it. Gated on `mounted` for the same reason as `isDark`: `forced` is
+// client-only, so the first client render must still match the SSR output.
+const hidden = computed(() => mounted.value && cm.forced);
 </script>
 
 <template>
   <SwitchRoot
+    v-if="!hidden"
     v-model="isDark"
     :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
     class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-border bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"

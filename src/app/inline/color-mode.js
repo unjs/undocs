@@ -1,0 +1,1 @@
+(function(){let e=null;try{e=localStorage.getItem(`undocs-color-mode`)}catch{}let t=e===`light`||e===`dark`?e:e===`system`?matchMedia(`(prefers-color-scheme: dark)`).matches?`dark`:`light`:`dark`,n=document.documentElement;n.classList.toggle(`dark`,t===`dark`),n.classList.toggle(`light`,t===`light`)})();

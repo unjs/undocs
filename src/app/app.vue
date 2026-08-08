@@ -60,7 +60,14 @@ onMounted(() => {
       if (hash) {
         let attempts = 0;
         const interval = setInterval(() => {
-          document.querySelector(hash)?.scrollIntoView();
+          // The hash need not be a valid selector (see `router.ts`'s
+          // `applyScroll`); an uncaught throw here would leak the interval.
+          try {
+            document.querySelector(hash)?.scrollIntoView();
+          } catch {
+            clearInterval(interval);
+            return;
+          }
           if (attempts++ > 5) {
             clearInterval(interval);
           }
