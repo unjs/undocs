@@ -81,8 +81,8 @@ importers:
         specifier: ^1.5.1
         version: 1.5.1
       rangi:
-        specifier: 2.1.0
-        version: 2.1.0
+        specifier: 2.2.0
+        version: 2.2.0
       reka-ui:
         specifier: ^2.10.1
         version: 2.10.1(vue@3.5.40(typescript@7.0.2))
@@ -1981,8 +1981,8 @@ packages:
   quansync@0.2.11:
     resolution: {integrity: sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA==}
 
-  rangi@2.1.0:
-    resolution: {integrity: sha512-2IJphkRRAIrGn+ujlKfu8kogEOhcm09Igw/HZsU/DsLcxyrOn16MCzpdr2s2qEQC3e4GLVitcTEoXr9pVVAJQg==}
+  rangi@2.2.0:
+    resolution: {integrity: sha512-zMXLNs+3ejB2dg5kjJdNbllNq6FrdtEbHA9f3POxbSIHb0CyslALbY8qSDCE2r+/6Ku7xaVHKtnC5qHbF2SgNg==}
     hasBin: true
 
   rc9@3.0.1:
@@ -3868,7 +3868,7 @@ snapshots:
 
   quansync@0.2.11: {}
 
-  rangi@2.1.0: {}
+  rangi@2.2.0: {}
 
   rc9@3.0.1:
     dependencies:

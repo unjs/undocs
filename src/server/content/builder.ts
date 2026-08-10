@@ -15,7 +15,10 @@ import type { BuildStats, ContentIndex, DocPage, MarkNode, NavItem, TocLink } fr
 // dot-prefixed, so they need their own glob (a `**/*` glob never matches leading
 // dots) and an EXCLUDE exemption below.
 const INCLUDE = ["**/*.{md,yml}", "**/.navigation.yml"];
-const EXCLUDE = [/(^|\/)\./, /\/node_modules\//, /\/dist\//, /\/\.docs\//];
+// Tested against a LEADING-slash path ("/" + relative). Shared with the dev
+// watcher (`dev-watch.ts`), which must not descend into what we never scan —
+// `node_modules` alone is ~20x the directory count of real content.
+export const EXCLUDE = [/(^|\/)\./, /\/node_modules\//, /\/dist\//, /\/\.docs\//];
 
 export interface BuildOptions {
   dir: string;
