@@ -48,12 +48,13 @@ const isEmoji = computed(() => Boolean(props.icon && /\p{Emoji}/u.test(props.ico
       </h3>
     </div>
 
-    <p
+    <!-- `div`, not `p` — see the note in PageHero.vue -->
+    <div
       v-if="$slots.description || description"
-      class="m-0! text-sm text-muted-foreground text-pretty leading-relaxed"
+      class="[&>*]:m-0! text-sm text-muted-foreground text-pretty leading-relaxed"
     >
       <slot name="description">{{ description }}</slot>
-    </p>
+    </div>
 
     <div
       v-if="$slots.default"
