@@ -26,7 +26,6 @@
  * executes during SSR. It still guards defensively (`typeof window`) and the
  * `queryPage` body is the same request-scoped `docFetch` used everywhere else.
  */
-import { watch } from "vue";
 import { kebabCase } from "scule";
 import { useLazyAsyncData } from "@app/composables/useAsyncData";
 import { queryPage, querySearchIndex } from "@app/composables/useContent";
@@ -171,19 +170,7 @@ function warm(path: string): void {
   // `useLazyAsyncData` returns an existing entry untouched, so re-warming an
   // already-visited page is a no-op. Errors are swallowed inside the async-data
   // fetcher (it stores them on the entry), so nothing rejects here.
-  const t0 = performance.now();
-  console.log("[prefetch] →", path);
-  const { data: page, error } = useLazyAsyncData(pageKey(path), () => queryPage(path));
-  // Report when the page request settles (data / 404 / error).
-  watch(
-    () => page.value ?? error.value,
-    () => {
-      const ms = Math.round(performance.now() - t0);
-      const status = error.value ? "error" : page.value ? "ok" : "404/empty";
-      console.log(`[prefetch] ✓ ${path} (${status}, ${ms}ms)`, error.value ?? "");
-    },
-    { once: true },
-  );
+  useLazyAsyncData(pageKey(path), () => queryPage(path));
 }
 
 /**
@@ -194,20 +181,7 @@ function warm(path: string): void {
  * parallel.
  */
 function warmSearch(): void {
-  const t0 = performance.now();
-  console.log("[prefetch] → /api/docs/search");
-  const { data, error } = useLazyAsyncData("search", () => querySearchIndex());
-  watch(
-    () => data.value ?? error.value,
-    () => {
-      const ms = Math.round(performance.now() - t0);
-      console.log(
-        `[prefetch] ✓ /api/docs/search (${error.value ? "error" : "ok"}, ${ms}ms)`,
-        error.value ?? "",
-      );
-    },
-    { once: true },
-  );
+  useLazyAsyncData("search", () => querySearchIndex());
 }
 
 let started = false;
@@ -224,8 +198,6 @@ export function startPrefetch(nav: NavItem[], currentPath?: string): void {
   const queue = collectPaths(nav)
     .filter((p) => p !== currentPath)
     .slice(0, MAX_PREFETCH);
-
-  console.log(`[prefetch] plan (${queue.length} pages):`, [...queue]);
 
   // Nothing goes out until the current page has finished loading its own
   // scripts/resources — including the chunks it lazy-loads while hydrating.
