@@ -16,6 +16,7 @@ const isEl = (n: MarkNode | undefined): n is MarkElement => Array.isArray(n);
 export function transformBody(nodes: MarkNode[], rel?: string): MarkNode[] {
   let value = mergeCodeGroups(nodes);
   value = unwrapBlockParagraphs(value);
+  unwrapSlotParagraphs(value);
   if (rel) resolveLinks(value, posix.dirname(rel));
   for (const node of value) {
     if (!isEl(node)) continue;
@@ -144,6 +145,60 @@ function paragraphWrapsBlock(node: MarkElement): boolean {
     hasBlock = true;
   }
   return hasBlock;
+}
+
+// --- unwrap the paragraph md4x wraps a one-line slot fill in ---
+// `#description` followed by a line of prose parses as a block, so the slot
+// template holds a `<p>`. Components render a named slot as the CONTENT of an
+// element they choose — `<p class="…"><slot name="description"/></p>`, a heading,
+// a label — so that paragraph is redundant at best. At worst it is a `<p>` inside
+// a `<p>`: invalid, and the browser's repair (hoist the inner one, synthesize an
+// empty one for the now-stray end tag) yields a DOM that no longer matches the
+// vdom, so hydration mismatches.
+//
+// Only a slot filled with exactly ONE bare paragraph is unwrapped — that is prose
+// the author typed inline. Two paragraphs, a list, or a nested component is block
+// content the component is expected to lay out, and is left alone; so is a
+// paragraph carrying props (`{.text-lg}`), which the author asked for explicitly.
+function unwrapSlotParagraphs(nodes: MarkNode[], start = 0): void {
+  for (let i = start; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (!isEl(node)) continue;
+    const tag = node[0];
+    if (tag && RAW_SKIP.has(tag)) continue;
+    if (tag === "template" && typeof (node[1] as any)?.name === "string") {
+      const idx = loneParagraphIndex(node);
+      // Splice in place rather than rebuilding the child list, so any comment or
+      // whitespace sibling of the paragraph survives.
+      if (idx !== -1) node.splice(idx, 1, ...((node[idx] as MarkElement).slice(2) as MarkNode[]));
+    }
+    // `node` is a `[tag, props, ...MarkNode[]]` tuple; `start = 2` skips the
+    // tag/props, so treating it as a node array is safe.
+    unwrapSlotParagraphs(node as unknown as MarkNode[], 2);
+  }
+}
+
+/**
+ * Index of the slot's only child paragraph, or `-1` when it holds anything else
+ * (real text, a second element, a paragraph with props). Whitespace strings and
+ * comments don't count against it.
+ */
+function loneParagraphIndex(node: MarkElement): number {
+  let found = -1;
+  for (let i = 2; i < node.length; i++) {
+    const child = node[i] as MarkNode;
+    if (typeof child === "string") {
+      if (child.trim() !== "") return -1; // real text -> nothing to unwrap
+      continue;
+    }
+    if (!isEl(child)) continue;
+    const tag = child[0];
+    if (tag === null) continue; // HTML comment
+    if (found !== -1 || tag !== "p") return -1;
+    if (child[1] && Object.keys(child[1]).length > 0) return -1;
+    found = i;
+  }
+  return found;
 }
 
 // --- raw HTML in markdown -> `_html` node rendered via `v-html` ---

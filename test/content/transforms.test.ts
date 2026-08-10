@@ -178,3 +178,67 @@ describe("transformBody: unwrap block paragraphs", () => {
     expect((node[2] as MarkElement)[0]).toBe("pm-x");
   });
 });
+
+describe("transformBody: unwrap slot paragraphs", () => {
+  const slot = (...children: MarkNode[]): MarkNode[] => [
+    ["card", {}, ["template", { name: "description" }, ...children]],
+  ];
+  const slotOf = (nodes: MarkNode[]): MarkElement =>
+    (transformBody(nodes) as MarkElement[])[0][2] as MarkElement;
+
+  it("unwraps a slot filled with a single paragraph", () => {
+    // A component renders a named slot inside an element of its own choosing —
+    // often a `<p>`. Nested paragraphs are invalid and break hydration.
+    expect(slotOf(slot(["p", {}, "Card description."])).slice(2)).toEqual(["Card description."]);
+  });
+
+  it("keeps the paragraph's inline children intact", () => {
+    const out = slotOf(slot(["p", {}, "See ", ["a", { href: "/x" }, "docs"]]));
+    expect(out.slice(2)).toEqual(["See ", ["a", { href: "/x" }, "docs"]]);
+  });
+
+  it("leaves a slot holding two paragraphs alone", () => {
+    const out = slotOf(slot(["p", {}, "One"], ["p", {}, "Two"]));
+    expect(out.slice(2)).toEqual([
+      ["p", {}, "One"],
+      ["p", {}, "Two"],
+    ]);
+  });
+
+  it("leaves a slot holding block content alone", () => {
+    const out = slotOf(slot(["ul", {}, ["li", {}, "One"]]));
+    expect((out[2] as MarkElement)[0]).toBe("ul");
+  });
+
+  it("keeps a paragraph that carries props", () => {
+    const out = slotOf(slot(["p", { class: "text-lg" }, "Loud"]));
+    expect((out[2] as MarkElement)[0]).toBe("p");
+  });
+
+  it("ignores whitespace around the paragraph", () => {
+    const out = slotOf(slot("\n", ["p", {}, "Text"], "\n"));
+    expect(out.slice(2).filter((c) => typeof c !== "string" || c.trim())).toEqual(["Text"]);
+  });
+
+  it("unwraps a slot on a component nested in another component's slot", () => {
+    const nodes: MarkNode[] = [
+      [
+        "landing-features",
+        {},
+        [
+          "template",
+          { name: "body" },
+          ["feature-card", {}, ["template", { name: "title" }, ["p", {}, "Caching"]]],
+        ],
+      ],
+    ];
+    const [section] = transformBody(nodes) as MarkElement[];
+    const card = (section[2] as MarkElement)[2] as MarkElement;
+    expect((card[2] as MarkElement).slice(2)).toEqual(["Caching"]);
+  });
+
+  it("leaves a plain paragraph outside any slot alone", () => {
+    const nodes: MarkNode[] = [["p", {}, "prose"]];
+    expect((transformBody(nodes) as MarkElement[])[0][0]).toBe("p");
+  });
+});

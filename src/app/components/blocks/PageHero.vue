@@ -59,11 +59,12 @@ const hasAside = computed(() => Boolean(slots.default));
           </h1>
 
           <!-- Description -->
-          <!-- A `div`, not a `p`: the slot receives rendered markdown, which is
-               itself a `<p>`. Nested paragraphs are invalid HTML — the browser
-               hoists the inner one out and synthesizes an empty one for the stray
-               end tag, leaving a DOM that no longer matches the vdom (hydration
-               mismatch). Same reason in Card.vue and PageCard.vue. -->
+          <!-- A `div`, not a `p`: the slot receives rendered markdown. A one-line
+               fill arrives unwrapped (see `unwrapSlotParagraphs` in the content
+               transforms), but a multi-block one still carries its `<p>`s — and a
+               nested paragraph is invalid HTML, repaired by the browser into a DOM
+               that no longer matches the vdom, so hydration mismatches. Same
+               reason in Card.vue and PageCard.vue. -->
           <div
             v-if="slots.description || description"
             class="mt-6 text-lg sm:text-xl text-muted-foreground text-pretty"
