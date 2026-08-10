@@ -1,5 +1,5 @@
 // Tests: test/server/dev-watch.test.ts
-import { watch, readdirSync, statSync, type FSWatcher } from "node:fs";
+import { watch, readdirSync, lstatSync, type FSWatcher } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { useRuntimeConfig } from "nitro/runtime-config";
 import { definePlugin as defineNitroPlugin } from "nitro";
@@ -15,11 +15,11 @@ import { broadcastReload } from "./dev-reload";
 // of using `watch(dir, { recursive: true })`. On Linux Node implements the
 // recursive mode by adding one inotify watch per directory with no way to skip
 // any — so a docs project with its own `node_modules` burned thousands of
-// watches (3192 vs 164 real content dirs on a nitro checkout) against the
-// shared `fs.inotify.max_user_watches` budget, and the resulting ENOSPC came
-// back as an *unhandled* `error` event that killed the dev server. Walking
-// ourselves lets us reuse the builder's EXCLUDE rules (never watch what we
-// never scan) and attach an error handler per watcher.
+// watches (3192 dirs on a nitro docs checkout, against the 8 we actually scan)
+// out of the shared `fs.inotify.max_user_watches` budget, and the resulting
+// ENOSPC came back as an *unhandled* `error` event that killed the dev server.
+// Walking ourselves lets us reuse the builder's EXCLUDE rules (never watch what
+// we never scan) and attach an error handler per watcher.
 
 // Backstop for a pathological tree: past this we stop adding watchers rather
 // than exhaust the system's inotify budget. Content dirs number in the dozens.
@@ -28,7 +28,7 @@ const MAX_WATCHED_DIRS = 2048;
 const isExcludedDir = (rel: string) => EXCLUDE.some((re) => re.test(`/${rel}/`));
 
 /**
- * Directories to watch under `root`, depth-first, skipping everything the
+ * Directories to watch under `root`, breadth-first, skipping everything the
  * content builder excludes (dotfiles, `node_modules`, `dist`, `.docs`).
  * Symlinked dirs are not followed — they can form cycles, and the recursive
  * `fs.watch` this replaces didn't follow them either.
@@ -120,9 +120,9 @@ export default defineNitroPlugin((nitro) => {
     if (watchers.has(childAbs) || isExcludedDir(relOf(childAbs))) return;
     let isDir = false;
     try {
-      isDir = statSync(childAbs).isDirectory();
+      isDir = lstatSync(childAbs).isDirectory(); // `l`: symlinks are skipped, as in the walk
     } catch {
-      return; // removed, or a broken symlink
+      return; // already removed again
     }
     if (!isDir) return;
     for (const sub of collectWatchDirs(childAbs, MAX_WATCHED_DIRS - watchers.size)) {
