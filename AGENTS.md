@@ -163,10 +163,18 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
   promise — and so are `highlightBody` and `highlightCode`.
 - **Token colours are styled, not inlined.** `highlightCode` runs rangi with
   `classes: true`, so each token is `<span class="shj-<type>">` and the palette
-  lives in `assets/main.css` (~37% smaller markup raw, ~7% gzipped). The two
-  branches of each `light-dark()` there are rangi's own `default`/`dark` themes;
-  `test/content/theme.test.ts` is the drift guard, and also pins the italic on
-  `.shj-cmnt` that rangi's inline mode used to add for us. `html.light`/`html.dark`
+  lives in `assets/main.css` (~37% smaller markup raw, ~7% gzipped). Both
+  branches of each `light-dark()` there are **Vesper** — the dark one mapped from
+  its TextMate scopes onto rangi's token types, the light one derived from that
+  in OKLCH (Vesper publishes no light variant). rangi ships no vesper either, so
+  `main.css` is the only copy of both and there is NO upstream to sync with:
+  `test/content/theme.test.ts` pins each colour, asserts every one clears WCAG AA
+  against `--ui-bg-muted` (read from `tokens.css`, so restyling the neutrals
+  fails there), and pins the italic on `.shj-cmnt` that rangi's inline mode used
+  to add for us. Retune a token only with that contrast check in hand. A rangi
+  upgrade can ADD a token type — 2.2 added `bracket`, which renders unstyled
+  until the palette gains a rule; the coverage test is what catches that.
+  `html.light`/`html.dark`
   map to CSS `color-scheme` in `main.css` — those two declarations are
   LOAD-BEARING: without them `light-dark()` resolves to its light branch in dark
   mode and every code block renders wrong. Our own `.code-hl` /
@@ -174,15 +182,15 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
 - **Prefer upstream over a local grammar.** rangi 2.1 absorbed four of the five
   we used to carry (jsx/tsx, jsonc/json5, and the corrected `yaml` fork), each at
   parity or better on measured coverage. Only `mdc` is left, because rangi ships
-  no equivalent. Before adding one, measure against the bundled grammar; before
-  keeping one, re-measure on upgrade.
+  no equivalent (still true as of 2.2). Before adding one, measure against the
+  bundled grammar; before keeping one, re-measure on upgrade.
 - **Local grammars are passed per call, never registered.** `grammars/index.ts`
   builds a frozen `LOCAL_LANGUAGES` record handed to rangi via its `languages`
   option (it applies to sub-languages too). There is no global registration step
   and no shared mutable cache. A grammar named after one rangi ships REPLACES it
   and must say why via `overridesBuiltin` — `registry.test.ts` enforces that.
   Rules are TUPLES (`[match, type, sub]`), not objects; see `grammars/types.ts`.
-- **Aliases: rangi's first, ours only for the gaps.** rangi 2.1 spreads its own
+- **Aliases: rangi's first, ours only for the gaps.** rangi 2.2 spreads its own
   39 aliases into the same `languages` record as the grammars, so they resolve
   through `KNOWN_LANGS` for free. `LANG_ALIASES` in `highlight.ts` holds only
   what rangi lacks — deliberate approximations (`mdx`→md, `console`→bash) and

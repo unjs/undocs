@@ -271,64 +271,96 @@ body {
  * repeats a short class name per token rather than a full `color:` declaration,
  * and the palette is downloaded once in a file the browser caches.
  *
- * The two branches of each `light-dark()` are rangi's own bundled themes —
- * `default` (light) and `dark` — so this reproduces exactly what the inline
- * mode emitted. The browser picks a branch from the inherited `color-scheme`,
- * NOT from `.dark`, which is why the `html.light` / `html.dark` rules at the top
- * of this file are load-bearing.
+ * Both branches are VESPER (github.com/raunofreiberg/vesper). rangi ships no
+ * vesper and Vesper itself ships only a dark variant, so this table is the only
+ * copy of either and there is NOTHING UPSTREAM TO SYNC WITH — `theme.test.ts`
+ * pins both halves instead.
  *
- * Keep these in step with rangi's themes when upgrading: nothing fails loudly if
- * they drift, the colours just stop matching upstream. There is deliberately no
- * `.shj-esc` rule — neither theme colours that token, so it inherits, exactly as
- * it did inline.
+ * Vesper is deliberately a four-colour theme, so most token types collapse onto
+ * its one accent. That flatness is the theme, not an omission:
+ *
+ *              dark (upstream)      light (derived)
+ *   variables  #fff                 #101010    Vesper's own bg, inverted
+ *   keywords   #a0a0a0              #5a5a5a    operators and brackets too
+ *   comments   #909090              #6b6b6b
+ *   accent     #ffc799              #90510b    functions, types, numbers, …
+ *   strings    #99ffe4              #0e6d5b    insertions too
+ *   errors     #ff8080              #b8132d    deletions too
+ *
+ * Brackets take the keyword grey because Vesper says so — it declares all six
+ * `editorBracketHighlight.foreground*` levels as `#a0a0a0`. rangi's own themes
+ * dim them to the comment colour instead; we follow Vesper.
+ *
+ * The light column is derived per hue in OKLCH: Vesper's hue is kept, lightness
+ * is inverted for a light surface, and chroma is raised to compensate (a pastel
+ * that reads as a colour on #101010 reads as grey on #f5f5f5). Contrast is the
+ * binding constraint, not fidelity — every token clears WCAG AA (4.5:1) against
+ * `--ui-bg-muted` in BOTH modes, which the test asserts. Add or retune a colour
+ * only with that check in hand.
+ *
+ * Two deliberate departures from upstream, both for that reason: Vesper declares
+ * comments `#8b8b8b94` and we drop the alpha and lift it to `#909090`, because
+ * it was tuned against Vesper's near-black `#101010` editor (where it lands at
+ * ~2.4:1) and not our lighter `--ui-bg-muted`. That background is likewise not
+ * applied — code blocks keep showing their container's surface (see below).
+ *
+ * The browser picks a branch from the inherited `color-scheme`, NOT from
+ * `.dark`, which is why the `html.light` / `html.dark` rules at the top of this
+ * file are load-bearing.
+ *
+ * There is deliberately no `.shj-esc` rule — rangi colours that token in neither
+ * of its own themes, so it inherits, exactly as it did inline.
  *
  * `.code-hl` / `.code-hl-lang-*` are ours, emitted by `highlightCode`, and carry
  * layout only (see `ProsePre.vue`). The background stays transparent so code
  * blocks show their container's surface (`--ui-bg-muted`).
  */
 .shj-deleted {
-  color: light-dark(#f44, #ff5261);
+  color: light-dark(#b8132d, #ff8080);
 }
 .shj-err {
-  color: light-dark(#e16, #ff5261);
+  color: light-dark(#b8132d, #ff8080);
 }
 .shj-var {
-  color: light-dark(#f44, #ff5261);
+  color: light-dark(#101010, #fff);
 }
 .shj-section {
-  color: light-dark(#84f, #ff7cc6);
+  color: light-dark(#90510b, #ffc799);
 }
 .shj-kwd {
-  color: light-dark(#e16, #ff7cc6);
+  color: light-dark(#5a5a5a, #a0a0a0);
 }
 .shj-class {
-  color: light-dark(#f60, #eab07c);
+  color: light-dark(#90510b, #ffc799);
 }
 .shj-cmnt {
-  color: light-dark(#999, #7d828b);
+  color: light-dark(#6b6b6b, #909090);
   /* rangi's inline mode applies this itself; in classes mode it is ours to add. */
   font-style: italic;
 }
+.shj-bracket {
+  color: light-dark(#5a5a5a, #a0a0a0);
+}
 .shj-insert {
-  color: light-dark(#7d8, #71d58a);
+  color: light-dark(#0e6d5b, #99ffe4);
 }
 .shj-type {
-  color: light-dark(#5af, #71d58a);
+  color: light-dark(#90510b, #ffc799);
 }
 .shj-func {
-  color: light-dark(#84f, #71d58a);
+  color: light-dark(#90510b, #ffc799);
 }
 .shj-bool {
-  color: light-dark(#3bf, #71d58a);
+  color: light-dark(#90510b, #ffc799);
 }
 .shj-num {
-  color: light-dark(#f60, #b581fd);
+  color: light-dark(#90510b, #ffc799);
 }
 .shj-oper {
-  color: light-dark(#5af, #80c6ff);
+  color: light-dark(#5a5a5a, #a0a0a0);
 }
 .shj-str {
-  color: light-dark(#7d8, #4dacfa);
+  color: light-dark(#0e6d5b, #99ffe4);
 }
 
 main {
