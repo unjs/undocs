@@ -25,6 +25,17 @@ NEVER write E2E tests. Ask for it to be tested manually.
   the build-time virtual module `virtual:undocs/app-config`, generated once per
   build) wins; theme-only keys from `src/app/app.config.ts` survive. Shape lives
   in `schema/config.json` + `config.d.ts`.
+- `src/app/webmcp/` — [WebMCP](https://webmachinelearning.github.io/webmcp/):
+  registers docs tools (search/list/project-info/read/current/navigate) on
+  `document.modelContext` for browser AI agents. Feature-detected + lazily
+  imported from `main.ts` after mount, so a non-supporting browser never fetches
+  the chunk. Tools wrap existing machinery (the MiniSearch index, the
+  `useAsyncData` caches, the router) — never a second data path. Unregistration
+  is `AbortSignal`-only (the spec's sole teardown), which is also what makes an
+  HMR re-setup safe. WebMCP has NO `resources` primitive (tools are the whole
+  surface), so project/page links are tool RESULTS instead — `links.ts` derives
+  them from the docs config, mirroring the URL conventions `SocialButtons.vue`,
+  `AppFooter.vue` and `pages/[...slug].vue` already render.
 - `pnpm test`, `pnpm typecheck` (bare tsc, so `.vue` imports don't resolve),
   `pnpm lint` / `pnpm fmt` (oxlint + oxfmt — run before finishing),
   `pnpm build:inline` after touching `src/app/inline/*.ts`.

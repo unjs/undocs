@@ -191,6 +191,17 @@ function bootstrap(): void {
     }
   });
 
+  // -------------------------------------------------------------------------
+  // WebMCP (https://webmachinelearning.github.io/webmcp/): expose docs search /
+  // navigation to a browser-resident AI agent as MCP tools (`./webmcp`). The API
+  // is a flagged draft, so it is feature-detected here and the implementation is
+  // loaded as its own lazy chunk — a browser without `document.modelContext`
+  // never downloads it. Opt out with `webmcp: false` in the docs config.
+  // -------------------------------------------------------------------------
+  if (useAppConfig().docs?.webmcp !== false && document.modelContext) {
+    import("./webmcp").then((m) => m.setupWebMCP(router));
+  }
+
   // Dev-only content live-reload. `import.meta.env.DEV` is a Vite static
   // constant (true in dev, replaced with `false` at build time), so this whole
   // branch — and the dynamically-imported `./dev-reload` chunk — is tree-shaken

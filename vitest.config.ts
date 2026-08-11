@@ -10,6 +10,10 @@ export default defineConfig({
     alias: {
       "@app": r("./src/app"),
       "@server": r("./src/server"),
+      // `useAppConfig` imports the build-time vfs the `undocs:app-config` Vite
+      // plugin provides; tests get a fixed stand-in so app modules that read the
+      // app config (e.g. `@app/webmcp/tools`) are importable outside a build.
+      "virtual:undocs/app-config": r("./test/stubs/app-config.ts"),
     },
   },
   test: {
