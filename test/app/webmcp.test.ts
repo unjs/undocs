@@ -8,12 +8,12 @@
  */
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import MiniSearch from "minisearch";
-import { MINISEARCH_OPTIONS, toSearchDocuments } from "@server/content/search-options";
-import type { NavItem } from "@server/content/types";
-import type { AppRouter } from "@app/router";
-import type { ModelContext, ModelContextTool } from "@app/webmcp/types";
+import { MINISEARCH_OPTIONS, toSearchDocuments } from "@server/content/search-options.ts";
+import type { NavItem } from "@server/content/types.ts";
+import type { AppRouter } from "@app/router.ts";
+import type { ModelContext, ModelContextTool } from "@app/webmcp/types.ts";
 // Pure config→URL derivation (no `ofetch`), so a static import is safe here.
-import { editUrl, repoLinks, repoUrl, socialLinks } from "@app/webmcp/links";
+import { editUrl, repoLinks, repoUrl, socialLinks } from "@app/webmcp/links.ts";
 
 const ORIGIN = "https://docs.test";
 
@@ -155,12 +155,12 @@ function createStubRouter(start = "/") {
   return { currentRoute, push } as unknown as AppRouter & { push: typeof push };
 }
 
-let createDocsTools: typeof import("@app/webmcp/tools").createDocsTools;
-let setupWebMCP: typeof import("@app/webmcp/index").setupWebMCP;
+let createDocsTools: typeof import("@app/webmcp/tools/index.ts").createDocsTools;
+let setupWebMCP: typeof import("@app/webmcp/index.ts").setupWebMCP;
 
 beforeAll(async () => {
-  ({ createDocsTools } = await import("@app/webmcp/tools"));
-  ({ setupWebMCP } = await import("@app/webmcp/index"));
+  ({ createDocsTools } = await import("@app/webmcp/tools/index.ts"));
+  ({ setupWebMCP } = await import("@app/webmcp/index.ts"));
 });
 
 function toolsByName(router: AppRouter = createStubRouter()): Record<string, ModelContextTool> {
@@ -405,8 +405,8 @@ describe("navigate", () => {
     // resolves to `null` rather than throwing. Probing an agent's typo through
     // that key would cache `null` under the real page, and the visitor's next
     // navigation there would throw a fatal 404 on a page that exists.
-    const { useAsyncData } = await import("@app/composables/useAsyncData");
-    const { queryPage } = await import("@app/composables/useContent");
+    const { useAsyncData } = await import("@app/composables/useAsyncData.ts");
+    const { queryPage } = await import("@app/composables/useContent.ts");
     const { kebabCase } = await import("scule");
 
     const router = createStubRouter("/");

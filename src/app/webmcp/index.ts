@@ -3,7 +3,7 @@
  *
  * WebMCP lets a page hand its own capabilities to a browser-resident AI agent as
  * MCP tools: `document.modelContext.registerTool(...)`. We register a handful of
- * docs tools (search / list / read / current page / navigate — see `./tools.ts`)
+ * docs tools (search / list / read / current page / navigate — see `./tools/`)
  * so an agent sitting in the browser can answer questions about the docs and
  * drive the site, using the site's own search index rather than scraping the DOM.
  *
@@ -13,10 +13,10 @@
  * throws. Registration lives on an `AbortSignal` — the spec's only unregister
  * path — which is what lets a dev HMR reload replace the tools cleanly.
  */
-import { createDocsTools } from "./tools";
-import type { AppRouter } from "@app/router";
+import { createDocsTools } from "./tools/index.ts";
+import type { AppRouter } from "@app/router.ts";
 
-export type { ModelContext, ModelContextTool, RegisteredTool } from "./types";
+export type { ModelContext, ModelContextTool, RegisteredTool } from "./types.ts";
 
 /** True when this browser exposes WebMCP (implies a secure context). */
 export function isWebMCPSupported(): boolean {

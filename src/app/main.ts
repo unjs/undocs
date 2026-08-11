@@ -199,7 +199,7 @@ function bootstrap(): void {
   // never downloads it. Opt out with `webmcp: false` in the docs config.
   // -------------------------------------------------------------------------
   if (useAppConfig().docs?.webmcp !== false && document.modelContext) {
-    import("./webmcp").then((m) => m.setupWebMCP(router));
+    import("./webmcp/index.ts").then((m) => m.setupWebMCP(router));
   }
 
   // Dev-only content live-reload. `import.meta.env.DEV` is a Vite static

@@ -29,7 +29,10 @@ NEVER write E2E tests. Ask for it to be tested manually.
   registers docs tools (search/list/project-info/read/current/navigate) on
   `document.modelContext` for browser AI agents. Feature-detected + lazily
   imported from `main.ts` after mount, so a non-supporting browser never fetches
-  the chunk. Tools wrap existing machinery (the MiniSearch index, the
+  the chunk. `tools/` is one module per tool over two shared ones —
+  `tools/content.ts` (the cached nav/page reads) and `tools/utils.ts` (agent
+  input coercion + URL shaping); `tools/index.ts` assembles them in the order
+  the agent sees. Tools wrap existing machinery (the MiniSearch index, the
   `useAsyncData` caches, the router) — never a second data path. Unregistration
   is `AbortSignal`-only (the spec's sole teardown), which is also what makes an
   HMR re-setup safe. WebMCP has NO `resources` primitive (tools are the whole
@@ -231,7 +234,7 @@ NEVER write E2E tests. Ask for it to be tested manually.
   page keys its `useAsyncData` by `kebabCase(route.path)`, which is lossy
   (`/guide/deploy`, `/guide-deploy` and `/Guide/Deploy` collapse onto ONE entry),
   and `queryPage` resolves a 404 to `null` instead of throwing. So looking up an
-  unvalidated path through `webmcp/tools.ts`'s `page()` would cache `null` under
+  unvalidated path through `webmcp/tools/content.ts`'s `page()` would cache `null` under
   a REAL page's key and 404 the visitor's next navigation there. Unvalidated
   input goes through `probePage`/`routeExists` (own key namespace); `page()` is
   only for the visitor's own route or a path already cleared.

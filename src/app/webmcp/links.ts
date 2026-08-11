@@ -12,7 +12,7 @@
  * for socials, `AppFooter.vue` for the repo, `pages/[...slug].vue` for the edit
  * link — so an agent and a visitor are handed the same links.
  */
-import { titleCase } from "@app/utils/title";
+import { titleCase } from "@app/utils/title.ts";
 
 export interface ProjectLink {
   label: string;
