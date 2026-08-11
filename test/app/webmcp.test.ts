@@ -13,7 +13,7 @@ import type { NavItem } from "@server/content/types";
 import type { AppRouter } from "@app/router";
 import type { ModelContext, ModelContextTool } from "@app/webmcp/types";
 // Pure config→URL derivation (no `ofetch`), so a static import is safe here.
-import { editUrl, repoUrl, socialLinks } from "@app/webmcp/links";
+import { editUrl, repoLinks, repoUrl, socialLinks } from "@app/webmcp/links";
 
 const ORIGIN = "https://docs.test";
 
@@ -59,6 +59,14 @@ const PAGES: Record<
     description: "Ship it.",
     toc: [{ id: "vercel", depth: 2, text: "Vercel" }],
     markdown: "# Deploy\n\nDeploy to Vercel with zero config.\n",
+  },
+  // Comfortably past `MARKDOWN_MAX` (40k chars), for the truncate/continue path.
+  "/guide/long": {
+    id: "content/2.guide/3.long.md",
+    title: "Long",
+    description: "A very long page.",
+    toc: [],
+    markdown: `# Long\n\n${"x".repeat(60_000)}\nEND\n`,
   },
 };
 
@@ -245,7 +253,8 @@ describe("get_project_info", () => {
       index: `${ORIGIN}/llms.txt`,
       full: `${ORIGIN}/llms-full.txt`,
     });
-    expect(result.versions).toHaveLength(1);
+    // `to` is normalized to an absolute `url`, like every other tool result.
+    expect(result.versions).toEqual([{ label: "v3", url: "https://docs.test", active: true }]);
     expect(result.site.name).toBe("Test Docs");
   });
 });
@@ -284,6 +293,45 @@ describe("read_page", () => {
       /No documentation page/,
     );
   });
+
+  it("explains that a generated route has no source, rather than 404-ing at it", async () => {
+    // `/` and `/blog` are real routes an agent sees in results, but they have no
+    // markdown behind them — "not found" would read as a broken link.
+    for (const path of ["/", "/blog"]) {
+      await expect(toolsByName().read_page.execute({ path })).rejects.toThrow(
+        /generated, not written in Markdown/,
+      );
+    }
+  });
+
+  it("hands back a long page in slices with a continuation cursor", async () => {
+    const { read_page } = toolsByName();
+    const first: any = await read_page.execute({ path: "/guide/long" });
+    expect(first.truncated).toBe(true);
+    expect(first.offset).toBe(0);
+    expect(first.markdown).toHaveLength(40_000);
+    expect(first.nextOffset).toBe(40_000);
+
+    const second: any = await read_page.execute({ path: "/guide/long", offset: first.nextOffset });
+    expect(second.offset).toBe(40_000);
+    expect(second.truncated).toBe(false);
+    expect(second.nextOffset).toBeUndefined();
+    expect(second.markdown).toContain("END");
+    // The two slices reassemble the whole source, with nothing dropped.
+    expect(first.markdown.length + second.markdown.length).toBe(first.length);
+  });
+
+  it("clamps a nonsense offset instead of returning junk", async () => {
+    const { read_page } = toolsByName();
+    const negative: any = await read_page.execute({ path: "/guide/deploy", offset: -5 });
+    expect(negative.offset).toBe(0);
+    expect(negative.markdown).toContain("Deploy to Vercel");
+
+    const past: any = await read_page.execute({ path: "/guide/deploy", offset: 10_000 });
+    expect(past.offset).toBe(past.length);
+    expect(past.markdown).toBe("");
+    expect(past.truncated).toBe(false);
+  });
 });
 
 describe("get_current_page", () => {
@@ -305,6 +353,9 @@ describe("get_current_page", () => {
       description: "Documentation used by the undocs test-suite.",
       headings: [],
     });
+    // No content-index entry → no `/raw` source and no edit link to offer.
+    expect(result.markdownUrl).toBeUndefined();
+    expect(result.editUrl).toBeUndefined();
   });
 });
 
@@ -337,6 +388,36 @@ describe("navigate", () => {
       /No documentation page/,
     );
     expect((router as any).push).not.toHaveBeenCalled();
+  });
+
+  it("allows a user-defined `.docs/pages/**` route", async () => {
+    // Custom pages are real routes with no content-index entry either — they
+    // are matched off the same route table `router.ts` builds.
+    const router = createStubRouter("/");
+    await expect(
+      toolsByName(router).navigate.execute({ path: "/showcase" }),
+    ).resolves.toMatchObject({ navigated: true, path: "/showcase" });
+  });
+
+  it("does not poison the docs page cache when an agent mistypes a path", async () => {
+    // `pages/[...slug].vue` keys its `useAsyncData` by `kebabCase(path)`, which
+    // collapses `/guide-deploy` and `/guide/deploy` onto ONE entry — and a 404
+    // resolves to `null` rather than throwing. Probing an agent's typo through
+    // that key would cache `null` under the real page, and the visitor's next
+    // navigation there would throw a fatal 404 on a page that exists.
+    const { useAsyncData } = await import("@app/composables/useAsyncData");
+    const { queryPage } = await import("@app/composables/useContent");
+    const { kebabCase } = await import("scule");
+
+    const router = createStubRouter("/");
+    for (const typo of ["/guide-deploy", "/Guide/Deploy"]) {
+      await expect(toolsByName(router).navigate.execute({ path: typo })).rejects.toThrow(
+        /No documentation page/,
+      );
+    }
+
+    const entry = await useAsyncData(kebabCase("/guide/deploy"), () => queryPage("/guide/deploy"));
+    expect(entry.data.value).toMatchObject({ title: "Deploy" });
   });
 });
 
@@ -396,6 +477,24 @@ describe("project links", () => {
     expect(repoUrl("https://github.com/unjs/undocs/")).toBe("https://github.com/unjs/undocs");
     expect(repoUrl(undefined)).toBeUndefined();
     expect(repoUrl("")).toBeUndefined();
+  });
+
+  it("synthesizes `issues`/`releases` only for a GitHub repo", () => {
+    expect(repoLinks("unjs/undocs", "dev")).toEqual({
+      url: "https://github.com/unjs/undocs",
+      issues: "https://github.com/unjs/undocs/issues",
+      releases: "https://github.com/unjs/undocs/releases",
+      branch: "dev",
+    });
+    // Another forge has its own URL shape (GitLab nests both under `/-/`), so
+    // the repo URL is all we can honestly claim.
+    expect(repoLinks("https://gitlab.com/unjs/undocs", undefined)).toEqual({
+      url: "https://gitlab.com/unjs/undocs",
+      issues: undefined,
+      releases: undefined,
+      branch: "main",
+    });
+    expect(repoLinks(undefined, "main")).toBeUndefined();
   });
 
   it("expands social handles by platform key and passes URLs through", () => {

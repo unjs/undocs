@@ -27,6 +27,34 @@ export function repoUrl(github: unknown): string | undefined {
 }
 
 /**
+ * The repository plus its canonical sub-pages. `/issues` and `/releases` are
+ * GITHUB's URL shape, and `docs.github` also accepts a full URL — which may
+ * point at another forge (GitLab nests both under `/-/`). So the repo URL is
+ * always returned, but the two sub-pages only when the host really is GitHub;
+ * an invented link is worse for an agent than a missing one.
+ */
+export function repoLinks(
+  github: unknown,
+  branch: unknown,
+): { url: string; issues?: string; releases?: string; branch: string } | undefined {
+  const url = repoUrl(github);
+  if (!url) return undefined;
+  let host = "";
+  try {
+    host = new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    // Not parseable — treat it as an unknown forge (sub-pages omitted).
+  }
+  const isGitHub = host === "github.com";
+  return {
+    url,
+    issues: isGitHub ? `${url}/issues` : undefined,
+    releases: isGitHub ? `${url}/releases` : undefined,
+    branch: (typeof branch === "string" && branch) || "main",
+  };
+}
+
+/**
  * The `socials` config as labelled links. Values are either a bare handle
  * (`{ x: "unjsio" }` → `https://x.com/unjsio`, the key naming the platform) or
  * an explicit URL / link object — the same three shapes `SocialButtons.vue`

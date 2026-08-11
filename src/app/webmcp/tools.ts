@@ -26,15 +26,21 @@ import { useAsyncData } from "@app/composables/useAsyncData";
 import { useAppConfig } from "@app/composables/useAppConfig";
 import { queryNavigation, queryPage, querySearchIndex } from "@app/composables/useContent";
 import type { AppRouter } from "@app/router";
-import { editUrl, repoUrl, socialLinks } from "./links";
+import { pages as userPages } from "virtual:undocs/user-pages";
+import { editUrl, repoLinks, socialLinks } from "./links";
 import type { ModelContextTool } from "./types";
 
 // ---------------------------------------------------------------------------
 // Shared helpers
 // ---------------------------------------------------------------------------
 
-/** Cap on `read_page` output, so one call can't dump a whole book at an agent. */
-const MARKDOWN_MAX = 100_000;
+/**
+ * Cap on the Markdown one `read_page` call returns, so a long page can't fill an
+ * agent's whole context in one go. Not a hard limit on what it can read: the
+ * result carries a `nextOffset` cursor for the remainder (and `markdownUrl` /
+ * `llms-full.txt` for an agent that would rather fetch the text itself).
+ */
+const MARKDOWN_MAX = 40_000;
 
 /**
  * Routes that exist without a page in the content index, so an "is this a real
@@ -81,6 +87,12 @@ function clampLimit(value: unknown, fallback: number, max: number): number {
   return Math.min(n, max);
 }
 
+/** Clamp an agent-supplied character offset to a non-negative integer. */
+function clampOffset(value: unknown): number {
+  const n = Math.floor(Number(value));
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
 /**
  * The navigation tree — served from the SSR payload's `useAsyncData` entry, so
  * this is a cache read, not a request.
@@ -93,10 +105,44 @@ async function navigation(): Promise<NavItem[]> {
 /**
  * One page — same `useAsyncData` key the docs page component uses
  * (`kebabCase(path)`), so the currently-rendered page is already cached here.
+ *
+ * ONLY for a path already known to be real: the visitor's own route, or one
+ * `routeExists` has cleared. For anything an agent typed, use `probePage`.
  */
 async function page(path: string): Promise<DocPage | null> {
   const entry = await useAsyncData(kebabCase(path), () => queryPage(path));
   return entry.data.value ?? null;
+}
+
+/**
+ * Look a page up under a key of OUR own, for a path an agent supplied.
+ *
+ * `page()`'s key is lossy — `kebabCase` collapses `/guide/deploy`,
+ * `/guide-deploy` and `/Guide/Deploy` onto one entry — and `queryPage` resolves
+ * a 404 to `null` rather than throwing. So probing an agent's typo through that
+ * key would cache `null` under a REAL page's entry, and the visitor's next
+ * navigation there would read the poisoned entry and throw a fatal 404 on a page
+ * that exists. Keyed by the raw path here, where a miss can only poison itself.
+ */
+async function probePage(path: string): Promise<DocPage | null> {
+  const entry = await useAsyncData(`webmcp:probe:${path}`, () => queryPage(path));
+  return entry.data.value ?? null;
+}
+
+/** User `.docs/pages/**` routes, matched exactly as `router.ts` matches them. */
+const USER_ROUTES = userPages.map((p) => new RegExp(p.match));
+
+/**
+ * Does the router resolve `path` to a real page? Cheapest check first: the
+ * generated standalone routes, then the user's own pages (which have no
+ * content-index entry either), then the nav tree — all cache reads — and only
+ * then a probe request, for a page the nav doesn't list.
+ */
+async function routeExists(path: string): Promise<boolean> {
+  if (STANDALONE_ROUTES.has(path)) return true;
+  if (USER_ROUTES.some((re) => re.test(path))) return true;
+  if (flattenNav(await navigation()).some((p) => p.path === path)) return true;
+  return Boolean(await probePage(path));
 }
 
 interface FlatPage {
@@ -168,9 +214,48 @@ function pageLinks(path: string, doc: DocPage | null) {
   const docs = useAppConfig().docs || {};
   return {
     url: pageUrl(path),
-    markdownUrl: pageUrl(joinURL("/raw", `${path}.md`)),
+    // `/raw/**` is served from the content index, so a route with no entry there
+    // (the landing page, the blog listing) has no Markdown source to link to —
+    // `/raw/.md` would 404. Omit it rather than hand an agent a dead link.
+    markdownUrl: doc ? pageUrl(joinURL("/raw", `${path}.md`)) : undefined,
     editUrl: editUrl(docs.github, docs.branch, doc?.id),
   };
+}
+
+/**
+ * The `versions` config as linkable entries. Its `to` is whatever the docs
+ * author wrote — usually another site, but it may be a relative path, and every
+ * other tool hands back absolute URLs.
+ */
+function docsVersions(versions: unknown) {
+  if (!Array.isArray(versions) || versions.length === 0) return undefined;
+  return versions
+    .filter((v) => v && typeof v === "object")
+    .map((v: { label?: string; to?: string; active?: boolean }) => ({
+      label: v.label,
+      url:
+        typeof v.to === "string" && /^https?:\/\//i.test(v.to)
+          ? v.to
+          : pageUrl(withLeadingSlash(String(v.to ?? "/"))),
+      active: v.active || undefined,
+    }));
+}
+
+/**
+ * The "nothing to read here" error. `/` and `/blog` are real routes an agent
+ * will have seen in a result, but they're generated — no content-index entry,
+ * so no `/raw` source. A bare "not found" would read as a broken link instead
+ * of "this page exists, it just isn't written in Markdown".
+ */
+function noSourceError(path: string): Error {
+  if (!STANDALONE_ROUTES.has(path)) {
+    return new Error(`No documentation page at \`${path}\`.`);
+  }
+  return new Error(
+    `\`${path}\` is generated, not written in Markdown, so it has no source to read. ` +
+      `Use \`list_pages\` for the pages that do` +
+      (path === "/" ? ", or `get_project_info` for the project's links." : "."),
+  );
 }
 
 /**
@@ -188,7 +273,9 @@ async function currentPage(router: AppRouter) {
     // The visitor's own anchor, which `pageLinks` (page-level) doesn't carry.
     url: pageUrl(path, router.currentRoute.hash.replace(/^#/, "")),
     title: doc?.title || rendered,
-    description: doc?.description || (doc ? "" : useAppConfig().site?.description || ""),
+    // A generated route has no description of its own; the site's stands in so
+    // the agent gets context rather than an empty field.
+    description: doc ? doc.description || "" : useAppConfig().site?.description || "",
     headings: flattenToc(doc?.body?.toc?.links),
   };
 }
@@ -229,7 +316,10 @@ export function createDocsTools(router: AppRouter): ModelContextTool[] {
       // Results embed docs prose, which for most projects is community-authored
       // — flag it so the agent treats it as data, never as instructions.
       annotations: { readOnlyHint: true, untrustedContentHint: true },
-      async execute({ query, limit }) {
+      // The spec passes an object, but it's a draft behind flags — default the
+      // destructure so a bare call fails with the tool's own error, not a
+      // `TypeError` the agent can't act on. Same for the other tools below.
+      async execute({ query, limit } = {}) {
         const q = String(query ?? "").trim();
         if (!q) throw new Error("`query` is required.");
 
@@ -290,21 +380,13 @@ export function createDocsTools(router: AppRouter): ModelContextTool[] {
       annotations: { readOnlyHint: true },
       execute() {
         const docs = appConfig.docs || {};
-        const repo = repoUrl(docs.github);
         return {
           site: {
             name: appConfig.site?.name,
             description: appConfig.site?.description,
             url: appConfig.site?.url || pageUrl("/"),
           },
-          repository: repo
-            ? {
-                url: repo,
-                issues: `${repo}/issues`,
-                releases: `${repo}/releases`,
-                branch: docs.branch || "main",
-              }
-            : undefined,
+          repository: repoLinks(docs.github, docs.branch),
           links: socialLinks(docs.socials),
           // The plain-text bundles of this same content, for an agent that would
           // rather ingest the whole corpus than call `read_page` per page.
@@ -312,8 +394,7 @@ export function createDocsTools(router: AppRouter): ModelContextTool[] {
             index: pageUrl("/llms.txt"),
             full: pageUrl("/llms-full.txt"),
           },
-          versions:
-            Array.isArray(docs.versions) && docs.versions.length ? docs.versions : undefined,
+          versions: docsVersions(docs.versions),
         };
       },
     },
@@ -322,21 +403,30 @@ export function createDocsTools(router: AppRouter): ModelContextTool[] {
       name: "read_page",
       title: "Read a documentation page",
       description:
-        `Return the full Markdown source of one documentation page, given its ` +
-        `route path (e.g. '/guide/getting-started'). Paths come from ` +
-        `\`search_docs\`, \`list_pages\` or \`get_current_page\`.`,
+        `Return the Markdown source of one documentation page, given its route ` +
+        `path (e.g. '/guide/getting-started'). Paths come from \`search_docs\`, ` +
+        `\`list_pages\` or \`get_current_page\`. A long page comes back ` +
+        `truncated with a \`nextOffset\` — call again with that \`offset\` for ` +
+        `the rest. Generated routes (the landing page, the blog listing) have no ` +
+        `Markdown source.`,
       inputSchema: {
         type: "object",
         properties: {
           path: {
             type: "string",
-            description: "Route path of the page, e.g. '/guide/getting-started' or '/'.",
+            description: "Route path of the page, e.g. '/guide/getting-started'.",
+          },
+          offset: {
+            type: "integer",
+            description:
+              "Character offset to read from — pass the `nextOffset` of a truncated result to continue (default 0).",
+            minimum: 0,
           },
         },
         required: ["path"],
       },
       annotations: { readOnlyHint: true, untrustedContentHint: true },
-      async execute({ path: input }) {
+      async execute({ path: input, offset } = {}) {
         const path = normalizePath(input);
         // `/raw/**` serves the page's source markdown (frontmatter stripped,
         // title/description ensured) — the same text `llms.txt` links to.
@@ -347,19 +437,29 @@ export function createDocsTools(router: AppRouter): ModelContextTool[] {
           });
         } catch (error: any) {
           const status = error?.statusCode ?? error?.response?.status;
-          if (status === 404) throw new Error(`No documentation page at \`${path}\`.`);
+          if (status === 404) throw noSourceError(path);
           throw error;
         }
 
-        const truncated = markdown.length > MARKDOWN_MAX;
+        // Long pages are handed over in `MARKDOWN_MAX` slices: `nextOffset` is
+        // the cursor for the remainder, so truncation is a pause, not a dead end.
+        const start = Math.min(clampOffset(offset), markdown.length);
+        const slice = markdown.slice(start, start + MARKDOWN_MAX);
+        const end = start + slice.length;
+
+        // The path came back 200 from `/raw`, so it's real — safe to share the
+        // docs page's cache key (see `page`).
         const doc = await page(path);
         return {
           path,
           ...pageLinks(path, doc),
           title: doc?.title ?? "",
           description: doc?.description ?? "",
-          truncated,
-          markdown: truncated ? markdown.slice(0, MARKDOWN_MAX) : markdown,
+          length: markdown.length,
+          offset: start,
+          truncated: end < markdown.length,
+          nextOffset: end < markdown.length ? end : undefined,
+          markdown: slice,
         };
       },
     },
@@ -398,11 +498,13 @@ export function createDocsTools(router: AppRouter): ModelContextTool[] {
         },
         required: ["path"],
       },
-      annotations: { readOnlyHint: false },
-      async execute({ path: input, hash }) {
+      // The result embeds the landed page's title/description/outline — the same
+      // docs prose every other tool flags.
+      annotations: { readOnlyHint: false, untrustedContentHint: true },
+      async execute({ path: input, hash } = {}) {
         const path = normalizePath(input);
         // Refuse dead links rather than dumping the visitor on a 404 page.
-        if (!STANDALONE_ROUTES.has(path) && !(await page(path))) {
+        if (!(await routeExists(path))) {
           throw new Error(`No documentation page at \`${path}\`.`);
         }
 

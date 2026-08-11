@@ -35,7 +35,9 @@ NEVER write E2E tests. Ask for it to be tested manually.
   HMR re-setup safe. WebMCP has NO `resources` primitive (tools are the whole
   surface), so project/page links are tool RESULTS instead — `links.ts` derives
   them from the docs config, mirroring the URL conventions `SocialButtons.vue`,
-  `AppFooter.vue` and `pages/[...slug].vue` already render.
+  `AppFooter.vue` and `pages/[...slug].vue` already render. Reusing those caches
+  has ONE rule (see the invariant below): a path an agent typed never goes
+  through the docs page's `useAsyncData` key.
 - `pnpm test`, `pnpm typecheck` (bare tsc, so `.vue` imports don't resolve),
   `pnpm lint` / `pnpm fmt` (oxlint + oxfmt — run before finishing),
   `pnpm build:inline` after touching `src/app/inline/*.ts`.
@@ -225,6 +227,14 @@ NEVER write E2E tests. Ask for it to be tested manually.
   `©` would otherwise go back in as an entity and decode a second time on its way
   into the DOM. `test/content/transforms.test.ts` parses real markdown to pin all
   four behaviours, because they are md4x's promise rather than ours.
+- **An agent-supplied path never touches the docs page's cache key.** The docs
+  page keys its `useAsyncData` by `kebabCase(route.path)`, which is lossy
+  (`/guide/deploy`, `/guide-deploy` and `/Guide/Deploy` collapse onto ONE entry),
+  and `queryPage` resolves a 404 to `null` instead of throwing. So looking up an
+  unvalidated path through `webmcp/tools.ts`'s `page()` would cache `null` under
+  a REAL page's key and 404 the visitor's next navigation there. Unvalidated
+  input goes through `probePage`/`routeExists` (own key namespace); `page()` is
+  only for the visitor's own route or a path already cleared.
 - **Heading anchors come from md4x, at parse time.** It slugs every heading
   GitHub-compatibly, de-duplicates within the document (`same`, `same-1`) and
   honours an explicit `## Title {#anchor}`, stamping the result on the node.
