@@ -1,5 +1,5 @@
 <script setup lang="ts">
- /**
+/**
  * Steps
  * -----
  * Renders a vertical, numbered steps list. Two authoring forms feed it, and
