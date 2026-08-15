@@ -6,6 +6,7 @@ import { loadConfig } from "c12";
 import { vercel } from "./src/server/vercel";
 import { bundleDocs } from "./src/server/bundle-docs";
 import { rebaseOutput } from "./src/server/rebase-output";
+import { normalizeRedirects } from "./src/app/utils/redirects";
 import pkg from "./package.json" with { type: "json" };
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
@@ -30,6 +31,17 @@ const { config: docs } = await loadConfig<any>({ name: "docs", cwd: docsDir });
 // docs dir itself when the config omits it).
 const dir = resolve(docsDir, docs.dir || ".");
 const llms = (docs.llms || {}) as any;
+
+// User redirects (`redirects: { "/docs": "/guide" }`) → one route rule each,
+// merged into `routeRules` below. 301 (not h3-rules' default 307): these are
+// docs pages that MOVED, so search engines should transfer the old URL's ranking
+// to the new one. A `/old/**` key redirects the whole subtree (tail preserved
+// when the target also ends in `/**`). `src/app/router.ts` mirrors the same map
+// for client navigations, which never reach the server.
+const redirects = normalizeRedirects(docs.redirects);
+const redirectRules = Object.fromEntries(
+  Object.entries(redirects).map(([from, to]) => [from, { redirect: { to, status: 301 } }]),
+);
 
 // Root(s) for the Vercel post-build link step. `rebaseOutput` now writes the
 // real `.vercel/output` INTO the docs dir, so we no longer symlink it back to
@@ -196,10 +208,14 @@ export default defineNitroConfig({
   // allow-list stops unrelated params (utm_*, …) fragmenting the cache.
   // `/api/_content` is excluded — its `?fresh` forces a cold rebuild, which
   // caching would defeat.
+  // The user redirects are spread last: rules deep-merge by specificity at
+  // runtime, so a redirect key coexists with the `/**` ISR rule (an old URL
+  // redirects, and the redirect response itself stays cacheable).
   routeRules: {
     "/**": { isr: true },
     "/api/_content": { isr: false },
     "/_og/**": { isr: true },
+    ...redirectRules,
   },
 
   runtimeConfig: {

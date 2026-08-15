@@ -27,6 +27,8 @@ import {
   shallowRef,
 } from "vue";
 import { pages as userPages } from "virtual:undocs/user-pages";
+import { useAppConfig } from "@app/composables/useAppConfig";
+import { normalizeRedirects, resolveRedirect } from "@app/utils/redirects";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -178,6 +180,13 @@ function matchRoute(path: string): RouteRecord {
   return routes.find((r) => r.match(path))!;
 }
 
+// Docs-config redirects (`redirects: { "/old": "/new" }`). The SERVER is the
+// primary enforcement point — `nitro.config.ts` turns the same map into route
+// rules, so a direct hit is redirected before the app renders. This mirror only
+// covers in-app navigation (`AppLink`), which never reaches the server and would
+// otherwise land on the docs catch-all and 404.
+const redirects = normalizeRedirects(useAppConfig().docs?.redirects);
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -327,7 +336,23 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     // an abandoned nav can't flip the bar on after this one takes over.
     clearPendingTimer();
 
-    const parsed = parseLocation(loc);
+    let parsed = parseLocation(loc);
+
+    // A configured redirect replaces the location before anything is matched.
+    // An absolute target leaves the app entirely (full page load); a path is
+    // swapped into history in place, so back/forward never returns to the old
+    // URL. Self-redirects are ignored — they'd loop.
+    const redirected = resolveRedirect(redirects, parsed.path);
+    if (redirected !== undefined && redirected !== parsed.path) {
+      const target = redirected + parsed.query + parsed.hash;
+      if (/^[a-z][\d+.a-z-]*:/i.test(redirected)) {
+        if (IS_BROWSER) window.location.replace(target);
+        return;
+      }
+      hist.replace(target);
+      parsed = parseLocation(target);
+    }
+
     const record = matchRoute(parsed.path);
 
     // Same-path nav (active link, hash-only, breadcrumb-to-self) never re-renders

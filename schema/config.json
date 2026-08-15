@@ -273,7 +273,7 @@
       "description": "Enable build cache (experimental)"
     },
     "redirects": {
-      "description": "Redirects for the documentation site.",
+      "description": "Redirects for the documentation site, as `from: to` paths (e.g. `/docs: /guide`). A `/old/**` key redirects the whole subtree; when the target also ends with `/**`, the matched tail is preserved.",
       "type": "object",
       "additionalProperties": {
         "type": "string"

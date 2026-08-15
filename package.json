@@ -55,6 +55,7 @@
     "clsx": "^2.1.1",
     "consola": "^3.4.2",
     "defu": "^6.1.7",
+    "h3-rules": "^0.1.0",
     "md4x": "^0.0.25",
     "mermaid-compact": "^0.0.1",
     "minisearch": "^7.2.0",

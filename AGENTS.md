@@ -201,6 +201,17 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
   not exist on a deploy; `store.ts`'s `resolveDir` falls back to
   `<nitro-main>/docs`, populated by `bundle-docs.ts`. Keep the two glob/exclude
   rules in sync.
+- **Config redirects are enforced twice, from one map.**
+  `src/app/utils/redirects.ts` (client-safe, no node imports) normalizes the docs
+  config's `redirects`; `nitro.config.ts` turns it into `routeRules`
+  (`{ redirect: { to, status: 301 } }` — moved pages, so the ranking transfers)
+  and `router.ts` resolves the same map for CLIENT navigations, which never reach
+  the server. Note that ANY route rule with a runtime handler
+  (redirect/headers/cors/proxy/cache) makes nitro's generated
+  `#nitro/virtual/routing` `import "h3-rules"` — a bare specifier resolved
+  against the Vite root, i.e. undocs, where pnpm does not expose nitro's private
+  dep. Until nitro emits a resolvable specifier, that import is what breaks first
+  if redirects stop working ("Cannot find module 'h3-rules'", every request 500s).
 - **Output lives in the docs dir, via rebase — not `rootDir`.** Nitro's `rootDir`
   MUST stay `pkgRoot`: it drives both c12 config discovery (finding our
   `nitro.config.ts`) and builder-package resolution (`vite` is undocs's dep, not
