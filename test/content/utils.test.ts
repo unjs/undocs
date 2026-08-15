@@ -7,6 +7,7 @@ import {
   orderKey,
   textContent,
   slugify,
+  createSlugger,
   titleCase,
 } from "../../src/server/content/utils.ts";
 import type { MarkNode } from "../../src/server/content/types.ts";
@@ -112,6 +113,56 @@ describe("slugify", () => {
 
   it("collapses repeated separators and trims edges", () => {
     expect(slugify("  a --  b  ")).toBe("a-b");
+  });
+
+  // The strip used to be `\w`, which is ASCII-only: a Cyrillic or CJK heading
+  // slugged to the EMPTY string, and an empty id means no anchor and a dead TOC
+  // link. An accented Latin heading lost only the accented letter, which is the
+  // same bug with a survivor.
+  it("keeps non-Latin letters and digits", () => {
+    expect(slugify("Установка")).toBe("установка");
+    expect(slugify("Быстрый старт")).toBe("быстрый-старт");
+    expect(slugify("安装")).toBe("安装");
+    expect(slugify("インストール 2")).toBe("インストール-2");
+    expect(slugify("Émoji 🚀 heading")).toBe("émoji-heading");
+    expect(slugify("Ünicode Größe")).toBe("ünicode-größe");
+  });
+
+  it("keeps underscores (they were inside the old `\\w`)", () => {
+    expect(slugify("max_age option")).toBe("max_age-option");
+  });
+
+  it("still yields nothing for a heading with no letters or digits", () => {
+    expect(slugify("🚀")).toBe("");
+    expect(slugify("!!!")).toBe("");
+  });
+});
+
+describe("createSlugger", () => {
+  it("suffixes repeated slugs so the ids stay unique", () => {
+    const slug = createSlugger();
+    expect(slug("Options")).toBe("options");
+    expect(slug("Usage")).toBe("usage");
+    expect(slug("Options")).toBe("options-2");
+    expect(slug("options")).toBe("options-3");
+  });
+
+  it("gives a slug-less heading an anchor anyway", () => {
+    const slug = createSlugger();
+    expect(slug("🚀")).toBe("section");
+    expect(slug("---")).toBe("section-2");
+  });
+
+  it("steps around a literal heading that collides with a suffix", () => {
+    const slug = createSlugger();
+    expect(slug("Options")).toBe("options");
+    expect(slug("Options")).toBe("options-2");
+    expect(slug("Options 2")).toBe("options-2-2");
+  });
+
+  it("counts per instance, so one page's headings never see another's", () => {
+    expect(createSlugger()("Options")).toBe("options");
+    expect(createSlugger()("Options")).toBe("options");
   });
 });
 

@@ -4,10 +4,10 @@ import { join, dirname, basename } from "node:path";
 import { pathToFileURL } from "node:url";
 import * as md4x from "md4x/wasm";
 import {
+  createSlugger,
   isIndexFile,
   isReadmeFile,
   orderKey,
-  slugify,
   stripPrefix,
   textContent,
   titleCase,
@@ -224,7 +224,6 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
 
     mark = now();
     const tree = md4x.parseAST(raw);
-    const meta = md4x.parseMeta(raw);
     phases.parse += now() - mark;
     const fm = (tree.frontmatter || {}) as Record<string, any>;
     let body = tree.nodes as MarkNode[];
@@ -279,8 +278,9 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     codeBlocks += highlightBody(body);
     phases.highlight += now() - mark;
 
-    // toc (nested h2 > h3)
-    const toc = buildToc(meta.headings || []);
+    // toc (nested h2 > h3) — also stamps every heading's `id`, so it must run
+    // after the transforms that rewrite heading nodes.
+    const toc = buildToc(body);
     const icon = fm.icon || fm.navigation?.icon || resolveIcon(path) || undefined;
 
     pages.push({
@@ -335,19 +335,53 @@ function countNav(items: NavItem[]): number {
   return n;
 }
 
-// --- toc ---
-function buildToc(headings: { level: number; text: string }[]): TocLink[] {
+// --- toc + heading ids ---
+/**
+ * Give every heading in the body its `id` and collect the h2/h3 ones into the
+ * page's TOC — ONE walk, one derivation.
+ *
+ * The TOC is built here, on the server, while the ids are emitted by the CLIENT
+ * renderer during SSR and hydration. Deriving the id twice (this used to slug
+ * `md4x.parseMeta().headings` while `MarkdownRenderer` slugged the AST node) is
+ * a desync waiting to happen, and once ids need de-duplicating it is a certainty:
+ * the two sides see different heading LISTS (the page's h1 is spliced out of the
+ * body, raw-HTML headings never reach the renderer), so any counter they each
+ * keep drifts apart and the TOC links point at nothing. Instead the id is
+ * allocated once, written onto the node, and shipped in the body payload —
+ * `MarkdownRenderer` finds `props.id` already set and only falls back to
+ * `slugify` for bodies that never came through here.
+ *
+ * The walk recurses, because `parseMeta` counted headings inside containers
+ * (`::tabs`) too and the renderer anchors them all the same.
+ */
+function buildToc(body: MarkNode[]): TocLink[] {
+  const slug = createSlugger();
   const links: TocLink[] = [];
-  for (const h of headings) {
-    if (h.level < 2 || h.level > 3) continue;
-    const link: TocLink = { id: slugify(h.text), depth: h.level, text: h.text };
-    if (h.level === 3 && links.length) {
-      const parent = links[links.length - 1];
-      (parent.children ||= []).push(link);
-    } else {
-      links.push(link);
+  const visit = (nodes: MarkNode[]): void => {
+    for (const node of nodes) {
+      if (!Array.isArray(node)) continue;
+      const tag = node[0];
+      if (typeof tag !== "string") continue;
+      const level = /^h([1-6])$/.exec(tag);
+      if (level) {
+        // md4x emits no heading ids of its own (`## H {#anchor}` parses as
+        // literal text), so this is always the allocator's to assign.
+        const props = (node[1] ||= {});
+        const text = textContent(node);
+        const id = slug(text);
+        props.id = id;
+        const depth = Number(level[1]);
+        if (depth === 2 || depth === 3) {
+          const link: TocLink = { id, depth, text };
+          const parent = depth === 3 ? links[links.length - 1] : undefined;
+          if (parent) (parent.children ||= []).push(link);
+          else links.push(link);
+        }
+      }
+      visit(node.slice(2) as MarkNode[]);
     }
-  }
+  };
+  visit(body);
   return links;
 }
 

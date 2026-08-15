@@ -66,6 +66,11 @@ function isHeading(node: MarkNode): node is [string, Record<string, any>, ...Mar
 // Walk the flat block body and collect the prose under each h2/h3 heading
 // (keyed by the same slug the TOC uses), plus any intro text before the first
 // heading. Deeper headings (h4+) fold into their enclosing section's text.
+//
+// The key is READ off the node (`props.id`), not re-slugified from the text:
+// `buildToc` allocates each heading's id once and stamps it there, and its
+// de-duplication (`options`, `options-2`) is not something a second derivation
+// could reproduce from one heading in isolation.
 function sectionTexts(body: MarkNode[]): { intro: string; bySlug: Map<string, string> } {
   const bySlug = new Map<string, string>();
   const introParts: string[] = [];
@@ -75,7 +80,7 @@ function sectionTexts(body: MarkNode[]): { intro: string; bySlug: Map<string, st
       const depth = Number((node[0] as string).slice(1));
       if (depth === 2 || depth === 3) {
         if (current) bySlug.set(current.slug, current.parts.join(" "));
-        current = { slug: slugify(textContent(node)), parts: [] };
+        current = { slug: node[1]?.id || slugify(textContent(node)), parts: [] };
         continue;
       }
     }

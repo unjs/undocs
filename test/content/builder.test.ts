@@ -549,3 +549,118 @@ describe("buildIndex same-numbered siblings", () => {
     await rm(dir2, { recursive: true, force: true });
   });
 });
+
+// The TOC is built HERE, on the server; the ids are emitted by the client
+// renderer (`src/app/content/MarkdownRenderer.ts`) during SSR and hydration. The
+// two must agree exactly, or every TOC link points at nothing — so the id is
+// allocated once and stamped onto the heading node, and these tests assert the
+// node and the TOC link carry the same string.
+describe("buildIndex heading anchors", () => {
+  let anchorDir: string;
+  let index: ContentIndex;
+
+  beforeAll(async () => {
+    anchorDir = await mkdtemp(join(tmpdir(), "undocs-anchors-"));
+    await writeFile(
+      join(anchorDir, "index.md"),
+      [
+        "# Начало",
+        "",
+        "## Установка",
+        "",
+        "Ставим.",
+        "",
+        "### Options",
+        "",
+        "Первые опции.",
+        "",
+        "## 安装",
+        "",
+        "装好了。",
+        "",
+        "### Options",
+        "",
+        "Вторые опции.",
+        "",
+        "## Émoji 🚀 heading",
+        "",
+        "Accented.",
+        "",
+        "## 🚀",
+        "",
+        "Nothing sluggable.",
+        "",
+      ].join("\n"),
+    );
+    index = await buildIndex({ dir: anchorDir });
+  }, 60_000);
+
+  afterAll(async () => {
+    if (anchorDir) await rm(anchorDir, { recursive: true, force: true });
+  });
+
+  const headings = (nodes: any[]): any[] => {
+    const out: any[] = [];
+    const visit = (list: any[]) => {
+      for (const n of list) {
+        if (!Array.isArray(n) || typeof n[0] !== "string") continue;
+        if (/^h[1-6]$/.test(n[0])) out.push(n);
+        visit(n.slice(2));
+      }
+    };
+    visit(nodes);
+    return out;
+  };
+
+  const flatToc = (links: any[]): any[] =>
+    links.flatMap((l) => [l, ...(l.children ? flatToc(l.children) : [])]);
+
+  it("slugs non-Latin headings instead of emptying them", () => {
+    const toc = flatToc(index.byPath.get("/")!.body.toc.links);
+    expect(toc.map((l) => l.id)).toEqual([
+      "установка",
+      "options",
+      "安装",
+      "options-2",
+      "émoji-heading",
+      "section",
+    ]);
+  });
+
+  it("gives two identically-named headings distinct ids", () => {
+    const toc = flatToc(index.byPath.get("/")!.body.toc.links);
+    const options = toc.filter((l) => l.text === "Options");
+    expect(options).toHaveLength(2);
+    expect(options[0].id).not.toBe(options[1].id);
+  });
+
+  // The renderer uses `props.id` verbatim when it is set, so a non-empty id on
+  // every heading node IS the rendered `id` — and its `slugify` fallback (which
+  // could neither de-duplicate nor see the rest of the page) never runs.
+  it("stamps the same id on the heading node the renderer will render", () => {
+    const page = index.byPath.get("/")!;
+    const nodes = headings(page.body.value);
+    const ids = nodes.map((n) => n[1].id);
+    expect(ids.every((id) => typeof id === "string" && id.length > 0)).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
+    // Every TOC link resolves to exactly one heading node, carrying its text.
+    for (const link of flatToc(page.body.toc.links)) {
+      const matches = nodes.filter((n) => n[1].id === link.id);
+      expect(matches).toHaveLength(1);
+      expect(matches[0][1].id).toBe(link.id);
+    }
+  });
+
+  it("keys the search sections by the same id", () => {
+    const ids = index.search.filter((s) => s.level > 1).map((s) => s.id);
+    expect(ids).toContain("/#options");
+    expect(ids).toContain("/#options-2");
+    expect(ids).toContain("/#установка");
+    // Each heading section carries its OWN prose — the proof the second
+    // `### Options` is not silently folded into the first.
+    const first = index.search.find((s) => s.id === "/#options");
+    const second = index.search.find((s) => s.id === "/#options-2");
+    expect(first!.content).toContain("Первые");
+    expect(second!.content).toContain("Вторые");
+  });
+});

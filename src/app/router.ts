@@ -29,6 +29,7 @@ import {
 import { pages as userPages } from "virtual:undocs/user-pages";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { normalizeRedirects, resolveRedirect } from "@app/utils/redirects.ts";
+import { findAnchor } from "@app/utils/anchor.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -313,14 +314,11 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     // Hash anchors: `app.vue` also runs its own scroll-into-view retry loop for
     // async-rendered content; try an immediate scroll here too.
     if (hash) {
-      // A hash is attacker/user-authorable and need not be a valid CSS selector
-      // (`#foo bar`, `#~<payload>`), in which case `querySelector` THROWS and
-      // would take the whole navigation down with it.
-      try {
-        document.querySelector(hash)?.scrollIntoView();
-      } catch {
-        // Not a selector — nothing to scroll to.
-      }
+      // `findAnchor` decodes the fragment before looking the id up (a non-ASCII
+      // anchor is percent-encoded in `location.hash`) and never throws on a hash
+      // that is not a valid selector — either would take the navigation down or
+      // silently skip the scroll.
+      findAnchor(hash)?.scrollIntoView();
       return;
     }
     window.scrollTo({ top: top ?? 0 });

@@ -210,7 +210,14 @@ function renderNode(node: MarkNode, _parentTag: string | null): VNode | string |
   // Clone props so we never mutate the source AST (e.g. when adding heading ids).
   const props: Record<string, any> = { ...rawProps };
 
-  // --- Headings: ensure an `id` for on-page TOC anchor links. ---
+  // --- Headings: ensure an `id` for on-page TOC anchor links.
+  // Content built by the engine arrives with `id` ALREADY on the node —
+  // `buildToc` allocates it once, server-side, so the TOC link and this element
+  // cannot disagree and repeated headings get distinct ids. Re-slugging here
+  // would be a second derivation with no way to see the rest of the page (it
+  // could not de-duplicate, and on a client navigation there is no counter to
+  // share), so this is only a fallback for a body that never went through the
+  // builder. ---
   if (HEADINGS.has(tag) && !props.id) {
     props.id = slugify(textContent(node));
   }

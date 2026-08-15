@@ -100,7 +100,7 @@ export interface BuildStats {
     scan: number; // glob + sort of the docs dir
     read: number; // readFile of every .md/.yml
     automd: number; // automd transform (0 when unused)
-    parse: number; // md4x.parseAST + parseMeta
+    parse: number; // md4x.parseAST
     transform: number; // transformBody (AST rewrites)
     highlight: number; // highlightBody (rangi)
     navigation: number; // buildNavigation

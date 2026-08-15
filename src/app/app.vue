@@ -7,6 +7,7 @@ import { useHead, useSeoMeta } from "@unhead/vue";
 import { queryNavigation, hintPrerenderRoute } from "@app/composables/useContent.ts";
 import { LANDING_KEY, resolveLanding } from "@app/composables/useLanding.ts";
 import { docsNavTree } from "@app/utils/nav.ts";
+import { findAnchor } from "@app/utils/anchor.ts";
 import AppFooter from "@app/components/app/AppFooter.vue";
 import AppHeader from "@app/components/app/AppHeader.vue";
 import FilmBackground from "@app/components/FilmBackground.vue";
@@ -75,14 +76,10 @@ onMounted(() => {
       if (hash) {
         let attempts = 0;
         const interval = setInterval(() => {
-          // The hash need not be a valid selector (see `router.ts`'s
-          // `applyScroll`); an uncaught throw here would leak the interval.
-          try {
-            document.querySelector(hash)?.scrollIntoView();
-          } catch {
-            clearInterval(interval);
-            return;
-          }
+          // `findAnchor` decodes the fragment and swallows an invalid selector
+          // (see `utils/anchor.ts`); an uncaught throw here would leak the
+          // interval.
+          findAnchor(hash)?.scrollIntoView();
           if (attempts++ > 5) {
             clearInterval(interval);
           }

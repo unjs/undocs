@@ -75,15 +75,66 @@ export function textContent(node: MarkNode | undefined | null): string {
   return (node.slice(2) as MarkNode[]).map(textContent).join("");
 }
 
+/**
+ * Turn a heading's text into an anchor slug.
+ *
+ * The strip is UNICODE (`\p{L}\p{N}` with the `u` flag), not `\w`. `\w` is
+ * ASCII-only, so `## Установка` and `## 安装` stripped down to the empty string —
+ * and an empty id is not just an ugly anchor: the renderer gates the heading's
+ * `id` and its `#` deep-link on a non-empty slug, so the whole TOC of a
+ * non-Latin docs set pointed at nothing. `## Émoji 🚀 heading` was the same bug
+ * wearing a disguise (`moji-heading`). `_` is kept explicitly — it was inside
+ * `\w`, and dropping it would silently move every existing `snake_case` anchor.
+ *
+ * Uniqueness is NOT this function's job: two `### Options` under different
+ * sections both land here as `options`. See `createSlugger`.
+ */
 export function slugify(s: string): string {
   return s
     .toLowerCase()
     .trim()
     .replace(/<[^>]*>/g, "")
-    .replace(/[^\w\s-]/g, "")
+    .replace(/[^\p{L}\p{N}_\s-]/gu, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+/**
+ * A per-page slug allocator: `slugify`, plus the uniqueness a DOM id needs.
+ *
+ * Two `### Options` under different `##` sections slug identically, which gives
+ * the page two elements with one id — `getElementById` finds the first, so the
+ * second TOC link scrolls to the wrong heading. Repeats get an occurrence
+ * suffix (`options`, `options-2`, `options-3`), and a heading that slugs to
+ * nothing at all (`## 🚀`, `## ---`) falls back to `section`, so every heading
+ * ends up with an anchor.
+ *
+ * The counter is CLOSURE state, created once per page by the builder — never
+ * module-level. The server renders many requests concurrently in one process
+ * (see AGENTS.md), and a shared counter would both leak ids across pages and
+ * hand two concurrent renders different numbers for the same heading.
+ *
+ * The allocated id is written onto the heading node, so the client renderer
+ * never counts anything: there is exactly ONE derivation of a heading's id, on
+ * the server, and the TOC, the search sections and the rendered DOM all read it.
+ */
+export function createSlugger(): (text: string) => string {
+  const used = new Set<string>();
+  const counts = new Map<string, number>();
+  return (text: string): string => {
+    const base = slugify(text) || "section";
+    // The `while` covers the case the counter alone cannot: a literal
+    // `## Options 2` slugs to `options-2`, which an earlier repeat may hold.
+    let n = counts.get(base) ?? 1;
+    let id = base;
+    while (used.has(id)) {
+      id = `${base}-${++n}`;
+    }
+    counts.set(base, n);
+    used.add(id);
+    return id;
+  };
 }
 
 export function titleCase(s: string): string {
