@@ -18,7 +18,7 @@ import PageHeaderLinks from "@app/components/layout/PageHeaderLinks.vue";
 import PageLinks from "@app/components/layout/PageLinks.vue";
 import Separator from "@app/components/ui/Separator.vue";
 import MarkdownRenderer from "@app/content/MarkdownRenderer.ts";
-import { isWithin } from "@app/utils/nav.ts";
+import { navBreadcrumb } from "@app/utils/nav.ts";
 import { joinURL } from "ufo";
 import { kebabCase } from "scule";
 import type { NavItem } from "@server/content/types.ts";
@@ -41,27 +41,7 @@ const surround = computed(() => page.value?.surround ?? []);
 
 const navigation = inject<Ref<NavItem[]>>("navigation");
 
-// console.log(JSON.stringify(navigation?.value, null, 2))
-
-function makeBreadcrumb(items: NavItem[], path: string, level = 0) {
-  const parent = [...items].find((i) => isWithin(path, i.path) && i.children?.length > 0);
-  if (!parent) {
-    return [];
-  }
-  if (level === 0) {
-    return makeBreadcrumb(parent.children, path, level + 1);
-  }
-  return [
-    {
-      label: parent.title,
-      icon: parent.icon as string,
-      to: parent.page !== false ? parent.path : "",
-    },
-    ...makeBreadcrumb(parent.children, path, level + 1),
-  ];
-}
-
-const breadcrumb = computed(() => makeBreadcrumb(navigation?.value || [], page.value.path));
+const breadcrumb = computed(() => navBreadcrumb(navigation?.value, page.value.path));
 
 usePageSEO({
   title: `${page.value?.title} - ${appConfig.site.name}`,

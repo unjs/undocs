@@ -35,6 +35,24 @@ export function isWithin(path: string, base: string | undefined): boolean {
 }
 
 /**
+ * Is this route the blog, or a post in it?
+ *
+ * The blog is singled out in three places — the landing's "Get Started" CTA
+ * (`firstDocsPage`), the mobile drawer (`mobileNavLinks`) and the section tabs
+ * (`useSectionTabs`, which pushes it to the far end of the bar) — and all three
+ * ask on the ROUTE, never on the title or on an exact `/blog`. Both of the
+ * obvious shortcuts are wrong: a `blog/` directory with no `index.md` borrows
+ * its first post's path (`builder.ts` → `out.path = kids[0].path`), so its nav
+ * item is `/blog/hello` and an `=== "/blog"` test misses it entirely; and its
+ * title is whatever its index page is called, so a blog titled "News" defeats a
+ * title test. Matching the prefix answers both, and `isWithin` keeps `/blogging`
+ * out of it.
+ */
+export function isBlogPath(path: string | undefined): boolean {
+  return isWithin(path ?? "", "/blog");
+}
+
+/**
  * Does this item, or anything beneath it, own `path`?
  *
  * Prefix matching alone is not enough once the tree contains a SYNTHETIC section
@@ -135,11 +153,51 @@ export function docsNavTree(navigation: NavItem[] | null | undefined, landing: b
  */
 export function firstDocsPage(navigation: NavItem[] | null | undefined): string | undefined {
   for (const item of navigation ?? []) {
-    if (item.path === "/blog") continue;
+    if (isBlogPath(item.path)) continue;
     const path = item.children?.length ? firstDocsPage(item.children) : item.path;
     if (path) return path;
   }
   return undefined;
+}
+
+/** One crumb of the trail `[...slug].vue` renders above a page title. */
+export interface BreadcrumbItem {
+  label: string;
+  icon?: string;
+  /** Empty for an index-less section, which has no page of its own to link to. */
+  to: string;
+}
+
+/**
+ * The trail of SECTIONS a page sits in, outermost first.
+ *
+ * The top level is skipped: which section the reader is in is what the tab bar
+ * (`DocsSectionTabs`) says, so repeating it here would only shorten the title.
+ * What is left is the sub-sections between that tab and the page — a trail that
+ * is empty for most docs and only earns its row on a nested tree.
+ *
+ * Containment is `navContains`, not a prefix test on the section's own path: an
+ * index-less directory borrows its FIRST CHILD's path (`builder.ts`), so
+ * `/api`-with-`a.md`-and-`b.md` is the item `/api/a`, and a reader on `/api/b`
+ * would match nothing and get no trail at all. Asking what the section HOLDS is
+ * right for that and for a synthetic section (`groupLoosePages`), whose members
+ * share no prefix with it at all.
+ */
+export function navBreadcrumb(
+  items: NavItem[] | null | undefined,
+  path: string,
+  level = 0,
+): BreadcrumbItem[] {
+  const parent = (items ?? []).find(
+    (item) => navContains(item, path) && (item.children?.length ?? 0) > 0,
+  );
+  if (!parent) return [];
+  const rest = navBreadcrumb(parent.children, path, level + 1);
+  if (level === 0) return rest;
+  return [
+    { label: parent.title, icon: parent.icon, to: parent.page === false ? "" : parent.path },
+    ...rest,
+  ];
 }
 
 /**
@@ -201,7 +259,7 @@ export function countNavRows(items: NavItem[] | null | undefined): number {
  */
 export function mobileNavLinks(navigation: NavItem[] | null | undefined): NavItem[] {
   return (navigation ?? []).map((item) => {
-    if (item.path === "/blog") {
+    if (isBlogPath(item.path)) {
       return { ...item, children: undefined };
     }
     if (item.children?.length === 1) {
