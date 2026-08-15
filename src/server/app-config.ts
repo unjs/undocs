@@ -1,4 +1,4 @@
-import { loadConfig } from "c12";
+import { loadDocsConfig } from "./docs-config.ts";
 import { highlightCode } from "./content/highlight.ts";
 
 /**
@@ -13,7 +13,8 @@ import { highlightCode } from "./content/highlight.ts";
  *
  *   { docs, site: { name, description, url }, ui: { colors: { primary } } }
  *
- * It loads `<docsDir>/.config/docs.*` via c12, converts
+ * It loads `<docsDir>/.config/docs.*` via `loadDocsConfig` (c12 + the
+ * `package.json` name inference), converts
  * `landing.features[].description` markdown → HTML (md4x), highlights
  * `landing.heroCode` (`contentHighlighted`), and infers `branch` (default
  * "main"). md4x/the highlighter are wrapped in try/catch so a highlight/markdown
@@ -26,18 +27,22 @@ export interface UndocsAppConfig {
 }
 
 export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfig> {
-  const { config: docs } = await loadConfig<any>({ name: "docs", cwd: docsDir });
+  const docs = await loadDocsConfig(docsDir);
 
   // Guess branch (MVP: default to "main"; git/env inference is a later step).
   docs.branch = docs.branch || "main";
 
+  // `landing` doubles as an on/off switch, so it may be a boolean here — only
+  // the object form carries anything to normalize.
+  const landing = typeof docs.landing === "object" ? docs.landing : undefined;
+
   // Convert markdown → HTML for landing feature descriptions. Uses md4x (the
   // same parser as the doc content) via its `md4x/wasm` entry.
-  if (docs.landing && docs.landing.features) {
+  if (landing?.features) {
     try {
       const md4x = await import("md4x/wasm");
       await md4x.init();
-      for (const item of docs.landing.features) {
+      for (const item of landing.features) {
         if (item.description) {
           item.description = md4x.renderToHtml(item.description);
         }
@@ -51,14 +56,14 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
   // highlighter (`highlightCode`) so the landing hero renders with the exact
   // same grammars, aliases and `.code-hl` token markup as every other block —
   // no separate config that drifts out of sync.
-  if (docs.landing && docs.landing.heroCode) {
+  if (landing?.heroCode) {
     try {
-      if (typeof docs.landing.heroCode === "string") {
-        docs.landing.heroCode = { content: docs.landing.heroCode };
+      if (typeof landing.heroCode === "string") {
+        landing.heroCode = { content: landing.heroCode };
       }
-      docs.landing.heroCode.contentHighlighted = highlightCode(
-        docs.landing.heroCode.content,
-        docs.landing.heroCode.lang || "sh",
+      landing.heroCode.contentHighlighted = highlightCode(
+        landing.heroCode.content,
+        landing.heroCode.lang || "sh",
       );
     } catch (error) {
       console.error("[undocs] failed to highlight hero code:", error);

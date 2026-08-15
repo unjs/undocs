@@ -33,7 +33,9 @@ export interface BannerProps {
 
 export interface DocsConfig {
   dir?: string;
+  /** The name of the documentation site. Defaults to the `name` of the closest `package.json` (searching upwards from the docs directory up to the repository root). */
   name?: string;
+  /** The description of the documentation site. Defaults to the `description` of the closest `package.json` (searching upwards from the docs directory up to the repository root). */
   description?: string;
   shortDescription?: string;
   url?: string;
@@ -54,8 +56,20 @@ export interface DocsConfig {
   automd?: unknown;
   buildCache?: boolean;
   sponsors?: { api: string };
+  /**
+   * The landing page shown at `/`.
+   *
+   * `true` forces the hero on, `false` forces it off — with it off, `/` is
+   * served from the docs-root `index.md` (or `README.md`) as an ordinary page:
+   * docs layout, left sidebar, and a `Home` entry in the navigation. Any
+   * configuration here also turns it on.
+   *
+   * Left unset, it is inferred from the content: docs organised into sections
+   * get a landing, flat docs use their root page as the home page, and docs with
+   * no root page always get one (nothing else could serve `/`).
+   */
   landing?:
-    | false
+    | boolean
     | {
         title?: string;
         description?: string;

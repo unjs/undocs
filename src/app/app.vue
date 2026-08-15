@@ -5,6 +5,8 @@ import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { useHead, useSeoMeta } from "@unhead/vue";
 import { queryNavigation, hintPrerenderRoute } from "@app/composables/useContent.ts";
+import { LANDING_KEY, resolveLanding } from "@app/composables/useLanding.ts";
+import { docsNavTree } from "@app/utils/nav.ts";
 import AppFooter from "@app/components/app/AppFooter.vue";
 import AppHeader from "@app/components/app/AppHeader.vue";
 import FilmBackground from "@app/components/FilmBackground.vue";
@@ -22,6 +24,17 @@ import { startPrefetch } from "@app/prefetch.ts";
 const appConfig = useAppConfig();
 
 const { data: navigation } = await useAsyncData("navigation", () => queryNavigation());
+
+// Landing on/off — resolved once, here, from the config plus the shape of the
+// content tree, and provided to the whole app (`useLanding`). Every consumer
+// reads this one answer: `AppLayout` (which layout `/` gets), `pages/index.vue`
+// (which page `/` renders), `useSectionTabs`, and the backdrop below.
+const landing = computed(() => resolveLanding(appConfig.docs, navigation.value));
+
+// The tree the chrome renders, shaped for that answer — see `docsNavTree`. Every
+// consumer (sidebar, section tabs, mobile drawer, search, prefetch) reads this
+// one, not the raw response.
+const docsNavigation = computed(() => docsNavTree(navigation.value, landing.value));
 
 // Bake the global search index (`/api/docs/search`, query-less) too. Unlike
 // navigation it isn't fetched during SSR (search loads lazily on open), so the
@@ -50,9 +63,9 @@ useHead({
 
 const route = useRoute();
 
-// The film backdrop belongs to the landing only — other pages get a plain
-// background.
-const isLanding = computed(() => route.path === "/");
+// The film backdrop belongs to the landing only — other pages, including a
+// no-landing `/`, get a plain background.
+const isLanding = computed(() => route.path === "/" && landing.value);
 
 onMounted(() => {
   watch(
@@ -81,10 +94,11 @@ onMounted(() => {
 
   // Speculatively warm the `/api/docs/*` requests the top navigation pages need,
   // so client navigations to them are instant. No-op on mobile/slow links.
-  startPrefetch(navigation.value ?? [], route.path);
+  startPrefetch(docsNavigation.value, route.path);
 });
 
-provide("navigation", navigation);
+provide("navigation", docsNavigation);
+provide(LANDING_KEY, landing);
 </script>
 
 <template>
@@ -122,7 +136,7 @@ provide("navigation", navigation);
       </GridPage>
 
       <ClientOnly>
-        <DocsSearch :navigation="navigation" shortcut="meta_k" />
+        <DocsSearch :navigation="docsNavigation" shortcut="meta_k" />
       </ClientOnly>
     </div>
   </AppProvider>

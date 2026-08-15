@@ -40,6 +40,7 @@ export const BUILTIN_ICONS: Record<string, string[]> = {
     "git-pull-request",
     "hash",
     "heart-handshake",
+    "house",
     "info",
     "lightbulb",
     "link",

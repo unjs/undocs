@@ -5,13 +5,39 @@ export function stripPrefix(seg: string): string {
   return seg.replace(/^\d+\./, "");
 }
 
+/**
+ * The file names that stand for a directory itself rather than a page inside it.
+ *
+ * `README` is an alias for `index`, because it is the file a repository host
+ * renders for a directory — so a docs set that already reads well when browsed
+ * on GitHub builds without being renamed. Matched case-insensitively: `README`,
+ * `readme` and `ReadMe` are all in the wild, and on a case-insensitive
+ * filesystem they are the same file anyway.
+ */
+const INDEX_NAMES = new Set(["index", "readme"]);
+
+/** The file's own name, without its numeric prefix, directories or extension. */
+function baseName(rel: string): string {
+  return stripPrefix(rel.split("/").pop() ?? "").replace(/\.(md|yml)$/i, "");
+}
+
+/** Does this file stand for its directory (`index.md`, `README.md`, `1.index.md`)? */
+export function isIndexFile(rel: string): boolean {
+  return INDEX_NAMES.has(baseName(rel).toLowerCase());
+}
+
+/** Specifically the `README` spelling — the alias, not the canonical name. */
+export function isReadmeFile(rel: string): boolean {
+  return baseName(rel).toLowerCase() === "readme";
+}
+
 /** Derive a route path from a source-relative file path. */
 export function toRoutePath(rel: string): string {
   const segs = rel
     .replace(/\.(md|yml)$/, "")
     .split("/")
     .map(stripPrefix);
-  if (segs[segs.length - 1] === "index") segs.pop();
+  if (INDEX_NAMES.has((segs[segs.length - 1] ?? "").toLowerCase())) segs.pop();
   const joined = "/" + segs.join("/");
   return joined === "/" ? "/" : joined.replace(/\/$/, "");
 }

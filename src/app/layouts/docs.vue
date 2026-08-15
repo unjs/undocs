@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, watch } from "vue";
 import { useRoute } from "@app/router.ts";
 import { useDocsNav } from "@app/composables/useDocsNav.ts";
 import { useSectionTabs } from "@app/composables/useSectionTabs.ts";
+import { countNavRows } from "@app/utils/nav.ts";
 import Container from "@app/components/Container.vue";
 import DocsNavigation from "@app/components/docs/DocsNavigation.vue";
 import Page from "@app/components/layout/Page.vue";
@@ -20,12 +21,15 @@ const { visible: hasSectionTabs } = useSectionTabs();
 // Section anchors shown above the tree when the tabs bar isn't on screen.
 const anchorLinks = computed(() => docsNav.links.filter((l) => l.title !== "Blog"));
 
-// Whether the left sidebar has anything to render. When empty, drop the `#left`
-// slot entirely so the grid doesn't reserve its column and the content spans wide.
-const hasSidebar = computed(() =>
-  hasSectionTabs.value
-    ? docsNav.activeLinks.length > 0
-    : anchorLinks.value.length > 0 || docsNav.activeLinks.length > 0,
+// Whether the left sidebar is worth rendering. Counted in ROWS, not entries —
+// see `countNavRows`. It takes at least TWO to navigate: a sidebar with one row
+// links to the page the reader is already on (a single-page docs set, or a
+// section holding one page), so it is a column of chrome that can only be a
+// no-op. When there is nothing to show, drop the `#left` slot entirely so the
+// grid doesn't reserve its column and the content spans wide.
+const hasSidebar = computed(
+  () =>
+    countNavRows(docsNav.activeLinks) + (hasSectionTabs.value ? 0 : anchorLinks.value.length) > 1,
 );
 
 // Keep the active entry visible when a deep-linked page loads (or on navigation)
@@ -80,8 +84,10 @@ function scrollport(el: Element): HTMLElement | undefined {
                anchors above the tree so switching is still possible. -->
           <template v-else>
             <PageAnchors :links="anchorLinks" />
-            <Separator v-if="docsNav.activeLinks?.length" type="dashed" class="py-6" />
-            <DocsNavigation :navigation="docsNav.activeLinks" :collapsible="false" />
+            <template v-if="docsNav.activeLinks?.length">
+              <Separator type="dashed" class="py-6" />
+              <DocsNavigation :navigation="docsNav.activeLinks" :collapsible="false" />
+            </template>
           </template>
         </PageAside>
       </template>

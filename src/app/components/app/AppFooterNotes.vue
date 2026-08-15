@@ -14,9 +14,11 @@ const appConfig = useAppConfig();
         >{{ appConfig.site.name }}
       </AppLink>
     </span>
+    <template v-if="appConfig.docs.shortDescription">
     &nbsp;<span class="text-muted-foreground">{{
       appConfig.docs.shortDescription.replace(/\.$/, "")
     }}</span
     >.
+    </template>
   </p>
 </template>

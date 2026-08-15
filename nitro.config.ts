@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineNitroConfig } from "nitro/config";
-import { loadConfig } from "c12";
+import { loadDocsConfig } from "./src/server/docs-config.ts";
 import { vercel } from "./src/server/vercel.ts";
 import { bundleDocs } from "./src/server/bundle-docs.ts";
 import { rebaseOutput } from "./src/server/rebase-output.ts";
@@ -24,8 +24,9 @@ const docsDir = process.env.UNDOCS_DIR ? resolve(process.env.UNDOCS_DIR) : r("./
 
 // Its config lives at `<docsDir>/.config/docs.yaml` and is loaded here via c12
 // (nitro.config.ts is a module we control, so config-time loading keeps
-// runtimeConfig in sync).
-const { config: docs } = await loadConfig<any>({ name: "docs", cwd: docsDir });
+// runtimeConfig in sync). `loadDocsConfig` is shared with the client app-config
+// so an inferred `name` is identical on both sides.
+const docs = await loadDocsConfig(docsDir);
 
 // Mirror the CLI: `dir` is resolved relative to the docs cwd (falls back to the
 // docs dir itself when the config omits it).

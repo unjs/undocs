@@ -11,7 +11,9 @@ export default defineEventHandler(async (event) => {
     throw new HTTPError({ status: 404, statusText: "Page not found" });
   }
 
-  const path = withLeadingSlash(slug.replace(/\.md$/, ""));
+  // `/raw/index.md` is the docs root: `toRoutePath` strips `index` from every
+  // route, so `/index` is never a page of its own and the alias is unambiguous.
+  const path = withLeadingSlash(slug.replace(/\.md$/, "")).replace(/^\/index$/, "/");
   const index = await getIndex();
   const page = index.byPath.get(path) || index.byPath.get(path + "/");
   if (!page) {

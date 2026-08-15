@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from "@app/router.ts";
 import { cn } from "@app/utils/cn.ts";
+import { isWithin } from "@app/utils/nav.ts";
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
 // Renders top-level quick links (from `useDocsNav().links`) as a vertical
@@ -12,6 +13,8 @@ interface AnchorLink {
   label?: string;
   title?: string;
   icon?: string;
+  /** Precomputed by `useDocsNav` — see `isActive`. */
+  active?: boolean;
   [key: string]: any;
 }
 
@@ -20,10 +23,10 @@ defineProps<{
 }>();
 
 const route = useRoute();
-const isActive = (link: AnchorLink) => {
-  const base = link.to || link.path || "";
-  return base !== "" && route.path.startsWith(base);
-};
+// `useDocsNav` links carry their own answer, which is the only correct one for an
+// entry holding pages that don't share its path (a synthetic section — see
+// `groupLoosePages`). Raw `NavItem`s fall back to matching the path.
+const isActive = (link: AnchorLink) => link.active ?? isWithin(route.path, link.to || link.path);
 </script>
 
 <template>

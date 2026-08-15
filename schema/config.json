@@ -17,11 +17,11 @@
     },
     "name": {
       "type": "string",
-      "description": "The name of the documentation site."
+      "description": "The name of the documentation site.\nDefaults to the `name` of the closest `package.json` (searching upwards from the docs directory up to the repository root)."
     },
     "description": {
       "type": "string",
-      "description": "The description of the documentation site."
+      "description": "The description of the documentation site.\nDefaults to the `description` of the closest `package.json` (searching upwards from the docs directory up to the repository root)."
     },
     "shortDescription": {
       "type": "string",
@@ -280,10 +280,10 @@
       }
     },
     "landing": {
+      "description": "The landing page shown at `/`. `true` forces the hero on, `false` forces it off — with it off, `/` is served from the docs-root `index.md` (or `README.md`) as an ordinary page: docs layout, left sidebar, and a `Home` entry in the navigation. Any configuration here also turns it on. Left unset, it is inferred from the content: docs organised into sections get a landing, flat docs use their root page as the home page, and docs with no root page always get one (nothing else could serve `/`).",
       "oneOf": [
         {
-          "type": "boolean",
-          "const": false
+          "type": "boolean"
         },
         {
           "type": "object",

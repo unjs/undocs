@@ -1,5 +1,6 @@
 {
   "name": "docs",
+  "description": "undocs starter template",
   "private": true,
   "scripts": {
     "dev": "undocs dev",

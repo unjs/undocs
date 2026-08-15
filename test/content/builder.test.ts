@@ -80,6 +80,20 @@ describe("buildIndex", () => {
     expect(home.description).toBe("Welcome to the docs");
   });
 
+  it("adds the docs-root index as the tree's first item, flagged `root`", () => {
+    // `/` has no path segment, so it is only in the tree because `buildNavigation`
+    // special-cases it. The flag is what lets a landing-page site strip it back
+    // out (see `resolveLanding`).
+    const first = index.navigation[0];
+    expect(first.path).toBe("/");
+    expect(first.title).toBe("Home");
+    expect(first.root).toBe(true);
+    expect(first.page).toBe(true);
+    expect(first.children).toBeUndefined();
+    // Exactly one item carries it, and never a nested one.
+    expect(index.navigation.filter((n) => n.root)).toHaveLength(1);
+  });
+
   it("builds a nested navigation tree", () => {
     const guide = index.navigation.find((n) => n.path === "/guide");
     expect(guide).toBeDefined();
@@ -232,5 +246,113 @@ describe("buildIndex edge cases", () => {
     // The first child shares the group's path but must NOT be folded away — every
     // page in the directory stays in the tree.
     expect(api?.children?.map((c) => c.path)).toEqual(["/docs/api/first", "/docs/api/second"]);
+  });
+});
+
+// The docs root's position in the content order. Its own fixture because the
+// point is a docs set whose files carry NO numeric prefixes.
+describe("buildIndex root ordering", () => {
+  let flatDir: string;
+  let numberedDir: string;
+
+  afterAll(async () => {
+    for (const d of [flatDir, numberedDir]) {
+      if (d) await rm(d, { recursive: true, force: true });
+    }
+  });
+
+  it("leads with an unprefixed root index.md rather than sorting it alphabetically", async () => {
+    flatDir = await mkdtemp(join(tmpdir(), "undocs-flat-"));
+    // Alphabetically `another.md` < `index.md`, so a plain `orderKey` sort would
+    // list the docs' front page second — in the nav AND in prev/next.
+    await writeFile(join(flatDir, "index.md"), "# Home\n\nIntro.\n");
+    await writeFile(join(flatDir, "another.md"), "# Another\n\nMore.\n");
+    const flat = await buildIndex({ dir: flatDir });
+
+    expect(flat.order).toEqual(["/", "/another"]);
+    expect(flat.navigation.map((n) => n.path)).toEqual(["/", "/another"]);
+    expect(flat.navigation[0].root).toBe(true);
+  });
+
+  it("keeps an explicit number on the root index.md", async () => {
+    numberedDir = await mkdtemp(join(tmpdir(), "undocs-numbered-"));
+    // Numbering a file IS the ordering choice, so it is not overridden.
+    await writeFile(join(numberedDir, "9.index.md"), "# Home\n\nIntro.\n");
+    await writeFile(join(numberedDir, "1.another.md"), "# Another\n\nMore.\n");
+    const numbered = await buildIndex({ dir: numberedDir });
+
+    expect(numbered.order).toEqual(["/another", "/"]);
+    expect(numbered.navigation.map((n) => n.path)).toEqual(["/another", "/"]);
+  });
+});
+
+// `README.md` is an alias for `index.md`, so a docs set that reads well browsed
+// on GitHub builds without being renamed.
+describe("buildIndex README alias", () => {
+  let readmeDir: string;
+  let bothDir: string;
+
+  afterAll(async () => {
+    for (const d of [readmeDir, bothDir]) {
+      if (d) await rm(d, { recursive: true, force: true });
+    }
+  });
+
+  it("routes README.md exactly as index.md, at the root and in a section", async () => {
+    readmeDir = await mkdtemp(join(tmpdir(), "undocs-readme-"));
+    await writeFile(join(readmeDir, "README.md"), "# Home\n\n> The front page\n\nIntro.\n");
+    await mkdir(join(readmeDir, "1.guide"), { recursive: true });
+    await writeFile(join(readmeDir, "1.guide", "README.md"), "# Guide\n\nOverview.\n");
+    await writeFile(join(readmeDir, "1.guide", "2.usage.md"), "# Usage\n\nHow to.\n");
+    const index = await buildIndex({ dir: readmeDir });
+
+    expect(index.pages.map((p) => p.path)).toEqual(["/", "/guide", "/guide/usage"]);
+    expect(index.byPath.get("/")?.title).toBe("Home");
+    expect(index.byPath.get("/")?.description).toBe("The front page");
+
+    // The unprefixed docs root still leads (`scanKey`), and is flagged `root`.
+    expect(index.order).toEqual(["/", "/guide", "/guide/usage"]);
+    expect(index.navigation[0]).toMatchObject({ path: "/", root: true });
+
+    // A section README is its directory's index, so the section keeps its own
+    // identity and re-emits that page as its first child.
+    const guide = index.navigation.find((n) => n.path === "/guide")!;
+    expect(guide.children?.map((c) => c.path)).toEqual(["/guide", "/guide/usage"]);
+  });
+
+  it("lets an explicit index.md win over a README.md in the same directory", async () => {
+    bothDir = await mkdtemp(join(tmpdir(), "undocs-both-"));
+    await writeFile(join(bothDir, "index.md"), "# Real Home\n\nThe docs.\n");
+    await writeFile(join(bothDir, "README.md"), "# Repo Stub\n\nSee the docs site.\n");
+    const index = await buildIndex({ dir: bothDir });
+
+    // One page on the route, and it is the index — not whichever sorted first.
+    expect(index.pages).toHaveLength(1);
+    expect(index.byPath.get("/")?.title).toBe("Real Home");
+  });
+});
+
+// The generalisation behind the README fix: an index page leads its OWN
+// directory, at any depth, whether it is spelled `index` or `README`.
+describe("buildIndex unnumbered index ordering", () => {
+  let deepDir: string;
+
+  afterAll(async () => {
+    if (deepDir) await rm(deepDir, { recursive: true, force: true });
+  });
+
+  it("puts an unnumbered section index ahead of its numbered siblings", async () => {
+    deepDir = await mkdtemp(join(tmpdir(), "undocs-deep-"));
+    await mkdir(join(deepDir, "1.guide"), { recursive: true });
+    // `orderKey` alone keys these "000001/999999index.md" and "000001/000002",
+    // so the section's own page would sort after the page inside it.
+    await writeFile(join(deepDir, "1.guide", "index.md"), "# Guide\n\nOverview.\n");
+    await writeFile(join(deepDir, "1.guide", "2.usage.md"), "# Usage\n\nHow to.\n");
+    await mkdir(join(deepDir, "2.api"), { recursive: true });
+    await writeFile(join(deepDir, "2.api", "README.md"), "# API\n\nReference.\n");
+    await writeFile(join(deepDir, "2.api", "1.types.md"), "# Types\n\nTypes.\n");
+    const index = await buildIndex({ dir: deepDir });
+
+    expect(index.order).toEqual(["/guide", "/guide/usage", "/api", "/api/types"]);
   });
 });

@@ -176,23 +176,24 @@ describe("/api/docs/page/[...path]", () => {
   });
 
   // Source order zero-pads numeric prefixes, so numbered dirs (`1.guide/*`) sort
-  // ahead of the un-numbered root `index.md`: order is ["/guide", "/guide/usage", "/"].
+  // ahead of the un-numbered files — but the docs root leads regardless (see
+  // `scanKey`), so order is ["/", "/guide", "/guide/usage"].
+  const surroundOf = async (path: string) => {
+    const res = await (await load("page")).fetch(req(`/api/docs/page/${path}.json`));
+    const { surround } = (await res.json()) as { surround: Array<{ path: string } | null> };
+    return surround.map((item) => item?.path ?? null);
+  };
+
   it("embeds [prev, next] surround for a middle page", async () => {
-    const res = await (await load("page")).fetch(req("/api/docs/page/guide/usage.json"));
-    const { surround } = (await res.json()) as {
-      surround: Array<{ path: string } | null>;
-    };
-    expect(surround[0]?.path).toBe("/guide");
-    expect(surround[1]?.path).toBe("/");
+    expect(await surroundOf("guide")).toEqual(["/", "/guide/usage"]);
   });
 
-  it("embeds a null previous for the first page", async () => {
-    const res = await (await load("page")).fetch(req("/api/docs/page/guide.json"));
-    const { surround } = (await res.json()) as {
-      surround: Array<{ path: string } | null>;
-    };
-    expect(surround[0]).toBeNull();
-    expect(surround[1]?.path).toBe("/guide/usage");
+  it("embeds a null previous for the first page — the docs root", async () => {
+    expect(await surroundOf("_index")).toEqual([null, "/guide"]);
+  });
+
+  it("embeds a null next for the last page", async () => {
+    expect(await surroundOf("guide/usage")).toEqual(["/guide", null]);
   });
 });
 

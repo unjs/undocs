@@ -3,6 +3,9 @@ import { computed, provide } from "vue";
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { useHead, useSeoMeta } from "@unhead/vue";
 import { queryNavigation } from "@app/composables/useContent.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { LANDING_KEY, resolveLanding } from "@app/composables/useLanding.ts";
+import { docsNavTree } from "@app/utils/nav.ts";
 import AppFooter from "@app/components/app/AppFooter.vue";
 import AppHeader from "@app/components/app/AppHeader.vue";
 import AppProvider from "@app/components/ui/AppProvider.vue";
@@ -31,7 +34,15 @@ useHead({
 
 const { data: navigation } = await useAsyncData("navigation", () => queryNavigation());
 
-provide("navigation", navigation);
+// The error page renders the same chrome as `app.vue` (header, section tabs,
+// search), so it has to seed the same two injections, the same way — see
+// `app.vue` for what the landing flag decides and how it shapes the tree.
+const appConfig = useAppConfig();
+const landing = computed(() => resolveLanding(appConfig.docs, navigation.value));
+const docsNavigation = computed(() => docsNavTree(navigation.value, landing.value));
+
+provide("navigation", docsNavigation);
+provide(LANDING_KEY, landing);
 
 const statusCode = computed(() => props.error?.statusCode || 404);
 const message = computed(
@@ -61,7 +72,7 @@ const message = computed(
     <AppFooter />
 
     <ClientOnly>
-      <DocsSearch :navigation="navigation" shortcut="meta_k" />
+      <DocsSearch :navigation="docsNavigation" shortcut="meta_k" />
     </ClientOnly>
   </AppProvider>
 </template>

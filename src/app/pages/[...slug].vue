@@ -18,6 +18,7 @@ import PageHeaderLinks from "@app/components/layout/PageHeaderLinks.vue";
 import PageLinks from "@app/components/layout/PageLinks.vue";
 import Separator from "@app/components/ui/Separator.vue";
 import MarkdownRenderer from "@app/content/MarkdownRenderer.ts";
+import { isWithin } from "@app/utils/nav.ts";
 import { joinURL } from "ufo";
 import { kebabCase } from "scule";
 import type { NavItem } from "@server/content/types.ts";
@@ -43,7 +44,7 @@ const navigation = inject<Ref<NavItem[]>>("navigation");
 // console.log(JSON.stringify(navigation?.value, null, 2))
 
 function makeBreadcrumb(items: NavItem[], path: string, level = 0) {
-  const parent = [...items].find((i) => path.startsWith(i.path) && i.children?.length > 0);
+  const parent = [...items].find((i) => isWithin(path, i.path) && i.children?.length > 0);
   if (!parent) {
     return [];
   }
@@ -68,7 +69,11 @@ usePageSEO({
 });
 
 const path = computed(() => route.path.replace(/\/$/, ""));
-const rawPath = joinURL("/raw", `${path.value}.md`);
+// The docs root has no path segment to name a raw file with, so it uses the
+// conventional `index.md` — unambiguous, because `toRoutePath` strips `index`
+// from every route and so no page is ever `/index`. (A bare `/raw/.md` also
+// resolves, but prerendering it bakes a dotfile that static hosts hide.)
+const rawPath = joinURL("/raw", `${path.value || "/index"}.md`);
 
 // Bake the source markdown (`/raw/<path>.md`, path-based + query-less) alongside
 // the page. Hinted via the `x-nitro-prerender` response header — crawlLinks
@@ -80,7 +85,7 @@ useHead({
   link: [
     {
       rel: "alternate",
-      href: joinURL(appConfig.site.url, rawPath),
+      href: joinURL(appConfig.site.url!, rawPath),
       type: "text/markdown",
     },
   ],

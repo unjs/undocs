@@ -50,6 +50,18 @@ export interface NavItem {
   path: string;
   icon?: string;
   page?: boolean;
+  /**
+   * The docs-root `index.md` (`/`). Exactly one item can carry it, and only at
+   * the top level. A landing page owns `/`, so `app.vue` strips this item from
+   * the tree it provides whenever the landing is on.
+   */
+  root?: boolean;
+  /**
+   * A section the CLIENT invented rather than one the content directory
+   * declares — see `utils/nav.ts` → `groupLoosePages`. Never emitted by the
+   * builder; it only ever appears in the shaped tree `app.vue` provides.
+   */
+  synthetic?: boolean;
   children?: NavItem[];
   [key: string]: any;
 }

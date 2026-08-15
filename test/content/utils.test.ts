@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
+  isIndexFile,
+  isReadmeFile,
   stripPrefix,
   toRoutePath,
   orderKey,
@@ -99,5 +101,33 @@ describe("titleCase", () => {
   it("upper-cases a standalone 'api' word", () => {
     expect(titleCase("api")).toBe("API");
     expect(titleCase("rest-api-guide")).toBe("Rest API Guide");
+  });
+});
+
+describe("README as an index alias", () => {
+  it("maps README.md to its directory, like index.md", () => {
+    expect(toRoutePath("README.md")).toBe("/");
+    expect(toRoutePath("1.guide/README.md")).toBe("/guide");
+    expect(toRoutePath("1.guide/2.api/README.md")).toBe("/guide/api");
+  });
+
+  it("matches any casing, prefixed or not", () => {
+    for (const rel of ["README.md", "readme.md", "ReadMe.md", "1.README.md"]) {
+      expect(isIndexFile(rel)).toBe(true);
+      expect(isReadmeFile(rel)).toBe(true);
+      expect(toRoutePath(rel)).toBe("/");
+    }
+  });
+
+  it("still treats index.md as the canonical spelling", () => {
+    expect(isIndexFile("index.md")).toBe(true);
+    expect(isReadmeFile("index.md")).toBe(false);
+  });
+
+  it("leaves an ordinary page alone", () => {
+    expect(isIndexFile("guide/usage.md")).toBe(false);
+    // Only the whole name matches — `readme-first.md` is a page.
+    expect(isIndexFile("readme-first.md")).toBe(false);
+    expect(toRoutePath("readme-first.md")).toBe("/readme-first");
   });
 });

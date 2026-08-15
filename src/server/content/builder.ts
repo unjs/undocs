@@ -3,7 +3,16 @@ import { readFile, glob } from "node:fs/promises";
 import { join, dirname, basename } from "node:path";
 import { pathToFileURL } from "node:url";
 import * as md4x from "md4x/wasm";
-import { orderKey, slugify, stripPrefix, textContent, titleCase, toRoutePath } from "./utils.ts";
+import {
+  isIndexFile,
+  isReadmeFile,
+  orderKey,
+  slugify,
+  stripPrefix,
+  textContent,
+  titleCase,
+  toRoutePath,
+} from "./utils.ts";
 import { transformBody } from "./transforms.ts";
 import { highlightBody } from "./highlight.ts";
 import { resolveIcon } from "./icons.ts";
@@ -26,6 +35,49 @@ export interface BuildOptions {
 }
 
 const now = () => performance.now();
+
+/**
+ * Sort key for the scanned files: an unnumbered index page leads its directory.
+ *
+ * `orderKey` gives an unnumbered file the key `999999<name>`, which sorts it
+ * alphabetically among its unnumbered siblings — and that is wrong for an index
+ * page specifically, because an index IS its directory and cannot meaningfully
+ * come after the pages inside it. Left alone, `index.md` beside `another.md`
+ * lists the docs' front page second, and `guide/README.md` lands after
+ * `guide/2.usage.md`.
+ *
+ * So an index page's own segment drops out of the key, leaving its directory's —
+ * which sorts ahead of every numbered and unnumbered sibling. Only when the
+ * author did not say otherwise: a numbered `1.index.md` keeps its number, since
+ * that is an explicit ordering choice.
+ *
+ * One key drives the file walk, and with it the nav tree, `index.order` and
+ * prev/next — so pinning it here keeps all three agreeing, which a nav-only
+ * special case would not.
+ */
+function scanKey(rel: string): string {
+  const name = rel.slice(rel.lastIndexOf("/") + 1);
+  if (!isIndexFile(rel) || name !== stripPrefix(name)) return orderKey(rel);
+  const key = orderKey(rel);
+  return key.slice(0, key.lastIndexOf("/") + 1);
+}
+
+/**
+ * Drop a `README.md` that sits beside an `index.md` in the same directory.
+ *
+ * The two are aliases (`isIndexFile`), so both resolve to the SAME route — a
+ * directory holding both would otherwise build two pages onto one path, and
+ * which of them won would come down to sort order. The explicit `index.md` is
+ * the one that wins; the README is left out of the build entirely (it is
+ * usually a repo-facing stub pointing at the real docs).
+ */
+function dropShadowedReadmes(files: string[]): string[] {
+  const dirOf = (rel: string) => rel.slice(0, rel.lastIndexOf("/") + 1);
+  const canonical = new Set(
+    files.filter((rel) => isIndexFile(rel) && !isReadmeFile(rel)).map(dirOf),
+  );
+  return files.filter((rel) => !(isReadmeFile(rel) && canonical.has(dirOf(rel))));
+}
 
 export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
   const t0 = now();
@@ -53,7 +105,7 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
 
   // scan
   mark = now();
-  const files: string[] = [];
+  const scanned: string[] = [];
   const seen = new Set<string>();
   for await (const f of glob(INCLUDE, { cwd: dir })) {
     const rel = f.split("\\").join("/");
@@ -64,9 +116,10 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     if (rules.some((re) => re.test("/" + rel))) continue;
     if (seen.has(rel)) continue;
     seen.add(rel);
-    files.push(rel);
+    scanned.push(rel);
   }
-  files.sort((a, b) => orderKey(a).localeCompare(orderKey(b)));
+  const files = dropShadowedReadmes(scanned);
+  files.sort((a, b) => scanKey(a).localeCompare(scanKey(b)));
   phases.scan = now() - mark;
 
   const navYml: Record<string, Record<string, unknown>> = {};
@@ -217,7 +270,16 @@ function isPlainObject(v: unknown): v is Record<string, any> {
 // would corrupt the tree (e.g. a `.navigation.yml` with a `children:` key would
 // be emitted verbatim as a node's children). Display fields like title/icon/
 // path/description and arbitrary custom flags are still allowed through.
-const RESERVED_NAV_KEYS = new Set(["_seg", "_children", "_page", "_index", "children", "page"]);
+const RESERVED_NAV_KEYS = new Set([
+  "_seg",
+  "_children",
+  "_page",
+  "_index",
+  "children",
+  "page",
+  "root",
+  "synthetic",
+]);
 
 function stripReserved(fields: Record<string, any>): Record<string, any> {
   const out: Record<string, any> = {};
@@ -267,7 +329,31 @@ function buildNavigation(
     // Skip pages living under a directory hidden by its `.navigation.yml`.
     if (hiddenDirs.some((d) => p.path === d || p.path.startsWith(d + "/"))) continue;
 
-    const segs = p.path === "/" ? [] : p.path.slice(1).split("/");
+    // The docs-root `index.md`. It has no path segment, so the walk below never
+    // sees it — add it directly as the tree's first item (content is sorted by
+    // `orderKey`, and a root index sorts ahead of every sibling). Flagged `root`
+    // so a landing-page site can strip it back out: with a landing owning `/`,
+    // a "Home" entry in the sidebar would just point at the landing (see
+    // `app.vue` → `resolveLanding`).
+    if (p.path === "/") {
+      const node: RawNode = {
+        _seg: "",
+        title: p.title,
+        path: "/",
+        icon: p.icon,
+        description: p.description,
+        page: true,
+        root: true,
+        _page: p,
+        _children: [],
+        ...navOverride(p.meta),
+      };
+      if (navYml["/"]) Object.assign(node, configFields(navYml["/"]));
+      root.push(node);
+      continue;
+    }
+
+    const segs = p.path.slice(1).split("/");
     let level = root;
     let curPath = "";
     for (let i = 0; i < segs.length; i++) {
@@ -290,10 +376,10 @@ function buildNavigation(
         node.page = true;
         node._page = p;
         node.description = p.description;
-        // A directory index page (`index.md`) is exposed as its own first child
-        // in the nav tree — so a section with an index keeps its own identity
-        // instead of collapsing into a lone subchild.
-        node._index = stripPrefix(basename(p.rel)) === "index.md";
+        // A directory index page (`index.md` / `README.md`) is exposed as its own
+        // first child in the nav tree — so a section with an index keeps its own
+        // identity instead of collapsing into a lone subchild.
+        node._index = isIndexFile(p.rel);
         // The page's own `navigation:` frontmatter overrides derived fields...
         Object.assign(node, navOverride(p.meta));
         // ...but the directory's `.navigation.yml` still wins over the index page.

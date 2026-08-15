@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, inject } from "vue";
+import { computed, inject, type Ref } from "vue";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
-import { titleCase } from "@app/utils/title.ts";
+import { mobileNavLinks } from "@app/utils/nav.ts";
+import type { NavItem } from "@server/content/types.ts";
 import AppHeaderVersionsMenu from "@app/components/app/AppHeaderVersionsMenu.vue";
 import ColorModeSwitch from "@app/components/ColorModeSwitch.vue";
 import DocsNavigation from "@app/components/docs/DocsNavigation.vue";
@@ -14,29 +15,13 @@ import SocialMenu from "@app/components/SocialMenu.vue";
 import AppLink from "@app/components/app/AppLink.ts";
 const appConfig = useAppConfig();
 
-const navigation = inject("navigation");
+const navigation = inject<Ref<NavItem[]>>("navigation");
 
-// Top-level links outside the docs tree (currently Blog) live at the trailing
-// end of the section-tabs bar on desktop; below its `md` breakpoint the mobile
-// drawer renders them via `mobileLinks`.
-const mobileLinks = computed(() => {
-  return navigation.value.map((item) => {
-    if (item.path === "/blog") {
-      return {
-        ...item,
-        children: undefined,
-      };
-    }
-    if (item.children?.length === 1) {
-      return item.children[0];
-    }
-    const originalPath = item.path;
-    if (item.children?.length && item.children.some((c) => c.path === originalPath)) {
-      item.title = titleCase(originalPath);
-    }
-    return item;
-  });
-});
+// The whole tree, reshaped for a collapsible drawer — see `mobileNavLinks`. Top-
+// level links outside the docs tree (currently Blog) live at the trailing end of
+// the section-tabs bar on desktop; below its `md` breakpoint they come through
+// here instead.
+const mobileLinks = computed(() => mobileNavLinks(navigation?.value));
 </script>
 
 <template>

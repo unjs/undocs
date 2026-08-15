@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useWindowScroll } from "@vueuse/core";
 import { useRoute } from "@app/router.ts";
 import { cn } from "@app/utils/cn.ts";
+import { isWithin } from "@app/utils/nav.ts";
 import { useSectionTabs } from "@app/composables/useSectionTabs.ts";
 import Container from "@app/components/Container.vue";
 import Icon from "@app/components/global/Icon.vue";
@@ -17,10 +18,11 @@ import AppLink from "@app/components/app/AppLink.ts";
 const route = useRoute();
 const { tabs, trailingTabs, visible } = useSectionTabs();
 
-const isActive = (tab: { originalPath?: string; to?: string }) => {
-  const base = tab.originalPath || tab.to || "";
-  return base !== "" && route.path.startsWith(base);
-};
+// `useDocsNav` already worked out which entry holds the current route, and it is
+// the only thing that can: a synthetic section's members share no path prefix
+// with it, so matching `route.path` against the tab's own path would leave the
+// bar with nothing marked while the reader is inside it.
+const isActive = (tab: { active?: boolean }) => !!tab.active;
 
 const tabClass = (tab: { originalPath?: string; to?: string }) =>
   cn(

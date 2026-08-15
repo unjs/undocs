@@ -5,9 +5,15 @@
  * component reads that (reactively) and renders the matching layout, passing its
  * own slot content through as the layout's default slot. A falsy/unknown layout
  * renders the slot directly (default passthrough).
+ *
+ * `/` is the one route whose layout is NOT in `meta`: with the landing off it is
+ * an ordinary docs page and wants the docs layout (sidebar and all), and that
+ * depends on the content tree, which the router cannot see when it matches the
+ * route. See `useLanding` and `pages/index.vue`.
  */
-import { defineComponent, h } from "vue";
+import { computed, defineComponent, h } from "vue";
 import { useRoute } from "@app/router.ts";
+import { useLanding } from "@app/composables/useLanding.ts";
 import DocsLayout from "@app/layouts/docs.vue";
 import BlogLayout from "@app/layouts/blog.vue";
 import { layouts as userLayouts } from "virtual:undocs/user-layouts";
@@ -26,8 +32,14 @@ export default defineComponent({
   inheritAttrs: false,
   setup(_props, { slots }) {
     const route = useRoute();
-    return () => {
+    const landing = useLanding();
+    const layoutName = computed(() => {
       const name = route.meta?.layout as string | undefined;
+      if (name) return name;
+      return route.path === "/" && !landing.value ? "docs" : undefined;
+    });
+    return () => {
+      const name = layoutName.value;
       const layout = name ? layouts[name] : undefined;
       if (!layout) {
         // Default layout = passthrough.
