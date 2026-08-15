@@ -222,7 +222,7 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     let automd = false;
     if (automdTransform && raw.includes("<!-- automd:")) {
       mark = now();
-      raw = await automdTransform(raw, filePath);
+      raw = await automdTransform(raw, filePath, rel);
       phases.automd += now() - mark;
       automd = true;
       automdPages++;
@@ -649,22 +649,51 @@ function parseNavYml(raw: string): Record<string, unknown> {
 }
 
 // --- automd ---
+/**
+ * The automd transform for this docs set, or `undefined` if automd is unusable.
+ *
+ * Every failure here is RECOVERABLE — the page still builds, from its
+ * untransformed source — and that is exactly why each one is announced. A
+ * generated block that silently kept its previous contents (or its empty
+ * placeholder) looks like a page the author forgot to update, and the build
+ * reports nothing to contradict that reading. So all three failure modes name
+ * the file and say the source was kept: automd itself failing to load (the
+ * docs config asked for it, so this is never "not configured"), a `transform`
+ * that threw, and a transform whose generators reported issues.
+ *
+ * The issues case keeps the ORIGINAL contents rather than the partly-generated
+ * ones: automd writes an `<!-- ⚠️ (generator) … -->` comment into the block it
+ * could not generate, and shipping that into a published page is worse than
+ * shipping the source. It does mean the blocks that DID generate are rolled
+ * back with it, which is the other half of what the warning is for.
+ */
 async function createAutomd(dir: string, automdConfig: unknown) {
   try {
     const automd = await import("automd");
     const config = await automd.loadConfig(dir, automdConfig as any);
-    return async (content: string, path: string): Promise<string> => {
+    return async (content: string, path: string, rel: string): Promise<string> => {
       try {
         const res = await automd.transform(content, config, pathToFileURL(path).href);
         if (!res.hasIssues) {
           return res.contents;
         }
-      } catch {
-        // ignore automd failures in MVP
+        const issues = res.updates.flatMap((u) =>
+          (u.result.issues || [])
+            .filter(Boolean)
+            .map((issue) => `  - ${u.block.generator}: ${issue}`),
+        );
+        console.warn(
+          `[undocs] automd issues in "${rel}" (keeping the source, generated blocks are not filled in):\n${issues.join("\n")}`,
+        );
+      } catch (error) {
+        console.warn(
+          `[undocs] automd failed for "${rel}" (keeping the source, generated blocks are not filled in): ${error}`,
+        );
       }
       return content;
     };
-  } catch {
+  } catch (error) {
+    console.warn(`[undocs] automd is configured but could not be loaded: ${error}`);
     return undefined;
   }
 }
