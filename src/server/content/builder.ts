@@ -70,11 +70,17 @@ function scanKey(rel: string): string {
  * which of them won would come down to sort order. The explicit `index.md` is
  * the one that wins; the README is left out of the build entirely (it is
  * usually a repo-facing stub pointing at the real docs).
+ *
+ * Only a `.md` file can shadow. `isIndexFile` ignores the extension (it also
+ * names the route a `.yml` would take, and `toRoutePath` strips both), but no
+ * page is ever built from a `.yml` — so a data file that happens to be called
+ * `index.yml` is not an index PAGE, and counting it here dropped the sibling
+ * README without anything replacing it: the directory's route vanished.
  */
 function dropShadowedReadmes(files: string[]): string[] {
   const dirOf = (rel: string) => rel.slice(0, rel.lastIndexOf("/") + 1);
   const canonical = new Set(
-    files.filter((rel) => isIndexFile(rel) && !isReadmeFile(rel)).map(dirOf),
+    files.filter((rel) => rel.endsWith(".md") && isIndexFile(rel) && !isReadmeFile(rel)).map(dirOf),
   );
   return files.filter((rel) => !(isReadmeFile(rel) && canonical.has(dirOf(rel))));
 }

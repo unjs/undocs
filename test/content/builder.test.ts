@@ -377,9 +377,10 @@ describe("buildIndex root ordering", () => {
 describe("buildIndex README alias", () => {
   let readmeDir: string;
   let bothDir: string;
+  let ymlDir: string;
 
   afterAll(async () => {
-    for (const d of [readmeDir, bothDir]) {
+    for (const d of [readmeDir, bothDir, ymlDir]) {
       if (d) await rm(d, { recursive: true, force: true });
     }
   });
@@ -415,6 +416,21 @@ describe("buildIndex README alias", () => {
     // One page on the route, and it is the index — not whichever sorted first.
     expect(index.pages).toHaveLength(1);
     expect(index.byPath.get("/")?.title).toBe("Real Home");
+  });
+
+  // Only a `.md` can shadow: nothing is ever built from a `.yml`, so a data
+  // file called `index.yml` counted as the directory's index dropped the README
+  // with no page taking its place — the route disappeared entirely.
+  it("does not let a data `index.yml` shadow its sibling README.md", async () => {
+    ymlDir = await mkdtemp(join(tmpdir(), "undocs-yml-"));
+    await writeFile(join(ymlDir, "index.md"), "# Home\n\nThe docs.\n");
+    await mkdir(join(ymlDir, "cfg"), { recursive: true });
+    await writeFile(join(ymlDir, "cfg", "index.yml"), "some: data\n");
+    await writeFile(join(ymlDir, "cfg", "README.md"), "# Config\n\nOptions.\n");
+    const index = await buildIndex({ dir: ymlDir });
+
+    expect(index.pages.map((p) => p.path)).toEqual(["/", "/cfg"]);
+    expect(index.byPath.get("/cfg")?.title).toBe("Config");
   });
 });
 
