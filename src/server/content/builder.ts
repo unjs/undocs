@@ -79,6 +79,36 @@ function dropShadowedReadmes(files: string[]): string[] {
   return files.filter((rel) => !(isReadmeFile(rel) && canonical.has(dirOf(rel))));
 }
 
+/**
+ * A leading node that can hold neither the page title nor its description.
+ *
+ * The unjs README shape opens with exactly this: automd markers
+ * (`<!-- automd:badges -->`, parsed as `[null, {}, …]`), the badge row they wrap
+ * (a paragraph of images/links with no prose), and/or a raw
+ * `<div align="center">` header. None of it is content, but all of it sits ahead
+ * of the `h1` the title/description probes are looking for.
+ *
+ * Deliberately narrow — anything carrying readable text stops the walk, so a
+ * page with a real intro paragraph never has a mid-page `h2`-ish `h1` mistaken
+ * for its title. Raw HTML is `html_block` here: these probes run BEFORE
+ * `transformBody`, which is what lifts it to `_html` (matched too, so the
+ * predicate stays correct on either side of that transform).
+ */
+function isPreamble(node: MarkNode | undefined): boolean {
+  if (typeof node === "string") return node.trim() === "";
+  if (!Array.isArray(node)) return false;
+  const tag = node[0];
+  if (tag === null || tag === "html_block" || tag === "_html") return true;
+  return tag === "p" && textContent(node).trim() === "";
+}
+
+/** Index of the first node the title/description probes may inspect. */
+function firstProbeIndex(body: MarkNode[]): number {
+  let i = 0;
+  while (i < body.length && isPreamble(body[i])) i++;
+  return i;
+}
+
 export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
   const t0 = now();
   const phases: BuildStats["phases"] = {
@@ -164,19 +194,30 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     // title & description (frontmatter, else first h1 / first blockquote)
     let title: string | undefined = fm.title;
     let description: string = fm.description || "";
-    if (Array.isArray(body[0]) && body[0][0] === "h1") {
-      const t = textContent(body[0]);
+    // Both probes start at the first node that could BE a title or description,
+    // not at `body[0]` — a README-shaped page opens with material that is neither
+    // (see `isPreamble`). Looking only at `body[0]` there leaves the h1
+    // undetected, so the title falls back to the file name, the description stays
+    // empty, and the h1 renders a second time below the page header.
+    const h1Index = firstProbeIndex(body);
+    const h1 = body[h1Index];
+    if (Array.isArray(h1) && h1[0] === "h1") {
+      const t = textContent(h1);
       if (!title) title = t;
-      if (t === title) body.shift();
+      // Consumed by the page header — drop it in place (it may sit under
+      // preamble, so `shift()` would remove the wrong node).
+      if (t === title) body.splice(h1Index, 1);
     }
-    if (Array.isArray(body[0]) && body[0][0] === "blockquote") {
-      const t = textContent(body[0]).trim();
+    const bqIndex = firstProbeIndex(body);
+    const bq = body[bqIndex];
+    if (Array.isArray(bq) && bq[0] === "blockquote") {
+      const t = textContent(bq).trim();
       // Skip GitHub alert blockquotes (`> [!NOTE]`, `> !...`) — they're callouts,
       // not the page description. This runs before `transformBody` normalizes
       // alerts, so the raw blockquote text is still what we see here.
       if (t && !/^\[?!/.test(t) && !description) {
         description = t;
-        body.shift();
+        body.splice(bqIndex, 1);
       }
     }
     if (!title) title = titleCase(path.split("/").pop() || "Home");

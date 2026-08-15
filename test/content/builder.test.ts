@@ -194,6 +194,17 @@ describe("buildIndex edge cases", () => {
       join(edgeDir, "alert.md"),
       "# Alert Page\n\n> [!NOTE]\n> Heads up.\n\nReal body.\n",
     );
+    // The unjs README shape: automd markers wrapping a badge row, ahead of the
+    // h1. Comments and the (text-free) badge paragraph must not hide it.
+    await writeFile(
+      join(edgeDir, "badged.md"),
+      "<!-- automd:badges -->\n\n[![npm version](https://img/v)](https://npm/pkg)\n\n<!-- /automd -->\n\n# Badged Page\n\n> The badged description.\n\nReal body.\n",
+    );
+    // The other README shape: a raw `<div align="center">` header block.
+    await writeFile(
+      join(edgeDir, "centered.md"),
+      '<div align="center">\n  <img src="/logo.svg">\n</div>\n\n# Centered Page\n\n> The centered description.\n\nReal body.\n',
+    );
     edge = await buildIndex({ dir: edgeDir });
   }, 60_000);
 
@@ -221,6 +232,24 @@ describe("buildIndex edge cases", () => {
   it("does not adopt a leading GitHub alert as the page description", () => {
     const alert = edge.byPath.get("/alert")!;
     expect(alert.description).toBe("");
+  });
+
+  it("finds the h1/blockquote past a leading comment, badge row or raw HTML block", () => {
+    // Reading `body[0]` only, each of these pages fell back to `titleCase(name)`
+    // with an empty description — and kept the h1 in the body, so it rendered
+    // again under the page header.
+    const hasH1 = (p: (typeof edge.pages)[number]) =>
+      p.body.value.some((n) => Array.isArray(n) && n[0] === "h1");
+
+    const badged = edge.byPath.get("/badged")!;
+    expect(badged.title).toBe("Badged Page");
+    expect(badged.description).toBe("The badged description.");
+    expect(hasH1(badged)).toBe(false);
+
+    const centered = edge.byPath.get("/centered")!;
+    expect(centered.title).toBe("Centered Page");
+    expect(centered.description).toBe("The centered description.");
+    expect(hasH1(centered)).toBe(false);
   });
 
   it("keeps the index page's own title/icon on the self-index child, not the directory override", () => {
