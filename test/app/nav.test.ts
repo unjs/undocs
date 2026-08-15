@@ -116,6 +116,46 @@ describe("mobileNavLinks", () => {
     mobileNavLinks([indexlessBlog]);
     expect(indexlessBlog.children).toHaveLength(2);
   });
+
+  it("returns a fresh object from EVERY branch, so a caller can retitle its own copy", () => {
+    // The docblock's contract, pinned on all four branches at once: blog,
+    // one-page section, retitled header, and the pass-through (an author-named
+    // section). Two of them used to hand back the shared item itself, so a
+    // caller taking the comment at its word would have renamed the section in
+    // the tabs and the desktop sidebar as well.
+    const solo: NavItem = {
+      title: "Solo",
+      path: "/solo",
+      page: true,
+      children: [{ title: "Solo Page", path: "/solo", page: true }],
+    };
+    const cli: NavItem = {
+      title: "Command Line",
+      path: "/cli",
+      page: true,
+      titleFromConfig: true,
+      children: [
+        { title: "CLI", path: "/cli", page: true },
+        { title: "Usage", path: "/cli/usage" },
+      ],
+    };
+    const tree = [indexlessBlog, solo, guide, cli];
+
+    const links = mobileNavLinks(tree);
+    expect(links).toHaveLength(4);
+    expect(links[0]).not.toBe(indexlessBlog);
+    expect(links[1]).not.toBe(solo.children![0]);
+    expect(links[2]).not.toBe(guide);
+    expect(links[3]).not.toBe(cli);
+
+    for (const link of links) {
+      link.title = "Renamed";
+      link.path = "/renamed";
+    }
+    expect(tree.map((item) => item.title)).toEqual(["Blog", "Solo", "Guide", "Command Line"]);
+    expect(tree.map((item) => item.path)).toEqual(["/blog/hello", "/solo", "/guide", "/cli"]);
+    expect(solo.children![0]).toMatchObject({ title: "Solo Page", path: "/solo" });
+  });
 });
 
 describe("navBreadcrumb", () => {

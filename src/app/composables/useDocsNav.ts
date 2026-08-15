@@ -25,17 +25,22 @@ export function useDocsNav() {
         };
       }
 
-      // Check if group index is not exists and default to first child
+      // Check if group index is not exists and default to first child. Computed
+      // into a local rather than written back onto `item`: outside the flatten
+      // above, `item` IS the injected tree's own object, which the tabs and the
+      // sidebar share.
       const originalPath = item.path;
-      if (item.children?.length && !item.children.some((c) => c.path === originalPath)) {
-        item.path = item.children[0].path;
-      }
+      const path =
+        item.children?.length && !item.children.some((c) => c.path === originalPath)
+          ? item.children[0].path
+          : originalPath;
 
       return {
         ...item,
-        to: item.path,
+        path,
+        to: path,
         originalPath,
-        hasIndex: item.path === originalPath,
+        hasIndex: path === originalPath,
         label: item.title || titleCase(originalPath),
         active: navContains(source, route.path),
       };

@@ -259,10 +259,13 @@ export function countNavRows(items: NavItem[] | null | undefined): number {
  *
  * Blog is a destination rather than a section: its posts belong on its own index.
  *
- * Every branch returns a NEW object. These items are the shared navigation tree,
- * which the tabs and the desktop sidebar read their titles from — retitling one
- * in place would rename the section everywhere the moment a reader opened the
- * drawer.
+ * Every branch returns a NEW object — a shallow copy, which is exactly the depth
+ * the reshaping needs: only an item's OWN fields (`title`, `children`) are ever
+ * rewritten here, and the `children` arrays are handed on as they came. These
+ * items are the shared navigation tree, which the tabs and the desktop sidebar
+ * read their titles from — retitling one in place would rename the section
+ * everywhere the moment a reader opened the drawer. A spread per top-level entry
+ * is a handful of objects on a tree with a handful of sections.
  */
 export function mobileNavLinks(navigation: NavItem[] | null | undefined): NavItem[] {
   return (navigation ?? []).map((item) => {
@@ -270,7 +273,7 @@ export function mobileNavLinks(navigation: NavItem[] | null | undefined): NavIte
       return { ...item, children: undefined };
     }
     if (item.children?.length === 1) {
-      return item.children[0];
+      return { ...item.children[0] };
     }
     // A synthetic section is named, not derived from a path — and its path is a
     // page's (`/`), which would rename it to "Home"'s first entry. An
@@ -278,6 +281,6 @@ export function mobileNavLinks(navigation: NavItem[] | null | undefined): NavIte
     if (!item.synthetic && !item.titleFromConfig && hasOwnIndex(item)) {
       return { ...item, title: titleCase(item.path.split("/").pop() || "") || item.title };
     }
-    return item;
+    return { ...item };
   });
 }
