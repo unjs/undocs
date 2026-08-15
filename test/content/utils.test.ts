@@ -43,7 +43,7 @@ describe("toRoutePath", () => {
 
 describe("orderKey", () => {
   it("zero-pads numeric prefixes so string sort matches numeric order", () => {
-    expect(orderKey("2.usage.md")).toBe("000002");
+    expect(orderKey("2.usage.md")).toBe("000002.usage.md");
     expect(orderKey("2.a.md") < orderKey("10.a.md")).toBe(true);
   });
 
@@ -54,6 +54,29 @@ describe("orderKey", () => {
   it("keeps per-segment ordering", () => {
     expect(orderKey("1.guide/2.b.md") < orderKey("1.guide/10.b.md")).toBe(true);
     expect(orderKey("1.guide/2.b.md") < orderKey("2.config/1.b.md")).toBe(true);
+  });
+
+  it("keeps the segment name, so same-numbered siblings stay distinct", () => {
+    // Dropping the name made `1.alpha.md` and `1.beta.md` — and every page under
+    // `1.guide/` and `1.api/` — key identically, leaving their order to readdir.
+    expect(orderKey("1.alpha.md")).not.toBe(orderKey("1.beta.md"));
+    expect(orderKey("1.alpha.md") < orderKey("1.beta.md")).toBe(true);
+    expect(orderKey("1.api/1.core.md")).not.toBe(orderKey("1.guide/1.install.md"));
+  });
+
+  it("groups a directory's pages together regardless of a shared number", () => {
+    const keys = [
+      "1.guide/1.install.md",
+      "1.api/1.core.md",
+      "1.guide/2.usage.md",
+      "1.api/2.plugins.md",
+    ].sort((a, b) => orderKey(a).localeCompare(orderKey(b)));
+    expect(keys).toEqual([
+      "1.api/1.core.md",
+      "1.api/2.plugins.md",
+      "1.guide/1.install.md",
+      "1.guide/2.usage.md",
+    ]);
   });
 });
 

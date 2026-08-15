@@ -344,8 +344,9 @@ describe("buildIndex unnumbered index ordering", () => {
   it("puts an unnumbered section index ahead of its numbered siblings", async () => {
     deepDir = await mkdtemp(join(tmpdir(), "undocs-deep-"));
     await mkdir(join(deepDir, "1.guide"), { recursive: true });
-    // `orderKey` alone keys these "000001/999999index.md" and "000001/000002",
-    // so the section's own page would sort after the page inside it.
+    // `orderKey` alone keys these "000001.guide/999999index.md" and
+    // "000001.guide/000002.usage.md", so the section's own page would sort
+    // after the page inside it.
     await writeFile(join(deepDir, "1.guide", "index.md"), "# Guide\n\nOverview.\n");
     await writeFile(join(deepDir, "1.guide", "2.usage.md"), "# Usage\n\nHow to.\n");
     await mkdir(join(deepDir, "2.api"), { recursive: true });
@@ -354,5 +355,54 @@ describe("buildIndex unnumbered index ordering", () => {
     const index = await buildIndex({ dir: deepDir });
 
     expect(index.order).toEqual(["/guide", "/guide/usage", "/api", "/api/types"]);
+  });
+});
+
+// Two sections may legitimately carry the same number (a docs set numbering
+// only SOME of its directories, or an author who copied a prefix). The sort key
+// has to keep them apart, or the walk interleaves them.
+describe("buildIndex same-numbered siblings", () => {
+  let sameDir: string;
+
+  afterAll(async () => {
+    if (sameDir) await rm(sameDir, { recursive: true, force: true });
+  });
+
+  it("keeps each section's pages contiguous when two directories share a number", async () => {
+    sameDir = await mkdtemp(join(tmpdir(), "undocs-same-"));
+    for (const [seg, pages] of [
+      ["1.guide", ["1.install", "2.usage"]],
+      ["1.api", ["1.core", "2.plugins"]],
+    ] as const) {
+      await mkdir(join(sameDir, seg), { recursive: true });
+      await writeFile(join(sameDir, seg, "index.md"), `# ${seg}\n\nOverview.\n`);
+      for (const p of pages) {
+        await writeFile(join(sameDir, seg, `${p}.md`), `# ${p}\n\nBody.\n`);
+      }
+    }
+    await writeFile(join(sameDir, "index.md"), "# Home\n\nIntro.\n");
+    const index = await buildIndex({ dir: sameDir });
+
+    // Ties break on the segment NAME, so `api` leads `guide` — and neither
+    // section's pages appear inside the other's run (prev/next would bounce).
+    expect(index.order).toEqual([
+      "/",
+      "/api",
+      "/api/core",
+      "/api/plugins",
+      "/guide",
+      "/guide/install",
+      "/guide/usage",
+    ]);
+  });
+
+  it("orders two same-numbered files in one directory by name, not by readdir", async () => {
+    const dir2 = await mkdtemp(join(tmpdir(), "undocs-samefile-"));
+    await writeFile(join(dir2, "1.beta.md"), "# Beta\n\nB.\n");
+    await writeFile(join(dir2, "1.alpha.md"), "# Alpha\n\nA.\n");
+    const index = await buildIndex({ dir: dir2 });
+
+    expect(index.order).toEqual(["/alpha", "/beta"]);
+    await rm(dir2, { recursive: true, force: true });
   });
 });

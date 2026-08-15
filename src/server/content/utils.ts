@@ -42,13 +42,24 @@ export function toRoutePath(rel: string): string {
   return joined === "/" ? "/" : joined.replace(/\/$/, "");
 }
 
-/** Stable sort key preserving numeric ordering per path segment. */
+/**
+ * Stable sort key preserving numeric ordering per path segment.
+ *
+ * The NAME is part of the key, not just the number. Two siblings may carry the
+ * same prefix — sections a docs set numbered independently (`1.guide/` beside
+ * `1.api/`), or two files an author gave the same number — and a number-only key
+ * makes those byte-identical. Identical keys leave the sort to glob/readdir
+ * order, so the walk interleaves the two sections' pages ("Next" from `/guide`
+ * landing on `/api`) and does so differently per filesystem. The name breaks the
+ * tie deterministically, alphabetically, and — because it is appended per
+ * segment — without ever outranking the number in front of it.
+ */
 export function orderKey(rel: string): string {
   return rel
     .split("/")
     .map((s) => {
       const m = s.match(/^(\d+)\./);
-      return m ? m[1].padStart(6, "0") : "999999" + s;
+      return m ? m[1].padStart(6, "0") + "." + s.slice(m[0].length) : "999999" + s;
     })
     .join("/");
 }
