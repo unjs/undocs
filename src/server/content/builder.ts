@@ -80,6 +80,40 @@ function dropShadowedReadmes(files: string[]): string[] {
 }
 
 /**
+ * Drop files whose route path a previous file already claimed.
+ *
+ * `dropShadowedReadmes` only settles the README-vs-index pair inside ONE
+ * directory; `toRoutePath` collapses far more than that. `guide.md` and
+ * `guide/index.md` both resolve to `/guide`, as do `index.md` and `1.index.md`
+ * at the root. Left alone, both files build: `byPath` silently keeps whichever
+ * came last (the other page is unreachable, with no diagnostic), `index.order`
+ * lists the route twice — and since prev/next is `order.indexOf(page.path)`,
+ * the page's "Next" card then points at itself.
+ *
+ * The winner is the file that comes FIRST in the build's own walk order (the
+ * caller has already sorted by `scanKey`). That is deterministic across
+ * filesystems, and it leaves the surviving page exactly where the route already
+ * sat in `index.order` and the nav tree — dropping a LATER file cannot move it.
+ * The loser is named in the warning, since a silently missing page is the whole
+ * defect. `.yml` files pass through untouched: `.navigation.yml` is keyed by its
+ * directory, not by a route of its own.
+ */
+function dropDuplicateRoutes(files: string[]): string[] {
+  const winners = new Map<string, string>();
+  return files.filter((rel) => {
+    if (rel.endsWith(".yml")) return true;
+    const path = toRoutePath(rel);
+    const winner = winners.get(path);
+    if (winner !== undefined) {
+      console.warn(`[undocs] duplicate route ${path}: keeping "${winner}", ignoring "${rel}".`);
+      return false;
+    }
+    winners.set(path, rel);
+    return true;
+  });
+}
+
+/**
  * A leading node that can hold neither the page title nor its description.
  *
  * The unjs README shape opens with exactly this: automd markers
@@ -148,8 +182,13 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     seen.add(rel);
     scanned.push(rel);
   }
-  const files = dropShadowedReadmes(scanned);
-  files.sort((a, b) => scanKey(a).localeCompare(scanKey(b)));
+  const sorted = dropShadowedReadmes(scanned);
+  // The `|| a.localeCompare(b)` tiebreak is what makes the walk — and with it
+  // the duplicate-route winner below — independent of readdir order in the one
+  // case `scanKey` can tie (two index-named files in a directory, e.g.
+  // `index.md` beside `Index.md`).
+  sorted.sort((a, b) => scanKey(a).localeCompare(scanKey(b)) || a.localeCompare(b));
+  const files = dropDuplicateRoutes(sorted);
   phases.scan = now() - mark;
 
   const navYml: Record<string, Record<string, unknown>> = {};

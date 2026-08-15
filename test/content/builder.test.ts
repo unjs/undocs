@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -415,6 +415,76 @@ describe("buildIndex unnumbered index ordering", () => {
     const index = await buildIndex({ dir: deepDir });
 
     expect(index.order).toEqual(["/guide", "/guide/usage", "/api", "/api/types"]);
+  });
+});
+
+// Two different files can resolve to ONE route (`guide.md` beside
+// `guide/index.md`, `index.md` beside `1.index.md`). Building both corrupts
+// `byPath` (last writer wins, the other page unreachable), `order` (the route
+// listed twice, so prev/next lands on the page itself) and the nav tree (two
+// items on one path) — all without a diagnostic.
+describe("buildIndex duplicate routes", () => {
+  let dupDir: string;
+  let dup: ContentIndex;
+  let warnings: string[];
+
+  beforeAll(async () => {
+    dupDir = await mkdtemp(join(tmpdir(), "undocs-dup-"));
+    // Root: unnumbered vs numbered index, both `/`.
+    await writeFile(join(dupDir, "index.md"), "# Home\n\nIntro.\n");
+    await writeFile(join(dupDir, "1.index.md"), "# Numbered Home\n\nDupe.\n");
+    // Section: flat page vs directory index, both `/guide`.
+    await writeFile(join(dupDir, "guide.md"), "# Flat Guide\n\nA.\n");
+    await mkdir(join(dupDir, "guide"), { recursive: true });
+    await writeFile(join(dupDir, "guide", "index.md"), "# Dir Guide\n\nB.\n");
+    await writeFile(join(dupDir, "guide", "usage.md"), "# Usage\n\nC.\n");
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      dup = await buildIndex({ dir: dupDir });
+      warnings = warn.mock.calls.map((c) => String(c[0]));
+    } finally {
+      warn.mockRestore();
+    }
+  }, 60_000);
+
+  afterAll(async () => {
+    if (dupDir) await rm(dupDir, { recursive: true, force: true });
+  });
+
+  it("builds one page per route", () => {
+    expect(dup.pages.map((p) => p.path)).toEqual(["/", "/guide", "/guide/usage"]);
+    expect(dup.byPath.size).toBe(dup.pages.length);
+    // The winner is the file that comes first in the walk, not whichever the
+    // filesystem happened to hand back last.
+    expect(dup.byPath.get("/")?.rel).toBe("index.md");
+    expect(dup.byPath.get("/guide")?.rel).toBe("guide.md");
+  });
+
+  it("leaves no duplicate entries in `order` (prev/next would point at the page itself)", () => {
+    expect(dup.order).toEqual(["/", "/guide", "/guide/usage"]);
+    expect(new Set(dup.order).size).toBe(dup.order.length);
+    // `[...path].get.ts` derives the surround with `order.indexOf(page.path)`.
+    for (const p of dup.pages) {
+      expect(dup.order[dup.order.indexOf(p.path) + 1]).not.toBe(p.path);
+    }
+  });
+
+  it("keeps the nav tree free of duplicate paths", () => {
+    const paths = (items: typeof dup.navigation): string[] =>
+      items.flatMap((n) => [n.path!, ...paths(n.children || [])]);
+    expect(dup.navigation.filter((n) => n.path === "/")).toHaveLength(1);
+    const all = paths(dup.navigation);
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it("warns naming both source files", () => {
+    const forRoot = warnings.find((w) => w.includes("duplicate route /:"))!;
+    expect(forRoot).toContain("index.md");
+    expect(forRoot).toContain("1.index.md");
+    const forGuide = warnings.find((w) => w.includes("duplicate route /guide:"))!;
+    expect(forGuide).toContain("guide.md");
+    expect(forGuide).toContain("guide/index.md");
   });
 });
 
