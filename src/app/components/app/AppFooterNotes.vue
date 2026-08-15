@@ -15,10 +15,10 @@ const appConfig = useAppConfig();
       </AppLink>
     </span>
     <template v-if="appConfig.docs.shortDescription">
-    &nbsp;<span class="text-muted-foreground">{{
-      appConfig.docs.shortDescription.replace(/\.$/, "")
-    }}</span
-    >.
+      &nbsp;<span class="text-muted-foreground">{{
+        appConfig.docs.shortDescription.replace(/\.$/, "")
+      }}</span
+      >.
     </template>
   </p>
 </template>
