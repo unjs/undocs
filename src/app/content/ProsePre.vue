@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import Icon from "@app/components/global/Icon.vue";
 import { computed, ref, useSlots } from "vue";
-import { useCodeIcon } from "@app/composables/useCodeIcon";
+import { useCodeIcon } from "@app/composables/useCodeIcon.ts";
 
 const props = defineProps<{
   code?: string;
@@ -34,13 +34,13 @@ async function copy() {
 
 <template>
   <div
-    class="prose-pre group relative my-4 overflow-hidden rounded-lg border border-[var(--ui-border)] bg-[var(--ui-bg-muted)]"
+    class="prose-pre group relative my-4 overflow-hidden rounded-lg border border-border bg-muted"
     :class="props.class"
   >
     <!-- Optional filename header bar -->
     <div
       v-if="filename"
-      class="flex items-center gap-2 border-b border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-4 py-2 text-xs font-medium text-[var(--ui-text-muted)]"
+      class="flex items-center gap-2 border-b border-border bg-card px-4 py-2 text-xs font-medium text-muted-foreground"
     >
       <Icon :name="fileIcon" class="size-3.5 shrink-0" />
       <span class="truncate">{{ filename }}</span>
@@ -49,7 +49,7 @@ async function copy() {
     <!-- Copy-to-clipboard button (top-right) -->
     <button
       type="button"
-      class="absolute right-2 z-10 inline-flex size-7 items-center justify-center rounded-md border border-[var(--ui-border)] bg-[var(--ui-bg)] text-[var(--ui-text-muted)] opacity-0 transition hover:text-[var(--ui-text)] group-hover:opacity-100"
+      class="absolute right-2 z-10 inline-flex size-7 items-center justify-center rounded-md border border-border bg-background text-muted-foreground opacity-0 transition hover:text-foreground group-hover:opacity-100"
       :class="filename ? 'top-9' : 'top-2'"
       :aria-label="copied ? 'Copied' : 'Copy code'"
       @click="copy"
@@ -81,7 +81,7 @@ async function copy() {
   padding: 0.75rem 1rem;
 }
 .prose-pre :deep(code) {
-  font-family: var(--ui-font-mono, ui-monospace, monospace);
+  font-family: var(--font-mono, ui-monospace, monospace);
 }
 
 /*

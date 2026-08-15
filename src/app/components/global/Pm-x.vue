@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { packageManagers } from "@app/utils/pm";
+import { packageManagers } from "@app/utils/pm.ts";
 import ProseCodeGroup from "@app/content/ProseCodeGroup.vue";
 import ProsePre from "@app/content/ProsePre.vue";
 const props = defineProps({
@@ -19,10 +19,10 @@ const codeBlocks = computed(() =>
 <template>
   <ProseCodeGroup sync="pm">
     <ProsePre v-for="(codeBlock, index) in codeBlocks" :key="index" v-bind="codeBlock">
-      <span style="color: var(--ui-text); font-weight: 700">{{
+      <span style="color: var(--foreground); font-weight: 700">{{
         codeBlock.code.split(" ")[0]
       }}</span>
-      <span style="color: var(--ui-text)"
+      <span style="color: var(--foreground)"
         >&nbsp;{{ codeBlock.code.split(" ").slice(1).join(" ") }}</span
       >
     </ProsePre>

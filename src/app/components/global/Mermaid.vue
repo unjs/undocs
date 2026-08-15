@@ -1,18 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import {
-  DialogRoot,
-  DialogPortal,
-  DialogOverlay,
-  DialogContent,
-  DialogClose,
-  DialogTitle,
-  DialogDescription,
-  VisuallyHidden,
-} from "reka-ui";
-import { useMermaid } from "@app/composables/useMermaid";
+import { useMermaid } from "@app/composables/useMermaid.ts";
 import Skeleton from "@app/components/ui/Skeleton.vue";
 import Button from "@app/components/ui/Button.vue";
+import Dialog from "@app/components/ui/Dialog.vue";
 
 const props = defineProps<{ code: string }>();
 const svg = useMermaid(() => props.code);
@@ -52,42 +43,35 @@ const onDiagramClick = (e: MouseEvent, next: boolean) => {
       ></div>
     </div>
 
-    <DialogRoot v-model:open="open">
-      <DialogPortal>
-        <DialogOverlay
-          class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0"
-        />
-        <DialogContent
-          class="fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-[90vw] max-w-5xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-border bg-background shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95"
-        >
-          <VisuallyHidden as-child>
-            <DialogTitle>Diagram</DialogTitle>
-          </VisuallyHidden>
-          <VisuallyHidden as-child>
-            <DialogDescription>Fullscreen view of the diagram.</DialogDescription>
-          </VisuallyHidden>
-          <DialogClose as-child>
-            <Button
-              icon="i-lucide-x"
-              variant="outline"
-              color="neutral"
-              size="xs"
-              square
-              aria-label="Close"
-              class="absolute right-2 top-2 z-10"
-            />
-          </DialogClose>
-          <div class="mermaid mermaid-lightbox overflow-auto p-6">
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <div
-              class="mermaid-svg cursor-zoom-out"
-              v-html="svg"
-              @click="onDiagramClick($event, false)"
-            ></div>
-          </div>
-        </DialogContent>
-      </DialogPortal>
-    </DialogRoot>
+    <!-- The accessible name/description are `sr-only` inside `<Dialog>`; it owns
+         the `aria-labelledby`/`aria-describedby` wiring. The close button used
+         to be a `<DialogClose as-child>` around this same `<Button>`, which only
+         ever merged an `onClick` onto it — so it carries the handler itself. -->
+    <Dialog
+      v-model:open="open"
+      title="Diagram"
+      description="Fullscreen view of the diagram."
+      content-class="fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-[90vw] max-w-5xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-border bg-background shadow-modal data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95"
+    >
+      <Button
+        icon="i-lucide-x"
+        variant="outline"
+        color="neutral"
+        size="xs"
+        square
+        aria-label="Close"
+        class="absolute right-2 top-2 z-10"
+        @click="open = false"
+      />
+      <div class="mermaid mermaid-lightbox overflow-auto p-6">
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <div
+          class="mermaid-svg cursor-zoom-out"
+          v-html="svg"
+          @click="onDiagramClick($event, false)"
+        ></div>
+      </div>
+    </Dialog>
   </div>
   <div v-else>
     <div class="grid gap-2">

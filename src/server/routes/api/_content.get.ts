@@ -1,5 +1,5 @@
 import { defineEventHandler, html } from "nitro/h3";
-import { getIndex, getDocsDir, invalidateIndex } from "../../content/store";
+import { getIndex, getDocsDir, invalidateIndex } from "../../content/store.ts";
 
 /**
  * Debug page: content build timing (load/parse/transform/highlight) +

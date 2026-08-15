@@ -2,8 +2,8 @@
  * CSS entry.
  *
  * The Tailwind v4 pipeline is wired by `@tailwindcss/vite`, so `@import
- * "tailwindcss"` is resolved by it. The design tokens (`--ui-*`) are defined
- * by our own shadcn token layer in `./assets/tokens.css`.
+ * "tailwindcss"` is resolved by it. The design tokens are defined by our own
+ * token layer in `./assets/tokens.css`.
  *
  * The `@source` globs tell Tailwind which files to scan for class usage — the
  * app sources (`src/**`), the app.config, and the local docs markdown.
@@ -24,7 +24,7 @@
 
 /* Self-hosted variable fonts (bundled, no external request). These register the
    `Geist Variable` / `Geist Mono Variable` families referenced by
-   `--font-sans` (main.css) and `--ui-font-mono` (tokens.css). */
+   `--font-sans` and `--font-mono` (both in main.css). */
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { cn } from "@app/utils/cn";
-import AppLink from "@app/components/app/AppLink";
+import { cn } from "@app/utils/cn.ts";
+import AppLink from "@app/components/app/AppLink.ts";
 interface Badge {
   label?: string;
   color?: string;
@@ -57,7 +57,7 @@ const formattedDate = computed(() => {
         isHorizontal ? 'flex-col sm:flex-row gap-6 items-start' : 'flex-col gap-3',
         variant === 'subtle'
           ? 'border-border bg-muted/40 hover:bg-muted/60'
-          : 'border-border bg-card hover:border-primary/50 hover:bg-accent/40',
+          : 'border-border bg-card hover:border-brand/50 hover:bg-accent/40',
         $props.class,
       )
     "
@@ -66,7 +66,7 @@ const formattedDate = computed(() => {
       <div v-if="badge?.label || formattedDate" class="flex items-center gap-3">
         <span
           v-if="badge?.label"
-          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-primary/10 text-primary"
+          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-brand/10 text-brand"
         >
           {{ badge.label }}
         </span>
@@ -77,7 +77,7 @@ const formattedDate = computed(() => {
 
       <h3
         v-if="title"
-        class="font-semibold text-foreground group-hover:text-primary transition-colors"
+        class="font-semibold text-foreground group-hover:text-brand transition-colors"
         :class="isHorizontal ? 'text-2xl' : 'text-lg'"
       >
         {{ title }}

@@ -6,8 +6,8 @@ import {
   textContent,
   slugify,
   titleCase,
-} from "../../src/server/content/utils";
-import type { MarkNode } from "../../src/server/content/types";
+} from "../../src/server/content/utils.ts";
+import type { MarkNode } from "../../src/server/content/types.ts";
 
 describe("stripPrefix", () => {
   it("removes a leading numeric order prefix", () => {

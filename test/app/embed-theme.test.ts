@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { EMBED_STYLE_ID, EMBED_THEME_TOKENS, FORCED_MODE_GLOBAL } from "../../src/app/embed-theme";
+import {
+  EMBED_STYLE_ID,
+  EMBED_THEME_TOKENS,
+  FORCED_MODE_GLOBAL,
+} from "../../src/app/embed-theme.ts";
 
 /**
  * Exercises the COMPILED artifact — the exact bytes `entry-server.ts` inlines

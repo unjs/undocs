@@ -1,6 +1,6 @@
 import { tokenize } from "rangi";
-import { highlightCode } from "../../../src/server/content/highlight";
-import { LOCAL_LANGUAGES } from "../../../src/server/content/grammars";
+import { highlightCode } from "../../../src/server/content/highlight.ts";
+import { LOCAL_LANGUAGES } from "../../../src/server/content/grammars/index.ts";
 
 /**
  * Helpers for grammar tests.

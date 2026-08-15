@@ -5,7 +5,7 @@
  * targets, and external/`mailto`/`tel`/`#` hrefs fall through to the browser.
  */
 import { defineComponent, h, mergeProps } from "vue";
-import { useRouter, type RouteTarget } from "@app/router";
+import { useRouter, type RouteTarget } from "@app/router.ts";
 
 const EXTERNAL_RE = /^(https?:)?\/\/|^(?:mailto|tel):|^#/;
 
@@ -60,10 +60,11 @@ export default defineComponent({
       };
 
       // `mergeProps` (not `{ ...attrs }`) so our SPA-nav `onClick` is COMBINED with
-      // any `onClick` a parent forwards via attrs (e.g. reka-ui's `NavigationMenuLink
-      // as-child` injects its own click handler). A plain spread would let the
-      // forwarded handler overwrite ours, and the link would fall back to a full
-      // page load. Both handlers run; ours `preventDefault`s the browser navigation.
+      // any `onClick` a parent forwards via attrs (a `DropdownMenu` link item is
+      // rendered through `AsChild`, which injects the menu's own select handler).
+      // A plain spread would let the forwarded handler overwrite ours, and the
+      // link would fall back to a full page load. Both handlers run; ours
+      // `preventDefault`s the browser navigation.
       return h(
         "a",
         mergeProps({ href: href(to), onClick, target: props.target }, attrs),

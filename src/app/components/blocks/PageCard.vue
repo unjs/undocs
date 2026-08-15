@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { cn } from "@app/utils/cn";
+import { cn } from "@app/utils/cn.ts";
 import Icon from "@app/components/global/Icon.vue";
-import AppLink from "@app/components/app/AppLink";
+import AppLink from "@app/components/app/AppLink.ts";
 const props = defineProps<{
   title?: string;
   description?: string;
@@ -23,12 +23,12 @@ const isEmoji = computed(() => Boolean(props.icon && /\p{Emoji}/u.test(props.ico
     :class="
       cn(
         'group flex flex-col gap-3 rounded-lg border border-border bg-card text-card-foreground p-6 transition-colors',
-        to && 'hover:border-primary/50 hover:bg-accent/40',
+        to && 'hover:border-brand/50 hover:bg-accent/40',
       )
     "
   >
     <slot name="leading">
-      <div v-if="icon" class="text-primary">
+      <div v-if="icon" class="text-brand">
         <span v-if="isEmoji" class="text-3xl leading-none">{{ icon }}</span>
         <Icon v-else :name="icon" class="size-8" />
       </div>

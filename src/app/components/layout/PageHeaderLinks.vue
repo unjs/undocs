@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute } from "@app/router";
+import { useRoute } from "@app/router.ts";
 import Button from "@app/components/ui/Button.vue";
 import ButtonGroup from "@app/components/ui/ButtonGroup.vue";
 import DropdownMenu from "@app/components/ui/DropdownMenu.vue";
 import { useClipboard } from "@vueuse/core";
 import { $fetch } from "ofetch";
-import { useRuntimeConfig } from "@app/composables/useRuntimeConfig";
+import { useRuntimeConfig } from "@app/composables/useRuntimeConfig.ts";
 
 const route = useRoute();
 const appBaseURL = useRuntimeConfig().app?.baseURL || "/";

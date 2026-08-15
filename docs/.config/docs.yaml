@@ -28,7 +28,7 @@ landing:
       description: "Focus on writing your *documentation* with Markdown, not tooling."
     - title: "Nitro + Vite powered"
       icon: "logos:vitejs"
-      description: "Made with [Nitro](https://nitro.build), [Vite](https://vite.dev), and [Reka UI](https://reka-ui.com)."
+      description: "Made with [Nitro](https://nitro.build), [Vite](https://vite.dev), and [Vue](https://vuejs.org)."
     - title: "Deploy anywhere"
       icon: "✨"
       description: "The documentation can be hosted on any static hosting."

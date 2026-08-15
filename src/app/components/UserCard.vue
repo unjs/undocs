@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Avatar from "@app/components/ui/Avatar.vue";
-import AppLink from "@app/components/app/AppLink";
+import AppLink from "@app/components/app/AppLink.ts";
 defineProps<{
   name?: string;
   avatar?: { src?: string; alt?: string };
@@ -21,7 +21,7 @@ defineProps<{
     <div class="flex flex-col leading-tight">
       <span
         v-if="name"
-        class="text-sm font-medium text-foreground group-hover:text-primary transition-colors"
+        class="text-sm font-medium text-foreground group-hover:text-brand transition-colors"
       >
         {{ name }}
       </span>

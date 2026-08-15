@@ -1,6 +1,6 @@
-import { useRoute } from "@app/router";
-import { useAppConfig } from "@app/composables/useAppConfig";
-import { hintPrerenderRoute } from "@app/composables/useContent";
+import { useRoute } from "@app/router.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { hintPrerenderRoute } from "@app/composables/useContent.ts";
 import { useHead, useSeoMeta } from "@unhead/vue";
 export interface PageMeta {
   title: string;

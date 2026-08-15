@@ -2,7 +2,8 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dark, defaultTheme } from "rangi/themes";
-import { highlightCode } from "../../src/server/content/highlight";
+import { highlightCode } from "../../src/server/content/highlight.ts";
+import { contrast, resolve } from "../utils/css-tokens.ts";
 
 /**
  * `highlightCode` runs rangi in `classes: true` mode, which emits `shj-<type>`
@@ -88,65 +89,17 @@ function palette(): Record<string, [string, string]> {
   return out;
 }
 
-const TOKENS_CSS = readFileSync(
-  fileURLToPath(new URL("../../src/app/assets/tokens.css", import.meta.url)),
-  "utf8",
-);
-
 /**
- * `--muted` (= `--ui-bg-muted`) from each mode — the surface `ProsePre` paints
- * code blocks on, and so the background the contrast check has to measure
- * against. Read from `tokens.css` rather than hardcoded, so restyling the app's
- * neutrals fails here instead of quietly dimming every code block.
+ * `--muted` from each mode — the surface `ProsePre` paints code blocks on, and
+ * so the background the contrast check has to measure against. Resolved out of
+ * `tokens.css` rather than hardcoded, so restyling the app's neutrals fails here
+ * instead of quietly dimming every code block. It is declared per mode (light
+ * walks down from white, dark walks up from near-black), so both are read.
  */
-const CODE_BG = (() => {
-  const read = (selector: string) => {
-    const block = new RegExp(String.raw`${selector}\s*\{([\s\S]*?)\n\}`).exec(TOKENS_CSS)?.[1];
-    const value = block && /--muted:\s*([^;]+);/.exec(block)?.[1];
-    if (!value) throw new Error(`--muted not found in ${selector} of tokens.css`);
-    return value.trim();
-  };
-  return { light: read(":root"), dark: read(String.raw`\.dark`) };
-})();
-
-/**
- * WCAG contrast between two CSS colours. Hand-rolled because the two formats we
- * need span both files: the palette is hex, the neutrals it sits on are OKLCH.
- */
-function contrast(a: string, b: string): number {
-  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
-  return (x + 0.05) / (y + 0.05);
-}
-
-function luminance(color: string): number {
-  const [r, g, b] = toLinearRgb(color);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-/** `#rgb` / `#rrggbb` / `oklch(L C H)` → linear-light sRGB. */
-function toLinearRgb(color: string): [number, number, number] {
-  const oklch = /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)$/.exec(color);
-  if (oklch) {
-    const [L, C, H] = oklch.slice(1).map(Number) as [number, number, number];
-    const h = (H * Math.PI) / 180;
-    const [a, bb] = [C * Math.cos(h), C * Math.sin(h)];
-    const l = (L + 0.396_337_777_4 * a + 0.215_803_757_3 * bb) ** 3;
-    const m = (L - 0.105_561_345_8 * a - 0.063_854_172_8 * bb) ** 3;
-    const s = (L - 0.089_484_177_5 * a - 1.291_485_548 * bb) ** 3;
-    return [
-      4.076_741_662_1 * l - 3.307_711_591_3 * m + 0.230_969_929_2 * s,
-      -1.268_438_004_6 * l + 2.609_757_401_1 * m - 0.341_319_396_5 * s,
-      -0.004_196_086_3 * l - 0.703_418_614_7 * m + 1.707_614_701 * s,
-    ];
-  }
-  const hex = color.replace("#", "");
-  const full = hex.length === 3 ? [...hex].map((c) => c + c).join("") : hex;
-  if (full.length !== 6) throw new Error(`unsupported colour: ${color}`);
-  return [0, 2, 4].map((i) => {
-    const c = Number.parseInt(full.slice(i, i + 2), 16) / 255;
-    return c <= 0.040_45 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  }) as [number, number, number];
-}
+const CODE_BG = {
+  light: resolve("light", "--muted"),
+  dark: resolve("dark", "--muted"),
+} as const;
 
 describe("token palette", () => {
   it.each([
@@ -173,7 +126,7 @@ describe("token palette", () => {
   it("clears WCAG AA against the surface code blocks are painted on", () => {
     // Vesper is tuned for its own near-black editor, and its light variant is
     // ours to invent — so readability is the constraint that actually binds
-    // here, and it binds against `--ui-bg-muted` (the code-block background,
+    // here, and it binds against `--muted` (the code-block background,
     // `ProsePre.vue`) rather than the page background.
     const css = palette();
     const failures: string[] = [];

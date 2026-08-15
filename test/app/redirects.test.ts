@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeRedirects, resolveRedirect } from "../../src/app/utils/redirects";
+import { normalizeRedirects, resolveRedirect } from "../../src/app/utils/redirects.ts";
 
 // The docs-config `redirects` map feeds two consumers from one implementation:
 // Nitro route rules (`nitro.config.ts`) and the client router. These cover the

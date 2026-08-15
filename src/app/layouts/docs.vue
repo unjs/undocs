@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, watch } from "vue";
-import { useRoute } from "@app/router";
-import { useDocsNav } from "@app/composables/useDocsNav";
-import { useSectionTabs } from "@app/composables/useSectionTabs";
+import { useRoute } from "@app/router.ts";
+import { useDocsNav } from "@app/composables/useDocsNav.ts";
+import { useSectionTabs } from "@app/composables/useSectionTabs.ts";
 import Container from "@app/components/Container.vue";
 import DocsNavigation from "@app/components/docs/DocsNavigation.vue";
 import Page from "@app/components/layout/Page.vue";

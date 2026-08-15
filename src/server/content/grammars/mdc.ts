@@ -1,6 +1,6 @@
 // Tests: test/content/grammars/mdc.test.ts
 import { languages } from "rangi/languages";
-import type { LocalGrammar, ShjDefinition, ShjRule } from "./types";
+import type { LocalGrammar, ShjDefinition, ShjRule } from "./types.ts";
 
 /**
  * rangi's bundled markdown, which this grammar extends. The cast narrows

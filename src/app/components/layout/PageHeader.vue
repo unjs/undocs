@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useSlots } from "vue";
-import { cn } from "@app/utils/cn";
+import { cn } from "@app/utils/cn.ts";
 // Based on Nuxt UI `UPageHeader` component. Page title/description block with `#headline` (above
 // the title, e.g. breadcrumb) and `#links` (right-aligned actions) slots.
 //

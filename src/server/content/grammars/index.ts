@@ -1,9 +1,9 @@
 // Tests: test/content/grammars/registry.test.ts
 import { languages, aliases } from "rangi/languages";
-import mdcGrammars from "./mdc";
-import type { LocalGrammar } from "./types";
+import mdcGrammars from "./mdc.ts";
+import type { LocalGrammar } from "./types.ts";
 
-export type { LocalGrammar, ShjDefinition, ShjRule, ShjToken } from "./types";
+export type { LocalGrammar, ShjDefinition, ShjRule, ShjToken } from "./types.ts";
 
 /**
  * Every name rangi answers to — its languages AND its aliases, which it spreads

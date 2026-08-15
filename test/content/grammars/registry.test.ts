@@ -5,8 +5,8 @@ import {
   LOCAL_GRAMMARS,
   LOCAL_LANGUAGES,
   LOCAL_LANG_NAMES,
-} from "../../../src/server/content/grammars";
-import { html } from "./helper";
+} from "../../../src/server/content/grammars/index.ts";
+import { html } from "./helper.ts";
 
 // Taken from rangi itself rather than hardcoded, so a version that adds or
 // renames a language can't silently invalidate these invariants.

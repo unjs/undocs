@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useAppConfig } from "@app/composables/useAppConfig";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import Button from "@app/components/ui/Button.vue";
 import DropdownMenu from "@app/components/ui/DropdownMenu.vue";
 const appConfig = useAppConfig();
@@ -42,7 +42,7 @@ const items = computed(() => {
       trailing-icon="i-lucide-chevron-down"
       size="xs"
       class="-mb-[6px] font-semibold rounded-full truncate"
-      :class="[open && 'bg-primary/15']"
+      :class="[open && 'bg-brand/15']"
       :ui="{
         trailingIcon: ['transition-transform duration-200', open ? 'rotate-180' : undefined]
           .filter(Boolean)

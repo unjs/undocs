@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { cloneVNode, computed, Fragment, ref, useSlots, type VNode } from "vue";
 import Icon from "@app/components/global/Icon.vue";
-import { useCodeIcon } from "@app/composables/useCodeIcon";
+import { useCodeIcon } from "@app/composables/useCodeIcon.ts";
 
 defineProps<{
   /** Sync group key (accepted for compatibility; not persisted in MVP). */
@@ -58,11 +58,11 @@ const activeVNode = computed<VNode | null>(() => {
 </script>
 
 <template>
-  <div class="prose-code-group my-4 overflow-hidden rounded-lg border border-[var(--ui-border)]">
+  <div class="prose-code-group my-4 overflow-hidden rounded-lg border border-border">
     <!-- Tab bar -->
     <div
       v-if="tabs.length"
-      class="flex flex-wrap items-center gap-1 border-b border-[var(--ui-border)] bg-[var(--ui-bg-elevated)] px-2 py-1.5"
+      class="flex flex-wrap items-center gap-1 border-b border-border bg-card px-2 py-1.5"
     >
       <button
         v-for="(tab, i) in tabs"
@@ -71,8 +71,8 @@ const activeVNode = computed<VNode | null>(() => {
         class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition"
         :class="
           i === active
-            ? 'bg-[var(--ui-bg)] text-[var(--ui-text)] shadow-sm'
-            : 'text-[var(--ui-text-muted)] hover:text-[var(--ui-text)]'
+            ? 'bg-background text-foreground shadow-small'
+            : 'text-muted-foreground hover:text-foreground'
         "
         @click="active = i"
       >

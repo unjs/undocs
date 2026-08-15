@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { cn } from "@app/utils/cn";
+import { cn } from "@app/utils/cn.ts";
 
 /**
  * `::card-group` — a responsive grid wrapper for `::card`s. `cols` sets the

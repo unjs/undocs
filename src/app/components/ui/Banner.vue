@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { cn } from "@app/utils/cn";
+import { cn } from "@app/utils/cn.ts";
 import Button from "@app/components/ui/Button.vue";
 import Icon from "@app/components/global/Icon.vue";
-import AppLink from "@app/components/app/AppLink";
+import AppLink from "@app/components/app/AppLink.ts";
 /**
  * Banner — the `UBanner` replacement (custom, no Reka primitive).
  *
@@ -59,16 +59,28 @@ function dismiss(): void {
   }
 }
 
+/**
+ * Every status colour is one role's tint with that role's text on top — the
+ * pairing the tokens are derived for, and one that flips correctly in dark mode
+ * without a `dark:` variant. Deliberately NOT `bg-primary`: since Geist made
+ * `--primary` the high-contrast near-black/near-white, a solid primary bar would
+ * swallow the action buttons rendered on top of it. `primary` is the brand tint.
+ */
 const colorClass = computed(() => {
   switch (props.color) {
     case "neutral":
+    case "secondary":
       return "bg-muted text-foreground";
     case "error":
-      return "bg-destructive text-destructive-foreground";
+      return "bg-danger-tint text-danger";
+    case "warning":
+      return "bg-warning-tint text-warning";
+    case "success":
+      return "bg-success-tint text-success";
+    case "info":
+      return "bg-info-tint text-info";
     default:
-      // "primary" and the semantic colors we don't have distinct tokens for
-      // (secondary/success/info/warning) all fall back to the primary tint.
-      return "bg-primary text-primary-foreground";
+      return "bg-brand/10 text-foreground";
   }
 });
 
@@ -118,7 +130,7 @@ function normalizeActionColor(color?: string): "primary" | "neutral" | "white" {
     <button
       v-if="close"
       type="button"
-      class="absolute right-2 inline-flex size-6 shrink-0 items-center justify-center rounded-md opacity-80 transition-opacity hover:bg-black/10 hover:opacity-100"
+      class="absolute right-2 inline-flex size-6 shrink-0 items-center justify-center rounded-md opacity-80 transition-opacity hover:bg-foreground/10 hover:opacity-100"
       aria-label="Dismiss banner"
       @click="dismiss"
     >

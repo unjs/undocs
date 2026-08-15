@@ -1,8 +1,8 @@
 import { resolve, basename } from "node:path";
 import { glob, readFile } from "node:fs/promises";
 import type { Plugin, ViteDevServer } from "vite";
-import { generateAppConfig } from "./src/server/app-config";
-import { BUILTIN_ICONS } from "./src/app/builtin-icons";
+import { generateAppConfig } from "./src/server/app-config.ts";
+import { BUILTIN_ICONS } from "./src/app/builtin-icons.ts";
 
 // DEV: reload the browser AND Nitro's cached SSR entry.
 //

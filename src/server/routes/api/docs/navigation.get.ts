@@ -1,5 +1,5 @@
 import { defineEventHandler } from "nitro/h3";
-import { getIndex } from "../../../content/store";
+import { getIndex } from "../../../content/store.ts";
 
 export default defineEventHandler(async () => {
   const index = await getIndex();

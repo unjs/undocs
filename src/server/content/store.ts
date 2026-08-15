@@ -1,8 +1,8 @@
 // Tests: test/content/store.test.ts
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { buildIndex } from "./builder";
-import type { ContentIndex } from "./types";
+import { buildIndex } from "./builder.ts";
+import type { ContentIndex } from "./types.ts";
 import { useRuntimeConfig } from "nitro/runtime-config";
 
 let cache: Promise<ContentIndex> | undefined;

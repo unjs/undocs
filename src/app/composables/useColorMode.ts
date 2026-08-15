@@ -27,13 +27,13 @@
  * mismatches.
  */
 import { reactive, watch } from "vue";
-import { FORCED_MODE_GLOBAL } from "@app/embed-theme";
+import { FORCED_MODE_GLOBAL } from "@app/embed-theme.ts";
 import {
   COLOR_MODE_STORAGE_KEY as STORAGE_KEY,
   DEFAULT_COLOR_MODE,
   type ColorModePreference,
   type ColorModeValue,
-} from "@app/color-mode";
+} from "@app/color-mode.ts";
 
 const state = reactive({
   preference: DEFAULT_COLOR_MODE as ColorModePreference,

@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node
 import { tmpdir } from "node:os";
 import { join, relative, sep } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { collectWatchDirs } from "@server/dev-watch";
+import { collectWatchDirs } from "@server/dev-watch.ts";
 
 // A docs dir shaped like a real project: content dirs plus the noise the
 // content builder never scans.

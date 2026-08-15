@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
-import { useRoute } from "@app/router";
-import { cn } from "@app/utils/cn";
+import { useRoute } from "@app/router.ts";
+import { cn } from "@app/utils/cn.ts";
 import DocsNavigation from "@app/components/docs/DocsNavigation.vue";
 import Icon from "@app/components/global/Icon.vue";
-import AppLink from "@app/components/app/AppLink";
+import AppLink from "@app/components/app/AppLink.ts";
 import Tooltip from "@app/components/ui/Tooltip.vue";
 // Based on Nuxt UI `UContentNavigation` component. Recursive, collapsible navigation tree.
 //
@@ -16,8 +16,17 @@ import Tooltip from "@app/components/ui/Tooltip.vue";
 //                  the docs sidebar; group headers become links when navigable
 //   - level        internal recursion depth (indents nested levels)
 //
-// Active link = exact route path match → `bg-muted text-primary`.
-import type { NavItem } from "../../server/content/types";
+// Active link = exact route path match → `bg-brand/10 text-brand`. The DEEP
+// accent, because the row is tinted: `--brand` is only guaranteed AA on the page
+// and on a card, and `--accent` is neither. See `tokens.css`.
+//
+// Row geometry is Geist's sidebar (vercel.com/geist): a 40px row (`--size-large`)
+// carrying 14px copy — the sidebar row is NOT a control, so it does not follow
+// `Button.ts`'s height↔type pairing (16px at large) — with `px-3` inside a list
+// that bleeds 8px past the aside on both sides (`-mx-2` at level 0). The bleed is
+// what puts the label text 4px from the container edge while the hover fill still
+// reads as a full-width row; drop it and every label indents by 12px instead.
+import type { NavItem } from "../../../server/content/types.ts";
 
 const props = withDefaults(
   defineProps<{
@@ -123,7 +132,12 @@ watch(
 
 <template>
   <ul
-    :class="cn('flex flex-col gap-0.5', level > 0 && 'mt-0.5 ml-2.5 border-l border-border pl-2.5')"
+    :class="
+      cn(
+        'flex flex-col gap-0.5',
+        level === 0 ? '-mx-2' : 'mt-0.5 ml-3 border-l border-border pl-1.5',
+      )
+    "
   >
     <li v-for="item in navigation" :key="item.path">
       <!-- Group (has children) -->
@@ -133,7 +147,7 @@ watch(
           v-if="collapsible !== false"
           type="button"
           :aria-expanded="isOpen(item)"
-          class="w-full flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+          class="flex h-(--size-large) w-full items-center gap-2.5 rounded-md px-3 text-copy-14 font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           @click="toggle(item)"
         >
           <Icon v-if="item.icon" :name="item.icon" class="size-4 shrink-0 text-muted-foreground" />
@@ -159,8 +173,8 @@ watch(
           :to="headerLink(item)"
           :class="
             cn(
-              'flex items-center gap-1.5 px-2 py-1.5 text-sm font-semibold transition-colors',
-              isActive(item) ? 'text-primary' : 'text-foreground hover:text-primary',
+              'flex h-(--size-large) items-center gap-2.5 rounded-md px-3 text-copy-14 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              isActive(item) ? 'text-brand' : 'text-foreground hover:text-brand',
             )
           "
         >
@@ -173,7 +187,7 @@ watch(
         </AppLink>
         <div
           v-else
-          class="flex items-center gap-1.5 px-2 py-1.5 text-sm font-semibold text-foreground"
+          class="flex h-(--size-large) items-center gap-2.5 px-3 text-copy-14 font-medium text-foreground"
         >
           <Icon v-if="item.icon" :name="item.icon" class="size-4 shrink-0 text-muted-foreground" />
           <Tooltip :text="item.title" side="right" :disabled="!truncated.has(item.path)">
@@ -207,10 +221,10 @@ watch(
         :data-active-docs-link="isActive(item) ? '' : undefined"
         :class="
           cn(
-            'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm transition-colors',
+            'flex h-(--size-large) items-center gap-2.5 rounded-md px-3 text-copy-14 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             isActive(item)
-              ? 'bg-primary/10 text-primary font-medium'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/60',
+              ? 'bg-brand/10 text-brand font-medium'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
           )
         "
       >

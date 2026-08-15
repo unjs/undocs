@@ -1,5 +1,5 @@
 import { loadConfig } from "c12";
-import { highlightCode } from "./content/highlight";
+import { highlightCode } from "./content/highlight.ts";
 
 /**
  * Generate the client app-config from the docs project config (loaded via c12).

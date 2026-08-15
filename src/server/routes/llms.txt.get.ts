@@ -1,7 +1,7 @@
 import { defineEventHandler } from "nitro/h3";
 import { joinURL } from "ufo";
 import { useRuntimeConfig } from "nitro/runtime-config";
-import { getIndex } from "../content/store";
+import { getIndex } from "../content/store.ts";
 
 /** Generate the `/llms.txt` index (links to every page). */
 export default defineEventHandler(async (event) => {

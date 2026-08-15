@@ -19,7 +19,7 @@
  */
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import Icon from "@app/components/global/Icon.vue";
-import { useOffline } from "@app/composables/useOffline";
+import { useOffline } from "@app/composables/useOffline.ts";
 
 const props = withDefaults(
   defineProps<{

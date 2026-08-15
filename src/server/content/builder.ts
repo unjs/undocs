@@ -3,13 +3,13 @@ import { readFile, glob } from "node:fs/promises";
 import { join, dirname, basename } from "node:path";
 import { pathToFileURL } from "node:url";
 import * as md4x from "md4x/wasm";
-import { orderKey, slugify, stripPrefix, textContent, titleCase, toRoutePath } from "./utils";
-import { transformBody } from "./transforms";
-import { highlightBody } from "./highlight";
-import { resolveIcon } from "./icons";
-import { buildSearch, buildSearchIndex } from "./search";
+import { orderKey, slugify, stripPrefix, textContent, titleCase, toRoutePath } from "./utils.ts";
+import { transformBody } from "./transforms.ts";
+import { highlightBody } from "./highlight.ts";
+import { resolveIcon } from "./icons.ts";
+import { buildSearch, buildSearchIndex } from "./search.ts";
 
-import type { BuildStats, ContentIndex, DocPage, MarkNode, NavItem, TocLink } from "./types";
+import type { BuildStats, ContentIndex, DocPage, MarkNode, NavItem, TocLink } from "./types.ts";
 
 // Content files, plus `.navigation.yml` directory-config files. The latter are
 // dot-prefixed, so they need their own glob (a `**/*` glob never matches leading

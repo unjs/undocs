@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import * as md4x from "md4x/wasm";
-import { transformBody } from "../../src/server/content/transforms";
-import type { MarkElement, MarkNode } from "../../src/server/content/types";
+import { transformBody } from "../../src/server/content/transforms.ts";
+import type { MarkElement, MarkNode } from "../../src/server/content/types.ts";
 
 // `transformBody` calls into md4x when lifting raw inline HTML, so the wasm
 // module must be initialized first.

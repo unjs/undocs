@@ -26,7 +26,7 @@ import {
   EMBED_STYLE_ID,
   EMBED_THEME_TOKENS,
   FORCED_MODE_GLOBAL,
-} from "../embed-theme";
+} from "../embed-theme.ts";
 
 /** Values that could make a token fetch a URL if it landed in the wrong property. */
 const FETCHING_VALUE = /url\(|image-set\(|element\(/i;

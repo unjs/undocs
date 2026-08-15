@@ -23,6 +23,16 @@
  * mismatch (the shared parent `<Suspense>` makes even an un-awaited synchronous
  * fetch a race against the commit).
  *
+ * `{ lazy: true }` keeps the SSR fetch (so the data is in the server HTML and in
+ * the payload) but never blocks the CLIENT: the returned promise settles at once
+ * and the fetch runs after mount, exactly like the `{ server: false }` client
+ * path. That distinction only matters for a CLIENT-SIDE navigation, where there
+ * is no payload to seed from: an awaited call there holds the page's
+ * `<Suspense>` — and with it the whole previous page and the loading bar — until
+ * it resolves. Use it for anything that is not the page's own content (sponsors,
+ * contributors, a "latest post" badge): those blocks render themselves away
+ * (`v-if="data"`) and fill in reactively, so the page commits immediately.
+ *
  * Results are cached by key so repeat calls (and `refreshAppData`) share the same
  * reactive refs.
  */
@@ -43,6 +53,12 @@ interface AsyncDataOptions<T> {
   default?: T | (() => T);
   /** When `false`, skip the fetch during SSR and run it on the client instead. */
   server?: boolean;
+  /**
+   * When `true`, the fetch still runs (and is awaited) during SSR, but never
+   * blocks the client: the awaited call returns immediately and `data` fills in
+   * after mount. For non-content blocks, so a client-side navigation isn't held
+   * on them. See the module header.
+   */
   lazy?: boolean;
   [key: string]: any;
 }
@@ -148,8 +164,13 @@ function getOrCreateEntry<T>(
   //
   // Use `!import.meta.server`, not `import.meta.client`: in dev Vite doesn't
   // apply the `client` define to browser modules, leaving it `undefined` there.
+  //
+  // `{ lazy: true }` takes the same client path for the same reason plus one
+  // more: on a client-side navigation an awaited entry blocks the page's
+  // `<Suspense>`, so a slow non-content block (contributors, sponsors) would
+  // hold the ENTIRE page — hero included — behind its request.
   const skipOnServer = import.meta.server && opts.server === false;
-  const deferOnClient = !import.meta.server && opts.server === false;
+  const deferOnClient = !import.meta.server && (opts.server === false || opts.lazy === true);
 
   const refs: AsyncData<T> = {
     data: ref(resolveDefault(opts)) as Ref<T | null>,

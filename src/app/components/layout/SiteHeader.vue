@@ -1,17 +1,40 @@
 <script setup lang="ts">
 import { Transition, computed, ref, watch } from "vue";
 import { useWindowScroll } from "@vueuse/core";
-import { useRoute } from "@app/router";
-import { cn } from "@app/utils/cn";
+import { useRoute } from "@app/router.ts";
+import { cn } from "@app/utils/cn.ts";
 import Container from "@app/components/Container.vue";
 // Based on Nuxt UI `UHeader` component. Sticky, blurred top header.
 //
 // Slots:
 //   - #left    logo / brand area
-//   - default  centered nav (hidden below `lg`)
-//   - #right   actions (search, color mode, socials)
+//   - default  centered content (search)
+//   - #right   actions (color mode, socials)
 //   - #toggle  scoped `{ open, toggle }` — mobile menu button
 //   - #body    mobile drawer content (revealed when `open`)
+//
+// `lg` (1024px) is the DESKTOP THRESHOLD, and it is shared: this header, the
+// docs sidebar (`PageAside`), the ToC (`DocsToc`) and the `Page` grid all flip
+// at the same width, so the shell is never half-desktop. Moving one means moving
+// all four. `xl` (1280px) was tried and reverted — the content column caps at
+// 1220px, so waiting for 1280 left a 1024–1280 band running the hamburger drawer
+// on screens with room to spare for the sidebar.
+//
+// On `lg+` the row is `grid-cols-[1fr_auto_1fr]`, so the default slot is centred
+// on the CONTAINER, not on whatever space the brand and the actions leave over —
+// two flex siblings of unequal width would push it off-centre by half their
+// difference. The side tracks are equal by construction, so the brand carries
+// `min-w-0` (and truncates) rather than widening its track and shifting the
+// centre.
+//
+// Below `lg` the row is a plain flex line with only TWO clusters: the brand at
+// the left edge, everything else at the right. The default slot keeps its DOM
+// position (one node, one tab order at every width) and joins the right cluster
+// through `ml-auto` — dropped again at `lg`, where the same class on a grid item
+// would right-align the search inside its track and undo the centring above.
+// Letting it sit next to the brand instead boxes the bar into three clusters
+// with a hole in the middle, which is what a 32px icon has nothing to centre
+// against.
 //
 // `to` is accepted for API parity (brand link); the `#left` slot usually renders
 // its own link.
@@ -61,16 +84,16 @@ watch(open, (isOpen) => {
     "
   >
     <Container>
-      <div class="flex h-16 items-center gap-4">
-        <div class="flex items-center gap-2">
+      <div class="flex h-16 items-center gap-2 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-4">
+        <div class="flex min-w-0 items-center gap-2">
           <slot name="left" />
         </div>
 
-        <div class="hidden lg:flex flex-1 items-center justify-center">
+        <div class="ml-auto flex min-w-0 items-center justify-center lg:ml-0">
           <slot />
         </div>
 
-        <div class="ml-auto flex items-center gap-1">
+        <div class="flex items-center gap-1 lg:ml-auto">
           <slot name="right" />
           <slot name="toggle" :open="open" :toggle="toggle" />
         </div>

@@ -1,48 +1,20 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useAppConfig } from "@app/composables/useAppConfig";
-import { titleCase } from "@app/utils/title";
+import { useSocialLinks } from "@app/composables/useSocialLinks.ts";
 import Button from "@app/components/ui/Button.vue";
 import Tooltip from "@app/components/ui/Tooltip.vue";
-const appConfig = useAppConfig();
 
-const props = defineProps({
-  githubOnly: {
-    type: Boolean,
-    default: false,
-  },
+defineProps({
   size: {
     type: String,
     default: "md",
   },
 });
 
-const socialLinks = computed(() => {
-  return (
-    Object.entries(
-      props.githubOnly
-        ? { github: appConfig.docs.github }
-        : { github: appConfig.docs.github, ...appConfig.docs.socials },
-    )
-      .reverse() // x<>github
-      // .filter(([key]) => props.socials?.includes(key) || !props.socials)
-      .map(([key, value]) => {
-        if (typeof value === "object") {
-          return value;
-        }
-        if (typeof value === "string" && value) {
-          return {
-            // Workaround: i-simple-icons-x i-simple-icons-github
-            icon: `i-simple-icons-${key}`,
-            label: titleCase(key),
-            to: /^https?:\/\//.test(value) ? value : `https://${key}.com/${value}`,
-          };
-        }
-        return undefined;
-      })
-      .filter(Boolean)
-  );
-});
+const links = useSocialLinks();
+
+// x <> github: config order puts GitHub first, the row wants it last.
+const socialLinks = computed(() => [...links.value].reverse());
 </script>
 <template>
   <Tooltip v-for="link of socialLinks" :key="link.label" :text="link.label">

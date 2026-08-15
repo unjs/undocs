@@ -2,7 +2,7 @@ import { defineEventHandler } from "nitro/h3";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { useRuntimeConfig } from "nitro/runtime-config";
-import { getIndex } from "../content/store";
+import { getIndex } from "../content/store.ts";
 
 /** Generate `/llms-full.txt`: the full markdown of every page concatenated. */
 export default defineEventHandler(async (event) => {

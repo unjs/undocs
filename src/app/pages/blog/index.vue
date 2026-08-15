@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useAsyncData } from "@app/composables/useAsyncData";
-import { useAppConfig } from "@app/composables/useAppConfig";
-import { queryBlog, queryPage } from "@app/composables/useContent";
-import { usePageSEO } from "@app/composables/usePageSEO";
+import { useAsyncData } from "@app/composables/useAsyncData.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { queryBlog, queryPage } from "@app/composables/useContent.ts";
+import { usePageSEO } from "@app/composables/usePageSEO.ts";
 import BlogPost from "@app/components/blog/BlogPost.vue";
 import BlogPosts from "@app/components/blog/BlogPosts.vue";
 import Container from "@app/components/Container.vue";

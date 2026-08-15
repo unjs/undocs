@@ -1,7 +1,7 @@
 import { defineEventHandler, getRouterParam, HTTPError } from "nitro/h3";
 import { withLeadingSlash } from "ufo";
-import { getIndex } from "../../../../content/store";
-import type { SurroundItem } from "../../../../content/types";
+import { getIndex } from "../../../../content/store.ts";
+import type { SurroundItem } from "../../../../content/types.ts";
 
 export default defineEventHandler(async (event) => {
   // Path-addressed so the prerenderer can write each page's JSON to disk;

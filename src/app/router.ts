@@ -27,8 +27,8 @@ import {
   shallowRef,
 } from "vue";
 import { pages as userPages } from "virtual:undocs/user-pages";
-import { useAppConfig } from "@app/composables/useAppConfig";
-import { normalizeRedirects, resolveRedirect } from "@app/utils/redirects";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { normalizeRedirects, resolveRedirect } from "@app/utils/redirects.ts";
 
 // ---------------------------------------------------------------------------
 // Types

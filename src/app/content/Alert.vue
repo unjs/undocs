@@ -21,15 +21,16 @@ const TYPES: Record<string, { icon: string; color: string; title: string }> = {
 };
 
 /**
- * Map a semantic color name to Tailwind tint classes. Colors use a neutral scale
- * so they render sensibly in both light and dark modes.
+ * Map a semantic color name to a status role — the same triples `ProseCallout`
+ * uses (text, its tint, its border). All three flip in `.dark` together, so
+ * none of these take a `dark:` variant.
  */
 const COLOR_MAP: Record<string, string> = {
-  important: "border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400",
-  info: "border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  tip: "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400",
-  warning: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  caution: "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400",
+  important: "border-important-border bg-important-tint text-important",
+  info: "border-info-border bg-info-tint text-info",
+  tip: "border-success-border bg-success-tint text-success",
+  warning: "border-warning-border bg-warning-tint text-warning",
+  caution: "border-danger-border bg-danger-tint text-danger",
 };
 
 const meta = computed(() => TYPES[(props.type || "note").toLowerCase()] || TYPES.note);
@@ -42,7 +43,7 @@ const tint = computed(() => COLOR_MAP[meta.value.color] || COLOR_MAP.info);
       <Icon :name="meta.icon" class="size-5 shrink-0" />
       <span>{{ meta.title }}</span>
     </p>
-    <div class="alert-body text-[var(--ui-text)]">
+    <div class="alert-body text-foreground">
       <slot />
     </div>
   </div>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, provide } from "vue";
-import { useAsyncData } from "@app/composables/useAsyncData";
+import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { useHead, useSeoMeta } from "@unhead/vue";
-import { queryNavigation } from "@app/composables/useContent";
+import { queryNavigation } from "@app/composables/useContent.ts";
 import AppFooter from "@app/components/app/AppFooter.vue";
 import AppHeader from "@app/components/app/AppHeader.vue";
 import AppProvider from "@app/components/ui/AppProvider.vue";
@@ -11,8 +11,8 @@ import Container from "@app/components/Container.vue";
 import Main from "@app/components/layout/Main.vue";
 import Page from "@app/components/layout/Page.vue";
 import DocsSearch from "@app/components/docs/DocsSearch.vue";
-import ClientOnly from "@app/components/app/ClientOnly";
-import type { AppError } from "@app/composables/createError";
+import ClientOnly from "@app/components/app/ClientOnly.ts";
+import type { AppError } from "@app/composables/createError.ts";
 
 useSeoMeta({
   title: "Page not found",
@@ -47,7 +47,7 @@ const message = computed(
       <Container>
         <Page>
           <div class="flex flex-col items-center justify-center gap-4 py-24 text-center">
-            <p class="text-primary text-base font-semibold">{{ statusCode }}</p>
+            <p class="text-brand text-base font-semibold">{{ statusCode }}</p>
             <h1 class="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
               {{ statusCode === 404 ? "Page not found" : "An error occurred" }}
             </h1>

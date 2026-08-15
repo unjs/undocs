@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { highlightCode, highlightBody } from "../../src/server/content/highlight";
-import type { MarkNode, MarkElement } from "../../src/server/content/types";
+import { highlightCode, highlightBody } from "../../src/server/content/highlight.ts";
+import type { MarkNode, MarkElement } from "../../src/server/content/types.ts";
 
 describe("highlightCode", () => {
   it("highlights a supported language into semantic token markup", async () => {

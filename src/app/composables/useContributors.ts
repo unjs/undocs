@@ -1,5 +1,5 @@
-import { useAppConfig } from "@app/composables/useAppConfig";
-import { docFetch } from "@app/composables/useContent";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { docFetch } from "@app/composables/useContent.ts";
 export interface Contributor {
   name: string;
   username: string;

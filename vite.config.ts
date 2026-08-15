@@ -13,7 +13,7 @@ import {
   metaEnvFlagsDev,
   patchVueExclude,
   ssrEntryReloadDev,
-} from "./vite.plugins";
+} from "./vite.plugins.ts";
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
@@ -78,7 +78,7 @@ export default defineConfig((configEnv) => ({
       // client-safe helpers (`utils.ts`, `types.ts`) per the client/server split.
       "@server": r("./src/server"),
 
-      // `@vueuse/core` (used directly + transitively by reka-ui/motion-v) is pinned
+      // `@vueuse/core` (used directly + transitively by motion-v) is pinned
       // to a single resolved copy (`vueuseCoreDir`) so rolldown's stricter build
       // resolver doesn't duplicate Vue — the naive nested path doesn't exist when
       // undocs is installed (pnpm hoists it as a sibling).

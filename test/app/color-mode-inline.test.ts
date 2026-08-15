@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { COLOR_MODE_STORAGE_KEY, DEFAULT_COLOR_MODE } from "../../src/app/color-mode";
+import { COLOR_MODE_STORAGE_KEY, DEFAULT_COLOR_MODE } from "../../src/app/color-mode.ts";
 
 /**
  * Exercises the COMPILED `inline/color-mode.js` — the exact bytes

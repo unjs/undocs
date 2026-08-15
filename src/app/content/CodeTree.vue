@@ -19,7 +19,7 @@
  */
 import { cloneVNode, computed, Fragment, ref, useSlots, type VNode } from "vue";
 import Icon from "@app/components/global/Icon.vue";
-import { useCodeIcon } from "@app/composables/useCodeIcon";
+import { useCodeIcon } from "@app/composables/useCodeIcon.ts";
 
 const props = defineProps<{
   /** Path of the file selected on first render (falls back to the first file). */
@@ -205,7 +205,7 @@ const rows = computed<Row[]>(() => {
         class="flex cursor-pointer items-center gap-1.5 px-2 py-1 transition"
         :class="
           node.type === 'file' && node.path === selected
-            ? 'bg-muted text-primary'
+            ? 'bg-brand/10 text-brand'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         "
         :style="{ paddingLeft: `${0.5 + depth * 0.75}rem` }"

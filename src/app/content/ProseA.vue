@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppLink from "@app/components/app/AppLink";
+import AppLink from "@app/components/app/AppLink.ts";
 import { computed } from "vue";
 
 const props = defineProps<{

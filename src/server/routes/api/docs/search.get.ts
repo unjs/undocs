@@ -1,5 +1,5 @@
 import { defineEventHandler } from "nitro/h3";
-import { getIndex } from "../../../content/store";
+import { getIndex } from "../../../content/store.ts";
 
 // Ships the pre-built, serialized MiniSearch index (see `builder.ts`'s
 // `buildSearchIndex`). Query-less, so it's baked to a static file at prerender;

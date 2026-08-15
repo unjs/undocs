@@ -1,6 +1,6 @@
 // Tests: test/content/highlight.test.ts
-import type { MarkNode, MarkElement } from "./types";
-import { textContent } from "./utils";
+import type { MarkNode, MarkElement } from "./types.ts";
+import { textContent } from "./utils.ts";
 import { highlightText } from "rangi";
 import {
   BUNDLED_ALIASES,
@@ -8,7 +8,7 @@ import {
   LOCAL_ALIASES,
   LOCAL_LANG_NAMES,
   LOCAL_LANGUAGES,
-} from "./grammars";
+} from "./grammars/index.ts";
 
 /**
  * Every name we can highlight: everything rangi answers to — its languages and

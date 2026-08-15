@@ -3,14 +3,14 @@ import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
 import MiniSearch from "minisearch";
 import type { Options, SearchOptions, SearchResult } from "minisearch";
-import { buildIndex } from "../../src/server/content/builder";
+import { buildIndex } from "../../src/server/content/builder.ts";
 import {
   MINISEARCH_OPTIONS,
   MINISEARCH_SEARCH_OPTIONS,
   toSearchDocuments,
-} from "../../src/server/content/search-options";
-import type { SearchDocument } from "../../src/server/content/search-options";
-import type { SearchSection } from "../../src/server/content/types";
+} from "../../src/server/content/search-options.ts";
+import type { SearchDocument } from "../../src/server/content/search-options.ts";
+import type { SearchSection } from "../../src/server/content/types.ts";
 
 // ============================================================================
 // Search-relevance tuning harness (NOT a pass/fail unit test — a benchmark).

@@ -3,9 +3,9 @@ import { watch, readdirSync, lstatSync, type FSWatcher } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { useRuntimeConfig } from "nitro/runtime-config";
 import { definePlugin as defineNitroPlugin } from "nitro";
-import { invalidateIndex } from "./content/store";
-import { EXCLUDE } from "./content/builder";
-import { broadcastReload } from "./dev-reload";
+import { invalidateIndex } from "./content/store.ts";
+import { EXCLUDE } from "./content/builder.ts";
+import { broadcastReload } from "./dev-reload.ts";
 
 // Dev-only Nitro plugin: watches the docs dir and, on a Markdown/YAML change,
 // drops the cached content index + tells connected browsers to refresh. Only

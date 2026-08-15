@@ -3,10 +3,10 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineNitroConfig } from "nitro/config";
 import { loadConfig } from "c12";
-import { vercel } from "./src/server/vercel";
-import { bundleDocs } from "./src/server/bundle-docs";
-import { rebaseOutput } from "./src/server/rebase-output";
-import { normalizeRedirects } from "./src/app/utils/redirects";
+import { vercel } from "./src/server/vercel.ts";
+import { bundleDocs } from "./src/server/bundle-docs.ts";
+import { rebaseOutput } from "./src/server/rebase-output.ts";
+import { normalizeRedirects } from "./src/app/utils/redirects.ts";
 import pkg from "./package.json" with { type: "json" };
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { useAppConfig } from "@app/composables/useAppConfig";
-import AppLink from "@app/components/app/AppLink";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import AppLink from "@app/components/app/AppLink.ts";
 const appConfig = useAppConfig();
 </script>
 
@@ -8,7 +8,7 @@ const appConfig = useAppConfig();
   <p class="text-sm text-muted-foreground">
     <span class="text-foreground font-medium">
       <AppLink
-        class="text-foreground hover:text-primary"
+        class="text-foreground hover:text-brand"
         :to="`https://github.com/${appConfig.docs.github}`"
         target="_blank"
         >{{ appConfig.site.name }}

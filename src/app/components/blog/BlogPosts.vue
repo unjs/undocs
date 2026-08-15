@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { cn } from "@app/utils/cn";
+import { cn } from "@app/utils/cn.ts";
 defineProps<{
   class?: unknown;
 }>();

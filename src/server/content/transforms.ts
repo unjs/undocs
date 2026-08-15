@@ -1,8 +1,8 @@
 // Tests: test/content/transforms.test.ts
 import { posix } from "node:path";
 import * as md4x from "md4x/wasm";
-import type { MarkNode, MarkElement } from "./types";
-import { textContent, toRoutePath } from "./utils";
+import type { MarkNode, MarkElement } from "./types.ts";
+import { textContent, toRoutePath } from "./utils.ts";
 
 const isEl = (n: MarkNode | undefined): n is MarkElement => Array.isArray(n);
 

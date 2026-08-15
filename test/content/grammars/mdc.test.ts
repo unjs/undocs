@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tokens, typeOf, coverage, html } from "./helper";
+import { tokens, typeOf, coverage, html } from "./helper.ts";
 
 /**
  * Samples lifted VERBATIM from `docs/1.guide/2.components.md` and

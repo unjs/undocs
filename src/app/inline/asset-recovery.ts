@@ -26,7 +26,7 @@
  * stop and let it fail visibly rather than thrash. That is also what stops a
  * permanently-missing lazy chunk from reload-looping forever.
  */
-import { ASSETS_BASE } from "../assets-base";
+import { ASSETS_BASE } from "../assets-base.ts";
 
 /** sessionStorage key holding `"<build-url> <attempts>"`. */
 const STORAGE_KEY = "undocs:asset-recovery";

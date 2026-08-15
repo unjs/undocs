@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useRoute } from "@app/router";
-import { useAsyncData } from "@app/composables/useAsyncData";
-import { createError } from "@app/composables/createError";
-import { useAppConfig } from "@app/composables/useAppConfig";
-import { queryPage, hintPrerenderRoute } from "@app/composables/useContent";
-import { usePageSEO } from "@app/composables/usePageSEO";
+import { useRoute } from "@app/router.ts";
+import { useAsyncData } from "@app/composables/useAsyncData.ts";
+import { createError } from "@app/composables/createError.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { queryPage, hintPrerenderRoute } from "@app/composables/useContent.ts";
+import { usePageSEO } from "@app/composables/usePageSEO.ts";
 import { useHead } from "@unhead/vue";
 import { joinURL } from "ufo";
 import Breadcrumb from "@app/components/ui/Breadcrumb.vue";
@@ -14,7 +14,7 @@ import PageHeader from "@app/components/layout/PageHeader.vue";
 import PageLinks from "@app/components/layout/PageLinks.vue";
 import Separator from "@app/components/ui/Separator.vue";
 import UserCard from "@app/components/UserCard.vue";
-import MarkdownRenderer from "@app/content/MarkdownRenderer";
+import MarkdownRenderer from "@app/content/MarkdownRenderer.ts";
 import { kebabCase } from "scule";
 
 const route = useRoute();

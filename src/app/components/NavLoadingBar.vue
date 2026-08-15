@@ -11,7 +11,7 @@
  * flips it on.
  */
 import { onUnmounted, ref, watch } from "vue";
-import { useRouter } from "@app/router";
+import { useRouter } from "@app/router.ts";
 
 const router = useRouter();
 
@@ -60,8 +60,12 @@ onUnmounted(clearTimers);
     :class="visible ? 'opacity-100' : 'opacity-0'"
     aria-hidden="true"
   >
+    <!-- The glow reads `--brand` directly, NOT `--color-brand`: the
+         latter is declared in `@theme inline`, which emits no variables at all.
+         Vivid rather than plain `--brand` because a 2px bar carries no text —
+         the accent's contrast derivation would only cost it saturation here. -->
     <div
-      class="h-full bg-primary shadow-[0_0_8px_var(--color-primary)] transition-[width] duration-150 ease-out"
+      class="h-full bg-brand shadow-[0_0_8px_var(--brand)] transition-[width] duration-150 ease-out"
       :style="{ width: `${progress}%` }"
     />
   </div>

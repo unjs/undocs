@@ -7,7 +7,7 @@
  * renders the slot directly (default passthrough).
  */
 import { defineComponent, h } from "vue";
-import { useRoute } from "@app/router";
+import { useRoute } from "@app/router.ts";
 import DocsLayout from "@app/layouts/docs.vue";
 import BlogLayout from "@app/layouts/blog.vue";
 import { layouts as userLayouts } from "virtual:undocs/user-layouts";

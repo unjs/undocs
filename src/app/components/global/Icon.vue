@@ -22,7 +22,7 @@
  */
 import { computed, onMounted, ref } from "vue";
 import { Icon as IconifyIcon, iconLoaded } from "@iconify/vue";
-import { isIconSeeded, registerServerIcon } from "@app/ssr/icons";
+import { isIconSeeded, registerServerIcon } from "@app/ssr/icons.ts";
 
 // Iconify collections whose name itself contains a dash — the first-dash split
 // would otherwise mangle them (e.g. `simple-icons-github` -> `simple:...`).

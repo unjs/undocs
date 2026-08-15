@@ -5,7 +5,7 @@
 // serialized in `toJSON()` — both sides import this same object/function, so
 // they match by construction. A divergent tokenizer would silently corrupt search.
 import type { Options, SearchOptions } from "minisearch";
-import type { SearchSection } from "./types";
+import type { SearchSection } from "./types.ts";
 
 // Max characters of body text STORED per section for rendering the result
 // snippet. Full-text search is unaffected — the whole `content` is still

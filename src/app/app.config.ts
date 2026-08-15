@@ -1,4 +1,4 @@
-import { defineAppConfig } from "@app/composables/useAppConfig";
+import { defineAppConfig } from "@app/composables/useAppConfig.ts";
 export default defineAppConfig({
   docs: {
     socialBackground: "https://github.com/unjs/undocs/blob/main/assets/ellipse.png?raw=true",

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { cn } from "@app/utils/cn";
+import { cn } from "@app/utils/cn.ts";
 import Icon from "@app/components/global/Icon.vue";
-import AppLink from "@app/components/app/AppLink";
+import AppLink from "@app/components/app/AppLink.ts";
 /**
  * Breadcrumb — the `UBreadcrumb` replacement. Plain markup (no Reka
  * primitive needed for a static trail). Items: `{ label, icon?, to? }`,

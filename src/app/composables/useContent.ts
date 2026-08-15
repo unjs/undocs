@@ -1,6 +1,6 @@
 import { $fetch } from "ofetch";
 import type { AsPlainObject } from "minisearch";
-import type { DocPage, NavItem } from "@server/content/types";
+import type { DocPage, NavItem } from "@server/content/types.ts";
 
 /**
  * The `$fetch` to use for `/api/docs/*`. These are relative, same-origin URLs.

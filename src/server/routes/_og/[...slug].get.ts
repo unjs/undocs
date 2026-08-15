@@ -4,7 +4,7 @@ import { useRuntimeConfig } from "nitro/runtime-config";
 import { withLeadingSlash } from "ufo";
 import { render } from "takumi-js";
 import { container, image, text } from "takumi-js/helpers";
-import { getIndex } from "../../content/store";
+import { getIndex } from "../../content/store.ts";
 
 const themeColorMap: Record<string, string> = {
   red: "#ff6467",

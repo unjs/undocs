@@ -1,7 +1,7 @@
 import { computed, inject, reactive, type Ref } from "vue";
-import { useRoute } from "@app/router";
-import { titleCase } from "@app/utils/title";
-import type { NavItem } from "@server/content/types";
+import { useRoute } from "@app/router.ts";
+import { titleCase } from "@app/utils/title.ts";
+import type { NavItem } from "@server/content/types.ts";
 
 export function useDocsNav() {
   const navigation = inject<Ref<NavItem[]>>("navigation");

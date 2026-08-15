@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Icon from "@app/components/global/Icon.vue";
-import AppLink from "@app/components/app/AppLink";
+import AppLink from "@app/components/app/AppLink.ts";
 import { computed } from "vue";
 
 const props = defineProps<{
@@ -13,20 +13,25 @@ const props = defineProps<{
 }>();
 
 /**
- * Map a semantic color name to Tailwind tint classes. Unknown colors fall
- * back to the "info" (blue) palette. Colors use a neutral scale so they
- * render sensibly in both light and dark modes.
+ * Map a semantic color name to a status role. Unknown colors fall back to
+ * "info". Each role is a triple — text, the tint it sits on, and a border — and
+ * all three flip in `.dark` together, so none of these need a `dark:` variant.
+ * `tokens.test.ts` asserts every role clears WCAG AA on its own tint.
+ *
+ * `primary` is the odd one out: it tracks the project's `themeColor` rather than
+ * a fixed role, so it mixes its own tint from `--brand`. That works because
+ * `--brand` is derived to clear AA on a wash of itself — see `tokens.css`.
  */
 const COLOR_MAP: Record<string, string> = {
-  primary: "border-[var(--ui-primary)]/30 bg-[var(--ui-primary)]/10 text-[var(--ui-primary)]",
-  important: "border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-400",
-  info: "border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  note: "border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  tip: "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400",
-  success: "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400",
-  warning: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  caution: "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400",
-  error: "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400",
+  primary: "border-brand/30 bg-brand/10 text-brand",
+  important: "border-important-border bg-important-tint text-important",
+  info: "border-info-border bg-info-tint text-info",
+  note: "border-info-border bg-info-tint text-info",
+  tip: "border-success-border bg-success-tint text-success",
+  success: "border-success-border bg-success-tint text-success",
+  warning: "border-warning-border bg-warning-tint text-warning",
+  caution: "border-danger-border bg-danger-tint text-danger",
+  error: "border-danger-border bg-danger-tint text-danger",
 };
 
 const tint = computed(() => COLOR_MAP[props.color || ""] || COLOR_MAP.info);
@@ -42,7 +47,7 @@ const tag = computed(() => (props.to ? AppLink : "div"));
     :class="[tint, to ? 'transition hover:brightness-110' : '']"
   >
     <Icon v-if="icon" :name="icon" class="mt-0.5 size-5 shrink-0" />
-    <div class="callout-body min-w-0 flex-1 text-[var(--ui-text)]">
+    <div class="callout-body min-w-0 flex-1 text-foreground">
       <p v-if="title" class="mb-1 font-bold select-none">{{ title }}</p>
       <slot />
     </div>

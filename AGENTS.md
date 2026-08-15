@@ -5,148 +5,192 @@ Vue** app that renders a docs site from a directory of Markdown. It ships as a
 CLI (`undocs dev` / `undocs build`) that a docs project depends on; the docs
 project supplies only Markdown + one config file.
 
-## Stack
+NEVER write E2E tests. Ask for it to be tested manually.
 
-- **Nitro v3** server — SSR-renders the app and serves the `/api/docs/*` content
-  API. Preset auto-detected (`node-server` default, `vercel` on Vercel).
-- **Vite** with two environments — `client` (browser bundle → `.output/public`)
-  and `ssr` (`entry-server.ts`, whose `fetch` Nitro auto-wires as the renderer).
-- **From-scratch router** (`src/app/router.ts`) instead of vue-router — a tiny
-  reactive route + `AppLink`/`AppPage`/`AppLayout`.
-- **`reka-ui`** (unstyled primitives) + **Tailwind v4** (`@tailwindcss/vite`).
-- **`md4x`** (Markdown → comark AST) + **`rangi`** (highlight, synchronous),
-  both server-only.
+## Orientation
 
-## Layout (`src/`)
-
-### `src/app/**` — CLIENT (browser + SSR render)
-
-- `main.ts` — client entry: seed stores from the payload → `createSSRApp` →
-  hydrate `#root`. `entry-server.ts` — the SSR renderer.
-- `router.ts` — `createAppRouter(history?)`, `useRoute`/`useRouter`,
-  `createWebHistory`/`createMemoryHistory`. Static first-match route table with a
-  mandatory trailing catch-all (docs page).
-- `app.config.ts` — the **theme** defaults (`defineAppConfig`).
-- `composables/` — `useAsyncData` (+`useLazyAsyncData`/`refreshAppData`), `useState`,
-  `createError`, `useColorMode`, `useAppConfig`, `useRuntimeConfig` (client stub),
-  plus content/query helpers (`useContent`, `useDocsNav`, `useDocsSearch`, …).
-  `useHead`/`useSeoMeta` come from `@unhead/vue`.
-- `components/app/` — the framework shims: `AppLink` (link + external `<a>`),
-  `AppPage` (per-page `<Suspense>`, keyed by `route.path`), `AppLayout`
-  (`route.meta.layout` resolver), `ClientOnly`. Other `components/` subdirs are UI.
-- `content/` — `MarkdownRenderer.ts` (renders the comark AST to Vue via an
-  explicit tag→component registry) + prose components.
-- `layouts/`, `pages/`, `utils/`, `assets/`, `public/`.
-- `ssr/` — the SSR state bridge: `server-context.ts` (per-request store via
-  AsyncLocalStorage) and `payload.ts` (`window.__UNDOCS__` serialize/read).
-- `inline/` — blocking `<head>` programs (asset recovery, color mode, embed
-  theme). `.ts` source + the **committed compiled `.js`** rolldown emits;
-  `entry-server.ts` inlines the artifact via `?raw`. Order in the shell matters:
-  `color-mode` before `embed-theme` (an embedder's pinned mode must win). See
-  `inline/README.md`.
-- `env.d.ts` — types the `import.meta.{server,client,dev,prerender}` build flags
-  and the `virtual:undocs/app-config` module.
-
-### `src/server/**` — NITRO (node-only)
-
-- `content/` — the content engine. `buildIndex()` (`builder.ts`) globs the docs
-  dir, parses each file with `md4x`, runs block `transforms`, highlights with
-  `rangi`, builds navigation/search/TOC/surround, and returns a `ContentIndex`. `store.ts` caches that index as a process singleton. `highlight.ts`, `icons.ts`,
-  `types.ts`, `utils.ts` support it.
-- `routes/api/docs/` — the content API (see below). Other routes: `raw/**` and
-  `llms{,-full}.txt` (source Markdown for LLMs), `_og/**` (OG images via
-  `takumi-js`), `_content` (build-stats debug page).
-- `app-config.ts` — `generateAppConfig(docsDir)`: loads `.config/docs.*` via
-  **c12**, renders landing markdown/hero code, returns the client app-config.
-- Nitro modules/plugins: `bundle-docs.ts` (copies docs into the prod output),
-  `vercel.ts` (Vercel output wiring), and dev-only live-reload
-  (`dev-watch`/`dev-ws`/`dev-reload`).
-
-### Root
-
-`nitro.config.ts`, `vite.config.ts`, `cli/` (citty CLI), `schema/` (the docs
-config JSON Schema + `.d.ts`), `docs/` (the repo's own docs, the default target),
-`template/` (starter scaffold), `test/`.
-
-## Commands
-
-```bash
-pnpm dev                       # vite dev on ./docs (:3000)
-pnpm build                     # vite build → docs/.output/{public,server}
-pnpm start                     # node docs/.output/server/index.mjs (:3000)
-node cli/main.mjs dev  <dir>   # dev on an arbitrary docs dir (sets UNDOCS_DIR)
-node cli/main.mjs build <dir>  # prod build → <dir>/.output
-pnpm build:inline              # rolldown src/app/inline/*.ts → committed *.js
-pnpm test                      # vitest run --coverage
-pnpm typecheck                 # tsc --noEmit  (bare tsc: .vue imports don't resolve)
-pnpm lint                      # oxlint && oxfmt --check   (fix: pnpm fmt)
-```
-
-The CLI sets `UNDOCS_DIR` (default `.`); `nitro.config.ts` and `vite.config.ts`
-both read it, falling back to `./docs`. `pkgRoot` is resolved from
-`import.meta.url` and used as Vite's `root`/`configFile`, so an installed bin
-always loads OUR config, not the user's cwd. Because Vite's `root` is `pkgRoot`,
-Nitro's `rootDir` is `pkgRoot` too — so its preset-derived output would land next
-to undocs. The `rebaseOutput` nitro module (`src/server/rebase-output.ts`)
-relocates that output tree onto `docsDir`, so the build always writes to
-`<docsDir>/.output` (or the preset's equivalent). See the invariant below.
-
-## The content API (the HTTP boundary)
-
-Pages fetch content over HTTP — never by importing the engine. `useContent`'s
-`docFetch()` → `$fetch("/api/docs/*")` → the Nitro route → `store`/`builder`:
-
-- `/api/docs/page/<path>.json` — one `DocPage` (404 if missing), with its
-  `[prev, next]` `surround` embedded (so a page render is a single request)
-- `/api/docs/navigation` — the nav tree
-- `/api/docs/search` — search sections
-- `/api/docs/blog.json` — the `/blog/` listing, newest-first (query-less so it
-  prerenders to disk)
-- `/api/docs/{contributors,sponsors}` — same-origin proxies (cached, last-good
-  fallback) to ungh / the sponsors API
-
-On the server this `$fetch` is request-scoped (Nitro internal `$fetch` if present,
-else a same-origin loopback); it does not forward the incoming request's
-cookies/headers (fine for these public routes).
-
-## Config flow (two configs, merged)
-
-1. **Theme** — `src/app/app.config.ts` (defaults shipped with undocs).
-2. **User** — the docs project's `.config/docs.*`, loaded by c12 in
-   `generateAppConfig` and exposed to the client as the build-time virtual module
-   `virtual:undocs/app-config` (the `undocs:app-config` Vite plugin). Generated
-   **once per build**; dev watches `.config` and full-reloads on change.
-
-`useAppConfig()` merges them once: `defu(userConfig, themeConfig)` — user wins,
-theme-only keys survive. The docs config shape is defined in `schema/config.json`
-(+ `config.d.ts`); docs YAML points its `$schema` at the published copy.
+- `src/app/**` is the CLIENT (browser + SSR render); `src/server/**` is NITRO
+  (node-only). The line between them is HTTP, and it is an invariant (below).
+- From-scratch router (`src/app/router.ts`) instead of vue-router. Our own UI
+  primitives (`components/ui/primitives/`) instead of reka-ui. Tailwind v4
+  themed with **Geist** (vercel.com/geist); every colour, type step and material
+  comes from `assets/tokens.css`.
+- `md4x` (Markdown → comark AST) and `rangi` (highlight, synchronous) are
+  server-only.
+- The CLI sets `UNDOCS_DIR` (default `.`, falling back to `./docs`). `pkgRoot`
+  is resolved from `import.meta.url` and used as Vite's `root`/`configFile`, so
+  an installed bin always loads OUR config, not the user's cwd.
+- Two configs, merged once by `useAppConfig()`: `defu(userConfig, themeConfig)` —
+  the docs project's `.config/docs.*` (loaded by c12, exposed to the client as
+  the build-time virtual module `virtual:undocs/app-config`, generated once per
+  build) wins; theme-only keys from `src/app/app.config.ts` survive. Shape lives
+  in `schema/config.json` + `config.d.ts`.
+- `pnpm test`, `pnpm typecheck` (bare tsc, so `.vue` imports don't resolve),
+  `pnpm lint` / `pnpm fmt` (oxlint + oxfmt — run before finishing),
+  `pnpm build:inline` after touching `src/app/inline/*.ts`.
 
 ## Invariants (do not break)
 
 - **HTTP boundary.** node/wasm deps (`md4x`, `rangi`, `automd`, `takumi-js`,
-  `node:*`, `c12`) live only under `src/server/`. The client reaches content
-  solely through `/api/docs/*` and `virtual:undocs/app-config`. Verify no engine
-  import leaks into the client bundle.
+  `node:*`, `c12`) live only under `src/server/`. Pages reach content solely
+  through `/api/docs/*` and `virtual:undocs/app-config` — never by importing the
+  engine. Verify no engine import leaks into the client bundle. On the server
+  that `$fetch` is request-scoped and does NOT forward the incoming request's
+  cookies/headers (fine — these routes are public).
 - **Per-request state on the server.** The server renders many requests
   concurrently in one process. Never add module-level mutable state to
   `src/app/**` code that runs during render — put it on the ALS
   `UndocsServerContext` (`ssr/server-context.ts`), or key it so the client
   reproduces it. `server-context.ts` is node-only; composables touch it only
-  inside `import.meta.server` branches (DCE'd from the client bundle). (The
-  content `ContentIndex` and proxy caches in `src/server/` are process singletons
-  — that's correct there: server-only, visitor-independent.)
+  inside `import.meta.server` branches (DCE'd from the client bundle). The
+  `ContentIndex` and proxy caches in `src/server/` are process singletons — that
+  is correct there: server-only and visitor-independent.
 - **Hydration parity.** The SSR render and the client's _first_ render must
   produce identical DOM. Defer `localStorage`/color-mode/random/time reads to
   `onMounted` or route them through the seeded payload; fence browser-only code
   with `import.meta.client` (or `!import.meta.server`) and node-only with
   `import.meta.server`. Payload seeding (`hydrateAsyncData`/`hydrateState`/
-  `seedClientIcons`) MUST run before `createSSRApp`.
-  The inline `<head>` programs are the one exception, and only because they stay
-  OUTSIDE the hydration root: `inline/color-mode.ts` reads `localStorage` before
-  the first paint but only touches `<html>`'s class. Anything that RENDERS from
-  the mode (`ColorModeSwitch.vue`) must still show `DEFAULT_COLOR_MODE` on its
-  first client render and correct itself `onMounted` — the server always
-  rendered the default.
+  `seedClientIcons`) MUST run before `createSSRApp`. The inline `<head>` programs
+  are the one exception, and only because they stay OUTSIDE the hydration root:
+  `inline/color-mode.ts` reads `localStorage` before first paint but only touches
+  `<html>`'s class. Anything that RENDERS from the mode (`ColorModeSwitch.vue`)
+  must still show `DEFAULT_COLOR_MODE` on its first client render and correct
+  itself `onMounted` — the server always rendered the default.
+- **`components/ui/primitives/` is ours, and it is MIT-derived from reka-ui.**
+  reka-ui is no longer a dependency, which makes the attribution comment at the
+  top of each file MORE load-bearing, not less — it is now the only record of the
+  derivation. Those headers also carry the "dropped, and why" list, which is what
+  stops the next reader re-adding a submenu grace area nobody needs. Never strip
+  them; credit anything further you port the same way. Three rules the layer runs
+  on:
+  - **The module-level stacks are browser-only, and that is what makes them
+    legal.** `useDismissableLayer`, `useFocusScope`, `useBodyScrollLock` and
+    `useHideOthers` each keep a module-level stack/set/WeakMap, because "which
+    layer does this Escape belong to" is a question about the document, not about
+    a request. Every one returns early under `import.meta.server` and is keyed by
+    DOM elements, so nothing is ever WRITTEN during SSR — the only reason they do
+    not violate the per-request-state invariant. Any new primitive must keep that
+    shape: if it can write module state during a render, it is a concurrency bug
+    waiting for a second visitor.
+  - **Generated ids come from Vue 3.5's `useId()`, never a counter.** A
+    module-level counter would hand two concurrent SSR renders the same
+    `aria-describedby` and mismatch on hydrate. Use `useId()` for every `aria-*`
+    id.
+  - **`usePresence` is what makes every `data-[state=closed]:animate-out` class in
+    the codebase work.** A plain `v-if` removes the node in the same tick the exit
+    class appears, so the keyframes never get a frame. Delete or bypass it and
+    nothing throws — dialogs, tooltips and menus just start vanishing instantly,
+    everywhere, and the classes that look like they animate them are silently
+    dead. The state machine is unit-tested (`test/app/presence.test.ts`); the
+    computed-style plumbing around it is not, because vitest runs in `node`.
+- **`tokens.css` is ROLES, not scales, and it is MONOCHROME.** The file used to
+  transcribe eight of Geist's 10-step hue ramps plus a 10-step alpha ramp in both
+  modes — 160 declarations — to serve about fifteen call sites. Those scales are
+  gone. What is left is three kinds of thing: a semantic colour (a role, declared
+  as a literal in `:root` and again in `.dark`), a metric (radius, control
+  height, grid geometry, elevation), and a type step. Geist's step numbers survive
+  only as provenance in the comments; `--color-<hue>-*: initial` is gone with
+  them, so Tailwind's own ramps are back and mean what they normally mean.
+  `--primary` is the high-contrast pair (near-black on white, near-white on
+  black) and is NOT the project's colour; the per-project accent is `--brand`,
+  aimed by `theme-brand.ts` from `docs.themeColor`. Links, active nav, icons and
+  the landing glow use `brand`; solid buttons and the high-contrast bar use
+  `primary`. Collapsing the two undoes the system. ONE button departs
+  deliberately: the landing hero's lead CTA (`color: "brand"`, applied by
+  position in `pages/index.vue`) fills with the accent so the docs' colour leads
+  the page — if a second call site appears, the two roles have merged after all.
+  Its label is `--brand-foreground` (= the page colour), and that is measured,
+  not chosen: across the hues `themeColor` can pick, in both modes, it is the only
+  foreground clearing AA on the accent fill.
+  `test/app/tokens.test.ts` re-derives every text/surface contrast from the
+  stylesheet rather than pinning literals.
+- **The accent is ONE token, and what makes that possible is a rule about
+  SURFACES.** `--brand` text sits on the page, on a card, or on a wash of itself
+  (≤15%) — never on `--muted` or `--accent`. The `--brand-<hue>` table derives
+  each hue in OKLCH against exactly that set: Geist's hue angle, lightness at the
+  4.55:1 boundary (or at the top of the accent band where a hue has contrast to
+  spare and its gamut cusp is higher — dark amber/green/teal), chroma at the sRGB
+  gamut edge. Three consequences.
+  (1) It is a PER-MODE table: the constraint is against a different page colour in
+  each mode and binds from opposite directions. Adding a hue means two
+  declarations. `--brand`/`--brand-foreground`/`--brand-hover` are `var()`
+  references INTO that table, so they must NOT be redeclared in `.dark`.
+  (2) There used to be three tokens (`--brand`/`--brand-deep`/`--brand-vivid`)
+  because no single value cleared AA across a wider surface set — and the deep one
+  still measured 4.38–4.49 on `--accent`, i.e. under AA. Constraining the surfaces
+  fixed that; re-widening them brings the split back.
+  (3) The rule is enforced on the SOURCE: `tokens.test.ts` greps `src/app` for
+  `text-brand` on `bg-accent`/`bg-muted` and fails. An active nav item wants
+  `bg-brand/10 text-brand`.
+- **Status colour is FIVE roles, each a triple.** `--info`/`--success`/
+  `--warning`/`--danger`/`--important`, each with `-tint` (the surface its text
+  sits on) and `-border`. `Alert`, `ProseCallout` and `Banner` render all three
+  with no `dark:` variant anywhere, which only works because every pairing is
+  declared per mode. Adding a role means six declarations and an entry in the
+  test's `STATUS` list.
+- **The type scale is declared ONCE, in `@theme static`.** `static` is
+  load-bearing: `inline` substitutes values into the utilities and emits no
+  variables (so plain CSS cannot read it), and a default `@theme` tree-shakes the
+  unused ones. `static` emits every variable AND generates every utility, so
+  `main.css`'s prose rules — which style bare `h1`/`p`/`table` tags, not utility
+  classes — read the same `--text-heading-32` / `--text-heading-32--line-height`
+  the `text-heading-32` utility compiles from. It used to be two parallel blocks.
+  Colours cannot use this trick (they need `.dark`, and `@theme` cannot nest), so
+  they stay a `:root`/`.dark` literal plus an `@theme inline` mapping — which is
+  also why `theme-brand.ts` may emit `var(--brand-blue)` but never
+  `var(--color-…)`: the former is a plain custom property and survives.
+  `--font-sans`/`--font-mono` are the same pattern, in `main.css`.
+- **Control heights come from `--size-*`, not from `h-<n>`.** Geist's ladder
+  is small 32 / medium 36 / large 40; `tiny` 24 is ours (the Button has the size,
+  upstream ships no token). `Button.ts` writes them as `h-(--token)`, and
+  `buttonSquareSizeClass` reuses the same token for width so the two cannot
+  drift. Each height carries Geist's paired type step (14px through medium, 16px
+  at large) — height alone is not the size.
+- **The Geist grid resolves breakpoints in JS, draws guides as grid ITEMS.**
+  `components/grid/`: `GridSystem` (guides on) > `Grid` (`columns`/`rows`, number
+  or `{sm,md,lg}`) > `GridCell` + `GridCross`, plus `GridPage`, the page shell
+  wrapping header/main/footer in `app.vue`. Three things are load-bearing.
+  (1) Breakpoints resolve in `responsive.ts` into `--ug-*-{sm,md,lg}` triples
+  that plain media queries pick from (Geist's sm/md/lg → base / 48rem / 64rem). A
+  `matchMedia` read would give SSR one column count and the client's first render
+  another — the hydration mismatch forbidden above.
+  (2) Guides are grid items bordering a track edge inside an overlay repeating
+  the same template, NOT lines at `calc(i * 100% / cols)`, so track rounding
+  applies to guides and cells identically instead of drifting a pixel apart.
+  Because a line COUNT is fixed in markup and no media query can add DOM nodes,
+  `guideLayers()` emits one overlay per distinct shape and the CSS swaps them; it
+  may only merge ADJACENT breakpoints, since each query hides the one below it.
+  (3) Cell spans travel through a custom property, which substitutes as a raw
+  token stream, so `gridLine()` MUST space the slash — `1/-1` unspaced is dropped
+  at computed-value time and the cell silently reverts to auto placement.
+  The outer frame is the grid's own border (the overlay's `inset: 0` resolves
+  against the padding box, which is where the tracks live).
+- **The shell is FULL-BLEED; the content column is what's capped.** `GridPage`
+  wraps header/main/footer but sets no width — it exists for `position: relative`
+  (the landing `FilmBackground`'s containing block, the one element spanning all
+  three). Width comes from `Container`, which every piece of chrome uses, at
+  `--ui-container` = 76.25rem/1220px — Geist's own `max-w-[1220px]`, not its
+  published `--geist-page-width`/`--ds-page-width` tokens (1200/1400), which that
+  page never references. So content centres while every horizontal rule
+  (`DocsSectionTabs`'s `border-y`, `AppFooter`'s `border-t`) runs to the
+  viewport. If you ever re-box the shell, put the max-width and rails on
+  `GridPage` itself rather than drawing an overlay at the same coordinates, which
+  cannot clip the chrome's own borders. We deliberately do NOT tint the page the
+  way Geist does in light: our `--card` IS that step, so the page would swallow
+  every card.
+  The grid's rules are SOLID (dashed is `Grid`'s `dashedGuides` opt-in) and come
+  from `--grid-guide`, a solid colour rather than the alpha `--border`, because
+  an 8%-black hairline tints with the landing backdrop behind it. Their per-mode
+  values are NOT a flip of one another: Geist's neutral ramp is not symmetric
+  about the two page backgrounds, so a step that separates from white is a bright
+  scratch on a 4% page.
+- **`cn()` must know the Geist type classes.** tailwind-merge decides a `text-*`
+  utility is a SIZE only from a size-shaped suffix, so `text-button-14` and
+  `text-heading-32` land in the font-COLOR group and get silently dropped by any
+  real colour in the same call — the class vanishes and the element renders at
+  the inherited size. `utils/cn.ts` re-registers every Geist size into
+  `font-size`; `test/app/cn.test.ts` guards it. Adding a step to the scale in
+  `tokens.css` means adding it there too.
 - **Raw HTML is resolved server-side.** `transforms.ts`'s `liftRawHtml` turns raw
   HTML into `_html` nodes (md4x can't distinguish a real tag from a literal `<`);
   the client injects them with `v-html`. Moving this client-side breaks escaping
@@ -157,10 +201,18 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
 - **Loading-bar release.** `AppPage`'s `<Suspense>` `onResolve` (and its
   `onErrorCaptured`) must call `router._pageRendered()`, or a slow/errored page
   leaves `router.pending` — and the nav loading bar — stuck on.
+- **Only a page's own content may be awaited.** Every `await useAsyncData` in a
+  page's subtree — including one in a nested component like `PageSponsors` —
+  joins the SAME `AppPage` `<Suspense>`, and on a CLIENT-side navigation there is
+  no payload to seed it from. So one slow third-party proxy holds the whole
+  incoming page (hero included) and the loading bar behind it, while the previous
+  page stays on screen. Blocks that are not the page's content pass
+  `{ lazy: true }`: SSR still fetches and serializes them, the client renders the
+  page at once and the block fills in reactively (it is `v-if`'d on its own data).
 - **Single shared highlighter.** Doc content and the landing hero both go through
   the one `highlightCode` (`rangi`), so both get the same grammars and the same
-  fence-alias table. It is SYNCHRONOUS — rangi returns markup directly, not a
-  promise — and so are `highlightBody` and `highlightCode`.
+  fence-alias table. It is SYNCHRONOUS — rangi returns markup, not a promise —
+  and so are `highlightBody` and `highlightCode`.
 - **Token colours are styled, not inlined.** `highlightCode` runs rangi with
   `classes: true`, so each token is `<span class="shj-<type>">` and the palette
   lives in `assets/main.css` (~37% smaller markup raw, ~7% gzipped). Both
@@ -169,29 +221,25 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
   in OKLCH (Vesper publishes no light variant). rangi ships no vesper either, so
   `main.css` is the only copy of both and there is NO upstream to sync with:
   `test/content/theme.test.ts` pins each colour, asserts every one clears WCAG AA
-  against `--ui-bg-muted` (read from `tokens.css`, so restyling the neutrals
-  fails there), and pins the italic on `.shj-cmnt` that rangi's inline mode used
-  to add for us. Retune a token only with that contrast check in hand. A rangi
-  upgrade can ADD a token type — 2.2 added `bracket`, which renders unstyled
-  until the palette gains a rule; the coverage test is what catches that.
-  `html.light`/`html.dark`
-  map to CSS `color-scheme` in `main.css` — those two declarations are
-  LOAD-BEARING: without them `light-dark()` resolves to its light branch in dark
-  mode and every code block renders wrong. Our own `.code-hl` /
-  `.code-hl-lang-*` wrapper classes carry layout only.
-- **Prefer upstream over a local grammar.** rangi 2.1 absorbed four of the five
-  we used to carry (jsx/tsx, jsonc/json5, and the corrected `yaml` fork), each at
-  parity or better on measured coverage. Only `mdc` is left, because rangi ships
-  no equivalent (still true as of 2.2). Before adding one, measure against the
-  bundled grammar; before keeping one, re-measure on upgrade.
+  against `--muted` (read from `tokens.css`, so restyling the neutrals
+  fails there), and pins the italic on `.shj-cmnt`. Retune a token only with that
+  contrast check in hand. A rangi upgrade can ADD a token type, which renders
+  unstyled until the palette gains a rule; the coverage test catches that.
+  `html.light`/`html.dark` map to CSS `color-scheme` in `main.css` — those two
+  declarations are LOAD-BEARING: without them `light-dark()` resolves to its
+  light branch in dark mode and every code block renders wrong. Our own
+  `.code-hl` / `.code-hl-lang-*` wrapper classes carry layout only.
+- **Prefer upstream over a local grammar.** Only `mdc` is left in
+  `grammars/`, because rangi ships no equivalent. Before adding one, measure
+  against the bundled grammar; before keeping one, re-measure on upgrade.
 - **Local grammars are passed per call, never registered.** `grammars/index.ts`
   builds a frozen `LOCAL_LANGUAGES` record handed to rangi via its `languages`
-  option (it applies to sub-languages too). There is no global registration step
-  and no shared mutable cache. A grammar named after one rangi ships REPLACES it
-  and must say why via `overridesBuiltin` — `registry.test.ts` enforces that.
-  Rules are TUPLES (`[match, type, sub]`), not objects; see `grammars/types.ts`.
-- **Aliases: rangi's first, ours only for the gaps.** rangi 2.2 spreads its own
-  39 aliases into the same `languages` record as the grammars, so they resolve
+  option (it applies to sub-languages too). No global registration step, no
+  shared mutable cache. A grammar named after one rangi ships REPLACES it and
+  must say why via `overridesBuiltin` — `registry.test.ts` enforces that. Rules
+  are TUPLES (`[match, type, sub]`), not objects.
+- **Aliases: rangi's first, ours only for the gaps.** rangi spreads its own
+  aliases into the same `languages` record as the grammars, so they resolve
   through `KNOWN_LANGS` for free. `LANG_ALIASES` in `highlight.ts` holds only
   what rangi lacks — deliberate approximations (`mdx`→md, `console`→bash) and
   vendor spellings (`shellscript`, `c++`). `BUNDLED_ALIASES` inverts rangi's
@@ -204,9 +252,9 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
 - **Config redirects are enforced twice, from one map.**
   `src/app/utils/redirects.ts` (client-safe, no node imports) normalizes the docs
   config's `redirects`; `nitro.config.ts` turns it into `routeRules`
-  (`{ redirect: { to, status: 301 } }` — moved pages, so the ranking transfers)
-  and `router.ts` resolves the same map for CLIENT navigations, which never reach
-  the server. Note that ANY route rule with a runtime handler
+  (`{ redirect: { to, status: 301 } }` — moved pages, so ranking transfers) and
+  `router.ts` resolves the same map for CLIENT navigations, which never reach the
+  server. Note that ANY route rule with a runtime handler
   (redirect/headers/cors/proxy/cache) makes nitro's generated
   `#nitro/virtual/routing` `import "h3-rules"` — a bare specifier resolved
   against the Vite root, i.e. undocs, where pnpm does not expose nitro's private
@@ -215,12 +263,12 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
 - **Output lives in the docs dir, via rebase — not `rootDir`.** Nitro's `rootDir`
   MUST stay `pkgRoot`: it drives both c12 config discovery (finding our
   `nitro.config.ts`) and builder-package resolution (`vite` is undocs's dep, not
-  the docs project's). Repointing `rootDir` at `docsDir` breaks both. To still
-  write output into the docs project, `rebaseOutput` (`src/server/rebase-output.ts`,
+  the docs project's). Repointing it at `docsDir` breaks both. To still write
+  output into the docs project, `rebaseOutput` (`src/server/rebase-output.ts`,
   first in `modules`) rewrites `output.{dir,publicDir,serverDir}` from the
   `pkgRoot` base to `docsDir` in its `setup` — preserving the preset's shape
-  (never a hardcoded `output.*` override). It runs before the `vercel`/`bundleDocs`
-  `compiled` hooks that read those paths.
+  (never a hardcoded `output.*` override). It runs before the
+  `vercel`/`bundleDocs` `compiled` hooks that read those paths.
 - **Dev-only stays dev-only.** `dev-watch`/`dev-ws`/`dev-reload` and
   `metaEnvFlagsDev` must never ship in `.output/server`.
 - **Inline `<head>` programs are compiled, never hand-written.** Edit
@@ -230,38 +278,40 @@ theme-only keys survive. The docs config shape is defined in `schema/config.json
   the real build and fails on drift. They are excluded from oxlint/oxfmt
   (`ignorePatterns`) because they are generated, and carry NO banner/comments —
   the text ships on every HTML response. Keep them self-contained: every import
-  is inlined, and this is bytes on every page.
+  is inlined, and this is bytes on every page. Order in the shell matters:
+  `color-mode` before `embed-theme` (an embedder's pinned mode must win).
 - **The dev SSR entry must be re-imported on every app change.** Nitro's dev
   worker imports `entry-server.ts` ONCE and keeps that module namespace, so a
   Vite HMR update leaves the entry — and its whole STATIC graph (`app.vue`,
   `router.ts`, `AppPage`, …) — stale, while the page components the router pulls
   in via `import()` at request time re-evaluate fresh. Two copies of `router.ts`
   then meet in one render and the page's `useRoute()` injection misses
-  (`Symbol(undocs-route)` not found). `ssrEntryReloadDev` (vite.plugins.ts)
-  sends `{ type: "full-reload" }` on the `ssr` env's hot channel — the message
-  Nitro's worker reloads entries on — whenever a changed file is in the SSR
-  graph. Anything else that invalidates an SSR module by hand (the
-  `virtual:undocs/*` watchers) must reload through `fullReload(server)`, not a
-  bare `server.ws.send` (browser-only).
-
-## Build flags
-
-`import.meta.{server,client,dev,prerender}` are compile-time constants
-(`define` per Vite env in `vite.config.ts`), so opposite branches DCE. **Dev
-caveat:** Vite doesn't apply these `define`s to dev-served browser modules, so
-the `metaEnvFlagsDev` plugin (dev-only, `enforce: "post"`) does the token
-replacement itself. Keep it. Prefer `!import.meta.server` for client checks (robust
-even without the plugin).
+  (`Symbol(undocs-route)` not found). `ssrEntryReloadDev` (vite.plugins.ts) sends
+  `{ type: "full-reload" }` on the `ssr` env's hot channel — the message Nitro's
+  worker reloads entries on — whenever a changed file is in the SSR graph.
+  Anything else that invalidates an SSR module by hand (the `virtual:undocs/*`
+  watchers) must reload through `fullReload(server)`, not a bare `server.ws.send`
+  (browser-only).
+- **Build flags DCE, except in the dev browser.**
+  `import.meta.{server,client,dev,prerender}` are compile-time constants
+  (`define` per Vite env), but Vite doesn't apply those `define`s to dev-served
+  browser modules — the `metaEnvFlagsDev` plugin (dev-only, `enforce: "post"`)
+  does the replacement itself. Keep it. Prefer `!import.meta.server` for client
+  checks (robust even without the plugin).
+- **Every relative/aliased import carries its file extension** (`./types.ts`,
+  `@app/router.ts` — no directory indexes). `tsconfig.json` pins
+  `module`/`moduleResolution` to `nodenext` so `pnpm typecheck` fails (TS2835) on
+  a bare specifier. Not style: Vite's coming native config loader
+  (`configLoader: "native"`) resolves `vite.config.ts`'s import graph with node,
+  which has no extension guessing — so anything reachable from `vite.config.ts` →
+  `vite.plugins.ts` → `src/server/**` stops loading. tsc does not read `.vue`
+  files, so their imports are on the honour system.
 
 ## Testing
 
 `test/api.test.ts` exercises every Nitro route via its h3 `.fetch(Request)`
 against an on-disk fixture — no running server. `test/content/*` unit-tests the
-engine (builder, highlight, icons, store, transforms, utils). Run `pnpm test`.
-
-## Conventions
-
-- Formatter/linter is **oxlint + oxfmt** — run `pnpm fmt` before finishing.
+engine.
 
 ## Deferred
 

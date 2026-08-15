@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from "vue";
-import { useState } from "@app/composables/useState";
+import { useState } from "@app/composables/useState.ts";
 const points = useState(() =>
   Array.from({ length: 16 })
     .fill(0)
@@ -52,8 +52,8 @@ onMounted(() => {
   transition: clip-path 3s;
   background-image: radial-gradient(
     circle at center,
-    color-mix(in srgb, var(--ui-primary) 30%, transparent),
-    color-mix(in srgb, var(--ui-bg) 30%, transparent)
+    color-mix(in srgb, var(--brand) 30%, transparent),
+    color-mix(in srgb, var(--background) 30%, transparent)
   );
 }
 

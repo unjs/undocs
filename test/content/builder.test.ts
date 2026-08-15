@@ -3,12 +3,12 @@ import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import MiniSearch from "minisearch";
-import { buildIndex } from "../../src/server/content/builder";
+import { buildIndex } from "../../src/server/content/builder.ts";
 import {
   MINISEARCH_OPTIONS,
   MINISEARCH_SEARCH_OPTIONS,
-} from "../../src/server/content/search-options";
-import type { ContentIndex } from "../../src/server/content/types";
+} from "../../src/server/content/search-options.ts";
+import type { ContentIndex } from "../../src/server/content/types.ts";
 
 // Build a small on-disk docs fixture and index it once. `buildIndex` is the
 // public entry of the content engine, so this exercises scan → parse →

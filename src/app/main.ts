@@ -32,28 +32,28 @@ import { createHead } from "@unhead/vue/client";
 import AppComponent from "@app/app.vue";
 import ErrorPage from "@app/error.vue";
 
-import { createAppRouter, useRoute } from "./router";
-import type { AppError } from "@app/composables/createError";
-import { useAppConfig } from "@app/composables/useAppConfig";
-import { useColorMode } from "@app/composables/useColorMode";
-import { hydrateAsyncData } from "@app/composables/useAsyncData";
-import { hydrateState } from "@app/composables/useState";
-import { seedBuiltinIcons, seedClientIcons } from "@app/ssr/icons";
-import { readPayload } from "@app/ssr/payload";
-import { primaryCss, STYLE_ID } from "@app/theme-primary";
-import { registerUserComponents } from "@app/user-theme";
+import { createAppRouter, useRoute } from "./router.ts";
+import type { AppError } from "@app/composables/createError.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { useColorMode } from "@app/composables/useColorMode.ts";
+import { hydrateAsyncData } from "@app/composables/useAsyncData.ts";
+import { hydrateState } from "@app/composables/useState.ts";
+import { seedBuiltinIcons, seedClientIcons } from "@app/ssr/icons.ts";
+import { readPayload } from "@app/ssr/payload.ts";
+import { brandCss, BRAND_STYLE_ID } from "@app/theme-brand.ts";
+import { registerUserComponents } from "@app/user-theme.ts";
 
 // ---------------------------------------------------------------------------
-// Runtime primary color fallback: the server already inlines this <style> for
+// Runtime brand color fallback: the server already inlines this <style> for
 // SSR (`entry-server.ts`). Only inject here if it's missing (e.g. a pure
-// client nav), keyed by `STYLE_ID` to avoid duplicating the server's tag.
+// client nav), keyed by `BRAND_STYLE_ID` to avoid duplicating the server's tag.
 // ---------------------------------------------------------------------------
-function applyRuntimePrimary(themeColor: unknown): void {
-  if (document.getElementById(STYLE_ID)) return;
-  const css = primaryCss(themeColor);
+function applyRuntimeBrand(themeColor: unknown): void {
+  if (document.getElementById(BRAND_STYLE_ID)) return;
+  const css = brandCss(themeColor);
   if (!css) return;
   const style = document.createElement("style");
-  style.id = STYLE_ID;
+  style.id = BRAND_STYLE_ID;
   style.textContent = css;
   document.head.append(style);
 }
@@ -114,8 +114,8 @@ function bootstrap(): void {
   // -------------------------------------------------------------------------
   useColorMode();
 
-  // 2. Ensure the primary token is set (no-op if the server already emitted it).
-  applyRuntimePrimary(useAppConfig().ui?.colors?.primary);
+  // 2. Ensure the brand token is set (no-op if the server already emitted it).
+  applyRuntimeBrand(useAppConfig().ui?.colors?.primary);
 
   // -------------------------------------------------------------------------
   // 3. Real router (page routes + layout meta). Components reach it via
@@ -196,7 +196,7 @@ function bootstrap(): void {
   // branch — and the dynamically-imported `./dev-reload` chunk — is tree-shaken
   // out of the production client bundle.
   if (import.meta.env.DEV) {
-    import("./dev-reload").then((m) => m.connectDevReload());
+    import("./dev-reload.ts").then((m) => m.connectDevReload());
 
     // Dev and prod share an origin (localhost:3000), so a SW installed by an
     // earlier `pnpm build && pnpm start` / `vite preview` would keep controlling

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Icon from "@app/components/global/Icon.vue";
-import AppLink from "@app/components/app/AppLink";
+import AppLink from "@app/components/app/AppLink.ts";
 // Based on Nuxt UI `UPageLinks` component. Renders small inline icon links (e.g. "Edit this page").
 // A passed `class` falls through onto the root.
 interface PageLink {
@@ -23,7 +23,7 @@ defineProps<{
       :key="index"
       :to="link.to"
       :target="link.target"
-      class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+      class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-brand transition-colors"
     >
       <Icon v-if="link.icon" :name="link.icon" class="size-4 shrink-0" />
       <span>{{ link.label }}</span>

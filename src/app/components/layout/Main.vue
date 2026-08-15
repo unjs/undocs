@@ -5,7 +5,7 @@
 </script>
 
 <template>
-  <main class="flex-1 py-8 lg:py-12">
+  <main class="flex-1">
     <slot />
   </main>
 </template>

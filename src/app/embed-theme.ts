@@ -27,8 +27,14 @@
 
 /** The settable tokens: payload key → CSS custom property. */
 export const EMBED_THEME_TOKENS: Readonly<Record<string, string>> = Object.freeze({
+  // `p`/`pf` are Geist's MONOCHROME high-contrast pair (solid buttons); `br` is
+  // the project accent that tints links, active nav and the header glow. An
+  // embedder that wants the site to pick up its own brand colour wants `br`,
+  // and `br` alone — the accent is one token, so there is no second role left
+  // pointing at our blue.
   p: "--primary",
   pf: "--primary-foreground",
+  br: "--brand",
   bg: "--background",
   fg: "--foreground",
   mu: "--muted",

@@ -1,26 +1,19 @@
 <script setup lang="ts">
 import { computed, markRaw, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
-import { useRouter } from "@app/router";
-import { useDocsSearch } from "@app/composables/useDocsSearch";
-import { querySearchIndex } from "@app/composables/useContent";
-import { useAsyncData } from "@app/composables/useAsyncData";
+import { useRouter } from "@app/router.ts";
+import { useDocsSearch } from "@app/composables/useDocsSearch.ts";
+import { querySearchIndex } from "@app/composables/useContent.ts";
+import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import {
   MINISEARCH_OPTIONS,
   MINISEARCH_SEARCH_OPTIONS,
   MINISEARCH_FUZZY_SEARCH_OPTIONS,
   toSearchDocuments,
-} from "@server/content/search-options";
-import type { SearchDocument } from "@server/content/search-options";
+} from "@server/content/search-options.ts";
+import type { SearchDocument } from "@server/content/search-options.ts";
 import Icon from "@app/components/global/Icon.vue";
-import {
-  DialogRoot,
-  DialogPortal,
-  DialogOverlay,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-  VisuallyHidden,
-} from "reka-ui";
+import Dialog from "@app/components/ui/Dialog.vue";
+import Kbd from "@app/components/ui/Kbd.vue";
 import MiniSearch from "minisearch";
 
 interface SearchSection {
@@ -494,172 +487,159 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <DialogRoot v-model:open="open">
-    <DialogPortal>
-      <DialogOverlay
-        class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0"
+  <!-- `<Dialog>` is only the modal shell here — backdrop, focus trap, scroll
+       lock, Escape/outside dismissal. The listbox below is hand-rolled: it owns
+       Arrow/Enter through `onInputKeydown` on the input, and the shell
+       deliberately does not compete for those keys (its focus scope only claims
+       Tab, at the scope's edges). Escape is the shell's, and the palette never
+       looks at it. -->
+  <Dialog
+    v-model:open="open"
+    title="Search documentation"
+    description="Search across the documentation and jump to a section."
+    content-class="fixed left-1/2 top-[12vh] z-50 w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-card text-foreground shadow-modal data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2"
+  >
+    <!-- input -->
+    <div class="flex items-center gap-2 border-b border-border px-4">
+      <Icon name="i-lucide-search" class="size-4 shrink-0 text-muted-foreground" />
+      <input
+        v-model="query"
+        type="text"
+        placeholder="Search documentation..."
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        class="w-full bg-transparent py-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+        @keydown="onInputKeydown"
       />
-      <DialogContent
-        class="fixed left-1/2 top-[12vh] z-50 w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2"
-      >
-        <VisuallyHidden as-child>
-          <DialogTitle>Search documentation</DialogTitle>
-        </VisuallyHidden>
-        <VisuallyHidden as-child>
-          <DialogDescription
-            >Search across the documentation and jump to a section.</DialogDescription
-          >
-        </VisuallyHidden>
+      <Icon
+        v-if="indexLoading"
+        name="i-lucide-loader-circle"
+        class="size-4 shrink-0 animate-spin text-muted-foreground"
+        aria-label="Loading full search index"
+      />
+      <Kbd class="hidden sm:inline-flex">Esc</Kbd>
+    </div>
 
-        <!-- input -->
-        <div class="flex items-center gap-2 border-b border-border px-4">
-          <Icon name="i-lucide-search" class="size-4 shrink-0 text-muted-foreground" />
-          <input
-            v-model="query"
-            type="text"
-            placeholder="Search documentation..."
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck="false"
-            class="w-full bg-transparent py-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-            @keydown="onInputKeydown"
-          />
-          <Icon
-            v-if="indexLoading"
-            name="i-lucide-loader-circle"
-            class="size-4 shrink-0 animate-spin text-muted-foreground"
-            aria-label="Loading full search index"
-          />
-          <kbd
-            class="hidden shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline-block"
+    <!-- results -->
+    <div ref="listEl" class="max-h-[60vh] overflow-y-auto p-2">
+      <template v-if="renderGroups.length">
+        <div
+          v-for="group in renderGroups"
+          :key="`${group.path}#${group.header.index}`"
+          class="mb-1 last:mb-0"
+        >
+          <!-- page header -->
+          <button
+            type="button"
+            :data-active="group.header.index === activeIndex"
+            class="flex w-full flex-col gap-0.5 rounded-md px-3 py-2 text-left outline-none transition-colors"
+            :class="
+              group.header.index === activeIndex
+                ? 'bg-accent text-foreground'
+                : 'text-foreground hover:bg-accent/50'
+            "
+            @click="select(headerTarget(group))"
+            @mousemove="group.header.isHit && onItemMouseMove($event, group.header.index)"
           >
-            Esc
-          </kbd>
-        </div>
-
-        <!-- results -->
-        <div ref="listEl" class="max-h-[60vh] overflow-y-auto p-2">
-          <template v-if="renderGroups.length">
-            <div
-              v-for="group in renderGroups"
-              :key="`${group.path}#${group.header.index}`"
-              class="mb-1 last:mb-0"
-            >
-              <!-- page header -->
-              <button
-                type="button"
-                :data-active="group.header.index === activeIndex"
-                class="flex w-full flex-col gap-0.5 rounded-md px-3 py-2 text-left outline-none transition-colors"
-                :class="
-                  group.header.index === activeIndex
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-foreground hover:bg-accent/50'
-                "
-                @click="select(headerTarget(group))"
-                @mousemove="group.header.isHit && onItemMouseMove($event, group.header.index)"
-              >
-                <span v-if="group.header.parents.length" class="text-xs text-muted-foreground">
-                  {{ group.header.parents.join(" › ") }}
-                </span>
-                <span class="flex items-center gap-2 text-sm font-medium">
-                  <Icon name="i-lucide-file-text" class="size-3.5 shrink-0 text-muted-foreground" />
-                  <span class="min-w-0 truncate">
-                    <template
-                      v-for="(seg, i) in highlight(group.header.title, group.header.terms)"
-                      :key="i"
-                      ><mark
-                        v-if="seg.mark"
-                        class="rounded bg-primary/15 font-semibold text-primary"
-                        >{{ seg.text }}</mark
-                      ><template v-else>{{ seg.text }}</template></template
-                    >
-                  </span>
-                </span>
-                <span
-                  v-if="
-                    group.header.isHit &&
-                    snippet(group.header.section.content, group.header.terms).length
-                  "
-                  class="truncate text-xs text-muted-foreground"
+            <span v-if="group.header.parents.length" class="text-xs text-muted-foreground">
+              {{ group.header.parents.join(" › ") }}
+            </span>
+            <span class="flex items-center gap-2 text-sm font-medium">
+              <Icon name="i-lucide-file-text" class="size-3.5 shrink-0 text-muted-foreground" />
+              <span class="min-w-0 truncate">
+                <template
+                  v-for="(seg, i) in highlight(group.header.title, group.header.terms)"
+                  :key="i"
+                  ><mark v-if="seg.mark" class="rounded bg-brand/15 font-semibold text-brand">{{
+                    seg.text
+                  }}</mark
+                  ><template v-else>{{ seg.text }}</template></template
                 >
-                  <template
-                    v-for="(seg, i) in snippet(group.header.section.content, group.header.terms)"
-                    :key="i"
-                    ><mark v-if="seg.mark" class="bg-transparent font-medium text-foreground">{{
+              </span>
+            </span>
+            <span
+              v-if="
+                group.header.isHit &&
+                snippet(group.header.section.content, group.header.terms).length
+              "
+              class="truncate text-xs text-muted-foreground"
+            >
+              <template
+                v-for="(seg, i) in snippet(group.header.section.content, group.header.terms)"
+                :key="i"
+                ><mark v-if="seg.mark" class="bg-transparent font-medium text-foreground">{{
+                  seg.text
+                }}</mark
+                ><template v-else>{{ seg.text }}</template></template
+              >
+            </span>
+          </button>
+
+          <!-- matching sections within the page -->
+          <div v-if="group.sections.length" class="ml-4 border-l border-border pl-1">
+            <button
+              v-for="s in group.sections"
+              :key="s.section.id"
+              type="button"
+              :data-active="s.index === activeIndex"
+              class="flex w-full flex-col gap-0.5 rounded-md px-3 py-2 text-left outline-none transition-colors"
+              :class="
+                s.index === activeIndex
+                  ? 'bg-accent text-foreground'
+                  : 'text-foreground hover:bg-accent/50'
+              "
+              @click="select(s.section)"
+              @mousemove="onItemMouseMove($event, s.index)"
+            >
+              <span v-if="s.crumb" class="text-xs text-muted-foreground">
+                {{ s.crumb }}
+              </span>
+              <span class="flex items-center gap-2 text-sm font-medium">
+                <Icon name="i-lucide-hash" class="size-3.5 shrink-0 text-muted-foreground" />
+                <span class="min-w-0 truncate">
+                  <template v-for="(seg, i) in highlight(s.heading, s.terms)" :key="i"
+                    ><mark v-if="seg.mark" class="rounded bg-brand/15 font-semibold text-brand">{{
                       seg.text
                     }}</mark
                     ><template v-else>{{ seg.text }}</template></template
                   >
                 </span>
-              </button>
-
-              <!-- matching sections within the page -->
-              <div v-if="group.sections.length" class="ml-4 border-l border-border pl-1">
-                <button
-                  v-for="s in group.sections"
-                  :key="s.section.id"
-                  type="button"
-                  :data-active="s.index === activeIndex"
-                  class="flex w-full flex-col gap-0.5 rounded-md px-3 py-2 text-left outline-none transition-colors"
-                  :class="
-                    s.index === activeIndex
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-foreground hover:bg-accent/50'
-                  "
-                  @click="select(s.section)"
-                  @mousemove="onItemMouseMove($event, s.index)"
-                >
-                  <span v-if="s.crumb" class="text-xs text-muted-foreground">
-                    {{ s.crumb }}
-                  </span>
-                  <span class="flex items-center gap-2 text-sm font-medium">
-                    <Icon name="i-lucide-hash" class="size-3.5 shrink-0 text-muted-foreground" />
-                    <span class="min-w-0 truncate">
-                      <template v-for="(seg, i) in highlight(s.heading, s.terms)" :key="i"
-                        ><mark
-                          v-if="seg.mark"
-                          class="rounded bg-primary/15 font-semibold text-primary"
-                          >{{ seg.text }}</mark
-                        ><template v-else>{{ seg.text }}</template></template
-                      >
-                    </span>
-                  </span>
-                  <span
-                    v-if="snippet(s.section.content, s.terms).length"
-                    class="truncate text-xs text-muted-foreground"
-                  >
-                    <template v-for="(seg, i) in snippet(s.section.content, s.terms)" :key="i"
-                      ><mark v-if="seg.mark" class="bg-transparent font-medium text-foreground">{{
-                        seg.text
-                      }}</mark
-                      ><template v-else>{{ seg.text }}</template></template
-                    >
-                  </span>
-                </button>
-              </div>
-            </div>
-          </template>
-
-          <div
-            v-else
-            class="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center text-sm text-muted-foreground"
-          >
-            <Icon name="i-lucide-search-x" class="size-6" />
-            <span>No results for "{{ query }}"</span>
-            <span v-if="suggestion">
-              Did you mean
-              <button
-                type="button"
-                class="font-medium text-primary underline-offset-2 hover:underline"
-                @click="applySuggestion"
+              </span>
+              <span
+                v-if="snippet(s.section.content, s.terms).length"
+                class="truncate text-xs text-muted-foreground"
               >
-                {{ suggestion }}</button
-              >?
-            </span>
+                <template v-for="(seg, i) in snippet(s.section.content, s.terms)" :key="i"
+                  ><mark v-if="seg.mark" class="bg-transparent font-medium text-foreground">{{
+                    seg.text
+                  }}</mark
+                  ><template v-else>{{ seg.text }}</template></template
+                >
+              </span>
+            </button>
           </div>
         </div>
-      </DialogContent>
-    </DialogPortal>
-  </DialogRoot>
+      </template>
+
+      <div
+        v-else
+        class="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center text-sm text-muted-foreground"
+      >
+        <Icon name="i-lucide-search-x" class="size-6" />
+        <span>No results for "{{ query }}"</span>
+        <span v-if="suggestion">
+          Did you mean
+          <button
+            type="button"
+            class="font-medium text-brand underline-offset-2 hover:underline"
+            @click="applySuggestion"
+          >
+            {{ suggestion }}</button
+          >?
+        </span>
+      </div>
+    </div>
+  </Dialog>
 </template>

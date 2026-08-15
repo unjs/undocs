@@ -1,5 +1,5 @@
 import { watch, type WatchSource, ref, type Ref } from "vue";
-import { useColorMode } from "@app/composables/useColorMode";
+import { useColorMode } from "@app/composables/useColorMode.ts";
 
 const mermaidCache: Record<string, Record<string, string>> = Object.create(null);
 
@@ -15,9 +15,11 @@ let mermaidPromise: Promise<typeof import("mermaid-compact").default> | undefine
 const loadMermaid = () => (mermaidPromise ??= import("mermaid-compact").then((m) => m.default));
 
 /**
- * Resolve a CSS expression (e.g. `var(--primary)`) to a concrete color mermaid's
- * color lib (khroma) can parse. The app's design tokens are authored in `oklch`,
- * which khroma can't read, so we let the browser resolve the variable on a probe
+ * Resolve a CSS expression (e.g. `var(--brand)`) to a concrete color mermaid's
+ * color lib (khroma) can parse. Tokens are not all one syntax — `--brand` is an
+ * `oklch()`, the neutrals are `hsl()`, `--border` is `#rrggbbaa` — and a
+ * `themeColor` set to a bare CSS color can be any syntax at all, including ones
+ * khroma can't read. So we let the browser resolve the variable on a probe
  * element and normalize the result to sRGB (`#rrggbb`/`rgb(...)`) via a canvas.
  */
 let _probe: HTMLSpanElement | undefined;
@@ -30,8 +32,8 @@ function resolveColor(expr: string): string {
   probe.remove();
   // The browser may serialize the resolved token in `oklch(...)` (or another
   // Color-4 space) that khroma can't read. Rasterize a single pixel to force
-  // concrete, un-premultiplied sRGB bytes, preserving alpha (e.g. dark-mode
-  // `--border` is translucent white).
+  // concrete, un-premultiplied sRGB bytes, preserving alpha (a `themeColor` set
+  // to a translucent CSS color comes through here too).
   const ctx = (_ctx ??= document.createElement("canvas").getContext("2d")!);
   ctx.clearRect(0, 0, 1, 1);
   ctx.fillStyle = computed;
@@ -51,12 +53,12 @@ function themeVariables(): Record<string, string> {
     mainBkg: resolveColor("var(--muted)"),
     primaryColor: resolveColor("var(--muted)"),
     primaryTextColor: resolveColor("var(--foreground)"),
-    primaryBorderColor: resolveColor("var(--primary)"),
-    secondaryColor: resolveColor("var(--secondary)"),
+    primaryBorderColor: resolveColor("var(--brand)"),
+    secondaryColor: resolveColor("var(--card)"),
     tertiaryColor: resolveColor("var(--accent)"),
-    lineColor: resolveColor("var(--primary)"),
+    lineColor: resolveColor("var(--brand)"),
     textColor: resolveColor("var(--foreground)"),
-    nodeBorder: resolveColor("var(--primary)"),
+    nodeBorder: resolveColor("var(--brand)"),
     clusterBkg: resolveColor("var(--card)"),
     clusterBorder: resolveColor("var(--border)"),
     titleColor: resolveColor("var(--foreground)"),

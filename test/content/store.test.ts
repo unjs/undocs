@@ -3,7 +3,7 @@ import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { useRuntimeConfig } from "nitro/runtime-config";
-import { getDocsDir, getIndex, invalidateIndex } from "../../src/server/content/store";
+import { getDocsDir, getIndex, invalidateIndex } from "../../src/server/content/store.ts";
 
 // `store.ts` reads the docs dir from Nitro's runtime config. Outside a Nitro
 // build, `useRuntimeConfig()` returns a cached stub object; seed `undocs.dir` on

@@ -13,8 +13,8 @@
  */
 import { defineComponent, h, type Component, type PropType, type VNode } from "vue";
 import { kebabCase } from "scule";
-import { slugify, textContent } from "../../server/content/utils";
-import type { MarkNode, MarkElement } from "../../server/content/types";
+import { slugify, textContent } from "../../server/content/utils.ts";
+import type { MarkNode, MarkElement } from "../../server/content/types.ts";
 import { components as userComponents } from "virtual:undocs/user-components";
 
 // Local (co-located) prose components mapped from AST tag names.

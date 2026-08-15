@@ -10,7 +10,7 @@
  * This module is imported ONLY behind an `import.meta.env.DEV` guard in
  * `main.ts`, so it is tree-shaken out of the production client bundle entirely.
  */
-import { refreshAppData } from "@app/composables/useAsyncData";
+import { refreshAppData } from "@app/composables/useAsyncData.ts";
 
 const WS_ROUTE = "/api/docs/_ws";
 

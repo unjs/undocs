@@ -13,7 +13,7 @@
  *
  * Falls back to a generic file icon.
  */
-import { useAppConfig } from "@app/composables/useAppConfig";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
 
 export function useCodeIcon(): (filename?: string, language?: string, icon?: string) => string {
   const codeIcon = (useAppConfig().ui?.prose?.codeIcon ?? {}) as Record<string, string>;

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { defineEventHandler, getRouterParam, HTTPError } from "nitro/h3";
 import { withLeadingSlash } from "ufo";
-import { getIndex, getDocsDir } from "../../content/store";
+import { getIndex, getDocsDir } from "../../content/store.ts";
 
 /** Serve the source markdown for a page at `/raw/<path>.md`. */
 export default defineEventHandler(async (event) => {

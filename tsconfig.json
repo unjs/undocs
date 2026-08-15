@@ -1,6 +1,13 @@
 {
   "extends": "nitro/tsconfig",
   "compilerOptions": {
+    // Node16/NodeNext resolution is what makes explicit file extensions on
+    // relative imports MANDATORY (TS2835). Vite's upcoming native config loader
+    // (`configLoader: "native"`) resolves `vite.config.ts`'s import graph with
+    // node, which cannot do extensionless or directory-index specifiers — so
+    // the typecheck is the thing that keeps that graph loadable.
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "paths": {
       "@app": ["./src/app"],
       "@app/*": ["./src/app/*"],

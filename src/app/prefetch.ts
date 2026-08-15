@@ -27,9 +27,9 @@
  * `queryPage` body is the same request-scoped `docFetch` used everywhere else.
  */
 import { kebabCase } from "scule";
-import { useLazyAsyncData } from "@app/composables/useAsyncData";
-import { queryPage, querySearchIndex } from "@app/composables/useContent";
-import type { NavItem } from "@server/content/types";
+import { useLazyAsyncData } from "@app/composables/useAsyncData.ts";
+import { queryPage, querySearchIndex } from "@app/composables/useContent.ts";
+import type { NavItem } from "@server/content/types.ts";
 
 /** How many pages to warm at most, so a huge nav can't fan out unboundedly. */
 const MAX_PREFETCH = 24;

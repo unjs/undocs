@@ -2,11 +2,40 @@
  * `buttonVariants` — the CVA class matrix for `Button`.
  *
  * Two-axis matrix (the values the codebase passes):
- * `color` (`primary` | `neutral` | `white`) × `variant` (`solid` |
+ * `color` (`primary` | `brand` | `neutral` | `white`) × `variant` (`solid` |
  * `outline` | `soft` | `subtle` | `ghost` | `link`), plus a `size` axis
  * (`xs` | `sm` | `md` | `lg`). Exported separately from `Button.vue` (shadcn-vue
  * convention) so sibling components (`ButtonGroup`, ...) can reuse it without
  * importing the whole SFC.
+ *
+ * Geist has no accent-coloured button: its primary action is the high-contrast
+ * one (`--primary`, so near-black on white and near-white on black) and its
+ * secondary is a bordered surface. `color: "primary"` therefore renders
+ * MONOCHROME here — the project's `themeColor` lives in `--brand` and tints
+ * links, active nav, and icons, not button fills.
+ *
+ * `color: "brand"` is the deliberate exception, and it is a DEPARTURE from
+ * Geist rather than a port of it: it fills with the project's accent so the
+ * landing hero's primary CTA carries the docs' colour instead of the neutral
+ * ramp. Keep it scarce — one call site, `pages/index.vue`. If it spreads to the
+ * chrome, `--primary` and `--brand` have collapsed into one role and the
+ * monochrome system is gone. Everything else, hero secondary included, stays on
+ * `primary`; that contrast is what makes the accented button read as the
+ * page's single action.
+ *
+ * Its fill/label pair is load-bearing and measured — `--brand-foreground` is
+ * the only label that clears AA across all seven hues in both modes. See the
+ * note on `--brand-foreground` in `tokens.css` before retuning any of it.
+ *
+ * Sizes are Geist's control ladder, read from the `--size-*` tokens rather
+ * than hardcoded — the `h-(--token)` form is Tailwind v4's shorthand for a bare
+ * `var()` height, and is what Vercel's own CSS emits. Each height carries the
+ * type step Geist pairs with it (14px through medium, 16px at large), because a
+ * tall control with small text reads as a stretched medium, not as a large.
+ *
+ * Write these as the shorthand ONLY. Spelling the bracket-and-`var()` form out
+ * anywhere in this file — even inside a comment — makes Tailwind scan it as a
+ * class candidate and emit a second, dead rule for it.
  */
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -20,6 +49,7 @@ export const buttonVariants = cva(
     variants: {
       color: {
         primary: "",
+        brand: "",
         neutral: "",
         white: "",
       },
@@ -32,56 +62,103 @@ export const buttonVariants = cva(
         link: "",
       },
       size: {
-        xs: "h-7 px-2 text-xs gap-1 [&_svg]:size-3.5",
-        sm: "h-8 px-2.5 text-xs gap-1.5 [&_svg]:size-4",
-        md: "h-9 px-3 text-sm gap-1.5 [&_svg]:size-4",
-        lg: "h-10 px-4 text-sm gap-2 [&_svg]:size-5",
+        xs: "h-(--size-tiny) px-2 text-button-12 gap-1 [&_svg]:size-3.5",
+        sm: "h-(--size-small) px-2.5 text-button-14 gap-1.5 [&_svg]:size-4",
+        md: "h-(--size-medium) px-3 text-button-14 gap-1.5 [&_svg]:size-4",
+        lg: "h-(--size-large) px-4 text-button-16 gap-2 [&_svg]:size-4",
       },
     },
     compoundVariants: [
-      // ---- primary ----------------------------------------------------
+      // ---- primary (Geist: high-contrast, monochrome) ---------------------
+      // `--primary-hover` recedes toward the page in BOTH modes — darker than
+      // `--primary` in light, lighter in dark — and keeps AA against the label.
       {
         color: "primary",
         variant: "solid",
-        class: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+        class: "bg-primary text-primary-foreground shadow-small hover:bg-primary-hover",
       },
+      // Geist's secondary button: page surface, hairline border, hover fill.
       {
         color: "primary",
         variant: "outline",
-        class: "border border-primary/50 text-primary bg-transparent hover:bg-primary/10",
+        class: "border border-border bg-background text-foreground hover:bg-accent",
       },
       {
         color: "primary",
         variant: "soft",
-        class: "bg-primary/10 text-primary hover:bg-primary/15",
+        class: "bg-muted text-foreground hover:bg-accent",
       },
       {
         color: "primary",
         variant: "subtle",
-        class: "bg-primary/10 text-primary border border-primary/25 hover:bg-primary/15",
+        class: "bg-muted text-foreground border border-border hover:bg-accent",
       },
       {
         color: "primary",
         variant: "ghost",
-        class: "text-primary bg-transparent hover:bg-primary/10",
+        class: "text-foreground bg-transparent hover:bg-accent",
       },
+      // The one accented variant: it reads as a link, so it takes the brand.
       {
         color: "primary",
         variant: "link",
-        class: "text-primary bg-transparent underline-offset-4 hover:underline",
+        class: "text-brand bg-transparent underline-offset-4 hover:underline",
+      },
+
+      // ---- brand (the accent fill — see the header) -----------------------
+      {
+        color: "brand",
+        variant: "solid",
+        class: "bg-brand text-brand-foreground shadow-small hover:bg-brand-hover",
+      },
+      // The tinted variants pair the accent with a 10-15% wash of ITSELF, which
+      // is one of the three surfaces `--brand` is derived against (the page, a
+      // card, a wash of itself — see `tokens.css`). Those washes are the reason
+      // the accent is a shade darker than the page alone would require, and the
+      // reason it can be one token instead of three. 15% is the ceiling the
+      // derivation assumes: a deeper wash needs a re-derivation, not a tweak.
+      // No `dark:` variant — the table is declared per mode.
+      //
+      // `outline` and `ghost` are in this group for their HOVER state alone:
+      // they rest on `--background`, where the wash never appears, but hovering
+      // slides a 10% one under text that cannot change colour at the same time.
+      {
+        color: "brand",
+        variant: "outline",
+        class: "border border-brand/40 bg-background text-brand hover:bg-brand/10",
+      },
+      {
+        color: "brand",
+        variant: "soft",
+        class: "bg-brand/10 text-brand hover:bg-brand/15",
+      },
+      {
+        color: "brand",
+        variant: "subtle",
+        class: "bg-brand/10 text-brand border border-brand/20 hover:bg-brand/15",
+      },
+      {
+        color: "brand",
+        variant: "ghost",
+        class: "text-brand bg-transparent hover:bg-brand/10",
+      },
+      {
+        color: "brand",
+        variant: "link",
+        class: "text-brand bg-transparent underline-offset-4 hover:underline",
       },
 
       // ---- neutral -------------------------------------------------------
       {
         color: "neutral",
         variant: "solid",
-        class: "bg-foreground text-background shadow-xs hover:bg-foreground/90",
+        class: "bg-foreground text-background shadow-small hover:bg-primary-hover",
       },
       {
         color: "neutral",
         variant: "outline",
         class:
-          "border border-input text-foreground bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-input text-foreground bg-background hover:bg-accent hover:text-foreground",
       },
       {
         color: "neutral",
@@ -96,7 +173,7 @@ export const buttonVariants = cva(
       {
         color: "neutral",
         variant: "ghost",
-        class: "text-foreground bg-transparent hover:bg-accent hover:text-accent-foreground",
+        class: "text-foreground bg-transparent hover:bg-accent hover:text-foreground",
       },
       {
         color: "neutral",
@@ -108,7 +185,10 @@ export const buttonVariants = cva(
       {
         color: "white",
         variant: "solid",
-        class: "bg-white text-neutral-900 shadow-xs hover:bg-white/90",
+        // Mode-INVARIANT: this variant sits on hero/coloured artwork, so its
+        // label must stay black even in dark mode (`--foreground` would flip
+        // to near-white and vanish against the white fill).
+        class: "bg-white text-black shadow-small hover:bg-white/90",
       },
       {
         color: "white",
@@ -146,10 +226,13 @@ export const buttonVariants = cva(
 
 export type ButtonVariants = VariantProps<typeof buttonVariants>;
 
-/** Fixed square (icon-only) width per size — matches the size's `h-*` class. */
+/**
+ * Fixed square (icon-only) width per size — the same `--size-*` token the
+ * matching `size` variant uses for its height, so the two can't drift.
+ */
 export const buttonSquareSizeClass: Record<NonNullable<ButtonVariants["size"]>, string> = {
-  xs: "w-7 px-0",
-  sm: "w-8 px-0",
-  md: "w-9 px-0",
-  lg: "w-10 px-0",
+  xs: "w-(--size-tiny) px-0",
+  sm: "w-(--size-small) px-0",
+  md: "w-(--size-medium) px-0",
+  lg: "w-(--size-large) px-0",
 };

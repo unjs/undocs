@@ -18,7 +18,7 @@
  * which clears the navigation loading bar (see `router.ts`).
  */
 import { defineComponent, h, onErrorCaptured, Suspense } from "vue";
-import { useRouter, useRoute } from "@app/router";
+import { useRouter, useRoute } from "@app/router.ts";
 
 export default defineComponent({
   name: "AppPage",

@@ -49,15 +49,15 @@ const clientAssetHints = {
 
 import AppComponent from "@app/app.vue";
 import ErrorPage from "@app/error.vue";
-import { createAppRouter, createMemoryHistory } from "./router";
+import { createAppRouter, createMemoryHistory } from "./router.ts";
 import {
   createServerContext,
   runWithServerContext,
   type UndocsServerContext,
-} from "@app/ssr/server-context";
-import { PAYLOAD_GLOBAL, serializePayload, type UndocsPayload } from "@app/ssr/payload";
-import { builtinIconNames, seedBuiltinIcons } from "@app/ssr/icons";
-import { primaryCss, STYLE_ID } from "@app/theme-primary";
+} from "@app/ssr/server-context.ts";
+import { PAYLOAD_GLOBAL, serializePayload, type UndocsPayload } from "@app/ssr/payload.ts";
+import { builtinIconNames, seedBuiltinIcons } from "@app/ssr/icons.ts";
+import { brandCss, BRAND_STYLE_ID } from "@app/theme-brand.ts";
 
 // The compiled inline `<head>` programs, imported as text. Sources live in
 // `src/app/inline/*.ts`; `scripts/build-inline.mjs` compiles them with rolldown
@@ -65,10 +65,10 @@ import { primaryCss, STYLE_ID } from "@app/theme-primary";
 import embedThemeCode from "@app/inline/embed-theme.js?raw";
 import assetRecoveryCode from "@app/inline/asset-recovery.js?raw";
 import colorModeCode from "@app/inline/color-mode.js?raw";
-import { ASSETS_BASE } from "@app/assets-base";
-import { DEFAULT_COLOR_MODE } from "@app/color-mode";
-import { useAppConfig } from "@app/composables/useAppConfig";
-import { registerUserComponents } from "@app/user-theme";
+import { ASSETS_BASE } from "@app/assets-base.ts";
+import { DEFAULT_COLOR_MODE } from "@app/color-mode.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { registerUserComponents } from "@app/user-theme.ts";
 
 // Seed the bundled built-in icons into (process-global) Iconify storage once, at
 // module load — so the very first render emits their real SVGs with no Iconify-API
@@ -93,9 +93,9 @@ async function renderRoot(
     script: [{ type: "module", src: clientAssets.entry }],
   });
 
-  // Inline the primary-color token so the first paint is themed (no flash).
-  const primary = primaryCss(useAppConfig().ui?.colors?.primary);
-  if (primary) head.push({ style: [{ id: STYLE_ID, innerHTML: primary }] });
+  // Inline the brand-color token so the first paint is themed (no flash).
+  const brand = brandCss(useAppConfig().ui?.colors?.primary);
+  if (brand) head.push({ style: [{ id: BRAND_STYLE_ID, innerHTML: brand }] });
 
   const router = createAppRouter(createMemoryHistory());
   const app = createSSRApp({ setup: () => rootRender });
@@ -218,7 +218,7 @@ const embedThemeScript = /* html */ `<script>${embedThemeCode}</script>`;
 
 function htmlTemplate(appHtml: string, payload: string): string {
   return /* html */ `<!DOCTYPE html>
-<html lang="en" class="${DEFAULT_COLOR_MODE}">
+<html lang="en" dir="ltr" class="${DEFAULT_COLOR_MODE}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

@@ -1,5 +1,5 @@
 import { defineWebSocketHandler } from "nitro/h3";
-import { peers } from "./dev-reload";
+import { peers } from "./dev-reload.ts";
 
 // Dev-only WebSocket handler mounted at `/api/docs/_ws` (registered in
 // `nitro.config.ts` only when NODE_ENV !== "production"). It just tracks the set

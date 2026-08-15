@@ -1,5 +1,5 @@
 import { defineEventHandler } from "nitro/h3";
-import { getIndex } from "../../../content/store";
+import { getIndex } from "../../../content/store.ts";
 
 /**
  * The `/blog/` listing, newest-first. A fixed, query-less path so it prerenders

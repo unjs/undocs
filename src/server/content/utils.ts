@@ -1,5 +1,5 @@
 // Tests: test/content/utils.test.ts
-import type { MarkNode } from "./types";
+import type { MarkNode } from "./types.ts";
 
 export function stripPrefix(seg: string): string {
   return seg.replace(/^\d+\./, "");

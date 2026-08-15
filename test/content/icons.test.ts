@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { resolveIcon, CommonIcons } from "../../src/server/content/icons";
+import { resolveIcon, CommonIcons } from "../../src/server/content/icons.ts";
 
 describe("resolveIcon", () => {
   it("matches a known section pattern", () => {
     expect(resolveIcon("/guide")).toBe("i-lucide-book-open");
     expect(resolveIcon("/config")).toBe("i-lucide-settings");
-    expect(resolveIcon("/blog")).toBe("i-lucide-file-text");
+    expect(resolveIcon("/blog")).toBe("i-lucide-newspaper");
   });
 
   it("matches when the pattern is a substring of a segment", () => {

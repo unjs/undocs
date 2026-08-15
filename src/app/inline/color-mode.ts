@@ -21,7 +21,7 @@
  * Runs BEFORE `inline/embed-theme.ts`, whose `m` key pins the mode for an
  * embedder and must therefore win over the visitor's own preference.
  */
-import { COLOR_MODE_STORAGE_KEY, DEFAULT_COLOR_MODE } from "../color-mode";
+import { COLOR_MODE_STORAGE_KEY, DEFAULT_COLOR_MODE } from "../color-mode.ts";
 
 let preference: string | null = null;
 try {

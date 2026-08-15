@@ -1,11 +1,33 @@
+/*
+ * The two font stacks. `static` so Tailwind emits the variables as well as the
+ * `font-sans` / `font-mono` utilities — the prose rules below style bare
+ * markdown tags and read `var(--font-mono)` directly.
+ *
+ * The mono stack lived under a name of its own (`--ui-font-mono`) until it was
+ * moved here, which meant `font-mono` — the utility — quietly resolved to
+ * Tailwind's DEFAULT stack while `.md code` used Geist Mono. One name, one stack.
+ */
 @theme static {
   --font-sans:
     "Geist Variable", "Geist", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono:
+    "Geist Mono Variable", "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 :root {
-  --ui-container: 90rem;
+  /*
+   * The content column's width — every `Container` (header, section tabs, docs
+   * body, footer) caps at it. The shell around them is full-bleed, so this is
+   * what centres the page.
+   *
+   * 76.25rem = 1220px, which is what vercel.com/geist ships on its own docs
+   * (`max-w-[1220px]` on the header and main alike). It is NOT the
+   * `--geist-page-width` / `--ds-page-width` tokens Geist also publishes —
+   * those are 1200px and 1400px and go unreferenced on that page. The previous
+   * 90rem/1440px here came from Nuxt UI, and read wide next to Geist.
+   */
+  --ui-container: 76.25rem;
   /* Height reserved at the top of the page for the fixed status banner.
      Published by `StatusBanner.vue` while it is shown (measured, so it tracks
      wrapping), `0px` otherwise — so the offsets below are no-ops when hidden. */
@@ -62,11 +84,18 @@ body {
  * markdown-rendered content (wrapped in `.md`, see `PageBody.vue`) needs its own
  * type scale. These target native tags emitted by `MarkdownRenderer` — headings,
  * paragraphs, lists, tables, inline code, etc. — which render as bare elements.
+ *
+ * Every size below is a step of the Geist type scale in `tokens.css`. Bare tags
+ * can't use the `text-heading-*` / `text-copy-*` utilities, so these rules read
+ * the variables — and because the scale is declared in `@theme static`, they are
+ * the SAME variables the utilities compile from rather than a parallel copy.
+ * Body is `copy-16`; the headings walk 32 / 24 / 20 / 16 / 14, Geist's ladder
+ * placed to land on the sizes this prose already used.
  */
 .md {
-  font-size: 1rem;
-  line-height: 1.75;
-  color: var(--ui-text);
+  font-size: var(--text-copy-16);
+  line-height: var(--text-copy-16--line-height);
+  color: var(--foreground);
 }
 
 .md h1,
@@ -75,43 +104,50 @@ body {
 .md h4,
 .md h5,
 .md h6 {
-  color: var(--ui-text-highlighted);
+  color: var(--foreground);
+  /* Geist headings are semibold; the scale carries its own line-height. */
   font-weight: 600;
-  line-height: 1.25;
   scroll-margin-top: 6rem;
 }
 
 .md h1 {
-  font-size: 2.25rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-size: var(--text-heading-32);
+  line-height: var(--text-heading-32--line-height);
+  letter-spacing: var(--text-heading-32--letter-spacing);
   margin-bottom: 1.5rem;
 }
 
 .md h2 {
-  font-size: 1.5rem;
-  letter-spacing: -0.025em;
+  font-size: var(--text-heading-24);
+  line-height: var(--text-heading-24--line-height);
+  letter-spacing: var(--text-heading-24--letter-spacing);
   margin-top: 2.5rem;
   margin-bottom: 1rem;
   padding-top: 2rem;
-  border-top: 1px solid var(--ui-border);
+  border-top: 1px solid var(--border);
 }
 
 .md h3 {
-  font-size: 1.25rem;
+  font-size: var(--text-heading-20);
+  line-height: var(--text-heading-20--line-height);
+  letter-spacing: var(--text-heading-20--letter-spacing);
   margin-top: 2rem;
   margin-bottom: 0.75rem;
 }
 
 .md h4 {
-  font-size: 1.125rem;
+  font-size: var(--text-heading-16);
+  line-height: var(--text-heading-16--line-height);
+  letter-spacing: var(--text-heading-16--letter-spacing);
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
 .md h5,
 .md h6 {
-  font-size: 1rem;
+  font-size: var(--text-heading-14);
+  line-height: var(--text-heading-14--line-height);
+  letter-spacing: var(--text-heading-14--letter-spacing);
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
 }
@@ -127,7 +163,7 @@ body {
   position: absolute;
   right: 100%;
   padding-right: 0.5rem;
-  color: var(--ui-text-muted);
+  color: var(--muted-foreground);
   font-weight: 400;
   text-decoration: none;
   opacity: 0;
@@ -140,7 +176,7 @@ body {
 }
 
 .md .md-anchor:hover {
-  color: var(--ui-primary);
+  color: var(--brand);
 }
 
 /* First heading in a block shouldn't push a top border/margin off the top.
@@ -187,7 +223,7 @@ body {
 }
 
 .md a {
-  color: var(--ui-primary);
+  color: var(--brand);
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -204,7 +240,7 @@ body {
 }
 
 .md strong {
-  color: var(--ui-text-highlighted);
+  color: var(--foreground);
   font-weight: 600;
 }
 
@@ -212,8 +248,8 @@ body {
   margin-top: 1.25rem;
   margin-bottom: 1.25rem;
   padding-left: 1rem;
-  border-left: 3px solid var(--ui-border);
-  color: var(--ui-text-muted);
+  border-left: 3px solid var(--border);
+  color: var(--muted-foreground);
   font-style: italic;
 }
 
@@ -221,16 +257,16 @@ body {
   margin-top: 2.5rem;
   margin-bottom: 2.5rem;
   border: 0;
-  border-top: 1px solid var(--ui-border);
+  border-top: 1px solid var(--border);
 }
 
 /* Inline code (the `:not(pre) >` guard keeps highlighted code blocks untouched). */
 .md :not(pre) > code {
   padding: 0.125rem 0.375rem;
   border-radius: var(--radius-sm);
-  background-color: var(--ui-bg-muted);
-  border: 1px solid var(--ui-border);
-  font-family: var(--ui-font-mono);
+  background-color: var(--muted);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
   font-size: 0.875em;
 }
 
@@ -241,20 +277,21 @@ body {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: var(--text-copy-14);
+  line-height: var(--text-copy-14--line-height);
 }
 
 .md th,
 .md td {
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--ui-border);
+  border: 1px solid var(--border);
   text-align: left;
 }
 
 .md th {
-  color: var(--ui-text-highlighted);
+  color: var(--foreground);
   font-weight: 600;
-  background-color: var(--ui-bg-muted);
+  background-color: var(--muted);
 }
 
 .md img {
@@ -295,13 +332,13 @@ body {
  * is inverted for a light surface, and chroma is raised to compensate (a pastel
  * that reads as a colour on #101010 reads as grey on #f5f5f5). Contrast is the
  * binding constraint, not fidelity — every token clears WCAG AA (4.5:1) against
- * `--ui-bg-muted` in BOTH modes, which the test asserts. Add or retune a colour
+ * `--muted` in BOTH modes, which the test asserts. Add or retune a colour
  * only with that check in hand.
  *
  * Two deliberate departures from upstream, both for that reason: Vesper declares
  * comments `#8b8b8b94` and we drop the alpha and lift it to `#909090`, because
  * it was tuned against Vesper's near-black `#101010` editor (where it lands at
- * ~2.4:1) and not our lighter `--ui-bg-muted`. That background is likewise not
+ * ~2.4:1) and not our lighter `--muted`. That background is likewise not
  * applied — code blocks keep showing their container's surface (see below).
  *
  * The browser picks a branch from the inherited `color-scheme`, NOT from
@@ -313,7 +350,7 @@ body {
  *
  * `.code-hl` / `.code-hl-lang-*` are ours, emitted by `highlightCode`, and carry
  * layout only (see `ProsePre.vue`). The background stays transparent so code
- * blocks show their container's surface (`--ui-bg-muted`).
+ * blocks show their container's surface (`--muted`).
  */
 .shj-deleted {
   color: light-dark(#b8132d, #ff8080);

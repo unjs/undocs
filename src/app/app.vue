@@ -1,23 +1,24 @@
 <script setup lang="ts">
 import { computed, onMounted, provide, watch } from "vue";
-import { useRoute } from "@app/router";
-import { useAsyncData } from "@app/composables/useAsyncData";
-import { useAppConfig } from "@app/composables/useAppConfig";
+import { useRoute } from "@app/router.ts";
+import { useAsyncData } from "@app/composables/useAsyncData.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { useHead, useSeoMeta } from "@unhead/vue";
-import { queryNavigation, hintPrerenderRoute } from "@app/composables/useContent";
+import { queryNavigation, hintPrerenderRoute } from "@app/composables/useContent.ts";
 import AppFooter from "@app/components/app/AppFooter.vue";
 import AppHeader from "@app/components/app/AppHeader.vue";
-import AuraBackground from "@app/components/AuraBackground.vue";
+import FilmBackground from "@app/components/FilmBackground.vue";
+import GridPage from "@app/components/grid/GridPage.vue";
 import AppProvider from "@app/components/ui/AppProvider.vue";
 import Banner from "@app/components/ui/Banner.vue";
 import StatusBanner from "@app/components/ui/StatusBanner.vue";
 import Main from "@app/components/layout/Main.vue";
 import DocsSearch from "@app/components/docs/DocsSearch.vue";
 import NavLoadingBar from "@app/components/NavLoadingBar.vue";
-import ClientOnly from "@app/components/app/ClientOnly";
-import AppLayout from "@app/components/app/AppLayout";
-import AppPage from "@app/components/app/AppPage";
-import { startPrefetch } from "@app/prefetch";
+import ClientOnly from "@app/components/app/ClientOnly.ts";
+import AppLayout from "@app/components/app/AppLayout.ts";
+import AppPage from "@app/components/app/AppPage.ts";
+import { startPrefetch } from "@app/prefetch.ts";
 const appConfig = useAppConfig();
 
 const { data: navigation } = await useAsyncData("navigation", () => queryNavigation());
@@ -49,8 +50,9 @@ useHead({
 
 const route = useRoute();
 
-// Landing gets the richer hero aura; every other page a subtler top strip.
-const auraVariant = computed(() => (route.path === "/" ? "hero" : "docs"));
+// The film backdrop belongs to the landing only — other pages get a plain
+// background.
+const isLanding = computed(() => route.path === "/");
 
 onMounted(() => {
   watch(
@@ -88,23 +90,36 @@ provide("navigation", navigation);
 <template>
   <AppProvider>
     <div class="relative isolate">
-      <AuraBackground :variant="auraVariant" />
       <ClientOnly>
         <NavLoadingBar />
       </ClientOnly>
       <ClientOnly>
         <StatusBanner variant="offline" />
       </ClientOnly>
+      <!-- Full-bleed: an announcement strip reads as being addressed to the
+           viewport, not to the page, so it stays outside the box. -->
       <Banner v-if="appConfig.docs.banner?.title" v-bind="appConfig.docs.banner" />
-      <AppHeader />
 
-      <Main>
-        <AppLayout>
-          <AppPage />
-        </AppLayout>
-      </Main>
+      <!-- The full-bleed page shell. It sets no width of its own — each piece
+           of chrome caps its content at `--ui-container` via `Container`, so
+           the horizontal rules run to the viewport while the content stays in
+           a centred column. -->
+      <GridPage>
+        <!-- Parented to the shell, not to `<main>`: it spans the full page
+             height — up behind the (transparent-at-rest,
+             blurred-when-scrolled) header and down through the sections. -->
+        <FilmBackground v-if="isLanding" />
 
-      <AppFooter />
+        <AppHeader />
+
+        <Main>
+          <AppLayout>
+            <AppPage />
+          </AppLayout>
+        </Main>
+
+        <AppFooter />
+      </GridPage>
 
       <ClientOnly>
         <DocsSearch :navigation="navigation" shortcut="meta_k" />

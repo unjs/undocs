@@ -26,7 +26,7 @@ const isHorizontal = computed(() => props.orientation === "horizontal");
         : 'flex-col items-center text-center sm:items-start sm:text-left'
     "
   >
-    <div v-if="$slots.leading || icon" class="text-primary shrink-0">
+    <div v-if="$slots.leading || icon" class="text-brand shrink-0">
       <slot name="leading">
         <span v-if="isEmoji" class="w-8 h-8 text-2xl leading-none">{{ icon }}</span>
         <Icon v-else :name="icon!" class="w-8 h-8" />

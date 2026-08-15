@@ -5,11 +5,11 @@ import { join } from "node:path";
 import { useRuntimeConfig } from "nitro/runtime-config";
 import MiniSearch from "minisearch";
 import type { AsPlainObject } from "minisearch";
-import { invalidateIndex } from "../src/server/content/store";
+import { invalidateIndex } from "../src/server/content/store.ts";
 import {
   MINISEARCH_OPTIONS,
   MINISEARCH_SEARCH_OPTIONS,
-} from "../src/server/content/search-options";
+} from "../src/server/content/search-options.ts";
 
 // og.get pulls its fonts + fallback icon from Nitro asset storage
 // (`useStorage("assets/og-*")`), which only exists in a built server. Back those

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { cn } from "@app/utils/cn";
+import { cn } from "@app/utils/cn.ts";
 // Based on Nuxt UI `UPage` component. Responsive docs grid with optional `#left` (sidebar) and
 // `#right` (TOC aside) slots plus the default (main content) slot.
 //
-// The grid is a 10-column track on `lg+`:
+// The grid is a 10-column track on `lg+` (the shared desktop threshold — see
+// `SiteHeader`; below it the sidebar and ToC hide and the mobile drawer takes
+// over, so all four must move together):
 //   - left  → `lg:col-span-2` (overridable via `ui.left`)
 //   - right → `lg:col-span-2`
 //   - main  → fills the remaining columns (8 / 6)
@@ -32,7 +34,7 @@ const props = defineProps<{
     <div
       :class="
         cn(
-          'min-w-0',
+          'min-w-0 py-2',
           $slots.left && $slots.right
             ? 'lg:col-span-6'
             : $slots.left || $slots.right

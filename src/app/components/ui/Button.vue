@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { cn } from "@app/utils/cn";
+import { cn } from "@app/utils/cn.ts";
 import Icon from "@app/components/global/Icon.vue";
-import AppLink from "@app/components/app/AppLink";
+import AppLink from "@app/components/app/AppLink.ts";
 /**
  * Button — the `UButton` replacement.
  *
@@ -18,7 +18,7 @@ import AppLink from "@app/components/app/AppLink";
  * pass `square` explicitly).
  */
 import { computed, useSlots } from "vue";
-import { buttonVariants, buttonSquareSizeClass, type ButtonVariants } from "./Button";
+import { buttonVariants, buttonSquareSizeClass, type ButtonVariants } from "./Button.ts";
 
 const props = withDefaults(
   defineProps<{

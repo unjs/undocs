@@ -5,12 +5,12 @@
 // out of the client bundle.
 import * as md4x from "md4x/wasm";
 import MiniSearch from "minisearch";
-import { slugify, textContent } from "./utils";
-import { MINISEARCH_OPTIONS, toSearchDocuments } from "./search-options";
+import { slugify, textContent } from "./utils.ts";
+import { MINISEARCH_OPTIONS, toSearchDocuments } from "./search-options.ts";
 
 import type { AsPlainObject } from "minisearch";
-import type { SearchDocument } from "./search-options";
-import type { DocPage, MarkNode, SearchSection, TocLink } from "./types";
+import type { SearchDocument } from "./search-options.ts";
+import type { DocPage, MarkNode, SearchSection, TocLink } from "./types.ts";
 
 // --- search sections ---
 // One section per page (the h1/title) plus one per h2/h3 heading, each carrying

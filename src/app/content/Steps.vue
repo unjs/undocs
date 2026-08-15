@@ -29,7 +29,7 @@
   counter-reset: step;
   margin: 1.25rem 0;
   padding-left: 2rem;
-  border-left: 1px solid var(--ui-border);
+  border-left: 1px solid var(--border);
 }
 
 /* Each direct-child heading (`::steps`) or `.step` wrapper (numbered list)
@@ -83,9 +83,9 @@
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 9999px;
-  border: 1px solid var(--ui-border);
-  background: var(--ui-bg-elevated);
-  color: var(--ui-text-muted);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1;
