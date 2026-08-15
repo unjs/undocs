@@ -247,7 +247,14 @@ export function countNavRows(items: NavItem[] | null | undefined): number {
  *   header — otherwise that page would have nothing to reach it by. Header and
  *   child then read the same, because `builder.ts` titles a section FROM its
  *   index page ("Getting Started" over a "Getting Started" link), so the header
- *   falls back to naming the section's directory instead;
+ *   falls back to naming the section's directory instead. NOT when the author
+ *   named the section in its `.navigation.yml` (`titleFromConfig`): there is no
+ *   repetition to break — the header says "Command Line" and the child says
+ *   whatever the index page is called — and re-deriving would both discard
+ *   explicit configuration and hand `cli/` back to `titleCase`, which knows
+ *   "API" and no other acronym. That flag is the only thing that distinguishes
+ *   the two cases; the titles themselves look identical by the time the tree
+ *   reaches us;
  * - a section holding one page is not worth a toggle, so it collapses to a link.
  *
  * Blog is a destination rather than a section: its posts belong on its own index.
@@ -266,8 +273,9 @@ export function mobileNavLinks(navigation: NavItem[] | null | undefined): NavIte
       return item.children[0];
     }
     // A synthetic section is named, not derived from a path — and its path is a
-    // page's (`/`), which would rename it to "Home"'s first entry.
-    if (!item.synthetic && hasOwnIndex(item)) {
+    // page's (`/`), which would rename it to "Home"'s first entry. An
+    // author-named one is likewise already the name it should keep.
+    if (!item.synthetic && !item.titleFromConfig && hasOwnIndex(item)) {
       return { ...item, title: titleCase(item.path.split("/").pop() || "") || item.title };
     }
     return item;

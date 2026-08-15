@@ -90,6 +90,28 @@ describe("mobileNavLinks", () => {
     expect(links[0].children).toBeUndefined();
   });
 
+  it("keeps a section title the author supplied in .navigation.yml", () => {
+    // `cli/.navigation.yml` → `title: Command Line`, beside a `cli/index.md`.
+    // The header only falls back to the directory segment because a DERIVED
+    // title would repeat the index child; an author-named one repeats nothing,
+    // and re-deriving it both discarded the config and handed "cli" to
+    // `titleCase` (which knows "API" and no other acronym) — so the drawer said
+    // "Cli" while the tabs and the sidebar said "Command Line".
+    const cli: NavItem = {
+      title: "Command Line",
+      path: "/cli",
+      page: true,
+      titleFromConfig: true,
+      children: [
+        { title: "CLI", path: "/cli", page: true },
+        { title: "Usage", path: "/cli/usage", page: true },
+      ],
+    };
+    const [header] = mobileNavLinks([cli]);
+    expect(header.title).toBe("Command Line");
+    expect(header.children?.map((c) => c.title)).toEqual(["CLI", "Usage"]);
+  });
+
   it("leaves the source items untouched", () => {
     mobileNavLinks([indexlessBlog]);
     expect(indexlessBlog.children).toHaveLength(2);

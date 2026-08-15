@@ -369,6 +369,7 @@ const RESERVED_NAV_KEYS = new Set([
   "page",
   "root",
   "synthetic",
+  "titleFromConfig",
 ]);
 
 function stripReserved(fields: Record<string, any>): Record<string, any> {
@@ -392,6 +393,24 @@ function navOverride(source: Record<string, any> | undefined): Record<string, an
 function configFields(cfg: Record<string, any>): Record<string, any> {
   const { navigation, ...flat } = cfg;
   return stripReserved({ ...flat, ...(isPlainObject(navigation) ? navigation : {}) });
+}
+
+/**
+ * Overlay a directory's `.navigation.yml` onto its node, recording whether it
+ * NAMED the section.
+ *
+ * Every other title in the tree is derived — from the directory segment, or from
+ * the index page — and `mobileNavLinks` re-derives one of them from the other to
+ * keep a drawer group's header from repeating its own index child. By the time
+ * the client sees the tree those two cases are indistinguishable from an
+ * author's explicit `title:`, so the fact is recorded here, at the only place
+ * that still knows it. The flag tracks the last assignment, since a config
+ * without a `title:` leaves the derived one in place.
+ */
+function applyConfigFields(node: Record<string, any>, cfg: Record<string, unknown>): void {
+  const fields = configFields(cfg);
+  Object.assign(node, fields);
+  node.titleFromConfig = typeof fields.title === "string";
 }
 
 function buildNavigation(
@@ -438,7 +457,7 @@ function buildNavigation(
         _children: [],
         ...navOverride(p.meta),
       };
-      if (navYml["/"]) Object.assign(node, configFields(navYml["/"]));
+      if (navYml["/"]) applyConfigFields(node, navYml["/"]);
       root.push(node);
       continue;
     }
@@ -456,7 +475,7 @@ function buildNavigation(
           path: curPath,
           _children: [],
         };
-        if (navYml[curPath]) Object.assign(node, configFields(navYml[curPath]));
+        if (navYml[curPath]) applyConfigFields(node, navYml[curPath]);
         level.push(node);
       }
       if (i === segs.length - 1) {
@@ -473,7 +492,7 @@ function buildNavigation(
         // The page's own `navigation:` frontmatter overrides derived fields...
         Object.assign(node, navOverride(p.meta));
         // ...but the directory's `.navigation.yml` still wins over the index page.
-        if (navYml[curPath]) Object.assign(node, configFields(navYml[curPath]));
+        if (navYml[curPath]) applyConfigFields(node, navYml[curPath]);
       }
       level = node._children;
     }
@@ -484,9 +503,14 @@ function buildNavigation(
       // Carry every non-internal field through (title/path/icon/description plus
       // custom nav flags like badge/section), stripping only the build-time
       // bookkeeping keys.
-      const { _seg, _children, _page, _index, page, ...fields } = n;
+      // `titleFromConfig` comes out with the bookkeeping keys rather than with
+      // `fields`: the self-index child below spreads `fields` and then overwrites
+      // the title with the PAGE's, so carrying the flag through would claim the
+      // author named a title they did not.
+      const { _seg, _children, _page, _index, page, titleFromConfig, ...fields } = n;
       void _seg;
       const out: NavItem = { ...fields, page: !!page };
+      if (titleFromConfig) out.titleFromConfig = true;
       const kids = _children.length ? clean(_children) : [];
       if (_index) {
         // Re-add the index page itself as the section's first child. The section

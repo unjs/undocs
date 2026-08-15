@@ -295,6 +295,19 @@ describe("buildIndex edge cases", () => {
     expect(indexChild?.icon).toBe("i-page");
   });
 
+  it("marks a section whose title came from .navigation.yml", () => {
+    // `mobileNavLinks` re-derives a section's title from its directory to stop a
+    // drawer header repeating its index child — which it must not do when the
+    // author named the section. Only the builder can still tell the two apart.
+    const docs = edge.navigation.find((n) => n.path === "/docs")!;
+    expect(docs.titleFromConfig).toBe(true);
+    // Not on the re-added index child, whose title is the PAGE's.
+    expect(docs.children?.find((c) => c.path === "/docs")?.titleFromConfig).toBeUndefined();
+    // Nor on titles the builder derived itself.
+    expect(docs.children?.find((c) => c.path === "/docs/deep")?.titleFromConfig).toBeUndefined();
+    expect(edge.navigation.find((n) => n.path === "/blog")?.titleFromConfig).toBeUndefined();
+  });
+
   it("builds an index-less directory into a page-less group keyed by its first child", () => {
     const docs = edge.navigation.find((n) => n.path === "/docs")!;
     const api = docs.children?.find((c) => c.title === "API");

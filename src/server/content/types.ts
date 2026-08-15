@@ -62,6 +62,16 @@ export interface NavItem {
    * builder; it only ever appears in the shaped tree `app.vue` provides.
    */
   synthetic?: boolean;
+  /**
+   * The author NAMED this section, in its `.navigation.yml`, rather than the
+   * builder deriving the title from the directory segment or the index page.
+   * Only set when true, so it costs nothing on the overwhelming majority of
+   * items. `utils/nav.ts` → `mobileNavLinks` is the one reader: it retitles a
+   * section from its directory to keep the drawer's group header from repeating
+   * its index child, and this is what tells it the title is not the index
+   * page's to begin with.
+   */
+  titleFromConfig?: boolean;
   children?: NavItem[];
   [key: string]: any;
 }
