@@ -102,9 +102,9 @@ function isPreamble(node: MarkNode | undefined): boolean {
   return tag === "p" && textContent(node).trim() === "";
 }
 
-/** Index of the first node the title/description probes may inspect. */
-function firstProbeIndex(body: MarkNode[]): number {
-  let i = 0;
+/** Index of the first node at or after `from` that the probes may inspect. */
+function firstProbeIndex(body: MarkNode[], from = 0): number {
+  let i = from;
   while (i < body.length && isPreamble(body[i])) i++;
   return i;
 }
@@ -201,14 +201,24 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     // empty, and the h1 renders a second time below the page header.
     const h1Index = firstProbeIndex(body);
     const h1 = body[h1Index];
+    // Where the description probe starts. Normally the h1's own slot — it is
+    // spliced out, so the blockquote slides into it.
+    let descFrom = h1Index;
     if (Array.isArray(h1) && h1[0] === "h1") {
       const t = textContent(h1);
       if (!title) title = t;
       // Consumed by the page header — drop it in place (it may sit under
       // preamble, so `shift()` would remove the wrong node).
-      if (t === title) body.splice(h1Index, 1);
+      if (t === title) {
+        body.splice(h1Index, 1);
+      } else {
+        // Frontmatter named a different title, so the h1 is body content and
+        // STAYS (the header shows the frontmatter title, this renders below it).
+        // The description blockquote is then the node after it, not at h1Index.
+        descFrom = h1Index + 1;
+      }
     }
-    const bqIndex = firstProbeIndex(body);
+    const bqIndex = firstProbeIndex(body, descFrom);
     const bq = body[bqIndex];
     if (Array.isArray(bq) && bq[0] === "blockquote") {
       const t = textContent(bq).trim();

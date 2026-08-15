@@ -205,6 +205,18 @@ describe("buildIndex edge cases", () => {
       join(edgeDir, "centered.md"),
       '<div align="center">\n  <img src="/logo.svg">\n</div>\n\n# Centered Page\n\n> The centered description.\n\nReal body.\n',
     );
+    // Frontmatter title differing from the h1: the h1 is NOT consumed by the
+    // page header, so it stays in the body — and the description blockquote sits
+    // behind it rather than at the first probe slot.
+    await writeFile(
+      join(edgeDir, "retitled.md"),
+      "---\ntitle: Different\n---\n\n# H1 Here\n\n> Should be description.\n\nReal body.\n",
+    );
+    // Same shape, but the blockquote is a GitHub alert — still not a description.
+    await writeFile(
+      join(edgeDir, "retitled-alert.md"),
+      "---\ntitle: Different\n---\n\n# H1 Here\n\n> [!NOTE]\n> Heads up.\n\nReal body.\n",
+    );
     edge = await buildIndex({ dir: edgeDir });
   }, 60_000);
 
@@ -250,6 +262,25 @@ describe("buildIndex edge cases", () => {
     expect(centered.title).toBe("Centered Page");
     expect(centered.description).toBe("The centered description.");
     expect(hasH1(centered)).toBe(false);
+  });
+
+  it("still takes the description blockquote when a frontmatter title kept the h1 in the body", () => {
+    // The h1 is only spliced out when its text IS the resolved title, so with a
+    // differing frontmatter title it stays — and the probe, which looked at the
+    // first probe-eligible node, found that h1 instead of the blockquote and
+    // dropped the description entirely.
+    const retitled = edge.byPath.get("/retitled")!;
+    expect(retitled.title).toBe("Different");
+    expect(retitled.description).toBe("Should be description.");
+    // The h1 was not consumed by the page header, so it must still render...
+    expect(retitled.body.value.some((n) => Array.isArray(n) && n[0] === "h1")).toBe(true);
+    // ...while the consumed blockquote is gone from the body.
+    expect(retitled.body.value.some((n) => Array.isArray(n) && n[0] === "blockquote")).toBe(false);
+
+    // A GitHub alert in that position is still a callout, not a description.
+    const alert = edge.byPath.get("/retitled-alert")!;
+    expect(alert.description).toBe("");
+    expect(alert.body.value.some((n) => Array.isArray(n) && n[0] === "h1")).toBe(true);
   });
 
   it("keeps the index page's own title/icon on the self-index child, not the directory override", () => {
