@@ -299,14 +299,19 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
 
   const byPath = new Map(pages.map((p) => [p.path, p]));
   mark = now();
-  const navigation = buildNavigation(pages, navYml);
+  const hidden = hiddenPaths(pages, navYml);
+  const navigation = buildNavigation(pages, navYml, hidden);
   phases.navigation = now() - mark;
   mark = now();
   const search = buildSearch(pages);
   const searchIndex = buildSearchIndex(search);
   phases.search = now() - mark;
+  // Prev/next is a LISTING, so it obeys the same hiding the nav tree does — a
+  // page the author kept out of the sidebar must not resurface as its neighbour's
+  // "Next" card. A hidden page is still routable and searchable; it simply has no
+  // place in the chain, so `order.indexOf` misses it and it renders no surround.
   const order = pages
-    .filter((p) => p.path !== "/blog" && !p.path.startsWith("/blog/"))
+    .filter((p) => !hidden.has(p.path) && p.path !== "/blog" && !p.path.startsWith("/blog/"))
     .map((p) => p.path);
 
   const stats: BuildStats = {
@@ -447,9 +452,42 @@ function applyConfigFields(node: Record<string, any>, cfg: Record<string, unknow
   node.titleFromConfig = typeof fields.title === "string";
 }
 
+/**
+ * Every page the author hid from the navigation, by path.
+ *
+ * Two ways to say it: `navigation: false` in a page's own frontmatter, or a
+ * directory `.navigation.yml` carrying `navigation: false`, which hides its whole
+ * subtree. Hidden means "routable but not listed" — the page still builds, still
+ * answers on its route and still lands in the search index.
+ *
+ * The set is computed ONCE, here, because two listings consume it: the nav tree
+ * below and `index.order` (prev/next). Deriving it twice is how the surround
+ * cards came to link at pages the sidebar had dropped.
+ */
+function hiddenPaths(
+  pages: DocPage[],
+  navYml: Record<string, Record<string, unknown>>,
+): Set<string> {
+  // Directories explicitly hidden via `.navigation.yml` → `navigation: false`.
+  const hiddenDirs = Object.entries(navYml)
+    .filter(([, cfg]) => (cfg as any)?.navigation === false)
+    .map(([dirPath]) => dirPath);
+  const hidden = new Set<string>();
+  for (const p of pages) {
+    if (
+      (p.meta as any)?.navigation === false ||
+      hiddenDirs.some((d) => p.path === d || p.path.startsWith(d + "/"))
+    ) {
+      hidden.add(p.path);
+    }
+  }
+  return hidden;
+}
+
 function buildNavigation(
   pages: DocPage[],
   navYml: Record<string, Record<string, unknown>>,
+  hidden: Set<string>,
 ): NavItem[] {
   interface RawNode extends NavItem {
     _seg?: string;
@@ -459,18 +497,10 @@ function buildNavigation(
   }
   const root: RawNode[] = [];
 
-  // Directories explicitly hidden via `.navigation.yml` → `navigation: false`.
-  // The whole subtree is dropped from the tree (pages stay routable).
-  const hiddenDirs = Object.entries(navYml)
-    .filter(([, cfg]) => (cfg as any)?.navigation === false)
-    .map(([dirPath]) => dirPath);
-
   for (const p of pages) {
-    // A page can opt out of the nav tree with `navigation: false` while staying
-    // routable and searchable.
-    if ((p.meta as any)?.navigation === false) continue;
-    // Skip pages living under a directory hidden by its `.navigation.yml`.
-    if (hiddenDirs.some((d) => p.path === d || p.path.startsWith(d + "/"))) continue;
+    // A page can opt out of the nav tree with `navigation: false` — its own, or
+    // its directory's — while staying routable and searchable (`hiddenPaths`).
+    if (hidden.has(p.path)) continue;
 
     // The docs-root `index.md`. It has no path segment, so the walk below never
     // sees it — add it directly as the tree's first item (content is sorted by

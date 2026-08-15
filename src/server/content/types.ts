@@ -127,6 +127,9 @@ export interface ContentIndex {
   // per content build and shipped verbatim by `/api/docs/search`; the client
   // rehydrates it with `MiniSearch.loadJS`. See `src/app/utils/search.ts`.
   searchIndex: AsPlainObject;
-  order: string[]; // ordered list of content page paths (excludes blog) for surround
+  // Ordered list of content page paths, for the prev/next surround. Excludes
+  // blog posts and every page hidden from the navigation (`navigation: false`,
+  // its own or its directory's) — the surround cards are a listing too.
+  order: string[];
   stats: BuildStats; // build timing/size info (see /_content route)
 }

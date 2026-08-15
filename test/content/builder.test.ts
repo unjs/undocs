@@ -135,15 +135,28 @@ describe("buildIndex", () => {
   });
 
   it("orders content pages", () => {
-    expect(index.order).toEqual([
-      "/",
-      "/guide",
-      "/guide/usage",
-      "/guide/hidden",
-      "/guide/custom",
-      "/secret",
-      "/secret/page",
-    ]);
+    expect(index.order).toEqual(["/", "/guide", "/guide/usage", "/guide/custom"]);
+  });
+
+  // `order` IS a listing — `[...path].get.ts` turns it into the prev/next cards —
+  // so a page the author hid from the nav must not reappear there as a neighbour.
+  it("keeps nav-hidden pages out of `order` (and so out of prev/next)", () => {
+    // Hidden by its own frontmatter `navigation: false`...
+    expect(index.order).not.toContain("/guide/hidden");
+    // ...and by its directory's `.navigation.yml`, subtree included.
+    expect(index.order).not.toContain("/secret");
+    expect(index.order).not.toContain("/secret/page");
+    // The chain closes over the gap: `/guide/usage`'s next is the page after the
+    // hidden one, not the hidden one.
+    const i = index.order.indexOf("/guide/usage");
+    expect(index.order[i + 1]).toBe("/guide/custom");
+    // A hidden page has no place in the chain at all, so it renders no surround
+    // (`order.indexOf` → -1 → `[null, null]`).
+    expect(index.order.indexOf("/guide/hidden")).toBe(-1);
+    // Still routable and still indexed — hidden means unlisted, not removed.
+    expect(index.byPath.get("/guide/hidden")?.title).toBe("Hidden");
+    expect(index.byPath.get("/secret/page")?.title).toBe("Secret Page");
+    expect(index.search.some((s) => s.id.startsWith("/guide/hidden"))).toBe(true);
   });
 
   it("records build stats", () => {
