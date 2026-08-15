@@ -514,6 +514,76 @@ describe("buildIndex duplicate routes", () => {
   });
 });
 
+// `navigation: false` in a SUBDIRECTORY's `.navigation.yml` hides that whole
+// subtree (covered above). At the docs ROOT that reading would hide every page
+// there is, so the root is deliberately narrow: it hides `/` and nothing else.
+describe("buildIndex root .navigation.yml navigation: false", () => {
+  let rootDir: string;
+  let rooted: ContentIndex;
+  let warnings: string[];
+
+  beforeAll(async () => {
+    rootDir = await mkdtemp(join(tmpdir(), "undocs-navroot-"));
+    // The same file carries the docs set's other root config (see the sibling
+    // test below, which pins that it still lands on the root nav item).
+    await writeFile(join(rootDir, ".navigation.yml"), "title: Docs Root\nnavigation: false\n");
+    await writeFile(join(rootDir, "1.index.md"), "# Home\n\nIntro.\n");
+    await writeFile(join(rootDir, "2.a.md"), "# A\n\nA.\n");
+    await mkdir(join(rootDir, "3.deep"), { recursive: true });
+    await writeFile(join(rootDir, "3.deep", "index.md"), "# Deep\n\nD.\n");
+    await writeFile(join(rootDir, "3.deep", "page.md"), "# Deep Page\n\nP.\n");
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      rooted = await buildIndex({ dir: rootDir });
+      warnings = warn.mock.calls.map((c) => String(c[0]));
+    } finally {
+      warn.mockRestore();
+    }
+  }, 60_000);
+
+  afterAll(async () => {
+    if (rootDir) await rm(rootDir, { recursive: true, force: true });
+  });
+
+  it("hides only the docs-root index page, never the rest of the tree", () => {
+    expect(rooted.navigation.some((n) => n.path === "/")).toBe(false);
+    expect(rooted.navigation.map((n) => n.path)).toEqual(["/a", "/deep"]);
+    const deep = rooted.navigation.find((n) => n.path === "/deep")!;
+    expect(deep.children?.some((c) => c.path === "/deep/page")).toBe(true);
+    // Hidden means unlisted, not removed.
+    expect(rooted.byPath.get("/")?.title).toBe("Home");
+  });
+
+  it("leaves the prev/next chain intact apart from `/`", () => {
+    // `index.order` consumes the same hidden set, so the wide reading would have
+    // emptied it outright.
+    expect(rooted.order).toEqual(["/a", "/deep", "/deep/page"]);
+  });
+
+  it("warns that the root case is the narrow one", () => {
+    const warned = warnings.find((line) => line.includes("root .navigation.yml"))!;
+    expect(warned).toContain("navigation: false");
+    expect(warned).toContain("not the whole site");
+  });
+
+  it("still applies the root .navigation.yml's other keys to the root nav item", async () => {
+    const dir2 = await mkdtemp(join(tmpdir(), "undocs-navroot2-"));
+    try {
+      await writeFile(join(dir2, ".navigation.yml"), "title: Docs Root\nicon: i-lucide-house\n");
+      await writeFile(join(dir2, "index.md"), "# Home\n\nIntro.\n");
+      await writeFile(join(dir2, "a.md"), "# A\n\nA.\n");
+      const index = await buildIndex({ dir: dir2 });
+      const root = index.navigation.find((n) => n.path === "/")!;
+      expect(root.title).toBe("Docs Root");
+      expect(root.icon).toBe("i-lucide-house");
+      expect(index.order).toEqual(["/", "/a"]);
+    } finally {
+      await rm(dir2, { recursive: true, force: true });
+    }
+  }, 60_000);
+});
+
 // Two sections may legitimately carry the same number (a docs set numbering
 // only SOME of its directories, or an author who copied a prefix). The sort key
 // has to keep them apart, or the walk interleaves them.

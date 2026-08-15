@@ -460,6 +460,23 @@ function applyConfigFields(node: Record<string, any>, cfg: Record<string, unknow
  * subtree. Hidden means "routable but not listed" — the page still builds, still
  * answers on its route and still lands in the search index.
  *
+ * The docs ROOT is the one directory that does NOT hide its subtree, and that is
+ * deliberate. Its subtree is the whole docs set, so reading it the way every
+ * other directory reads it would empty the sidebar outright — and empty the
+ * prev/next chain with it, since `index.order` consumes this same set. A docs
+ * site with no navigation at all is not something anyone configures on purpose,
+ * whereas the narrow reading is useful and is what an author who wrote it was
+ * almost certainly after: drop the "Home" entry from the sidebar, keep the rest.
+ * So a root `navigation: false` hides exactly `/`. The rest of that file is
+ * untouched by this: the root `.navigation.yml` is also where a docs set names
+ * itself, and `buildNavigation` still applies its title/icon/… to the root nav
+ * item — the item `navigation: false` is the one key that removes.
+ * That narrow behaviour is what shipped, but only by accident: the subtree test
+ * used to be `path.startsWith(d + "/")`, which for the root key is `"//"` and
+ * matches nothing. Splitting exact matches from prefixes states the intent and
+ * removes the string-concatenation coincidence holding it up. Since the same
+ * spelling means something wider in every other directory, say so once per build.
+ *
  * The set is computed ONCE, here, because two listings consume it: the nav tree
  * below and `index.order` (prev/next). Deriving it twice is how the surround
  * cards came to link at pages the sidebar had dropped.
@@ -469,14 +486,25 @@ function hiddenPaths(
   navYml: Record<string, Record<string, unknown>>,
 ): Set<string> {
   // Directories explicitly hidden via `.navigation.yml` → `navigation: false`.
-  const hiddenDirs = Object.entries(navYml)
-    .filter(([, cfg]) => (cfg as any)?.navigation === false)
-    .map(([dirPath]) => dirPath);
+  const hiddenSelf = new Set<string>();
+  const hiddenSubtrees: string[] = [];
+  for (const [dirPath, cfg] of Object.entries(navYml)) {
+    if ((cfg as any)?.navigation !== false) continue;
+    hiddenSelf.add(dirPath);
+    if (dirPath === "/") {
+      console.warn(
+        `[undocs] root .navigation.yml: \`navigation: false\` hides only the docs-root index page ("/"), not the whole site. Hide other pages with \`navigation: false\` in their own frontmatter or in a subdirectory's .navigation.yml.`,
+      );
+      continue;
+    }
+    hiddenSubtrees.push(dirPath + "/");
+  }
   const hidden = new Set<string>();
   for (const p of pages) {
     if (
       (p.meta as any)?.navigation === false ||
-      hiddenDirs.some((d) => p.path === d || p.path.startsWith(d + "/"))
+      hiddenSelf.has(p.path) ||
+      hiddenSubtrees.some((d) => p.path.startsWith(d))
     ) {
       hidden.add(p.path);
     }
