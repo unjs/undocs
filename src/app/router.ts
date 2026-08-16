@@ -28,7 +28,7 @@ import {
 } from "vue";
 import { pages as userPages } from "virtual:undocs/user-pages";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
-import { normalizeRedirects, resolveRedirect } from "@app/utils/redirects.ts";
+import { isExternalRedirect, normalizeRedirects, resolveRedirect } from "@app/utils/redirects.ts";
 import { findAnchor } from "@app/utils/anchor.ts";
 
 // ---------------------------------------------------------------------------
@@ -343,7 +343,7 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     const redirected = resolveRedirect(redirects, parsed.path);
     if (redirected !== undefined && redirected !== parsed.path) {
       const target = redirected + parsed.query + parsed.hash;
-      if (/^[a-z][\d+.a-z-]*:/i.test(redirected)) {
+      if (isExternalRedirect(redirected)) {
         if (IS_BROWSER) window.location.replace(target);
         return;
       }

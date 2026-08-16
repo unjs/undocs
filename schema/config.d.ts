@@ -67,6 +67,12 @@ export interface DocsConfig {
   crossOriginIsolation?: boolean | "credentialless" | "require-corp";
   automd?: unknown;
   buildCache?: boolean;
+  /**
+   * Expose docs search/navigation to browser AI agents via WebMCP
+   * (https://webmachinelearning.github.io/webmcp/). Enabled by default in
+   * supporting browsers; set to `false` to opt out.
+   */
+  webmcp?: boolean;
   sponsors?: { api: string };
   /**
    * The landing page shown at `/`.

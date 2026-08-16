@@ -272,6 +272,10 @@
       "type": "boolean",
       "description": "Enable build cache (experimental)"
     },
+    "webmcp": {
+      "type": "boolean",
+      "description": "Expose docs search/navigation to browser AI agents via WebMCP (https://webmachinelearning.github.io/webmcp/). Enabled by default in supporting browsers; set to `false` to opt out."
+    },
     "redirects": {
       "description": "Redirects for the documentation site, as `from: to` paths (e.g. `/docs: /guide`). A `/old/**` key redirects the whole subtree; when the target also ends with `/**`, the matched tail is preserved.",
       "type": "object",

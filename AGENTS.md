@@ -25,6 +25,26 @@ NEVER write E2E tests. Ask for it to be tested manually.
   the build-time virtual module `virtual:undocs/app-config`, generated once per
   build) wins; theme-only keys from `src/app/app.config.ts` survive. Shape lives
   in `schema/config.json` + `config.d.ts`.
+- `src/app/webmcp/` — [WebMCP](https://webmachinelearning.github.io/webmcp/):
+  registers docs tools (search/list/project-info/read/current/navigate) on
+  `document.modelContext` for browser AI agents. Feature-detected + lazily
+  imported from `main.ts` after mount, so a non-supporting browser never fetches
+  the chunk. `tools/` is one module per tool over two shared ones —
+  `tools/content.ts` (the cached nav/page reads) and `tools/utils.ts` (agent
+  input coercion + URL shaping); `tools/index.ts` assembles them in the order
+  the agent sees. Tools wrap existing machinery (the MiniSearch index, the
+  `useAsyncData` caches, the router) — never a second data path. Unregistration
+  is `AbortSignal`-only (the spec's sole teardown), which is also what makes an
+  HMR re-setup safe. WebMCP has NO `resources` primitive (tools are the whole
+  surface), so project/page links are tool RESULTS instead — `links.ts` derives
+  them from the docs config, mirroring the URL conventions `SocialButtons.vue`,
+  `AppFooter.vue` and `pages/[...slug].vue` already render. Reusing those caches
+  has ONE rule (see the invariant below): a path an agent typed never goes
+  through the docs page's `useAsyncData` key. An agent-supplied path also
+  resolves config `redirects` before anything judges it real (`resolveDocsPath`,
+  same map and same one hop as `router.ts`) — agents work from old links far
+  more than visitors do; `navigate` still pushes the path the agent ASKED for,
+  leaving the redirect for the router to execute.
 - `pnpm test`, `pnpm typecheck` (bare tsc, so `.vue` imports don't resolve),
   `pnpm lint` / `pnpm fmt` (oxlint + oxfmt — run before finishing),
   `pnpm build:inline` after touching `src/app/inline/*.ts`.
@@ -214,6 +234,16 @@ NEVER write E2E tests. Ask for it to be tested manually.
   `©` would otherwise go back in as an entity and decode a second time on its way
   into the DOM. `test/content/transforms.test.ts` parses real markdown to pin all
   four behaviours, because they are md4x's promise rather than ours.
+- **An agent-supplied path never touches the docs page's cache key.** The docs
+  page keys its `useAsyncData` by `kebabCase(route.path)`, which is lossy
+  (`/guide/deploy`, `/guide-deploy` and `/Guide/Deploy` collapse onto ONE entry),
+  and `queryPage` resolves a 404 to `null` instead of throwing. So looking up an
+  unvalidated path through `webmcp/tools/content.ts`'s `page()` would cache `null` under
+  a REAL page's key and 404 the visitor's next navigation there. Proving the
+  path real does NOT earn the key either — two paths that BOTH exist collide the
+  same way, and the visitor gets the other page's title/description/outline.
+  Agent input goes through `probePage`/`routeExists` (own key namespace);
+  `page()` is only for the visitor's own route.
 - **Heading anchors come from md4x, at parse time.** It slugs every heading
   GitHub-compatibly, de-duplicates within the document (`same`, `same-1`) and
   honours an explicit `## Title {#anchor}`, stamping the result on the node.
