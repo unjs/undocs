@@ -7,6 +7,7 @@ import { vercel } from "./src/server/vercel.ts";
 import { bundleDocs } from "./src/server/bundle-docs.ts";
 import { rebaseOutput } from "./src/server/rebase-output.ts";
 import { normalizeRedirects } from "./src/app/utils/redirects.ts";
+import { crossOriginIsolationHeaders } from "./src/server/cross-origin-isolation.ts";
 import pkg from "./package.json" with { type: "json" };
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
@@ -43,6 +44,12 @@ const redirects = normalizeRedirects(docs.redirects);
 const redirectRules = Object.fromEntries(
   Object.entries(redirects).map(([from, to]) => [from, { redirect: { to, status: 301 } }]),
 );
+
+// Opt-in cross-origin isolation (`crossOriginIsolation: true | "credentialless" |
+// "require-corp"`, default OFF). `undefined` unless enabled, in which case its
+// COOP/COEP pair is folded into the `/**` route rule below — the one place both
+// `undocs dev` and the built server read, so dev and prod cannot disagree.
+const coiHeaders = crossOriginIsolationHeaders(docs.crossOriginIsolation);
 
 // Root(s) for the Vercel post-build link step. `rebaseOutput` now writes the
 // real `.vercel/output` INTO the docs dir, so we no longer symlink it back to
@@ -212,8 +219,15 @@ export default defineNitroConfig({
   // The user redirects are spread last: rules deep-merge by specificity at
   // runtime, so a redirect key coexists with the `/**` ISR rule (an old URL
   // redirects, and the redirect response itself stays cacheable).
+  //
+  // Cross-origin isolation rides on the SAME `/**` rule rather than a second key
+  // (which would replace this one on spread). It is deliberately not narrowed to
+  // the HTML routes: route rules can add a header but not remove one, so "every
+  // route except the handlers below" is not expressible — and COOP/COEP are
+  // document headers, inert on the JSON, markdown and PNG a browser never treats
+  // as a top-level document. The one that matters is the one on the page.
   routeRules: {
-    "/**": { isr: true },
+    "/**": { isr: true, ...(coiHeaders ? { headers: coiHeaders } : {}) },
     "/api/_content": { isr: false },
     "/_og/**": { isr: true },
     ...redirectRules,

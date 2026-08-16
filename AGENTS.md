@@ -289,6 +289,15 @@ NEVER write E2E tests. Ask for it to be tested manually.
   against the Vite root, i.e. undocs, where pnpm does not expose nitro's private
   dep. Until nitro emits a resolvable specifier, that import is what breaks first
   if redirects stop working ("Cannot find module 'h3-rules'", every request 500s).
+- **Cross-origin isolation is opt-in and lives on the `/**` rule.**
+  `crossOriginIsolation` (`src/server/cross-origin-isolation.ts`) resolves to a
+  COOP/COEP pair — `true` means `credentialless`, `require-corp` is the strict
+  alternative — that `nitro.config.ts` folds INTO the existing `/**` ISR rule, not
+  a second `/**` key, which would replace it on spread. One declaration covers dev
+  and the built server. It is not narrowed to HTML routes because a route rule can
+  add a header but not remove one; COOP/COEP are inert on the JSON/markdown/PNG
+  routes anyway. It is the second producer of a runtime-handler route rule, so the
+  h3-rules note above applies to it too.
 - **Output lives in the docs dir, via rebase — not `rootDir`.** Nitro's `rootDir`
   MUST stay `pkgRoot`: it drives both c12 config discovery (finding our
   `nitro.config.ts`) and builder-package resolution (`vite` is undocs's dep, not

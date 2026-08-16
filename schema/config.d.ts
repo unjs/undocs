@@ -53,6 +53,18 @@ export interface DocsConfig {
   /** The accent color of the documentation site: a Geist hue (blue, red, amber, green, teal, purple, pink), a Tailwind palette name mapped onto the nearest Geist hue, a neutral name for a monochrome site, or any CSS color. Tints links, active navigation and icons; solid buttons stay monochrome. */
   themeColor?: string;
   redirects?: Record<string, string>;
+  /**
+   * Serve the site cross-origin isolated (`Cross-Origin-Opener-Policy: same-origin`
+   * plus a `Cross-Origin-Embedder-Policy`), the precondition for `SharedArrayBuffer`
+   * and wasm threads. Off by default.
+   *
+   * `true` means `credentialless` — cross-origin subresources load without
+   * credentials, so nothing upstream has to change. `"require-corp"` is the
+   * stricter alternative, valid only when every cross-origin asset sends
+   * `Cross-Origin-Resource-Policy`. Either way a cross-origin iframe must send
+   * COEP of its own or it will not load.
+   */
+  crossOriginIsolation?: boolean | "credentialless" | "require-corp";
   automd?: unknown;
   buildCache?: boolean;
   sponsors?: { api: string };
