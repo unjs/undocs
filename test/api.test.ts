@@ -98,7 +98,13 @@ beforeAll(async () => {
   await mkdir(join(dir, "1.guide"), { recursive: true });
   await writeFile(
     join(dir, "1.guide", "1.index.md"),
-    "# Guide\n\n> The guide\n\nOverview.\n\n## Setup\n\nInstall it.\n\n```ts\nconst a = 1\n```\n",
+    "# Guide\n\n> The guide\n\nOverview.\n\n" +
+      // File-relative links, as an author writes them (and GitHub renders them);
+      // the text routes must serve them as route paths. The fenced one is a
+      // quote of the syntax and must survive verbatim.
+      "See [Usage](./2.usage.md#setup) and [Home](../index.md).\n\n" +
+      "```md\n[Usage](./2.usage.md)\n```\n\n" +
+      "## Setup\n\nInstall it.\n\n```ts\nconst a = 1\n```\n",
   );
   await writeFile(join(dir, "1.guide", "2.usage.md"), "# Usage\n\n> Using it\n\nHow to use.\n");
 
@@ -220,6 +226,13 @@ describe("/llms-full.txt", () => {
     expect(text).toContain("> Full description");
     expect(text).toContain("# Home");
     expect(text).toContain("# Usage");
+  });
+
+  it("serves file-relative links as route paths, leaving fenced ones alone", async () => {
+    const res = await (await load("llms-full")).fetch(req("/"));
+    const text = await res.text();
+    expect(text).toContain("See [Usage](/guide/usage#setup) and [Home](/).");
+    expect(text).toContain("```md\n[Usage](./2.usage.md)\n```");
   });
 });
 

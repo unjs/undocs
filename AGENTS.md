@@ -224,6 +224,20 @@ NEVER write E2E tests. Ask for it to be tested manually.
   the inherited size. `utils/cn.ts` re-registers every Geist size into
   `font-size`; `test/app/cn.test.ts` guards it. Adding a step to the scale in
   `tokens.css` means adding it there too.
+- **A page's SOURCE is served through one helper, and its links are routes.**
+  `content/source.ts`'s `pageSource()` is what `/raw/<path>.md` and
+  `llms-full.txt` return (and so, through `/raw`, what `read_page` and the docs
+  page's "copy as markdown" hand out): frontmatter stripped, a title/description
+  ensured for a page that carries them in frontmatter, and file-relative links
+  (`./2.getting-started.md`, `../guide/1.index.md#anchor`) resolved to route
+  paths. That last part is not cosmetic — those hrefs are repository paths, so
+  an agent following one asks for a route that does not exist, `NN.` prefix and
+  all. It resolves through `transforms.ts`'s `resolveMdHref`, the SAME function
+  the AST pass uses on the rendered page, so the two views of a page cannot
+  disagree about where a link points. The text scan is line-wise so it can skip
+  fenced code blocks — a page quoting markdown link syntax is not linking — and
+  it is deliberately the whole story: do not re-add per-route frontmatter/title
+  handling, or the two text routes drift again.
 - **Raw HTML is resolved server-side.** `transforms.ts`'s `liftRawHtml` turns
   md4x's `html` nodes into `_html` nodes the client injects with `v-html`. Moving
   this client-side breaks escaping and security. An inline `html` node is ONE

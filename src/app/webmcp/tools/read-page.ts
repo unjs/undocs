@@ -51,8 +51,9 @@ export function readPageTool(): ModelContextTool {
     name: "read_page",
     title: "Read a documentation page",
     description:
-      `Read a documentation page as Markdown by route path. If \`truncated\`, ` +
-      `continue with \`nextOffset\` as \`offset\`. Generated pages have no Markdown source.`,
+      `Read a documentation page as Markdown by route path. Links in it are route ` +
+      `paths for this tool. If \`truncated\`, continue with \`nextOffset\` as \`offset\`. ` +
+      `Generated pages have no Markdown source.`,
     inputSchema: {
       type: "object",
       properties: {
@@ -88,7 +89,8 @@ export function readPageTool(): ModelContextTool {
       }
 
       // `/raw/**` serves the page's source markdown (frontmatter stripped,
-      // title/description ensured) — the same text `llms.txt` links to.
+      // title/description ensured, file-relative links resolved to route paths
+      // — see `server/content/source.ts`) — the same text `llms.txt` links to.
       let markdown: string;
       try {
         markdown = await $fetch<string, "text">(joinURL("/raw", `${path}.md`), {

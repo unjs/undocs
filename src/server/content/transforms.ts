@@ -57,7 +57,17 @@ function transformLinks(nodes: MarkNode[], baseDir?: string): void {
   }
 }
 
-function resolveMdHref(href: string, baseDir: string): string {
+/**
+ * Map one file-relative markdown href onto the route path the site serves.
+ *
+ * Exported because the AST is not the only place these links have to be fixed:
+ * `source.ts` runs the same resolution over the raw markdown text `/raw`,
+ * `llms-full.txt` and the `read_page` tool hand out, which never comes through
+ * the AST pass. One implementation, so the two views of a page cannot disagree
+ * about where a link points. `baseDir` is the page's own directory, relative to
+ * the docs root (`posix.dirname(page.rel)`, i.e. `"."` for a root page).
+ */
+export function resolveMdHref(href: string, baseDir: string): string {
   // Leave external (`https:`, `mailto:`), protocol-relative (`//`), root-absolute
   // (`/`), and anchor-only (`#`) links untouched.
   if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(href)) return href;
