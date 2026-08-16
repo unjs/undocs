@@ -14,6 +14,8 @@ import type { AppRouter } from "@app/router.ts";
 import type { ModelContext, ModelContextTool } from "@app/webmcp/types.ts";
 // Pure config→URL derivation (no `ofetch`), so a static import is safe here.
 import { editUrl, repoLinks, repoUrl, socialLinks } from "@app/webmcp/links.ts";
+import { isExternalRedirect, normalizeRedirects, resolveRedirect } from "@app/utils/redirects.ts";
+import appConfig from "../stubs/app-config.ts";
 
 const ORIGIN = "https://docs.test";
 
@@ -144,11 +146,25 @@ function notFound(): Response {
 vi.stubGlobal("fetch", fetchStub);
 vi.stubGlobal("location", { origin: ORIGIN });
 
-/** Minimal stand-in for the app router: just the surface the tools touch. */
+/** The docs-config redirects the stub app config declares, normalized once. */
+const REDIRECTS = normalizeRedirects(appConfig.docs.redirects);
+
+/**
+ * Minimal stand-in for the app router: just the surface the tools touch.
+ *
+ * It resolves configured redirects before committing a path, because the real
+ * `router.ts` does — the tools hand it the path the AGENT asked for and leave
+ * executing the redirect to it, so a stub that skipped that step would report a
+ * landing page no visitor ever sees. An off-site target leaves the app
+ * (`window.location.replace`), so the route stays put here too.
+ */
 function createStubRouter(start = "/") {
   const currentRoute = { path: start, hash: "", query: "", fullPath: start, meta: {} };
   const push = vi.fn(async (to: any) => {
-    currentRoute.path = typeof to === "string" ? to : to.path;
+    const asked = typeof to === "string" ? to : to.path;
+    const target = resolveRedirect(REDIRECTS, asked);
+    if (target !== undefined && isExternalRedirect(target)) return;
+    currentRoute.path = target ?? asked;
     currentRoute.hash = (typeof to === "object" && to.hash) || "";
     currentRoute.fullPath = currentRoute.path + currentRoute.hash;
   });
@@ -524,5 +540,72 @@ describe("project links", () => {
     // No repo configured, or a route with no content page → no edit link.
     expect(editUrl(undefined, "main", "content/x.md")).toBeUndefined();
     expect(editUrl("unjs/undocs", "main", undefined)).toBeUndefined();
+  });
+});
+
+describe("config redirects", () => {
+  // An agent works from links it collected earlier — a search result, a URL a
+  // user pasted, a path from an older copy of the docs — so it lands on moved
+  // paths far more often than a visitor clicking through the current nav. Every
+  // tool that takes a path resolves the docs config's `redirects` first, on the
+  // same map (and with the same one-hop semantics) the router uses.
+
+  it("navigates through an exact redirect and says where it came from", async () => {
+    const router = createStubRouter("/");
+    const result: any = await toolsByName(router).navigate.execute({ path: "/deploy" });
+    // The router owns executing the redirect, so it is handed the agent's path.
+    expect((router as any).push).toHaveBeenCalledWith({ path: "/deploy", hash: undefined });
+    expect(result).toMatchObject({
+      navigated: true,
+      redirectedFrom: "/deploy",
+      path: "/guide/deploy",
+      title: "Deploy",
+    });
+  });
+
+  it("navigates through a wildcard redirect, tail and all", async () => {
+    const router = createStubRouter("/");
+    await expect(
+      toolsByName(router).navigate.execute({ path: "/docs/guide/deploy" }),
+    ).resolves.toMatchObject({ redirectedFrom: "/docs/guide/deploy", path: "/guide/deploy" });
+  });
+
+  it("reports an off-site redirect instead of describing the page being left", async () => {
+    // `window.location.replace` takes the tab; this document is on its way out,
+    // so a page snapshot would describe the page the visitor is leaving.
+    const router = createStubRouter("/guide");
+    const result: any = await toolsByName(router).navigate.execute({ path: "/changelog" });
+    expect((router as any).push).toHaveBeenCalledWith({ path: "/changelog", hash: undefined });
+    expect(result).toEqual({
+      navigated: true,
+      external: true,
+      redirectedFrom: "/changelog",
+      url: "https://github.com/unjs/undocs/releases",
+    });
+  });
+
+  it("still refuses a redirect that lands on nothing, naming both paths", async () => {
+    const router = createStubRouter("/");
+    await expect(toolsByName(router).navigate.execute({ path: "/docs/nope" })).rejects.toThrow(
+      /`\/docs\/nope` redirects to `\/nope`/,
+    );
+    expect((router as any).push).not.toHaveBeenCalled();
+  });
+
+  it("reads the page a redirect points at", async () => {
+    // `/raw/deploy.md` has no content-index entry — without resolving first this
+    // is a 404 on a page the site happily serves.
+    await expect(toolsByName().read_page.execute({ path: "/deploy" })).resolves.toMatchObject({
+      path: "/guide/deploy",
+      redirectedFrom: "/deploy",
+      title: "Deploy",
+      markdown: expect.stringContaining("Deploy to Vercel"),
+    });
+  });
+
+  it("tells an agent to open an off-site redirect rather than read it", async () => {
+    await expect(toolsByName().read_page.execute({ path: "/changelog" })).rejects.toThrow(
+      /outside this documentation site/,
+    );
   });
 });

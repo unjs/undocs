@@ -40,7 +40,11 @@ NEVER write E2E tests. Ask for it to be tested manually.
   them from the docs config, mirroring the URL conventions `SocialButtons.vue`,
   `AppFooter.vue` and `pages/[...slug].vue` already render. Reusing those caches
   has ONE rule (see the invariant below): a path an agent typed never goes
-  through the docs page's `useAsyncData` key.
+  through the docs page's `useAsyncData` key. An agent-supplied path also
+  resolves config `redirects` before anything judges it real (`resolveDocsPath`,
+  same map and same one hop as `router.ts`) — agents work from old links far
+  more than visitors do; `navigate` still pushes the path the agent ASKED for,
+  leaving the redirect for the router to execute.
 - `pnpm test`, `pnpm typecheck` (bare tsc, so `.vue` imports don't resolve),
   `pnpm lint` / `pnpm fmt` (oxlint + oxfmt — run before finishing),
   `pnpm build:inline` after touching `src/app/inline/*.ts`.

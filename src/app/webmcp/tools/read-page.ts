@@ -4,7 +4,7 @@ import { joinURL } from "ufo";
 
 import type { ModelContextTool } from "../types.ts";
 import { page, pageLinks } from "./content.ts";
-import { clampOffset, normalizePath, STANDALONE_ROUTES } from "./utils.ts";
+import { clampOffset, resolveDocsPath, STANDALONE_ROUTES } from "./utils.ts";
 
 /**
  * Cap on the Markdown one `read_page` call returns, so a long page can't fill an
@@ -20,9 +20,13 @@ const MARKDOWN_MAX = 40_000;
  * so no `/raw` source. A bare "not found" would read as a broken link instead
  * of "this page exists, it just isn't written in Markdown".
  */
-function noSourceError(path: string): Error {
+function noSourceError(path: string, redirectedFrom?: string): Error {
   if (!STANDALONE_ROUTES.has(path)) {
-    return new Error(`No documentation page at \`${path}\`.`);
+    return new Error(
+      redirectedFrom
+        ? `\`${redirectedFrom}\` redirects to \`${path}\`, which is not a documentation page.`
+        : `No documentation page at \`${path}\`.`,
+    );
   }
   return new Error(
     `\`${path}\` is generated, not written in Markdown, so it has no source to read. ` +
@@ -60,7 +64,17 @@ export function readPageTool(): ModelContextTool {
     },
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     async execute({ path: input, offset } = {}) {
-      const path = normalizePath(input);
+      // Follow a configured redirect first: `/raw/<old>.md` has no entry in the
+      // content index, so reading a moved path would 404 on a page the site
+      // still serves (the route rule redirects a browser hitting it).
+      const { path, redirectedFrom, external } = resolveDocsPath(input);
+      if (external) {
+        throw new Error(
+          `\`${redirectedFrom}\` redirects to ${path}, which is outside this ` +
+            `documentation site — there is no Markdown source to read. Open the URL instead.`,
+        );
+      }
+
       // `/raw/**` serves the page's source markdown (frontmatter stripped,
       // title/description ensured) — the same text `llms.txt` links to.
       let markdown: string;
@@ -70,7 +84,7 @@ export function readPageTool(): ModelContextTool {
         });
       } catch (error: any) {
         const status = error?.statusCode ?? error?.response?.status;
-        if (status === 404) throw noSourceError(path);
+        if (status === 404) throw noSourceError(path, redirectedFrom);
         throw error;
       }
 
@@ -85,6 +99,7 @@ export function readPageTool(): ModelContextTool {
       const doc = await page(path);
       return {
         path,
+        redirectedFrom,
         ...pageLinks(path, doc),
         title: doc?.title ?? "",
         description: doc?.description ?? "",

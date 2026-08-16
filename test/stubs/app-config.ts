@@ -11,6 +11,13 @@ export default {
       discord: "https://discord.gg/example",
     },
     versions: [{ label: "v3", to: "https://docs.test", active: true }],
+    redirects: {
+      // Exact, wildcard-with-tail, and off-site — the three shapes
+      // `resolveRedirect` distinguishes.
+      "/deploy": "/guide/deploy",
+      "/docs/**": "/**",
+      "/changelog": "https://github.com/unjs/undocs/releases",
+    },
   },
   site: {
     name: "Test Docs",

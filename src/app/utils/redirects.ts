@@ -39,6 +39,17 @@ export function normalizeRedirects(input: unknown): RedirectMap {
 }
 
 /**
+ * Does this target leave the app entirely? A redirect may point at an absolute
+ * URL (`/changelog` → `https://github.com/…/releases`), which is a full page
+ * load rather than a route. Every consumer must agree on the answer — the router
+ * hands those to `window.location`, and `webmcp` reports them as off-site
+ * instead of describing a page that was never rendered.
+ */
+export function isExternalRedirect(target: string): boolean {
+  return /^[a-z][\d+.a-z-]*:/i.test(target);
+}
+
+/**
  * Resolve `path` against a normalized map — the redirect target, or `undefined`
  * when nothing matches. Exact keys win over wildcards; among wildcards the
  * longest (most specific) base wins.
