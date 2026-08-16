@@ -720,13 +720,32 @@ describe("webmcp polyfill", () => {
     const tools = await modelContext.getTools();
     const search = tools.find((t) => t.name === "search_docs")!;
 
-    const { data } = unwrap(await modelContext.executeTool!(search, { query: "vercel" }));
+    // The result is SERIALIZED, as the spec's execute steps serialize it: a
+    // client that renders what it got must not be handed `[object Object]`.
+    const serialized = await modelContext.executeTool!(search, { query: "vercel" });
+    expect(serialized).toBeTypeOf("string");
+    const { data } = unwrap(JSON.parse(serialized));
     expect(data.results[0]).toMatchObject({ path: "/guide/deploy" });
 
-    const byName: any = await modelContext.executeTool!("search_docs", '{"query":"vercel"}');
-    expect(unwrap(byName).data.count).toBe(data.count);
+    const byName = await modelContext.executeTool!("search_docs", '{"query":"vercel"}');
+    expect(unwrap(JSON.parse(byName)).data.count).toBe(data.count);
 
     await expect(modelContext.executeTool!("no_such_tool", {})).rejects.toThrow(/not found/);
+  });
+
+  // Agents call a no-argument tool with every spelling of "nothing": omitted,
+  // an empty string, `"null"`, a stray non-JSON string. `execute` takes an
+  // OBJECT, so each of those has to arrive as one.
+  it("hands `execute` an object whatever the caller passed for arguments", async () => {
+    stubBrowser();
+    const router = createStubRouter("/guide/deploy");
+    const modelContext = installWebMCPPolyfill(toolLoader(router))!;
+    await modelContext.getTools();
+
+    for (const args of [undefined, "", "null", "not json", 42, { "": "" }]) {
+      const result = JSON.parse(await modelContext.executeTool!("get_current_page", args));
+      expect(result).toMatchObject({ path: "/guide/deploy", title: "Deploy" });
+    }
   });
 
   it("rejects a duplicate name and unregisters on abort", async () => {

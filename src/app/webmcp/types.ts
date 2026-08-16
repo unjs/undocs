@@ -68,13 +68,19 @@ export interface ModelContext extends EventTarget {
   getTools(options?: { fromOrigins?: string[] }): Promise<RegisteredTool[]>;
   ontoolchange: ((this: ModelContext, event: Event) => unknown) | null;
   /**
-   * NOT in the spec — with native WebMCP the browser calls the registrant's
-   * `execute` itself. It exists on the reference polyfill (and so on ours, see
-   * `./polyfill.ts`) because a page-hosted agent has no other way in, which is
-   * why every polyfill consumer calls it. Optional: a native `modelContext`
-   * does not have it.
+   * Run a tool and resolve its result as a JSON STRING — the spec serializes
+   * `execute`'s value before resolving, and so does `./polyfill.ts`.
+   *
+   * The spec passes `inputArguments` as JSON text and takes only a
+   * `RegisteredTool`; the polyfill also accepts an argument object and a bare
+   * tool name, because every reference-polyfill consumer calls it that way.
+   * Optional because a browser predating the method may not have it.
    */
-  executeTool?(tool: { name?: string } | string, args?: unknown): Promise<unknown>;
+  executeTool?(
+    tool: { name?: string } | string,
+    args?: unknown,
+    options?: { signal?: AbortSignal },
+  ): Promise<string>;
 }
 
 declare global {

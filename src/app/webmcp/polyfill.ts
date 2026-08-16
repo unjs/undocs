@@ -5,9 +5,8 @@
  * LLC): https://github.com/GoogleChromeLabs/webmcp-tools/blob/main/demos/shared/webmcp-polyfill.js
  * — rewritten in TypeScript against our `types.ts`, keeping the two things its
  * consumers actually bind to: the `window.__webmcp_registered_tools` registry
- * and the `getTools()` / `executeTool()` pair (`executeTool` is the polyfill's
- * own addition — the spec has no such method, because with native WebMCP the
- * agent is the browser).
+ * and the `getTools()` / `executeTool()` pair (`executeTool` began as the
+ * reference polyfill's own addition, before the spec grew the method).
  *
  * Dropped, and why:
  * - **Declarative `form[toolname]` tools.** undocs registers every tool
@@ -65,6 +64,24 @@ const TOOL_NAME_RE = /^[A-Za-z0-9_.-]{1,128}$/;
 
 function registry(): Map<string, PolyfilledTool> {
   return (window.__webmcp_registered_tools ??= new Map());
+}
+
+/**
+ * Coerce a caller's arguments into the `object input` `execute` is declared to
+ * take — the spec parses `inputArguments` as JSON and fails anything that is
+ * not an object; we substitute `{}` instead (see `executeTool`).
+ */
+function toInputObject(args: unknown): Record<string, unknown> {
+  let input = args;
+  if (typeof input === "string") {
+    try {
+      input = JSON.parse(input);
+    } catch {
+      // Not JSON — there are no arguments to hand over.
+      return {};
+    }
+  }
+  return input && typeof input === "object" ? (input as Record<string, unknown>) : {};
 }
 
 class PolyfillModelContext extends EventTarget implements ModelContext {
@@ -143,28 +160,46 @@ class PolyfillModelContext extends EventTarget implements ModelContext {
   }
 
   /**
-   * Run a tool. Not a spec method — with native WebMCP the browser invokes the
-   * registrant's `execute` itself — but every polyfill consumer calls it, so it
-   * is the whole point of installing this. Accepts the tool descriptor
-   * `getTools()` handed out (only its `name` is trusted) and either an argument
-   * object or its JSON, as the reference polyfill does.
+   * Run a tool, and resolve its result AS A JSON STRING.
+   *
+   * The string is the whole point: the spec's signature is
+   * `Promise<DOMString> executeTool(RegisteredTool, DOMString inputArguments)`,
+   * and its imperative execute steps serialize `execute`'s fulfillment value to
+   * JSON before resolving. A native `modelContext` therefore hands the agent
+   * text, and a client that renders what it got — `${result}`, an
+   * `innerText =`, an append into a chat transcript — renders that text. The
+   * reference polyfill predates the method being specced and resolves the raw
+   * value, so those same clients print `[object Object]` for every tool here.
+   * Matching the spec is the only way to be indistinguishable from native,
+   * which is what a polyfill is for; a consumer that wants the object parses
+   * one, exactly as it must against Chrome.
+   *
+   * Input is the mirror image and stays LENIENT where the spec is not: it takes
+   * the JSON string the spec passes, an argument object (what every reference
+   * consumer passes), or nothing. Anything that does not land on an object
+   * becomes `{}` rather than a rejection — a no-arg tool invoked with `""` is
+   * common in the wild, and for a tool that does need arguments its own
+   * "`query` is required" beats a `DataError` the agent cannot act on.
+   *
+   * The tool itself is addressed by `name` alone, whether it arrives as the
+   * descriptor `getTools()` handed out or as a bare string.
    */
-  async executeTool(tool: { name?: string } | string, args?: unknown): Promise<unknown> {
+  async executeTool(
+    tool: { name?: string } | string,
+    args?: unknown,
+    _options?: { signal?: AbortSignal },
+  ): Promise<string> {
     await this.#ensureTools();
     const name = typeof tool === "string" ? tool : tool?.name;
     const registered = name ? registry().get(name) : undefined;
     if (!registered) {
       throw new Error(`Tool ${String(name)} not found`);
     }
-    let input = args;
-    if (typeof input === "string") {
-      try {
-        input = JSON.parse(input);
-      } catch {
-        // Not JSON — hand the tool the string it was given.
-      }
-    }
-    return registered._execute(input ?? {});
+    const result = await registered._execute(toInputObject(args));
+    // `?? "null"` covers a tool resolving something JSON drops entirely
+    // (`undefined`, a function): the spec's serialization step would throw,
+    // but an agent is better served by a value it can parse.
+    return JSON.stringify(result ?? null) ?? "null";
   }
 
   get ontoolchange(): ((this: ModelContext, event: Event) => unknown) | null {

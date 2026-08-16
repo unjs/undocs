@@ -252,8 +252,12 @@ NEVER write E2E tests. Ask for it to be tested manually.
   `document.modelContext` is barely shipping, so the agents that can use our
   tools TODAY are the ones written against that file — which is why it keeps the
   two things they bind to: the `window.__webmcp_registered_tools` registry under
-  that exact name, and `executeTool` (NOT a spec method; natively the browser
-  invokes `execute` itself). Same rules as `ui/primitives/`: the attribution
+  that exact name, and `executeTool` (the reference polyfill's own invention,
+  which the spec has since adopted). Where the two disagree the SPEC wins, since
+  a polyfill's job is to be indistinguishable from native: `executeTool` resolves
+  the result SERIALIZED to a JSON string, as the spec's execute steps do and the
+  reference does not — a client that renders what it got prints `[object Object]`
+  otherwise. Same rules as `ui/primitives/`: the attribution
   header is the only record of the derivation, and its "dropped, and why" list —
   declarative `form[toolname]` tools, the `:tool-form-active` shim that re-fetches
   every stylesheet, and the `postMessage` bridge that would hand ANY embedder our

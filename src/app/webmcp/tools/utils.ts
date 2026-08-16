@@ -119,8 +119,9 @@ export interface TextResult<T> {
 /**
  * Wrap a PROSE-carrying answer in MCP's own result shape.
  *
- * `executeTool()` resolves a string — the browser JSON-stringifies whatever
- * `execute` returns — so prose returned as a plain `{ markdown }` field reaches
+ * `executeTool()` resolves a string — the browser (and `../polyfill.ts`, which
+ * matches it) JSON-stringifies whatever `execute` returns — so prose returned
+ * as a plain `{ markdown }` field reaches
  * the client's model escaped inside JSON: a literal `\n` for every newline and a
  * backslash before every quote, across tens of thousands of characters. A client
  * that understands MCP unwraps `content` into a text block instead, so the
