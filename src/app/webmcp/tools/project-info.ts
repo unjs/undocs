@@ -4,7 +4,7 @@ import { withLeadingSlash } from "ufo";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { repoLinks, socialLinks } from "../links.ts";
 import type { ModelContextTool } from "../types.ts";
-import { pageUrl, siteName } from "./utils.ts";
+import { pageUrl } from "./utils.ts";
 
 /**
  * The `versions` config as linkable entries. Its `to` is whatever the docs
@@ -31,10 +31,7 @@ export function projectInfoTool(): ModelContextTool {
     name: "get_project_info",
     title: "Get project info and links",
     description:
-      `Return metadata and canonical links for ${siteName()}: the source ` +
-      `repository, issue tracker, releases, social/community links, the ` +
-      `\`llms.txt\` bundles, and any documented versions. Use this when the ` +
-      `user asks where to file a bug, find the source, or reach the project.`,
+      "Get project metadata and links: website, source repository, issues, releases, community, `llms.txt` bundles and versions.",
     inputSchema: { type: "object", properties: {} },
     annotations: { readOnlyHint: true },
     execute() {

@@ -51,12 +51,8 @@ export function readPageTool(): ModelContextTool {
     name: "read_page",
     title: "Read a documentation page",
     description:
-      `Return the Markdown source of one documentation page, given its route ` +
-      `path (e.g. '/guide/getting-started'). Paths come from \`search_docs\`, ` +
-      `\`list_pages\` or \`get_current_page\`. A long page comes back ` +
-      `truncated with a \`nextOffset\` — call again with that \`offset\` for ` +
-      `the rest. Generated routes (the landing page, the blog listing) have no ` +
-      `Markdown source.`,
+      `Read a documentation page as Markdown by route path. If \`truncated\`, ` +
+      `continue with \`nextOffset\` as \`offset\`. Generated pages have no Markdown source.`,
     inputSchema: {
       type: "object",
       properties: {
@@ -66,15 +62,12 @@ export function readPageTool(): ModelContextTool {
         },
         offset: {
           type: "integer",
-          description:
-            "Character offset to read from — pass the `nextOffset` of a truncated result to continue (default 0).",
+          description: "Character offset; use `nextOffset` to continue (default 0).",
           minimum: 0,
         },
         maxLength: {
           type: "integer",
-          description:
-            `Maximum characters of Markdown to return (1-${MARKDOWN_MAX}, default ${MARKDOWN_MAX}). ` +
-            `Lower it to take a long page in smaller slices; \`nextOffset\` continues from each one.`,
+          description: `Maximum Markdown characters to return (1-${MARKDOWN_MAX}, default ${MARKDOWN_MAX}).`,
           minimum: 1,
           maximum: MARKDOWN_MAX,
         },

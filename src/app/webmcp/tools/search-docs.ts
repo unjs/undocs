@@ -14,7 +14,7 @@ import type { SearchDocument } from "@server/content/search-options.ts";
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { querySearchIndex } from "@app/composables/useContent.ts";
 import type { ModelContextTool } from "../types.ts";
-import { clampLimit, pageUrl, siteName, textResult } from "./utils.ts";
+import { clampLimit, siteName, textResult } from "./utils.ts";
 
 /**
  * The MiniSearch index, rehydrated once and memoized. Routed through the shared
@@ -38,11 +38,21 @@ function searchIndex(): Promise<MiniSearch<SearchDocument> | null> {
   return indexPromise;
 }
 
+/**
+ * One hit, addressed the way the OTHER tools take input: a route path plus the
+ * matched heading's anchor. `path` is `read_page`'s argument verbatim and
+ * `hash` is `navigate`'s, so acting on a result is a copy rather than a parse —
+ * where an absolute `https://origin/guide/deploy#vercel` is a link for a human
+ * and makes the agent strip an origin back off (or, worse, fetch the rendered
+ * HTML page instead of asking `read_page` for the Markdown).
+ */
 interface SearchHit {
   title: string;
   breadcrumb?: string;
+  /** Route path of the page the section lives on, e.g. `/guide/deploy`. */
   path: string;
-  url: string;
+  /** Anchor of the matched heading, e.g. `#vercel`; absent on a page-level hit. */
+  hash?: string;
   preview: string;
 }
 
@@ -51,6 +61,9 @@ interface SearchHit {
  * previews as prose instead of as JSON-escaped strings. This is DISPLAY text —
  * the structured copy beside it keeps every field verbatim, which is why a
  * preview's own line breaks can be collapsed here to keep one hit to one entry.
+ *
+ * The path line is relative for the same reason the fields are: it is the thing
+ * an agent reading only the prose hands to the next tool call.
  */
 function formatHits(query: string, hits: SearchHit[]): string {
   if (hits.length === 0) return `No results for "${query}".`;
@@ -58,7 +71,8 @@ function formatHits(query: string, hits: SearchHit[]): string {
     .map((hit, i) => {
       const heading = hit.breadcrumb ? `${hit.breadcrumb} > ${hit.title}` : hit.title;
       const preview = hit.preview.replace(/\s+/g, " ").trim();
-      return `${i + 1}. ${heading}\n   ${hit.url}${preview ? `\n   ${preview}` : ""}`;
+      const link = `${hit.path}${hit.hash ?? ""}`;
+      return `${i + 1}. ${heading}\n   ${link}${preview ? `\n   ${preview}` : ""}`;
     })
     .join("\n\n");
 }
@@ -68,10 +82,8 @@ export function searchDocsTool(): ModelContextTool {
     name: "search_docs",
     title: "Search documentation",
     description:
-      `Full-text search over ${siteName()}. Searches page and heading sections, ` +
-      `returning the best matches with a text preview and a linkable URL. ` +
-      `Use this first to find which page answers a question, then call ` +
-      `\`read_page\` for the full text of a result.`,
+      `Search pages and sections in ${siteName()}. Returns ranked matches with previews, ` +
+      `route paths and optional heading anchors. Use \`read_page\` to read a result.`,
     inputSchema: {
       type: "object",
       properties: {
@@ -113,14 +125,14 @@ export function searchDocsTool(): ModelContextTool {
           title: stored.title,
           breadcrumb: (stored.titles || []).join(" > ") || undefined,
           path,
-          url: pageUrl(path, hash),
+          hash: hash ? `#${hash}` : undefined,
           preview: stored.preview || "",
         };
       });
 
       // Previews are prose (up to `PREVIEW_MAX` of the section's own text), so
       // this result gets the text block too — the structured hits carry the
-      // linkable fields an agent acts on.
+      // route path and anchor an agent acts on.
       return textResult(formatHits(q, results), {
         query: q,
         count: results.length,

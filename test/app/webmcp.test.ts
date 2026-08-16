@@ -291,23 +291,33 @@ describe("webmcp tool descriptors", () => {
 });
 
 describe("search_docs", () => {
-  it("returns ranked results with linkable urls", async () => {
+  // A hit addresses itself the way the other tools take input: `path` is
+  // `read_page`'s argument and `hash` is `navigate`'s. An absolute URL here
+  // would make the agent strip an origin back off before it could act.
+  it("addresses hits by route path and anchor, never an absolute url", async () => {
     const { data } = unwrap(await toolsByName().search_docs.execute({ query: "vercel" }));
     expect(data.count).toBeGreaterThan(0);
     expect(data.results[0]).toMatchObject({
       title: "Vercel",
       path: "/guide/deploy",
-      url: `${ORIGIN}/guide/deploy#vercel`,
+      hash: "#vercel",
       breadcrumb: "Deploy",
     });
+    expect(JSON.stringify(data)).not.toContain(ORIGIN);
+  });
+
+  it("omits the anchor on a page-level hit", async () => {
+    const { data } = unwrap(await toolsByName().search_docs.execute({ query: "install" }));
+    expect(data.results[0]).toMatchObject({ path: "/guide", title: "Getting Started" });
+    expect(data.results[0].hash).toBeUndefined();
   });
 
   it("renders the previews as prose in the result's text block", async () => {
     // The previews are the prose half of a search result; escaped into a JSON
     // string they reach the client model as `\n`-littered source. The text
-    // block carries them readably, breadcrumb and linkable URL included.
+    // block carries them readably, breadcrumb and relative link included.
     const { text } = unwrap(await toolsByName().search_docs.execute({ query: "vercel" }));
-    expect(text).toContain(`1. Deploy > Vercel\n   ${ORIGIN}/guide/deploy#vercel`);
+    expect(text).toContain("1. Deploy > Vercel\n   /guide/deploy#vercel");
     expect(text).toContain("Deploy to Vercel with zero config.");
   });
 

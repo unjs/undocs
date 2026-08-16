@@ -9,10 +9,8 @@ export function navigateTool(router: AppRouter): ModelContextTool {
     name: "navigate",
     title: "Open a documentation page",
     description:
-      `Navigate the browser tab to a documentation page, optionally scrolling ` +
-      `to a heading anchor. This changes what the user sees — only use it when ` +
-      `the user asked to be taken somewhere. To READ a page without moving ` +
-      `them, use \`read_page\`.`,
+      `Open a documentation page in the user's browser, optionally at a heading. ` +
+      `Use only when the user asks to navigate; use \`read_page\` to inspect content without moving them.`,
     inputSchema: {
       type: "object",
       properties: {
@@ -22,7 +20,7 @@ export function navigateTool(router: AppRouter): ModelContextTool {
         },
         hash: {
           type: "string",
-          description: "Optional heading anchor to scroll to, e.g. '#installation'.",
+          description: "Heading anchor to scroll to, e.g. '#installation'.",
         },
       },
       required: ["path"],

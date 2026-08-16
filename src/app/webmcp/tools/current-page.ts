@@ -8,9 +8,7 @@ export function currentPageTool(router: AppRouter): ModelContextTool {
     name: "get_current_page",
     title: "Get the current page",
     description:
-      `Return the documentation page the user is currently viewing: its route ` +
-      `path, URL, title, description and heading outline. Use this to ground ` +
-      `answers in what the user is actually looking at.`,
+      "Get metadata for the page the user is viewing: path, URL, title, description and heading outline.",
     inputSchema: { type: "object", properties: {} },
     annotations: { readOnlyHint: true },
     execute: () => currentPage(router),

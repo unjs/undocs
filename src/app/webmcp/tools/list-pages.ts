@@ -2,7 +2,7 @@
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import type { ModelContextTool } from "../types.ts";
 import { flattenNav, navigation } from "./content.ts";
-import { pageUrl, siteName } from "./utils.ts";
+import { pageUrl } from "./utils.ts";
 
 export function listPagesTool(): ModelContextTool {
   const appConfig = useAppConfig();
@@ -10,9 +10,8 @@ export function listPagesTool(): ModelContextTool {
     name: "list_pages",
     title: "List documentation pages",
     description:
-      `List every page of ${siteName()} in navigation order, with its route ` +
-      `path and description. Use this to get an overview of what the docs ` +
-      `cover; use \`search_docs\` when you have a specific question.`,
+      `List pages in the documentation navigation with titles, paths, URLs and available ` +
+      `descriptions. Use for browsing; use \`search_docs\` for a specific topic.`,
     inputSchema: { type: "object", properties: {} },
     annotations: { readOnlyHint: true },
     async execute() {
