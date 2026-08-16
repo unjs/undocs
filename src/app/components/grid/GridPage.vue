@@ -1,5 +1,5 @@
 <script setup lang="ts">
- /**
+/**
  * The page shell — FULL-BLEED.
  *
  * It wraps the header, main and footer, but it constrains nothing horizontally:
