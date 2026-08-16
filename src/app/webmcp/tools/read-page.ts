@@ -62,7 +62,7 @@ export function readPageTool(): ModelContextTool {
       },
       required: ["path"],
     },
-    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    annotations: { readOnlyHint: true },
     async execute({ path: input, offset } = {}) {
       // Follow a configured redirect first: `/raw/<old>.md` has no entry in the
       // content index, so reading a moved path would 404 on a page the site

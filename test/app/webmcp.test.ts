@@ -237,6 +237,16 @@ describe("webmcp tool descriptors", () => {
     }
     expect(tools.navigate.annotations?.readOnlyHint).toBe(false);
   });
+
+  // Docs pages, nav and config all come out of the one repo the site is built
+  // from, so every result is the page author's own content (see `types.ts`).
+  // Flagging one tool is a claim it reaches something the others don't; this
+  // keeps that a decision instead of a copy-paste.
+  it("treats every docs tool's content as trusted", () => {
+    for (const tool of createDocsTools(createStubRouter())) {
+      expect(tool.annotations?.untrustedContentHint).toBeUndefined();
+    }
+  });
 });
 
 describe("search_docs", () => {

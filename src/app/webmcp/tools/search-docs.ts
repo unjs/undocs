@@ -63,9 +63,7 @@ export function searchDocsTool(): ModelContextTool {
       },
       required: ["query"],
     },
-    // Results embed docs prose, which for most projects is community-authored
-    // — flag it so the agent treats it as data, never as instructions.
-    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    annotations: { readOnlyHint: true },
     // The spec passes an object, but it's a draft behind flags — default the
     // destructure so a bare call fails with the tool's own error, not a
     // `TypeError` the agent can't act on. Same for the other tools.

@@ -12,7 +12,7 @@ export function currentPageTool(router: AppRouter): ModelContextTool {
       `path, URL, title, description and heading outline. Use this to ground ` +
       `answers in what the user is actually looking at.`,
     inputSchema: { type: "object", properties: {} },
-    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    annotations: { readOnlyHint: true },
     execute: () => currentPage(router),
   };
 }

@@ -14,7 +14,7 @@ export function listPagesTool(): ModelContextTool {
       `path and description. Use this to get an overview of what the docs ` +
       `cover; use \`search_docs\` when you have a specific question.`,
     inputSchema: { type: "object", properties: {} },
-    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    annotations: { readOnlyHint: true },
     async execute() {
       const pages = flattenNav(await navigation());
       return {

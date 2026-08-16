@@ -27,9 +27,7 @@ export function navigateTool(router: AppRouter): ModelContextTool {
       },
       required: ["path"],
     },
-    // The result embeds the landed page's title/description/outline — the same
-    // docs prose every other tool flags.
-    annotations: { readOnlyHint: false, untrustedContentHint: true },
+    annotations: { readOnlyHint: false },
     async execute({ path: input, hash } = {}) {
       // A moved path is a real destination: resolve the docs config's redirects
       // the way the router will, so validation judges where the agent is

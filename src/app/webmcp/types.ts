@@ -8,7 +8,19 @@
 export interface ToolAnnotations {
   /** The tool only reads; it does not mutate page state. */
   readOnlyHint?: boolean;
-  /** The result may embed content the page's author does not fully control. */
+  /**
+   * The result may embed content the page's author does not fully control — the
+   * client is expected to fence it off as data and usually wraps it in a
+   * warning to the agent.
+   *
+   * DELIBERATELY UNSET by every docs tool: a site's pages, its nav and its
+   * config are all one repo, so the docs ARE the page author's own content and
+   * flagging them would spend the warning on everything the agent ever reads
+   * here. Setting it on one tool is a claim that THAT tool reaches something the
+   * rest do not — content proxied from a third party, or user input the site
+   * echoes back. `webmcp.test.ts` pins the current answer (nothing sets it) so
+   * re-adding it stays a decision rather than drift.
+   */
   untrustedContentHint?: boolean;
 }
 
