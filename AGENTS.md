@@ -239,9 +239,11 @@ NEVER write E2E tests. Ask for it to be tested manually.
   (`/guide/deploy`, `/guide-deploy` and `/Guide/Deploy` collapse onto ONE entry),
   and `queryPage` resolves a 404 to `null` instead of throwing. So looking up an
   unvalidated path through `webmcp/tools/content.ts`'s `page()` would cache `null` under
-  a REAL page's key and 404 the visitor's next navigation there. Unvalidated
-  input goes through `probePage`/`routeExists` (own key namespace); `page()` is
-  only for the visitor's own route or a path already cleared.
+  a REAL page's key and 404 the visitor's next navigation there. Proving the
+  path real does NOT earn the key either — two paths that BOTH exist collide the
+  same way, and the visitor gets the other page's title/description/outline.
+  Agent input goes through `probePage`/`routeExists` (own key namespace);
+  `page()` is only for the visitor's own route.
 - **Heading anchors come from md4x, at parse time.** It slugs every heading
   GitHub-compatibly, de-duplicates within the document (`same`, `same-1`) and
   honours an explicit `## Title {#anchor}`, stamping the result on the node.

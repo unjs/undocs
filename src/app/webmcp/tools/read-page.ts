@@ -3,7 +3,7 @@ import { $fetch } from "ofetch";
 import { joinURL } from "ufo";
 
 import type { ModelContextTool } from "../types.ts";
-import { page, pageLinks } from "./content.ts";
+import { pageLinks, probePage } from "./content.ts";
 import { clampOffset, resolveDocsPath, STANDALONE_ROUTES } from "./utils.ts";
 
 /**
@@ -94,9 +94,12 @@ export function readPageTool(): ModelContextTool {
       const slice = markdown.slice(start, start + MARKDOWN_MAX);
       const end = start + slice.length;
 
-      // The path came back 200 from `/raw`, so it's real — safe to share the
-      // docs page's cache key (see `page`).
-      const doc = await page(path);
+      // Metadata under OUR key, never the docs page's. A 200 from `/raw` proves
+      // the path is real, but `page()`'s `kebabCase` key is lossy between two
+      // paths that are BOTH real: `/guide-deploy` and `/guide/deploy` share one
+      // entry, so caching either here hands the visitor's next navigation to
+      // the other one the wrong page's title, description and outline.
+      const doc = await probePage(path);
       return {
         path,
         redirectedFrom,

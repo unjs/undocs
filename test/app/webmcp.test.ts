@@ -62,6 +62,23 @@ const PAGES: Record<
     toc: [{ id: "vercel", depth: 2, text: "Vercel" }],
     markdown: "# Deploy\n\nDeploy to Vercel with zero config.\n",
   },
+  // A pair that BOTH exist and collide under `kebabCase` (`-guide-nested`), for
+  // the cache-key test below. Untouched by every other test, so that one owns
+  // the shared `useAsyncData` entry and cannot be raced by test order.
+  "/guide/nested": {
+    id: "content/2.guide/4.nested/1.index.md",
+    title: "Nested",
+    description: "The real nested page.",
+    toc: [],
+    markdown: "# Nested\n\nThe real nested page.\n",
+  },
+  "/guide-nested": {
+    id: "content/2.guide-nested.md",
+    title: "Guide Nested",
+    description: "A sibling that kebab-cases onto the same key.",
+    toc: [],
+    markdown: "# Guide Nested\n\nA sibling page.\n",
+  },
   // Comfortably past `MARKDOWN_MAX` (40k chars), for the truncate/continue path.
   "/guide/long": {
     id: "content/2.guide/3.long.md",
@@ -434,6 +451,24 @@ describe("navigate", () => {
 
     const entry = await useAsyncData(kebabCase("/guide/deploy"), () => queryPage("/guide/deploy"));
     expect(entry.data.value).toMatchObject({ title: "Deploy" });
+  });
+
+  it("does not poison the docs page cache when an agent reads a colliding REAL page", async () => {
+    // Proving the path real is not enough to earn the docs page's key: two
+    // paths that both exist collide under `kebabCase` just the same
+    // (`/guide-nested` and `/guide/nested` → `-guide-nested`), so reading one
+    // through that key would serve the OTHER page's title/description/outline
+    // on the visitor's next navigation there.
+    const { useAsyncData } = await import("@app/composables/useAsyncData.ts");
+    const { queryPage } = await import("@app/composables/useContent.ts");
+    const { kebabCase } = await import("scule");
+
+    await expect(toolsByName().read_page.execute({ path: "/guide-nested" })).resolves.toMatchObject(
+      { title: "Guide Nested" },
+    );
+
+    const entry = await useAsyncData(kebabCase("/guide/nested"), () => queryPage("/guide/nested"));
+    expect(entry.data.value).toMatchObject({ title: "Nested" });
   });
 });
 

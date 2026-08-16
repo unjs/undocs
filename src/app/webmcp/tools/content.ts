@@ -33,8 +33,8 @@ export async function navigation(): Promise<NavItem[]> {
  * One page — same `useAsyncData` key the docs page component uses
  * (`kebabCase(path)`), so the currently-rendered page is already cached here.
  *
- * ONLY for a path already known to be real: the visitor's own route, or one
- * `routeExists` has cleared. For anything an agent typed, use `probePage`.
+ * ONLY for the visitor's OWN route. Proving an agent's path real is NOT enough
+ * to earn this key — see `probePage`.
  */
 export async function page(path: string): Promise<DocPage | null> {
   const entry = await useAsyncData(kebabCase(path), () => queryPage(path));
@@ -46,10 +46,16 @@ export async function page(path: string): Promise<DocPage | null> {
  *
  * `page()`'s key is lossy — `kebabCase` collapses `/guide/deploy`,
  * `/guide-deploy` and `/Guide/Deploy` onto one entry — and `queryPage` resolves
- * a 404 to `null` rather than throwing. So probing an agent's typo through that
- * key would cache `null` under a REAL page's entry, and the visitor's next
- * navigation there would read the poisoned entry and throw a fatal 404 on a page
- * that exists. Keyed by the raw path here, where a miss can only poison itself.
+ * a 404 to `null` rather than throwing. Both halves of that poison the docs
+ * page's cache, and a real path is no safer than a typo:
+ *
+ *   - A typo caches `null` under a REAL page's entry, so the visitor's next
+ *     navigation there throws a fatal 404 on a page that exists.
+ *   - A path that is real but COLLIDES (`/guide-deploy` when `/guide/deploy`
+ *     also exists) caches the wrong page under the other's entry, so that
+ *     navigation renders the wrong title, description and outline.
+ *
+ * Keyed by the raw path here, where a miss can only poison itself.
  */
 export async function probePage(path: string): Promise<DocPage | null> {
   const entry = await useAsyncData(`webmcp:probe:${path}`, () => queryPage(path));
