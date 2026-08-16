@@ -4,13 +4,24 @@ import { joinURL } from "ufo";
 
 import type { ModelContextTool } from "../types.ts";
 import { pageLinks, probePage } from "./content.ts";
-import { clampOffset, resolveDocsPath, STANDALONE_ROUTES } from "./utils.ts";
+import {
+  clampLimit,
+  clampOffset,
+  resolveDocsPath,
+  STANDALONE_ROUTES,
+  textResult,
+} from "./utils.ts";
 
 /**
  * Cap on the Markdown one `read_page` call returns, so a long page can't fill an
  * agent's whole context in one go. Not a hard limit on what it can read: the
  * result carries a `nextOffset` cursor for the remainder (and `markdownUrl` /
  * `llms-full.txt` for an agent that would rather fetch the text itself).
+ *
+ * It is also the CEILING rather than the whole story — a caller with a smaller
+ * context window passes `maxLength` to take the page in finer slices, walking
+ * the same `nextOffset` cursor. Without that, a model too small for 40k chars
+ * could only take the default or nothing at all.
  */
 const MARKDOWN_MAX = 40_000;
 
@@ -59,11 +70,19 @@ export function readPageTool(): ModelContextTool {
             "Character offset to read from — pass the `nextOffset` of a truncated result to continue (default 0).",
           minimum: 0,
         },
+        maxLength: {
+          type: "integer",
+          description:
+            `Maximum characters of Markdown to return (1-${MARKDOWN_MAX}, default ${MARKDOWN_MAX}). ` +
+            `Lower it to take a long page in smaller slices; \`nextOffset\` continues from each one.`,
+          minimum: 1,
+          maximum: MARKDOWN_MAX,
+        },
       },
       required: ["path"],
     },
     annotations: { readOnlyHint: true },
-    async execute({ path: input, offset } = {}) {
+    async execute({ path: input, offset, maxLength } = {}) {
       // Follow a configured redirect first: `/raw/<old>.md` has no entry in the
       // content index, so reading a moved path would 404 on a page the site
       // still serves (the route rule redirects a browser hitting it).
@@ -88,10 +107,16 @@ export function readPageTool(): ModelContextTool {
         throw error;
       }
 
-      // Long pages are handed over in `MARKDOWN_MAX` slices: `nextOffset` is
-      // the cursor for the remainder, so truncation is a pause, not a dead end.
+      // Long pages are handed over in slices: `nextOffset` is the cursor for
+      // the remainder, so truncation is a pause, not a dead end. The slice is
+      // `maxLength` when the caller asked for a smaller one, `MARKDOWN_MAX`
+      // otherwise — an over-large or nonsense `maxLength` clamps to the cap
+      // rather than rejecting the call.
       const start = Math.min(clampOffset(offset), markdown.length);
-      const slice = markdown.slice(start, start + MARKDOWN_MAX);
+      const slice = markdown.slice(
+        start,
+        start + clampLimit(maxLength, MARKDOWN_MAX, MARKDOWN_MAX),
+      );
       const end = start + slice.length;
 
       // Metadata under OUR key, never the docs page's. A 200 from `/raw` proves
@@ -100,7 +125,10 @@ export function readPageTool(): ModelContextTool {
       // entry, so caching either here hands the visitor's next navigation to
       // the other one the wrong page's title, description and outline.
       const doc = await probePage(path);
-      return {
+      // The Markdown rides in the result's TEXT block, not in a JSON field —
+      // this is the tool whose answer is prose, and a whole page of it escaped
+      // into a JSON string is what `textResult` exists to avoid.
+      return textResult(slice, {
         path,
         redirectedFrom,
         ...pageLinks(path, doc),
@@ -110,8 +138,7 @@ export function readPageTool(): ModelContextTool {
         offset: start,
         truncated: end < markdown.length,
         nextOffset: end < markdown.length ? end : undefined,
-        markdown: slice,
-      };
+      });
     },
   };
 }

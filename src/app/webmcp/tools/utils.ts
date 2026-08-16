@@ -1,10 +1,10 @@
 /**
- * Input coercion and URL shaping shared by the docs tools.
+ * Input coercion and result shaping shared by the docs tools.
  *
  * Everything here deals with what an agent HANDS US (a path it read off an
  * earlier result, a count, an offset) or with what we hand back (absolute,
- * directly-linkable URLs). Nothing here touches the content API — that's
- * `./content.ts`.
+ * directly-linkable URLs; the MCP result envelope). Nothing here touches the
+ * content API — that's `./content.ts`.
  */
 import { withLeadingSlash, withoutTrailingSlash } from "ufo";
 
@@ -108,4 +108,31 @@ export function clampLimit(value: unknown, fallback: number, max: number): numbe
 export function clampOffset(value: unknown): number {
   const n = Math.floor(Number(value));
   return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+/** An MCP tool result: a text block for the prose, metadata beside it. */
+export interface TextResult<T> {
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent: T;
+}
+
+/**
+ * Wrap a PROSE-carrying answer in MCP's own result shape.
+ *
+ * `executeTool()` resolves a string — the browser JSON-stringifies whatever
+ * `execute` returns — so prose returned as a plain `{ markdown }` field reaches
+ * the client's model escaped inside JSON: a literal `\n` for every newline and a
+ * backslash before every quote, across tens of thousands of characters. A client
+ * that understands MCP unwraps `content` into a text block instead, so the
+ * markdown arrives as markdown; one that doesn't still receives the whole object
+ * as JSON, exactly as it did before.
+ *
+ * The prose lives in `content` ONLY, never copied into `structuredContent` as
+ * well — that would double the payload for precisely the client that cannot
+ * unwrap it. Tools with no prose to unescape (`get_project_info`, `list_pages`,
+ * `get_current_page`, `navigate`) keep returning a plain object: the envelope
+ * buys them nothing and costs them a nesting level.
+ */
+export function textResult<T>(text: string, structuredContent: T): TextResult<T> {
+  return { content: [{ type: "text", text }], structuredContent };
 }

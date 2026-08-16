@@ -200,6 +200,19 @@ function toolsByName(router: AppRouter = createStubRouter()): Record<string, Mod
   return Object.fromEntries(createDocsTools(router).map((tool) => [tool.name, tool]));
 }
 
+/**
+ * Unwrap an MCP-shaped result into its text block and its metadata.
+ *
+ * The prose-carrying tools answer with `{ content: [{ type: "text", text }],
+ * structuredContent }` so a client that speaks MCP renders the text as text
+ * rather than as a JSON-escaped string. Asserting the envelope here means every
+ * call site below reads the same as it did against the old flat object.
+ */
+function unwrap(result: any): { text: string; data: any } {
+  expect(result.content).toEqual([{ type: "text", text: expect.any(String) }]);
+  return { text: result.content[0].text, data: result.structuredContent };
+}
+
 describe("webmcp tool descriptors", () => {
   it("exposes the docs tool set", () => {
     expect(Object.keys(toolsByName())).toEqual([
@@ -247,13 +260,41 @@ describe("webmcp tool descriptors", () => {
       expect(tool.annotations?.untrustedContentHint).toBeUndefined();
     }
   });
+
+  // The MCP envelope buys a tool one thing: prose that reaches the client model
+  // as text instead of as a JSON-escaped string. The metadata-only tools have no
+  // prose to unescape, so wrapping them would only cost a nesting level — which
+  // makes "which tools are wrapped" a decision worth pinning.
+  it("wraps only the prose-carrying tools in the MCP content shape", async () => {
+    const router = createStubRouter("/guide");
+    const tools = toolsByName(router);
+    const wrapped: any[] = await Promise.all([
+      tools.search_docs!.execute({ query: "vercel" }),
+      tools.read_page!.execute({ path: "/guide/deploy" }),
+    ]);
+    for (const result of wrapped) {
+      expect(result.content).toEqual([{ type: "text", text: expect.any(String) }]);
+      expect(result.structuredContent).toBeTypeOf("object");
+    }
+
+    const plain: any[] = await Promise.all([
+      tools.list_pages!.execute({}),
+      tools.get_project_info!.execute({}),
+      tools.get_current_page!.execute({}),
+      tools.navigate!.execute({ path: "/guide/deploy" }),
+    ]);
+    for (const result of plain) {
+      expect(result.content).toBeUndefined();
+      expect(result.structuredContent).toBeUndefined();
+    }
+  });
 });
 
 describe("search_docs", () => {
   it("returns ranked results with linkable urls", async () => {
-    const result: any = await toolsByName().search_docs.execute({ query: "vercel" });
-    expect(result.count).toBeGreaterThan(0);
-    expect(result.results[0]).toMatchObject({
+    const { data } = unwrap(await toolsByName().search_docs.execute({ query: "vercel" }));
+    expect(data.count).toBeGreaterThan(0);
+    expect(data.results[0]).toMatchObject({
       title: "Vercel",
       path: "/guide/deploy",
       url: `${ORIGIN}/guide/deploy#vercel`,
@@ -261,10 +302,28 @@ describe("search_docs", () => {
     });
   });
 
+  it("renders the previews as prose in the result's text block", async () => {
+    // The previews are the prose half of a search result; escaped into a JSON
+    // string they reach the client model as `\n`-littered source. The text
+    // block carries them readably, breadcrumb and linkable URL included.
+    const { text } = unwrap(await toolsByName().search_docs.execute({ query: "vercel" }));
+    expect(text).toContain(`1. Deploy > Vercel\n   ${ORIGIN}/guide/deploy#vercel`);
+    expect(text).toContain("Deploy to Vercel with zero config.");
+  });
+
+  it("says so in the text block when nothing matched", async () => {
+    const result: any = await toolsByName().search_docs.execute({ query: "zzqqxx" });
+    const { text, data } = unwrap(result);
+    expect(data).toMatchObject({ count: 0, results: [] });
+    expect(text).toBe('No results for "zzqqxx".');
+  });
+
   it("honours `limit` and rejects an empty query", async () => {
     const { search_docs } = toolsByName();
-    const result: any = await search_docs.execute({ query: "undocs deploy install", limit: 1 });
-    expect(result.results).toHaveLength(1);
+    const { data } = unwrap(
+      await search_docs.execute({ query: "undocs deploy install", limit: 1 }),
+    );
+    expect(data.results).toHaveLength(1);
     await expect(search_docs.execute({ query: "  " })).rejects.toThrow(/required/);
   });
 });
@@ -303,19 +362,23 @@ describe("get_project_info", () => {
 });
 
 describe("read_page", () => {
-  it("returns the source markdown", async () => {
+  it("returns the source markdown as the result's text block", async () => {
+    // A whole page of Markdown in a JSON field reaches the client model with a
+    // literal `\n` for every newline; MCP's `content` shape is what avoids it.
     const result: any = await toolsByName().read_page.execute({ path: "/guide/deploy" });
-    expect(result.markdown).toContain("Deploy to Vercel");
-    expect(result.truncated).toBe(false);
-    expect(result.url).toBe(`${ORIGIN}/guide/deploy`);
+    const { text, data } = unwrap(result);
+    expect(text).toBe(PAGES["/guide/deploy"]!.markdown);
+    expect(data.truncated).toBe(false);
+    expect(data.url).toBe(`${ORIGIN}/guide/deploy`);
+    // Never duplicated into the structured half — that would double the payload
+    // for exactly the client that cannot unwrap the text block.
+    expect(JSON.stringify(data)).not.toContain("Deploy to Vercel");
   });
 
   it("carries the markdown and edit links for the page", async () => {
-    const result: any = await toolsByName().read_page.execute({ path: "/guide/deploy" });
-    expect(result.markdownUrl).toBe(`${ORIGIN}/raw/guide/deploy.md`);
-    expect(result.editUrl).toBe(
-      "https://github.com/unjs/undocs/edit/main/docs/2.guide/2.deploy.md",
-    );
+    const { data } = unwrap(await toolsByName().read_page.execute({ path: "/guide/deploy" }));
+    expect(data.markdownUrl).toBe(`${ORIGIN}/raw/guide/deploy.md`);
+    expect(data.editUrl).toBe("https://github.com/unjs/undocs/edit/main/docs/2.guide/2.deploy.md");
   });
 
   it("normalizes what an agent passes as `path`", async () => {
@@ -326,8 +389,8 @@ describe("read_page", () => {
       "/guide/deploy.md",
       `${ORIGIN}/guide/deploy#vercel`,
     ]) {
-      const result: any = await read_page.execute({ path: input });
-      expect(result.path, input).toBe("/guide/deploy");
+      const { data } = unwrap(await read_page.execute({ path: input }));
+      expect(data.path, input).toBe("/guide/deploy");
     }
   });
 
@@ -349,31 +412,58 @@ describe("read_page", () => {
 
   it("hands back a long page in slices with a continuation cursor", async () => {
     const { read_page } = toolsByName();
-    const first: any = await read_page.execute({ path: "/guide/long" });
-    expect(first.truncated).toBe(true);
-    expect(first.offset).toBe(0);
-    expect(first.markdown).toHaveLength(40_000);
-    expect(first.nextOffset).toBe(40_000);
+    const first = unwrap(await read_page.execute({ path: "/guide/long" }));
+    expect(first.data.truncated).toBe(true);
+    expect(first.data.offset).toBe(0);
+    expect(first.text).toHaveLength(40_000);
+    expect(first.data.nextOffset).toBe(40_000);
 
-    const second: any = await read_page.execute({ path: "/guide/long", offset: first.nextOffset });
-    expect(second.offset).toBe(40_000);
-    expect(second.truncated).toBe(false);
-    expect(second.nextOffset).toBeUndefined();
-    expect(second.markdown).toContain("END");
+    const second = unwrap(
+      await read_page.execute({ path: "/guide/long", offset: first.data.nextOffset }),
+    );
+    expect(second.data.offset).toBe(40_000);
+    expect(second.data.truncated).toBe(false);
+    expect(second.data.nextOffset).toBeUndefined();
+    expect(second.text).toContain("END");
     // The two slices reassemble the whole source, with nothing dropped.
-    expect(first.markdown.length + second.markdown.length).toBe(first.length);
+    expect(first.text.length + second.text.length).toBe(first.data.length);
+  });
+
+  it("takes a page in smaller slices when a caller asks for less", async () => {
+    // A model with a small context window can't take 40k characters in one go;
+    // `maxLength` lets it walk the same `nextOffset` cursor in its own steps.
+    const { read_page } = toolsByName();
+    const first = unwrap(await read_page.execute({ path: "/guide/long", maxLength: 100 }));
+    expect(first.text).toHaveLength(100);
+    expect(first.data).toMatchObject({ offset: 0, truncated: true, nextOffset: 100 });
+
+    const second = unwrap(
+      await read_page.execute({ path: "/guide/long", offset: 100, maxLength: 100 }),
+    );
+    expect(second.text).toHaveLength(100);
+    expect(second.data.offset).toBe(100);
+    // Contiguous with the first slice, not a re-read of it.
+    expect(first.text + second.text).toBe(PAGES["/guide/long"]!.markdown.slice(0, 200));
+  });
+
+  it("clamps `maxLength` to the cap rather than refusing the call", async () => {
+    const { read_page } = toolsByName();
+    for (const maxLength of [10_000_000, 0, -1, "lots", undefined]) {
+      const { text } = unwrap(await read_page.execute({ path: "/guide/long", maxLength }));
+      expect(text, String(maxLength)).toHaveLength(40_000);
+    }
   });
 
   it("clamps a nonsense offset instead of returning junk", async () => {
     const { read_page } = toolsByName();
-    const negative: any = await read_page.execute({ path: "/guide/deploy", offset: -5 });
-    expect(negative.offset).toBe(0);
-    expect(negative.markdown).toContain("Deploy to Vercel");
+    const negative = unwrap(await read_page.execute({ path: "/guide/deploy", offset: -5 }));
+    expect(negative.data.offset).toBe(0);
+    expect(negative.text).toContain("Deploy to Vercel");
 
-    const past: any = await read_page.execute({ path: "/guide/deploy", offset: 10_000 });
-    expect(past.offset).toBe(past.length);
-    expect(past.markdown).toBe("");
-    expect(past.truncated).toBe(false);
+    const past = unwrap(await read_page.execute({ path: "/guide/deploy", offset: 10_000 }));
+    expect(past.data.offset).toBe(past.data.length);
+    expect(past.text).toBe("");
+    expect(past.data.truncated).toBe(false);
   });
 });
 
@@ -473,9 +563,8 @@ describe("navigate", () => {
     const { queryPage } = await import("@app/composables/useContent.ts");
     const { kebabCase } = await import("scule");
 
-    await expect(toolsByName().read_page.execute({ path: "/guide-nested" })).resolves.toMatchObject(
-      { title: "Guide Nested" },
-    );
+    const { data } = unwrap(await toolsByName().read_page.execute({ path: "/guide-nested" }));
+    expect(data).toMatchObject({ title: "Guide Nested" });
 
     const entry = await useAsyncData(kebabCase("/guide/nested"), () => queryPage("/guide/nested"));
     expect(entry.data.value).toMatchObject({ title: "Nested" });
@@ -640,12 +729,13 @@ describe("config redirects", () => {
   it("reads the page a redirect points at", async () => {
     // `/raw/deploy.md` has no content-index entry — without resolving first this
     // is a 404 on a page the site happily serves.
-    await expect(toolsByName().read_page.execute({ path: "/deploy" })).resolves.toMatchObject({
+    const { text, data } = unwrap(await toolsByName().read_page.execute({ path: "/deploy" }));
+    expect(data).toMatchObject({
       path: "/guide/deploy",
       redirectedFrom: "/deploy",
       title: "Deploy",
-      markdown: expect.stringContaining("Deploy to Vercel"),
     });
+    expect(text).toContain("Deploy to Vercel");
   });
 
   it("tells an agent to open an off-site redirect rather than read it", async () => {

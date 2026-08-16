@@ -31,9 +31,17 @@ NEVER write E2E tests. Ask for it to be tested manually.
   imported from `main.ts` after mount, so a non-supporting browser never fetches
   the chunk. `tools/` is one module per tool over two shared ones —
   `tools/content.ts` (the cached nav/page reads) and `tools/utils.ts` (agent
-  input coercion + URL shaping); `tools/index.ts` assembles them in the order
-  the agent sees. Tools wrap existing machinery (the MiniSearch index, the
-  `useAsyncData` caches, the router) — never a second data path. Unregistration
+  input coercion + URL/result shaping); `tools/index.ts` assembles them in the
+  order the agent sees. Tools wrap existing machinery (the MiniSearch index, the
+  `useAsyncData` caches, the router) — never a second data path. The two tools
+  answering with PROSE (`search_docs`, `read_page`) return `utils.ts`'s
+  `textResult`, MCP's `{ content: [{ type: "text" }], structuredContent }`
+  envelope: the browser JSON-stringifies whatever `execute` returns, so a page of
+  markdown in a plain field reaches the client's model with a literal `\n` per
+  newline and a backslash per quote. The prose goes in `content` ONLY — copying
+  it into `structuredContent` as well would double the payload for exactly the
+  client that cannot unwrap it — and metadata-only tools stay plain objects,
+  since the envelope buys them nothing. Unregistration
   is `AbortSignal`-only (the spec's sole teardown), which is also what makes an
   HMR re-setup safe. WebMCP has NO `resources` primitive (tools are the whole
   surface), so project/page links are tool RESULTS instead — `links.ts` derives

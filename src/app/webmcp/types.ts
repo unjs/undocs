@@ -49,8 +49,15 @@ export interface RegisteredTool {
   name: string;
   title?: string;
   description: string;
-  /** Serialized (stringified) JSON Schema, per spec. */
-  inputSchema?: string;
+  /**
+   * The tool's JSON Schema — as an OBJECT or as a serialized string.
+   *
+   * The spec carried a stringified schema here until 2026-08-14, when the field
+   * became the schema object itself. Browsers shipping the origin trial still
+   * hand back the string, so a reader of `getTools()` has to accept both until
+   * those builds age out.
+   */
+  inputSchema?: Record<string, unknown> | string;
   window: Window;
   origin: string;
   annotations?: ToolAnnotations;

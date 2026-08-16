@@ -14,7 +14,7 @@ import type { SearchDocument } from "@server/content/search-options.ts";
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { querySearchIndex } from "@app/composables/useContent.ts";
 import type { ModelContextTool } from "../types.ts";
-import { clampLimit, pageUrl, siteName } from "./utils.ts";
+import { clampLimit, pageUrl, siteName, textResult } from "./utils.ts";
 
 /**
  * The MiniSearch index, rehydrated once and memoized. Routed through the shared
@@ -36,6 +36,31 @@ function searchIndex(): Promise<MiniSearch<SearchDocument> | null> {
     return MiniSearch.loadJS<SearchDocument>(entry.data.value, MINISEARCH_OPTIONS);
   })();
   return indexPromise;
+}
+
+interface SearchHit {
+  title: string;
+  breadcrumb?: string;
+  path: string;
+  url: string;
+  preview: string;
+}
+
+/**
+ * The hits as one text block, so a client that unwraps `content` reads the
+ * previews as prose instead of as JSON-escaped strings. This is DISPLAY text —
+ * the structured copy beside it keeps every field verbatim, which is why a
+ * preview's own line breaks can be collapsed here to keep one hit to one entry.
+ */
+function formatHits(query: string, hits: SearchHit[]): string {
+  if (hits.length === 0) return `No results for "${query}".`;
+  return hits
+    .map((hit, i) => {
+      const heading = hit.breadcrumb ? `${hit.breadcrumb} > ${hit.title}` : hit.title;
+      const preview = hit.preview.replace(/\s+/g, " ").trim();
+      return `${i + 1}. ${heading}\n   ${hit.url}${preview ? `\n   ${preview}` : ""}`;
+    })
+    .join("\n\n");
 }
 
 export function searchDocsTool(): ModelContextTool {
@@ -80,7 +105,7 @@ export function searchDocsTool(): ModelContextTool {
       let hits = index.search(q, MINISEARCH_SEARCH_OPTIONS);
       if (hits.length === 0) hits = index.search(q, MINISEARCH_FUZZY_SEARCH_OPTIONS);
 
-      const results = hits.slice(0, clampLimit(limit, 10, 50)).map((hit) => {
+      const results: SearchHit[] = hits.slice(0, clampLimit(limit, 10, 50)).map((hit) => {
         const stored = hit as unknown as SearchDocument;
         // Section ids are `path#slug` — the page plus the heading anchor.
         const [path, hash = ""] = String(stored.id).split("#");
@@ -93,7 +118,14 @@ export function searchDocsTool(): ModelContextTool {
         };
       });
 
-      return { query: q, count: results.length, results };
+      // Previews are prose (up to `PREVIEW_MAX` of the section's own text), so
+      // this result gets the text block too — the structured hits carry the
+      // linkable fields an agent acts on.
+      return textResult(formatHits(q, results), {
+        query: q,
+        count: results.length,
+        results,
+      });
     },
   };
 }
