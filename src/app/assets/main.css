@@ -179,6 +179,29 @@ body {
   color: var(--brand);
 }
 
+/* Footnotes (`[^1]`), rendered from md4x's `footnote-ref`/`footnotes`/`footnote`
+ * nodes. The reference marker is a superscript link; the collected definitions
+ * close the page as a smaller, muted ordered list with a rule above it. */
+.md .md-footnote-ref a {
+  text-decoration: none;
+}
+
+.md .md-footnotes {
+  margin-top: 2.5rem;
+  font-size: var(--text-copy-14);
+  line-height: var(--text-copy-14--line-height);
+  color: var(--muted-foreground);
+}
+
+.md .md-footnotes hr {
+  margin-bottom: 1rem;
+}
+
+.md .md-footnote-backref {
+  margin-left: 0.375rem;
+  text-decoration: none;
+}
+
 /* First heading in a block shouldn't push a top border/margin off the top.
  * A leading `## ` (e.g. right after the page title/description are lifted out)
  * would otherwise draw its own top border directly below the PageHeader's

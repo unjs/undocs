@@ -207,17 +207,58 @@ function renderNode(node: MarkNode, _parentTag: string | null): VNode | string |
     return h((rawProps as any)?.block ? "div" : "span", { innerHTML: html });
   }
 
+  // --- Footnotes. md4x emits the reference and the collected definitions as
+  // three structural nodes rather than markup, so the anchor scheme is ours to
+  // render; it is kept byte-identical to md4x's own HTML output (`#fn-<id>` /
+  // `#fnref-<id>-<refId>`) so a page rendered either way deep-links the same.
+  // The visible marker is the footnote's ORDINAL, not its author-written label:
+  // `[^two]` is still the second footnote and reads "2". ---
+  if (tag === "footnote-ref") {
+    const { id, refId } = rawProps as { id: number; refId: number };
+    return h("sup", { class: "md-footnote-ref" }, [
+      h("a", { href: `#fn-${id}`, id: `fnref-${id}-${refId}` }, String(id)),
+    ]);
+  }
+  if (tag === "footnotes") {
+    return h("section", { class: "md-footnotes" }, [
+      h("hr"),
+      h(
+        "ol",
+        null,
+        children.map((child) => renderNode(child, tag)).filter(Boolean) as (VNode | string)[],
+      ),
+    ]);
+  }
+  if (tag === "footnote") {
+    const { id, refCount } = rawProps as { id: number; refCount: number };
+    const backrefs = Array.from({ length: Math.max(refCount, 1) }, (_, i) =>
+      h(
+        "a",
+        {
+          href: `#fnref-${id}-${i + 1}`,
+          class: "md-footnote-backref",
+          "aria-label": "Back to content",
+        },
+        "↩",
+      ),
+    );
+    return h("li", { id: `fn-${id}` }, [
+      ...(children.map((child) => renderNode(child, tag)).filter(Boolean) as (VNode | string)[]),
+      ...backrefs,
+    ]);
+  }
+
   // Clone props so we never mutate the source AST (e.g. when adding heading ids).
   const props: Record<string, any> = { ...rawProps };
 
   // --- Headings: ensure an `id` for on-page TOC anchor links.
-  // Content built by the engine arrives with `id` ALREADY on the node —
-  // `buildToc` allocates it once, server-side, so the TOC link and this element
-  // cannot disagree and repeated headings get distinct ids. Re-slugging here
-  // would be a second derivation with no way to see the rest of the page (it
-  // could not de-duplicate, and on a client navigation there is no counter to
-  // share), so this is only a fallback for a body that never went through the
-  // builder. ---
+  // Content built by the engine arrives with `id` ALREADY on the node — md4x
+  // allocates it during the parse and `buildToc` reads the same one into the TOC,
+  // so the link and this element cannot disagree and repeated headings get
+  // distinct ids. Re-slugging here would be a second derivation with no way to
+  // see the rest of the page (it could not de-duplicate, and on a client
+  // navigation there is no counter to share), so this is only a fallback for a
+  // body that never went through the builder. ---
   if (HEADINGS.has(tag) && !props.id) {
     props.id = slugify(textContent(node));
   }

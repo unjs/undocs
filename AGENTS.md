@@ -191,10 +191,39 @@ NEVER write E2E tests. Ask for it to be tested manually.
   the inherited size. `utils/cn.ts` re-registers every Geist size into
   `font-size`; `test/app/cn.test.ts` guards it. Adding a step to the scale in
   `tokens.css` means adding it there too.
-- **Raw HTML is resolved server-side.** `transforms.ts`'s `liftRawHtml` turns raw
-  HTML into `_html` nodes (md4x can't distinguish a real tag from a literal `<`);
-  the client injects them with `v-html`. Moving this client-side breaks escaping
-  and security.
+- **Raw HTML is resolved server-side.** `transforms.ts`'s `liftRawHtml` turns
+  md4x's `html` nodes into `_html` nodes the client injects with `v-html`. Moving
+  this client-side breaks escaping and security. An inline `html` node is ONE
+  TAG, not an element, so a matched pair has to be merged with the text between
+  it into a single node — split across two `v-html` spans the browser closes
+  `<span><b></span>` itself and the markup is lost. The merge only runs while
+  that interior is plain text; a run holding a real element would need an
+  AST→HTML serializer, so its fragments stay separate. Text is NOT scanned for
+  `<` any more: md4x distinguishes a real tag from a literal one, so `3 < 5` is a
+  string and Vue escapes it.
+- **HTML entities arrive RESOLVED; undocs owns no entity table.** md4x (0.0.29+)
+  resolves them in the AST's text nodes and in a link's/image's destination, so a
+  `&copy;` reaches `MarkdownRenderer` as `©` — which is what a Vue text vnode
+  needs, since Vue escapes it and any surviving entity source would render as its
+  own spelling. undocs used to redo this itself (`entities.ts`, deleted); do not
+  reintroduce it. Three kinds of text stay SOURCE, and matching that is still
+  load-bearing on our side: code (a code span is verbatim), MDC props (a literal
+  attribute value the author typed, not markdown text), and raw HTML, which
+  resolves natively through `innerHTML`. The last one is why `inlineSource`
+  escapes `&`: the text it merges into markup is plain by then, so an author's
+  `©` would otherwise go back in as an entity and decode a second time on its way
+  into the DOM. `test/content/transforms.test.ts` parses real markdown to pin all
+  four behaviours, because they are md4x's promise rather than ours.
+- **Heading anchors come from md4x, at parse time.** It slugs every heading
+  GitHub-compatibly, de-duplicates within the document (`same`, `same-1`) and
+  honours an explicit `## Title {#anchor}`, stamping the result on the node.
+  `buildToc` READS that id — the TOC, `search.ts`'s section keys and the rendered
+  DOM are all the one derivation. Re-deriving in undocs is what this replaced,
+  and it cannot be reintroduced: any later pass counts a different heading LIST
+  than the parser saw (the page's `h1` is spliced out, raw-HTML headings never
+  reach the renderer), so its suffixes drift and the TOC links point at nothing.
+  Only a heading md4x slugs to nothing (`## 🚀`) is numbered here, clear of the
+  ids already on the page.
 - **Router uses a runtime `typeof window` check** (`IS_BROWSER`), not
   `import.meta.client` — the latter is `undefined` in the dev browser and would
   pick memory history on the client, breaking hydration.

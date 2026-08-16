@@ -689,6 +689,10 @@ describe("buildIndex heading anchors", () => {
         "",
         "Nothing sluggable.",
         "",
+        "## Deploy targets {#deploy}",
+        "",
+        "Explicit anchor.",
+        "",
       ].join("\n"),
     );
     index = await buildIndex({ dir: anchorDir });
@@ -714,16 +718,35 @@ describe("buildIndex heading anchors", () => {
   const flatToc = (links: any[]): any[] =>
     links.flatMap((l) => [l, ...(l.children ? flatToc(l.children) : [])]);
 
-  it("slugs non-Latin headings instead of emptying them", () => {
+  // The ids are md4x's, allocated during the parse — GitHub-compatible, so a
+  // repeat is suffixed from `-1` and punctuation does NOT collapse
+  // (`émoji--heading` keeps the gap the stripped emoji left). undocs used to
+  // re-slug them itself with slightly different rules; adopting md4x's is what
+  // buys the `{#deploy}` case below.
+  it("takes md4x's anchor for every heading, non-Latin ones included", () => {
     const toc = flatToc(index.byPath.get("/")!.body.toc.links);
     expect(toc.map((l) => l.id)).toEqual([
       "установка",
       "options",
       "安装",
-      "options-2",
-      "émoji-heading",
+      "options-1",
+      "émoji--heading",
       "section",
+      "deploy",
     ]);
+  });
+
+  it("honours an explicit `{#anchor}` and keeps it out of the heading text", () => {
+    const toc = flatToc(index.byPath.get("/")!.body.toc.links);
+    const explicit = toc.find((l) => l.id === "deploy");
+    expect(explicit!.text).toBe("Deploy targets");
+  });
+
+  // md4x slugs `## 🚀` to nothing at all, so `buildToc` allocates that one — the
+  // only id it still derives, and it has to clear the parser's own.
+  it("gives a heading md4x could not slug an anchor anyway", () => {
+    const toc = flatToc(index.byPath.get("/")!.body.toc.links);
+    expect(toc.find((l) => l.text === "🚀")!.id).toBe("section");
   });
 
   it("gives two identically-named headings distinct ids", () => {
@@ -753,12 +776,12 @@ describe("buildIndex heading anchors", () => {
   it("keys the search sections by the same id", () => {
     const ids = index.search.filter((s) => s.level > 1).map((s) => s.id);
     expect(ids).toContain("/#options");
-    expect(ids).toContain("/#options-2");
+    expect(ids).toContain("/#options-1");
     expect(ids).toContain("/#установка");
     // Each heading section carries its OWN prose — the proof the second
     // `### Options` is not silently folded into the first.
     const first = index.search.find((s) => s.id === "/#options");
-    const second = index.search.find((s) => s.id === "/#options-2");
+    const second = index.search.find((s) => s.id === "/#options-1");
     expect(first!.content).toContain("Первые");
     expect(second!.content).toContain("Вторые");
   });

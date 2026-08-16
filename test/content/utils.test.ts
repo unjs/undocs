@@ -7,7 +7,6 @@ import {
   orderKey,
   textContent,
   slugify,
-  createSlugger,
   titleCase,
 } from "../../src/server/content/utils.ts";
 import type { MarkNode } from "../../src/server/content/types.ts";
@@ -138,34 +137,6 @@ describe("slugify", () => {
   });
 });
 
-describe("createSlugger", () => {
-  it("suffixes repeated slugs so the ids stay unique", () => {
-    const slug = createSlugger();
-    expect(slug("Options")).toBe("options");
-    expect(slug("Usage")).toBe("usage");
-    expect(slug("Options")).toBe("options-2");
-    expect(slug("options")).toBe("options-3");
-  });
-
-  it("gives a slug-less heading an anchor anyway", () => {
-    const slug = createSlugger();
-    expect(slug("🚀")).toBe("section");
-    expect(slug("---")).toBe("section-2");
-  });
-
-  it("steps around a literal heading that collides with a suffix", () => {
-    const slug = createSlugger();
-    expect(slug("Options")).toBe("options");
-    expect(slug("Options")).toBe("options-2");
-    expect(slug("Options 2")).toBe("options-2-2");
-  });
-
-  it("counts per instance, so one page's headings never see another's", () => {
-    expect(createSlugger()("Options")).toBe("options");
-    expect(createSlugger()("Options")).toBe("options");
-  });
-});
-
 describe("titleCase", () => {
   it("title-cases hyphen/underscore separated words", () => {
     expect(titleCase("getting-started")).toBe("Getting Started");
@@ -203,5 +174,24 @@ describe("README as an index alias", () => {
     // Only the whole name matches — `readme-first.md` is a page.
     expect(isIndexFile("readme-first.md")).toBe(false);
     expect(toRoutePath("readme-first.md")).toBe("/readme-first");
+  });
+});
+
+describe("textContent: raw html", () => {
+  // `liftRawHtml` merges a matched inline pair and the prose between it into one
+  // `_html` node, so skipping the node wholesale dropped that prose from the
+  // heading's TOC entry (and from search) while its id still spelled it out.
+  it("reads the prose out of an inline raw-html node, tags excluded", () => {
+    const node: MarkNode = ["h2", { id: "x" }, "Heading with ", ["_html", {}, "<em>markup</em>"]];
+    expect(textContent(node)).toBe("Heading with markup");
+  });
+
+  it("reads nothing out of a block raw-html node", () => {
+    const node: MarkNode = ["_html", { block: true }, '<div align="center">hi</div>'];
+    expect(textContent(node)).toBe("");
+  });
+
+  it("reads nothing out of a lone inline tag", () => {
+    expect(textContent(["p", {}, "a", ["_html", {}, "<br>"], "b"])).toBe("ab");
   });
 });

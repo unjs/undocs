@@ -4,7 +4,6 @@ import { join, dirname, basename } from "node:path";
 import { pathToFileURL } from "node:url";
 import * as md4x from "md4x/wasm";
 import {
-  createSlugger,
   isIndexFile,
   isReadmeFile,
   orderKey,
@@ -18,7 +17,15 @@ import { highlightBody } from "./highlight.ts";
 import { resolveIcon } from "./icons.ts";
 import { buildSearch, buildSearchIndex } from "./search.ts";
 
-import type { BuildStats, ContentIndex, DocPage, MarkNode, NavItem, TocLink } from "./types.ts";
+import type {
+  BuildStats,
+  ContentIndex,
+  DocPage,
+  MarkElement,
+  MarkNode,
+  NavItem,
+  TocLink,
+} from "./types.ts";
 
 // Content files, plus `.navigation.yml` directory-config files. The latter are
 // dot-prefixed, so they need their own glob (a `**/*` glob never matches leading
@@ -130,15 +137,18 @@ function dropDuplicateRoutes(files: string[]): string[] {
  *
  * Deliberately narrow — anything carrying readable text stops the walk, so a
  * page with a real intro paragraph never has a mid-page `h2`-ish `h1` mistaken
- * for its title. Raw HTML is `html_block` here: these probes run BEFORE
+ * for its title. Raw HTML is a block `html` node here: these probes run BEFORE
  * `transformBody`, which is what lifts it to `_html` (matched too, so the
- * predicate stays correct on either side of that transform).
+ * predicate stays correct on either side of that transform). The badge row is
+ * caught by the empty-paragraph arm — `textContent` reads no text out of the
+ * images and raw tags it is made of.
  */
 function isPreamble(node: MarkNode | undefined): boolean {
   if (typeof node === "string") return node.trim() === "";
   if (!Array.isArray(node)) return false;
   const tag = node[0];
-  if (tag === null || tag === "html_block" || tag === "_html") return true;
+  if (tag === null || tag === "_html") return true;
+  if (tag === "html") return node[1]?.block === true;
   return tag === "p" && textContent(node).trim() === "";
 }
 
@@ -249,6 +259,10 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     // spliced out, so the blockquote slides into it.
     let descFrom = h1Index;
     if (Array.isArray(h1) && h1[0] === "h1") {
+      // md4x resolves entities in the AST's text, so this is already `A & B` and
+      // compares equal to a frontmatter `title: A & B` below — read as entity
+      // SOURCE the two would look like different titles and the heading would
+      // render a second time under the page header.
       const t = textContent(h1);
       if (!title) title = t;
       // Consumed by the page header — drop it in place (it may sit under
@@ -348,51 +362,66 @@ function countNav(items: NavItem[]): number {
 
 // --- toc + heading ids ---
 /**
- * Give every heading in the body its `id` and collect the h2/h3 ones into the
- * page's TOC — ONE walk, one derivation.
+ * Collect the h2/h3 headings into the page's TOC, reading the anchor md4x
+ * already put on each heading node.
  *
- * The TOC is built here, on the server, while the ids are emitted by the CLIENT
- * renderer during SSR and hydration. Deriving the id twice (this used to slug
- * `md4x.parseMeta().headings` while `MarkdownRenderer` slugged the AST node) is
- * a desync waiting to happen, and once ids need de-duplicating it is a certainty:
- * the two sides see different heading LISTS (the page's h1 is spliced out of the
- * body, raw-HTML headings never reach the renderer), so any counter they each
- * keep drifts apart and the TOC links point at nothing. Instead the id is
- * allocated once, written onto the node, and shipped in the body payload —
- * `MarkdownRenderer` finds `props.id` already set and only falls back to
- * `slugify` for bodies that never came through here.
+ * The ids are NOT derived here. md4x allocates them during the parse —
+ * GitHub-compatible slugs, de-duplicated across the document, and an explicit
+ * `## Title {#anchor}` honoured over the generated one — and stamps each on its
+ * heading node, which is the single derivation everything downstream reads: this
+ * TOC, `search.ts`'s sections, and the `id` `MarkdownRenderer` puts in the DOM.
  *
- * The walk recurses, because `parseMeta` counted headings inside containers
- * (`::tabs`) too and the renderer anchors them all the same.
+ * That it happens at PARSE time is what makes it safe. Anything that re-derived
+ * an id from a finished body would be counting a different heading LIST than the
+ * parser saw — the page's `h1` is spliced out above, raw-HTML headings never
+ * reach the renderer — so its de-duplication suffixes would drift and the TOC
+ * would link to anchors no element carries.
+ *
+ * Only a heading md4x could slug nothing out of (`## 🚀`) arrives without an id,
+ * and it gets one here, numbered clear of every id already on the page.
+ *
+ * The walk recurses, because md4x anchors headings inside containers (`::tabs`)
+ * too and the renderer deep-links them all the same.
  */
+const FALLBACK_HEADING_ID = "section";
+
 function buildToc(body: MarkNode[]): TocLink[] {
-  const slug = createSlugger();
-  const links: TocLink[] = [];
+  const headings: MarkElement[] = [];
   const visit = (nodes: MarkNode[]): void => {
     for (const node of nodes) {
       if (!Array.isArray(node)) continue;
-      const tag = node[0];
-      if (typeof tag !== "string") continue;
-      const level = /^h([1-6])$/.exec(tag);
-      if (level) {
-        // md4x emits no heading ids of its own (`## H {#anchor}` parses as
-        // literal text), so this is always the allocator's to assign.
-        const props = (node[1] ||= {});
-        const text = textContent(node);
-        const id = slug(text);
-        props.id = id;
-        const depth = Number(level[1]);
-        if (depth === 2 || depth === 3) {
-          const link: TocLink = { id, depth, text };
-          const parent = depth === 3 ? links[links.length - 1] : undefined;
-          if (parent) (parent.children ||= []).push(link);
-          else links.push(link);
-        }
-      }
+      if (typeof node[0] === "string" && /^h[1-6]$/.test(node[0])) headings.push(node);
       visit(node.slice(2) as MarkNode[]);
     }
   };
   visit(body);
+
+  // Seeded with every id the parser handed out, so a fallback can never collide
+  // with a heading further down the page that has not been reached yet.
+  const used = new Set<string>();
+  for (const node of headings) {
+    const id = node[1]?.id;
+    if (typeof id === "string" && id) used.add(id);
+  }
+
+  const links: TocLink[] = [];
+  for (const node of headings) {
+    const props = (node[1] ||= {});
+    let id: string = typeof props.id === "string" ? props.id : "";
+    if (!id) {
+      id = FALLBACK_HEADING_ID;
+      for (let n = 2; used.has(id); n++) id = `${FALLBACK_HEADING_ID}-${n}`;
+      used.add(id);
+      props.id = id;
+    }
+    const depth = Number((node[0] as string).slice(1));
+    if (depth === 2 || depth === 3) {
+      const link: TocLink = { id, depth, text: textContent(node) };
+      const parent = depth === 3 ? links[links.length - 1] : undefined;
+      if (parent) (parent.children ||= []).push(link);
+      else links.push(link);
+    }
+  }
   return links;
 }
 
@@ -644,8 +673,7 @@ function buildNavigation(
 // The file is a YAML block; parse it as frontmatter via md4x. `md4x.init()`
 // has already run by the time this is called.
 function parseNavYml(raw: string): Record<string, unknown> {
-  const { headings: _headings, ...fm } = md4x.parseMeta(`---\n${raw}\n---\n`);
-  return fm;
+  return md4x.parseMeta(`---\n${raw}\n---\n`).frontmatter ?? {};
 }
 
 // --- automd ---

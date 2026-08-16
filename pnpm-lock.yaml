@@ -69,8 +69,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(h3@2.0.1-rc.25(crossws@0.4.10(srvx@0.11.22)))(ocache@0.2.0)
       md4x:
-        specifier: ^0.0.25
-        version: 0.0.25
+        specifier: ^0.0.29
+        version: 0.0.29
       mermaid-compact:
         specifier: ^0.0.1
         version: 0.0.1
@@ -1777,8 +1777,8 @@ packages:
   md4w@0.2.7:
     resolution: {integrity: sha512-lFM7vwk3d4MzkV2mija7aPkK6OjKXZDQsH2beX+e2cvccBoqc6RraheMtAO0Wcr/gjj5L+WS5zhb+06AmuGZrg==}
 
-  md4x@0.0.25:
-    resolution: {integrity: sha512-GrexawUhrKcwl7o2hkgs7Ut0PqI/meOCevmaRB1ueKo2y1Fh2nIl8e6KKawYGm9eXJP3u6BzVs4rzZOc2+w3hA==}
+  md4x@0.0.29:
+    resolution: {integrity: sha512-I4gPatCcXSkeI2BgsTwt6rv0dGSu6DpiIiO8bhdmL1xEKVbg6riLxoKzUmQxe3tLVNDcFtzE2smPqZlLkJJXsw==}
     hasBin: true
 
   mdbox@0.1.1:
@@ -3542,7 +3542,7 @@ snapshots:
 
   md4w@0.2.7: {}
 
-  md4x@0.0.25: {}
+  md4x@0.0.29: {}
 
   mdbox@0.1.1:
     dependencies:

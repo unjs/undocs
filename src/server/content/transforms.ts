@@ -1,6 +1,5 @@
 // Tests: test/content/transforms.test.ts
 import { posix } from "node:path";
-import * as md4x from "md4x/wasm";
 import type { MarkNode, MarkElement } from "./types.ts";
 import { textContent, toRoutePath } from "./utils.ts";
 
@@ -17,7 +16,7 @@ export function transformBody(nodes: MarkNode[], rel?: string): MarkNode[] {
   let value = mergeCodeGroups(nodes);
   value = unwrapBlockParagraphs(value);
   unwrapSlotParagraphs(value);
-  if (rel) resolveLinks(value, posix.dirname(rel));
+  transformLinks(value, rel ? posix.dirname(rel) : undefined);
   for (const node of value) {
     if (!isEl(node)) continue;
     transformStepsList(node);
@@ -28,24 +27,33 @@ export function transformBody(nodes: MarkNode[], rel?: string): MarkNode[] {
   return value;
 }
 
-// --- relative `.md`/`.yml` links -> route paths ---
+// --- link fixups: drop `autolink`, rewrite relative `.md`/`.yml` hrefs ---
+// md4x marks a bare `<https://…>` with `autolink: true`. Nothing here renders an
+// autolink differently, and every prop on an `a` node is spread onto the anchor
+// by `MarkdownRenderer`, so leaving it emits `<a autolink="true">` into the page
+// (and ships the prop in every payload). Dropped at the source instead.
+//
 // Markdown source links between pages point at files (`./02.foo.md`,
 // `../guide/1.index.md#anchor`). Those hrefs must become the route paths the
 // router serves (`/spec/foo`, `/guide#anchor`) — same numeric-prefix stripping
 // and extension removal `toRoutePath` applies to a page's own path. Left as-is
-// they 404, and the `NN.` prefix leaks into the URL.
-function resolveLinks(nodes: MarkNode[], baseDir: string): void {
+// they 404, and the `NN.` prefix leaks into the URL. Only that half needs the
+// page's own directory, so it is what `baseDir` gates.
+function transformLinks(nodes: MarkNode[], baseDir?: string): void {
   for (const node of nodes) {
     if (!isEl(node)) continue;
     const tag = node[0];
     if (tag === "a") {
       const props = node[1] as Record<string, any> | undefined;
-      if (props && typeof props.href === "string") {
-        props.href = resolveMdHref(props.href, baseDir);
+      if (props) {
+        delete props.autolink;
+        if (baseDir !== undefined && typeof props.href === "string") {
+          props.href = resolveMdHref(props.href, baseDir);
+        }
       }
     }
     if (tag && RAW_SKIP.has(tag)) continue;
-    resolveLinks(node.slice(2) as MarkNode[], baseDir);
+    transformLinks(node.slice(2) as MarkNode[], baseDir);
   }
 }
 
@@ -90,6 +98,9 @@ const PHRASING_TAGS = new Set([
   "s",
   "u",
   "input",
+  // Raw HTML, before (`html`) and after (`_html`) `liftRawHtml`. A paragraph of
+  // nothing but inline tags is prose the author wrote inline, not a block.
+  "html",
   "_html",
   "template",
   "wbr",
@@ -202,24 +213,43 @@ function loneParagraphIndex(node: MarkElement): number {
 }
 
 // --- raw HTML in markdown -> `_html` node rendered via `v-html` ---
-// md4x keeps raw HTML as literal characters in text strings, indistinguishable
-// from a plain `<` (e.g. `3 < 5` stays `"3 < 5"`). Resolved server-side:
-// `renderToHtml` escapes literal `<` while preserving real tags; wrapped in an
-// `_html` node the renderer injects via `innerHTML`. Only strings with `<` are touched.
-const RAW_SKIP = new Set(["pre", "code", "mermaid", "_html"]);
+// md4x TAGS raw HTML rather than leaving it in the text: a block fence arrives
+// as `["html", { block: true }, source]` and an inline tag as `["html", {}, "<b>"]`.
+// So a plain `<` is now just a string (`3 < 5` stays `"3 < 5"`) and needs no
+// sniffing — Vue escapes it as a text node, which is both simpler and safer than
+// the old scan-every-string-for-`<` pass this replaces.
+//
+// Both kinds become `_html` nodes the renderer injects with `innerHTML`. A block
+// one maps 1:1. An inline node is ONE TAG, not an element, so an open/close pair
+// arrives as two nodes with the content between them: split across two `_html`
+// spans the browser closes `<span><b></span>` on its own and the markup is lost,
+// so a matched pair is merged with its interior into a single node.
+//
+// That merge is only possible while the interior is plain text — a run holding a
+// real element (a link, `**bold**`) would have to be serialized back to HTML,
+// which is a renderer, not a transform. Those fragments are emitted one by one
+// instead, which is exactly what happened before md4x could tell a tag from a `<`.
+const RAW_SKIP = new Set(["pre", "code", "mermaid", "_html", "html"]);
 
 function liftRawHtml(nodes: MarkNode[], start = 0): void {
   for (let i = start; i < nodes.length; i++) {
     const child = nodes[i];
-    if (typeof child === "string") {
-      if (child.includes("<")) nodes[i] = ["_html", {}, renderInlineHtml(child)];
-      continue;
-    }
     if (!isEl(child)) continue;
     const tag = child[0];
-    // A block-level HTML fence is already raw HTML — pass it through verbatim.
-    if (tag === "html_block") {
-      nodes[i] = ["_html", { block: true }, typeof child[2] === "string" ? child[2] : ""];
+    if (tag === "html") {
+      const source = htmlSource(child);
+      // A block-level HTML fence is already raw HTML — pass it through verbatim.
+      if (child[1]?.block) {
+        nodes[i] = ["_html", { block: true }, source];
+        continue;
+      }
+      const close = closingIndex(nodes, i);
+      if (close === -1) {
+        nodes[i] = ["_html", {}, source];
+        continue;
+      }
+      const merged = (nodes.slice(i, close + 1) as MarkNode[]).map(inlineSource).join("");
+      nodes.splice(i, close - i + 1, ["_html", {}, merged]);
       continue;
     }
     if (tag && RAW_SKIP.has(tag)) continue;
@@ -230,20 +260,69 @@ function liftRawHtml(nodes: MarkNode[], start = 0): void {
   }
 }
 
+/** The verbatim markup an `["html", props, source]` node carries. */
+function htmlSource(node: MarkElement): string {
+  return typeof node[2] === "string" ? node[2] : "";
+}
+
 /**
- * Render one inline text fragment (markdown-escaped by md4x) to HTML and strip
- * the single `<p>…</p>` wrapper `renderToHtml` adds, yielding inline-level HTML.
+ * One node of a merged inline run, as HTML source.
+ *
+ * Text between the tags is PLAIN text — md4x resolves entities in the AST's text
+ * nodes, so an authored `&copy;` arrives as `©` — and it is about to be handed to
+ * `innerHTML`, so it needs the full escape, `&` included, or that `©` would go
+ * back in as an entity to decode a second time. The `html` nodes around it are
+ * source and pass through verbatim, which is why `innerHTML` still resolves the
+ * entities the author wrote INSIDE a tag. Callers only pass strings and `html`
+ * nodes; `closingIndex` guarantees a run holds nothing else.
  */
-function renderInlineHtml(str: string): string {
-  const out = md4x.renderToHtml(str).trim();
-  const m = out.match(/^<p>([\s\S]*)<\/p>$/);
-  return m ? m[1] : out;
+function inlineSource(node: MarkNode): string {
+  if (typeof node === "string") {
+    return node.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  }
+  return isEl(node) ? htmlSource(node) : "";
+}
+
+/**
+ * Void elements never open a run: they have no closing tag to look for, so a
+ * `<br>` between two paragraphs' worth of prose must not swallow it.
+ */
+// prettier-ignore
+const VOID_TAGS = new Set([
+  "area", "base", "br", "col", "embed", "hr", "img",
+  "input", "link", "meta", "param", "source", "track", "wbr",
+]);
+
+/** Does this markup open an element that something later has to close? */
+function isOpenTag(source: string): boolean {
+  const m = /^<([a-z][\w:-]*)/i.exec(source);
+  if (!m || source.endsWith("/>")) return false;
+  return !VOID_TAGS.has(m[1].toLowerCase());
+}
+
+/**
+ * Index of the inline `html` node closing the tag opened at `open`, or `-1` when
+ * the tag opens nothing, is never closed, or its run spans a node the merge
+ * cannot express as HTML source (anything but text and further inline tags).
+ * Nesting is counted, so `<b>x <i>y</i> z</b>` closes at the LAST node.
+ */
+function closingIndex(nodes: MarkNode[], open: number): number {
+  if (!isOpenTag(htmlSource(nodes[open] as MarkElement))) return -1;
+  let depth = 0;
+  for (let i = open; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (typeof node === "string") continue;
+    if (!isEl(node) || node[0] !== "html" || node[1]?.block) return -1;
+    if (isOpenTag(htmlSource(node))) depth++;
+    else if (htmlSource(node).startsWith("</") && --depth === 0) return i;
+  }
+  return -1;
 }
 
 // --- github/container alerts -> normalized `alert` node ---
-// md4x emits `> [!NOTE]` as ["alert", { type: "NOTE" }] and `::alert{type=x}`
-// as ["alert", { type: "x" }]. Normalize the type casing so a single Alert
-// component can switch on it.
+// md4x lowercases the type it reads out of `> [!NOTE]` itself, but `::alert{type=X}`
+// is an author-typed prop and arrives verbatim. Normalize the casing so a single
+// Alert component can switch on it either way.
 function normalizeAlert(node: MarkElement) {
   if (node[0] === "alert" && node[1] && typeof node[1].type === "string") {
     node[1].type = node[1].type.toLowerCase();

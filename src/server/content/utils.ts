@@ -68,10 +68,21 @@ export function textContent(node: MarkNode | undefined | null): string {
   if (node == null) return "";
   if (typeof node === "string") return node;
   // HTML comments (`[null, {}, "..."]`, e.g. automd markers) carry no readable
-  // text — skip them so they don't pollute titles/search. Raw HTML (`_html`)
-  // falls through to the generic walk, yielding its markup verbatim; callers
-  // that need clean prose (search) run it through `md4x.renderToText`.
+  // text — skip them so they don't pollute titles/search.
   if (node[0] === null) return "";
+  // Raw HTML, before (`html`) and after (`_html`) `liftRawHtml`. Its markup is
+  // never text — a `<b>` in a heading is a tag, the same reading md4x's own
+  // `meta.headings[].text` takes — but the PROSE an inline pair wraps is, and
+  // `liftRawHtml` has by then merged that prose into the node's own source. So
+  // an inline node is unwrapped by stripping its tags: without this a
+  // `## Heading with <em>markup</em> in it` lost the word `markup` from its TOC
+  // entry while md4x's id (`…-markup-…`) kept it. A BLOCK node is a `<div>`
+  // header, a `<script>`, an embed — markup wholesale, and nothing a title or a
+  // search snippet wants any part of.
+  if (node[0] === "html" || node[0] === "_html") {
+    if (node[1]?.block || typeof node[2] !== "string") return "";
+    return node[2].replaceAll(/<[^>]*>/g, "");
+  }
   return (node.slice(2) as MarkNode[]).map(textContent).join("");
 }
 
@@ -86,8 +97,11 @@ export function textContent(node: MarkNode | undefined | null): string {
  * wearing a disguise (`moji-heading`). `_` is kept explicitly — it was inside
  * `\w`, and dropping it would silently move every existing `snake_case` anchor.
  *
- * Uniqueness is NOT this function's job: two `### Options` under different
- * sections both land here as `options`. See `createSlugger`.
+ * Uniqueness is NOT this function's job, and neither is a page's real anchors:
+ * md4x allocates those at parse time and stamps them on the heading node (see
+ * `buildToc`). This is the fallback for a body that never came through the
+ * builder — `MarkdownRenderer` rendering an ad-hoc node array — and the slug
+ * `search.ts` falls back to for the same reason.
  */
 export function slugify(s: string): string {
   return s
@@ -98,43 +112,6 @@ export function slugify(s: string): string {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
-}
-
-/**
- * A per-page slug allocator: `slugify`, plus the uniqueness a DOM id needs.
- *
- * Two `### Options` under different `##` sections slug identically, which gives
- * the page two elements with one id — `getElementById` finds the first, so the
- * second TOC link scrolls to the wrong heading. Repeats get an occurrence
- * suffix (`options`, `options-2`, `options-3`), and a heading that slugs to
- * nothing at all (`## 🚀`, `## ---`) falls back to `section`, so every heading
- * ends up with an anchor.
- *
- * The counter is CLOSURE state, created once per page by the builder — never
- * module-level. The server renders many requests concurrently in one process
- * (see AGENTS.md), and a shared counter would both leak ids across pages and
- * hand two concurrent renders different numbers for the same heading.
- *
- * The allocated id is written onto the heading node, so the client renderer
- * never counts anything: there is exactly ONE derivation of a heading's id, on
- * the server, and the TOC, the search sections and the rendered DOM all read it.
- */
-export function createSlugger(): (text: string) => string {
-  const used = new Set<string>();
-  const counts = new Map<string, number>();
-  return (text: string): string => {
-    const base = slugify(text) || "section";
-    // The `while` covers the case the counter alone cannot: a literal
-    // `## Options 2` slugs to `options-2`, which an earlier repeat may hold.
-    let n = counts.get(base) ?? 1;
-    let id = base;
-    while (used.has(id)) {
-      id = `${base}-${++n}`;
-    }
-    counts.set(base, n);
-    used.add(id);
-    return id;
-  };
 }
 
 export function titleCase(s: string): string {

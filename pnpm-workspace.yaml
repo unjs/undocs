@@ -57,3 +57,4 @@ minimumReleaseAgeExclude:
   - typescript@7.0.2
   - vue-tsc@3.3.7
   - mermaid-compact@0.0.1
+  - md4x@0.0.29
