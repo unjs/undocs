@@ -7,6 +7,10 @@ import Icon from "@app/components/global/Icon.vue";
  * ThemeToggle), replacing the plain icon `ColorModeButton` in the header. The
  * thumb carries a sun/moon glyph and slides across on toggle.
  *
+ * It rides the header bar at `lg+` only; below that `AppHeaderActions` folds the
+ * same toggle into its `...` menu as a checkbox item, so the narrow bar keeps
+ * room for the search.
+ *
  * The resolved mode is client-only (localStorage / system preference), so — like
  * `ColorModeButton` — we report the SSR default (dark, matching the shell's
  * `<html class="dark">`) until mounted, keeping the server and first client

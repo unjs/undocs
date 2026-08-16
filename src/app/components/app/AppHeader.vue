@@ -3,15 +3,13 @@ import { computed, inject, type Ref } from "vue";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { mobileNavLinks } from "@app/utils/nav.ts";
 import type { NavItem } from "@server/content/types.ts";
+import AppHeaderActions from "@app/components/app/AppHeaderActions.vue";
 import AppHeaderVersionsMenu from "@app/components/app/AppHeaderVersionsMenu.vue";
-import ColorModeSwitch from "@app/components/ColorModeSwitch.vue";
 import DocsNavigation from "@app/components/docs/DocsNavigation.vue";
 import DocsSearchButton from "@app/components/docs/DocsSearchButton.vue";
 import DocsSectionTabs from "@app/components/docs/DocsSectionTabs.vue";
 import IconMenuToggle from "@app/components/IconMenuToggle.vue";
-// import Separator from "@app/components/ui/Separator.vue";
 import SiteHeader from "@app/components/layout/SiteHeader.vue";
-import SocialMenu from "@app/components/SocialMenu.vue";
 import AppLink from "@app/components/app/AppLink.ts";
 const appConfig = useAppConfig();
 
@@ -52,10 +50,10 @@ const mobileLinks = computed(() => mobileNavLinks(navigation?.value));
       <DocsSearchButton />
     </template>
 
+    <!-- Color mode + socials: a row at `lg+`, a single `...` menu below it, so
+         the narrow bar carries only search, that one control and the hamburger. -->
     <template #right>
-      <ColorModeSwitch />
-      <!-- <Separator orientation="vertical" class="mx-1 h-5" /> -->
-      <SocialMenu />
+      <AppHeaderActions />
     </template>
 
     <template #toggle="{ open, toggle }">

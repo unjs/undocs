@@ -10,7 +10,8 @@
  * concrete mode (`"light" | "dark"`). Setting `.preference` re-applies the
  * class and re-persists (reactive watcher). `.forced` is set when an embedder
  * pinned the mode via the URL fragment — the preference is then fixed and the
- * UI hides its toggle (`ColorModeSwitch.vue`).
+ * UI hides its toggle (`ColorModeSwitch.vue`, and with it the color-mode item in
+ * `AppHeaderActions.vue`'s menu).
  *
  * `init()` runs lazily on first `useColorMode()` call; main.ts also calls it at
  * startup so the class is applied before the app mounts. `main.css` maps those

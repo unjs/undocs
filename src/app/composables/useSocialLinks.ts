@@ -14,7 +14,8 @@ export interface SocialLink {
  * taken as-is.
  *
  * Consumers order for themselves: `SocialButtons` reverses so GitHub lands at
- * the trailing end of the row, `SocialMenu` keeps config order top-to-bottom.
+ * the trailing end of the row, `AppHeaderActions`'s menu keeps config order
+ * top-to-bottom.
  */
 export function useSocialLinks(): ComputedRef<SocialLink[]> {
   const appConfig = useAppConfig();
