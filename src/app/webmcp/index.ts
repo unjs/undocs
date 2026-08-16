@@ -8,22 +8,18 @@
  * drive the site, using the site's own search index rather than scraping the DOM.
  *
  * The API is a draft and shipping behind flags, so everything here is
- * feature-detected and best-effort: `main.ts` only imports this module when
- * `document.modelContext` exists, and a failed registration warns rather than
- * throws. Registration lives on an `AbortSignal` — the spec's only unregister
- * path — which is what lets a dev HMR reload replace the tools cleanly.
+ * best-effort: a failed registration warns rather than throws. Registration
+ * lives on an `AbortSignal` — the spec's only unregister path — which is what
+ * lets a dev HMR reload replace the tools cleanly.
+ *
+ * This module is the LAZY half of the integration. `main.ts` imports it as its
+ * own chunk: straight away when the browser has a native `document.modelContext`,
+ * and otherwise only when an agent first asks `./polyfill.ts` for tools.
  */
 import { createDocsTools } from "./tools/index.ts";
 import type { AppRouter } from "@app/router.ts";
 
 export type { ModelContext, ModelContextTool, RegisteredTool } from "./types.ts";
-
-/** True when this browser exposes WebMCP (implies a secure context). */
-export function isWebMCPSupported(): boolean {
-  return (
-    typeof document !== "undefined" && typeof document.modelContext?.registerTool === "function"
-  );
-}
 
 /** The live registration, so a re-setup (dev HMR) can retire the previous one. */
 let controller: AbortController | undefined;

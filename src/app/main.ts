@@ -42,6 +42,9 @@ import { seedBuiltinIcons, seedClientIcons } from "@app/ssr/icons.ts";
 import { readPayload } from "@app/ssr/payload.ts";
 import { brandCss, BRAND_STYLE_ID } from "@app/theme-brand.ts";
 import { registerUserComponents } from "@app/user-theme.ts";
+// The WebMCP polyfill only (~1 kB gzipped) — the tools themselves stay in their
+// own lazy chunk, imported below.
+import { installWebMCPPolyfill } from "./webmcp/polyfill.ts";
 
 // ---------------------------------------------------------------------------
 // Runtime brand color fallback: the server already inlines this <style> for
@@ -194,12 +197,17 @@ function bootstrap(): void {
   // -------------------------------------------------------------------------
   // WebMCP (https://webmachinelearning.github.io/webmcp/): expose docs search /
   // navigation to a browser-resident AI agent as MCP tools (`./webmcp`). The API
-  // is a flagged draft, so it is feature-detected here and the implementation is
-  // loaded as its own lazy chunk — a browser without `document.modelContext`
-  // never downloads it. Opt out with `webmcp: false` in the docs config.
+  // is a draft shipping behind flags, so a browser without it gets our polyfill
+  // (`./webmcp/polyfill.ts`) — the agents that exist today are the ones written
+  // against it. Either way the tools live in their own lazy chunk: with native
+  // support they are registered now, and behind the polyfill the chunk is not
+  // fetched until an agent actually looks for tools, so a visitor with no agent
+  // pays for neither. Opt out with `webmcp: false` in the docs config.
   // -------------------------------------------------------------------------
-  if (useAppConfig().docs?.webmcp !== false && document.modelContext) {
-    import("./webmcp/index.ts").then((m) => m.setupWebMCP(router));
+  if (useAppConfig().docs?.webmcp !== false) {
+    const loadTools = () => import("./webmcp/index.ts").then((m) => m.setupWebMCP(router));
+    if (document.modelContext) void loadTools();
+    else installWebMCPPolyfill(loadTools);
   }
 
   // Dev-only content live-reload. `import.meta.env.DEV` is a Vite static

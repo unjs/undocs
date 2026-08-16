@@ -14,6 +14,8 @@ import type { AppRouter } from "@app/router.ts";
 import type { ModelContext, ModelContextTool } from "@app/webmcp/types.ts";
 // Pure config→URL derivation (no `ofetch`), so a static import is safe here.
 import { editUrl, repoLinks, repoUrl, socialLinks } from "@app/webmcp/links.ts";
+// Same deal for the polyfill: types only, and nothing runs until it is called.
+import { installWebMCPPolyfill } from "@app/webmcp/polyfill.ts";
 import { isExternalRedirect, normalizeRedirects, resolveRedirect } from "@app/utils/redirects.ts";
 import appConfig from "../stubs/app-config.ts";
 
@@ -628,6 +630,136 @@ describe("setupWebMCP", () => {
   it("is a no-op without `document.modelContext`", async () => {
     vi.stubGlobal("document", {});
     await expect(setupWebMCP(createStubRouter())).resolves.toBeTypeOf("function");
+  });
+});
+
+describe("webmcp polyfill", () => {
+  /** A fresh document + window per test, so the tool registry starts empty. */
+  function stubBrowser(document: any = {}) {
+    vi.stubGlobal("document", document);
+    vi.stubGlobal("window", { origin: ORIGIN });
+    return document;
+  }
+
+  /** The real lazy loader: registers the docs tools into whatever is installed. */
+  function toolLoader(router: AppRouter = createStubRouter()) {
+    return vi.fn(() => setupWebMCP(router));
+  }
+
+  it("installs `document.modelContext` only when the browser has none", () => {
+    const document = stubBrowser();
+    const modelContext = installWebMCPPolyfill(toolLoader());
+    expect(document.modelContext).toBe(modelContext);
+
+    // A native implementation wins, and a second install does not replace ours.
+    const native = { registerTool: vi.fn() } as unknown as ModelContext;
+    stubBrowser({ modelContext: native });
+    expect(installWebMCPPolyfill(toolLoader())).toBe(native);
+  });
+
+  it("defers the tools chunk until an agent looks for tools", async () => {
+    stubBrowser();
+    const load = toolLoader();
+    const modelContext = installWebMCPPolyfill(load)!;
+    expect(load).not.toHaveBeenCalled();
+    expect(window.__webmcp_registered_tools?.size ?? 0).toBe(0);
+
+    const tools = await modelContext.getTools();
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(tools.map((t) => t.name)).toEqual([
+      "search_docs",
+      "list_pages",
+      "get_project_info",
+      "read_page",
+      "get_current_page",
+      "navigate",
+    ]);
+
+    // Loaded once, not once per lookup.
+    await modelContext.getTools();
+    expect(load).toHaveBeenCalledTimes(1);
+  });
+
+  // An agent that subscribes and then reads the registry directly never calls
+  // `getTools()` — the one blind spot of loading the tools lazily.
+  it("loads the tools for an agent that only subscribes to `toolchange`", async () => {
+    stubBrowser();
+    const load = toolLoader();
+    const modelContext = installWebMCPPolyfill(load)!;
+
+    const changed = vi.fn();
+    modelContext.ontoolchange = changed;
+    expect(load).toHaveBeenCalledTimes(1);
+    await load.mock.results[0]!.value;
+
+    expect(changed).toHaveBeenCalledTimes(6); // one event per registration
+    expect([...window.__webmcp_registered_tools!.keys()]).toContain("search_docs");
+  });
+
+  it("hands out the reference polyfill's tool shape", async () => {
+    stubBrowser();
+    const modelContext = installWebMCPPolyfill(toolLoader())!;
+    const [search] = await modelContext.getTools();
+
+    expect(search).toMatchObject({
+      name: "search_docs",
+      description: expect.any(String),
+      origin: ORIGIN,
+      window: globalThis.window,
+      annotations: { readOnlyHint: true },
+    });
+    // Stringified, because that is what `JSON.parse(tool.inputSchema)` in every
+    // polyfill consumer expects (the spec's own field is the object).
+    expect(search!.inputSchema).toBeTypeOf("string");
+    expect(JSON.parse(search!.inputSchema as string)).toMatchObject({ type: "object" });
+  });
+
+  it("executes a tool by descriptor, by name and from JSON arguments", async () => {
+    stubBrowser();
+    const modelContext = installWebMCPPolyfill(toolLoader())!;
+    const tools = await modelContext.getTools();
+    const search = tools.find((t) => t.name === "search_docs")!;
+
+    const { data } = unwrap(await modelContext.executeTool!(search, { query: "vercel" }));
+    expect(data.results[0]).toMatchObject({ path: "/guide/deploy" });
+
+    const byName: any = await modelContext.executeTool!("search_docs", '{"query":"vercel"}');
+    expect(unwrap(byName).data.count).toBe(data.count);
+
+    await expect(modelContext.executeTool!("no_such_tool", {})).rejects.toThrow(/not found/);
+  });
+
+  it("rejects a duplicate name and unregisters on abort", async () => {
+    stubBrowser();
+    const modelContext = installWebMCPPolyfill(toolLoader())!;
+    await modelContext.getTools();
+
+    const duplicate = modelContext.registerTool({
+      name: "search_docs",
+      description: "A second one.",
+      execute: () => null,
+    });
+    await expect(duplicate).rejects.toMatchObject({ name: "InvalidStateError" });
+
+    // `setupWebMCP`'s teardown retires the whole set — the spec's only path.
+    const teardown = await setupWebMCP(createStubRouter());
+    teardown();
+    expect(await modelContext.getTools()).toEqual([]);
+  });
+
+  it("refuses a tool the spec would not accept", async () => {
+    stubBrowser();
+    const modelContext = installWebMCPPolyfill(toolLoader())!;
+    const bad = [
+      { name: "bad name", description: "Spaces are not allowed.", execute: () => null },
+      { name: "no_description", description: "", execute: () => null },
+    ];
+    for (const tool of bad) {
+      await expect(modelContext.registerTool(tool)).rejects.toMatchObject({
+        name: "InvalidStateError",
+      });
+    }
+    expect(window.__webmcp_registered_tools?.size ?? 0).toBe(0);
   });
 });
 

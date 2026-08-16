@@ -69,8 +69,9 @@ export interface DocsConfig {
   buildCache?: boolean;
   /**
    * Expose docs search/navigation to browser AI agents via WebMCP
-   * (https://webmachinelearning.github.io/webmcp/). Enabled by default in
-   * supporting browsers; set to `false` to opt out.
+   * (https://webmachinelearning.github.io/webmcp/). Enabled by default —
+   * browsers without a native `document.modelContext` get a polyfill, so the
+   * tools are reachable today. Set to `false` to opt out.
    */
   webmcp?: boolean;
   sponsors?: { api: string };

@@ -27,9 +27,14 @@ NEVER write E2E tests. Ask for it to be tested manually.
   in `schema/config.json` + `config.d.ts`.
 - `src/app/webmcp/` — [WebMCP](https://webmachinelearning.github.io/webmcp/):
   registers docs tools (search/list/project-info/read/current/navigate) on
-  `document.modelContext` for browser AI agents. Feature-detected + lazily
-  imported from `main.ts` after mount, so a non-supporting browser never fetches
-  the chunk. `tools/` is one module per tool over two shared ones —
+  `document.modelContext` for browser AI agents. `polyfill.ts` is the only part
+  in the MAIN bundle: `main.ts` installs it after mount when the browser has no
+  native `document.modelContext`, and `index.ts` + `tools/` stay a lazy chunk
+  the polyfill does not fetch until an agent first LOOKS (a `getTools()` call,
+  or a `toolchange` subscription — the sniff that covers an agent reading
+  `window.__webmcp_registered_tools` straight). So a visitor with no agent still
+  pays nothing but the polyfill, and native support skips it and registers at
+  once. `tools/` is one module per tool over two shared ones —
   `tools/content.ts` (the cached nav/page reads) and `tools/utils.ts` (agent
   input coercion + URL/result shaping); `tools/index.ts` assembles them in the
   order the agent sees. Tools wrap existing machinery (the MiniSearch index, the
@@ -242,6 +247,19 @@ NEVER write E2E tests. Ask for it to be tested manually.
   `©` would otherwise go back in as an entity and decode a second time on its way
   into the DOM. `test/content/transforms.test.ts` parses real markdown to pin all
   four behaviours, because they are md4x's promise rather than ours.
+- **The WebMCP polyfill is ours, and it is Apache-2.0-derived from Google's
+  reference polyfill.** `webmcp/polyfill.ts` exists because native
+  `document.modelContext` is barely shipping, so the agents that can use our
+  tools TODAY are the ones written against that file — which is why it keeps the
+  two things they bind to: the `window.__webmcp_registered_tools` registry under
+  that exact name, and `executeTool` (NOT a spec method; natively the browser
+  invokes `execute` itself). Same rules as `ui/primitives/`: the attribution
+  header is the only record of the derivation, and its "dropped, and why" list —
+  declarative `form[toolname]` tools, the `:tool-form-active` shim that re-fetches
+  every stylesheet, and the `postMessage` bridge that would hand ANY embedder our
+  `navigate` tool — is what stops the next reader porting them back. Registered
+  tools carry a STRINGIFIED `inputSchema` because consumers `JSON.parse` it,
+  even though the spec's own field is now the object (`types.ts` covers both).
 - **An agent-supplied path never touches the docs page's cache key.** The docs
   page keys its `useAsyncData` by `kebabCase(route.path)`, which is lossy
   (`/guide/deploy`, `/guide-deploy` and `/Guide/Deploy` collapse onto ONE entry),

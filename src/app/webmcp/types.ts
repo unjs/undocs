@@ -67,6 +67,14 @@ export interface ModelContext extends EventTarget {
   registerTool(tool: ModelContextTool, options?: RegisterToolOptions): Promise<void>;
   getTools(options?: { fromOrigins?: string[] }): Promise<RegisteredTool[]>;
   ontoolchange: ((this: ModelContext, event: Event) => unknown) | null;
+  /**
+   * NOT in the spec — with native WebMCP the browser calls the registrant's
+   * `execute` itself. It exists on the reference polyfill (and so on ours, see
+   * `./polyfill.ts`) because a page-hosted agent has no other way in, which is
+   * why every polyfill consumer calls it. Optional: a native `modelContext`
+   * does not have it.
+   */
+  executeTool?(tool: { name?: string } | string, args?: unknown): Promise<unknown>;
 }
 
 declare global {
