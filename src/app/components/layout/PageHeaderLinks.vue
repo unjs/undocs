@@ -58,12 +58,14 @@ async function copyPage() {
 <template>
   <ButtonGroup size="sm">
     <Button
-      label="Copy Page"
+      size="sm"
       :icon="copied ? 'i-lucide-check' : 'i-lucide-copy'"
       color="neutral"
       variant="soft"
+      aria-label="Copy page as Markdown"
+      title="Copy page as Markdown"
       :ui="{
-        leadingIcon: 'text-neutral size-3.5',
+        leadingIcon: 'text-neutral',
       }"
       @click="copyPage"
     />
@@ -78,6 +80,7 @@ async function copyPage() {
       }"
     >
       <Button
+        size="sm"
         icon="i-lucide-chevron-down"
         color="neutral"
         variant="soft"

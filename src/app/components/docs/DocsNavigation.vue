@@ -20,10 +20,11 @@ import Tooltip from "@app/components/ui/Tooltip.vue";
 // accent, because the row is tinted: `--brand` is only guaranteed AA on the page
 // and on a card, and `--accent` is neither. See `tokens.css`.
 //
-// Row geometry is Geist's sidebar (vercel.com/geist): a 40px row (`--size-large`)
-// carrying 14px copy — the sidebar row is NOT a control, so it does not follow
-// `Button.ts`'s height↔type pairing (16px at large) — with `px-3` inside a list
-// that bleeds 8px past the aside on both sides (`-mx-2` at level 0). The bleed is
+// Row geometry is Geist's sidebar (vercel.com/geist), taken one step down its
+// control ladder: a 32px row (`--size-small`) carrying 14px copy — which is the
+// pairing `Button.ts` uses at that height, so the rows read tighter without
+// leaving the ladder — with `px-3` inside a list that bleeds 8px past the aside
+// on both sides (`-mx-2` at level 0). The bleed is
 // what puts the label text 4px from the container edge while the hover fill still
 // reads as a full-width row; drop it and every label indents by 12px instead.
 import type { NavItem } from "../../../server/content/types.ts";
@@ -147,7 +148,7 @@ watch(
           v-if="collapsible !== false"
           type="button"
           :aria-expanded="isOpen(item)"
-          class="flex h-(--size-large) w-full items-center gap-2.5 rounded-md px-3 text-copy-14 font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          class="flex h-(--size-small) w-full items-center gap-2.5 rounded-md px-3 text-copy-14 font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           @click="toggle(item)"
         >
           <Icon v-if="item.icon" :name="item.icon" class="size-4 shrink-0 text-muted-foreground" />
@@ -173,7 +174,7 @@ watch(
           :to="headerLink(item)"
           :class="
             cn(
-              'flex h-(--size-large) items-center gap-2.5 rounded-md px-3 text-copy-14 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              'flex h-(--size-small) items-center gap-2.5 rounded-md px-3 text-copy-14 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               isActive(item) ? 'text-brand' : 'text-foreground hover:text-brand',
             )
           "
@@ -187,7 +188,7 @@ watch(
         </AppLink>
         <div
           v-else
-          class="flex h-(--size-large) items-center gap-2.5 px-3 text-copy-14 font-medium text-foreground"
+          class="flex h-(--size-small) items-center gap-2.5 px-3 text-copy-14 font-medium text-foreground"
         >
           <Icon v-if="item.icon" :name="item.icon" class="size-4 shrink-0 text-muted-foreground" />
           <Tooltip :text="item.title" side="right" :disabled="!truncated.has(item.path)">
@@ -221,7 +222,7 @@ watch(
         :data-active-docs-link="isActive(item) ? '' : undefined"
         :class="
           cn(
-            'flex h-(--size-large) items-center gap-2.5 rounded-md px-3 text-copy-14 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            'flex h-(--size-small) items-center gap-2.5 rounded-md px-3 text-copy-14 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             isActive(item)
               ? 'bg-brand/10 text-brand font-medium'
               : 'text-muted-foreground hover:bg-muted hover:text-foreground',

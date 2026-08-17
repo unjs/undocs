@@ -37,7 +37,7 @@ const mobileLinks = computed(() => mobileNavLinks(navigation?.value));
         <img
           :src="appConfig.docs.logo"
           :alt="`${appConfig.site.name} logo`"
-          class="h-7 w-7 shrink-0 grayscale"
+          class="h-7 w-7 shrink-0"
         />
         <span class="select-none truncate">
           {{ appConfig.site.name }}

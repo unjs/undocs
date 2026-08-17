@@ -4,7 +4,12 @@
  *
  * At `md+` (the shell threshold, where the search takes the header's own centre
  * track — see `SiteHeader`) there is room for the full row: the color-mode
- * button, the blog link, plus the same `SocialButtons` the footer uses. Below that
+ * button, the blog link, plus the same `SocialButtons` the footer uses — here in
+ * their `stacked` shape, overlapped into one cluster that fans out on hover, so
+ * a project with four socials does not spend the whole track on them. The
+ * cluster is LAST in the row on purpose: it grows leftward against `ml-auto`, so
+ * expanding nudges the two buttons beside it rather than reflowing anything
+ * outside this track. Below that
  * the bar keeps only the brand and the hamburger, and the same links and the
  * same toggle live at the bottom of the drawer instead (`SiteHeader`'s
  * `#body-footer`, filled by `AppHeader`) — a tap the visitor is already making
@@ -43,6 +48,6 @@ const blog = useBlogLink();
         variant="ghost"
       />
     </Tooltip>
-    <SocialButtons size="lg" />
+    <SocialButtons size="lg" stacked />
   </div>
 </template>

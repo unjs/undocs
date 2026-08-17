@@ -64,8 +64,15 @@
 //    The key light (`.film__light`) stays ANCHORED — the comment above about one
 //    physical light source still holds. Smoke passes through the beam; the beam
 //    does not wander.
-// 4. No `filter: blur()`. Radial gradients are already soft, and blurring a
-//    page-tall layer costs a full-size offscreen pass on every paint.
+// 4. `filter: blur()` is for the PLUMES and nothing else. A radial gradient's
+//    falloff is linear in alpha, which still reads as a defined shape with a
+//    findable centre; the blur is what turns each blob into fog. It is affordable
+//    only because a plume is a small fixed-size box with a STATIC filter and an
+//    animated transform/opacity, so the offscreen pass happens once per layer and
+//    every frame after it is a composite. Never put it on `.film__light` or
+//    `.film__grain` — both are inset:0, i.e. as tall as the document, so a blur
+//    there is a full-page offscreen pass on every paint (and on the grain it would
+//    dissolve the specks the mask exists to make).
 //
 // Purely decorative: `pointer-events-none` + `aria-hidden`.
 </script>
@@ -133,6 +140,26 @@
  * start each plume mid-path so the layer has no visible beginning. Each path
  * returns to its own origin at 100%, so the loop closes without a rewind.
  *
+ * `--plume-blur` is roughly a tenth of the plume's own width, which is what makes
+ * the blob read as fog rather than as a soft-edged shape. It has to stay
+ * proportional: the same absolute radius that dissolves the small plume barely
+ * touches the large one.
+ *
+ * Each `--plume-tone` is then the pre-blur tone DIVIDED by what the blur leaves of
+ * the peak, and the peak is the number to hold: it is the plume's core, the only
+ * part with enough alpha to read at all against the wash. A radius comparable to
+ * the plume's minor radius is a large convolution against a linear ramp, and it
+ * keeps only ~0.66–0.69 of the apex — so the honest tones for parity are
+ * 10.6%/8.8%/8.75%, not the 8%/7%/7% that a "bump it a point" guess produces
+ * (that lands 20% dim). The mid-body ends up ~⅓ up on the unblurred version, which
+ * is not a miss: holding the peak while spreading the falloff IS more total ink,
+ * and it is what makes the plume read as fog with the same weight rather than as a
+ * fainter blob.
+ *
+ * So retuning the blur means retuning the tone WITH it, in the same direction. At
+ * constant tone a blurrier plume is a dimmer one, and the eye reads dimmer as the
+ * fog going away, not as it going soft. Solve it, do not nudge it.
+ *
  * The `animation-name`s are written OUT, per plume, and MUST stay that way. Vue's
  * scoped-style compiler rewrites `@keyframes film-plume-a` to
  * `film-plume-a-<scopeId>` and patches the literal names in `animation` /
@@ -150,6 +177,7 @@
     color-mix(in oklab, var(--foreground) var(--plume-tone), transparent),
     transparent
   );
+  filter: blur(var(--plume-blur));
   animation-duration: var(--plume-period);
   animation-delay: var(--plume-delay);
   animation-timing-function: ease-in-out;
@@ -162,7 +190,8 @@
   width: 60rem;
   height: 36rem;
   animation-name: film-plume-a;
-  --plume-tone: 7%;
+  --plume-blur: 6rem;
+  --plume-tone: 10.6%;
   --plume-period: 19s;
   --plume-delay: -4s;
 }
@@ -173,7 +202,8 @@
   width: 44rem;
   height: 30rem;
   animation-name: film-plume-b;
-  --plume-tone: 6%;
+  --plume-blur: 4.5rem;
+  --plume-tone: 8.8%;
   --plume-period: 23s;
   --plume-delay: -11s;
 }
@@ -184,7 +214,8 @@
   width: 34rem;
   height: 24rem;
   animation-name: film-plume-c;
-  --plume-tone: 6%;
+  --plume-blur: 3.5rem;
+  --plume-tone: 8.75%;
   --plume-period: 29s;
   --plume-delay: -7s;
 }
