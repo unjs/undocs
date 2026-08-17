@@ -15,17 +15,25 @@
  * links, active nav, and icons, not button fills.
  *
  * `color: "brand"` is the deliberate exception, and it is a DEPARTURE from
- * Geist rather than a port of it: it fills with the project's accent so the
- * landing hero's primary CTA carries the docs' colour instead of the neutral
- * ramp. Keep it scarce — one call site, `pages/index.vue`. If it spreads to the
- * chrome, `--primary` and `--brand` have collapsed into one role and the
+ * Geist rather than a port of it: it carries the project's accent so the
+ * landing hero's primary CTA reads in the docs' colour instead of the neutral
+ * ramp. Keep it scarce, and keep the FILL scarcer still: the accent-filled
+ * shape is one call site (`pages/landing.vue`), and the rest are tinted GLYPHS
+ * in the chrome, which is a use `tokens.css` sanctions outright — the header's
+ * active blog link and the accent picker's own trigger (`ColorModeButton`,
+ * given `color="brand"` by `AppHeaderActions`), both `ghost`, both resting on
+ * the page and hovering onto a 10% wash of themselves. If a second accent FILL
+ * appears, `--primary` and `--brand` have collapsed into one role and the
  * monochrome system is gone. Everything else, hero secondary included, stays on
  * `primary`; that contrast is what makes the accented button read as the
  * page's single action.
  *
- * Its fill/label pair is load-bearing and measured — `--brand-foreground` is
- * the only label that clears AA across all seven hues in both modes. See the
- * note on `--brand-foreground` in `tokens.css` before retuning any of it.
+ * That call site takes `solid` — the accent as a FILL. Its label is
+ * `--brand-foreground`, which is measured rather than chosen: across the seven
+ * hues `themeColor` can pick, in both modes, it is the only label clearing AA
+ * on the fill. Same for `--brand-hover`, whose direction is a token because the
+ * two kinds of accent (a hue, and mono) recede opposite ways. Read the note on
+ * both in `tokens.css` before retuning any of it.
  *
  * Sizes are Geist's control ladder, read from the `--size-*` tokens rather
  * than hardcoded — the `h-(--token)` form is Tailwind v4's shorthand for a bare

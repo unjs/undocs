@@ -120,13 +120,22 @@ function normalizeHeroLinks(links: LandingConfig["heroLinks"]) {
       })
       .filter(Boolean)
       .sort((a, b) => a!.order - b!.order)
-      // The lead CTA carries the docs' accent (`color: "brand"`, the one
-      // accent-filled button in the set — see `Button.ts`). Keyed on POSITION,
-      // like `PageHero`'s own primary/secondary split, so it follows whichever
-      // link actually renders first rather than the built-in `primary` key; a
-      // config link that names its own `color` still wins, since `link` spreads
-      // last.
-      .map((link, index) => (index === 0 ? { color: "brand", ...link } : link)) as any[]
+      // The lead CTA carries the docs' accent (`color: "brand"` — see
+      // `Button.ts`). Keyed on POSITION, like `PageHero`'s own
+      // primary/secondary split, so it follows whichever link actually renders
+      // first rather than the built-in `primary` key; a config link that names
+      // its own `color` or `variant` still wins, since `link` spreads last.
+      //
+      // It takes the accent as a SOLID FILL — `bg-brand` under the measured
+      // `--brand-foreground` label (see `tokens.css`) — so the docs' colour
+      // leads the page as a shape rather than as a tint. It is the ONE
+      // accent-filled button in the set; the variant is named rather than left
+      // to the default so that stays legible here. Being opaque, it is not one
+      // of the landing's glass panes: the fire behind it is the CTA's contrast,
+      // not its material.
+      .map((link, index) =>
+        index === 0 ? { color: "brand", variant: "solid", ...link } : link,
+      ) as any[]
   );
 }
 
@@ -233,7 +242,7 @@ const [{ data: latest }, { data: root }] = await Promise.all([
         {{ landing.heroDescription }}
       </template>
 
-      <ProseCodeGroup v-if="hero.code" class="mx-auto" style="max-width: 100%">
+      <ProseCodeGroup v-if="hero.code" class="hero-code mx-auto" style="max-width: 100%">
         <ProsePre
           :filename="hero.code.title || 'Terminal'"
           :code="hero.code.content"
@@ -304,3 +313,76 @@ const [{ data: latest }, { data: root }] = await Promise.all([
     <PageContributors v-if="landing.contributors" />
   </div>
 </template>
+
+<style scoped>
+/*
+ * The hero's one pane of frosted glass: the code block.
+ *
+ * It is the only surface on the site sitting IN the firelight
+ * (`FireplaceBackground`, mounted for the landing only) that reads as a pane
+ * over the backdrop rather than as a shape punched through it. Nowhere else
+ * gets this: a docs page has nothing behind its code blocks to show through,
+ * and a translucent block there is just a lighter one. The lead CTA is the
+ * other element standing in the same firelight and it deliberately does NOT
+ * take this treatment — it is a solid `--brand` fill, i.e. one of the shapes,
+ * and the fire is its contrast rather than its material.
+ *
+ * Every value below is a `color-mix` toward `transparent` of the token the
+ * element already used — the body is still `--muted`, the tab bar still
+ * `--card`, the active tab still `--background`. So the block keeps its rung on
+ * the surface ladder, and, since every token is declared per mode, nothing here
+ * needs a `dark:` variant.
+ *
+ * Three things are deliberate:
+ *
+ * 1. THE BLUR IS ONE PER PANE. `backdrop-filter` samples up to the backdrop
+ *    root, and per filter-effects-2 that is the document here — `isolation`,
+ *    which `PageHero` sets, is NOT on the list that forms one, so the fire
+ *    behind is in frame. A second filter on a surface INSIDE the pane would
+ *    re-blur an already-blurred backdrop and buy another offscreen pass for it;
+ *    the block's inner surfaces are TINTS over its one pane instead.
+ * 2. `@supports` runs the enhancement way round. Without `backdrop-filter` the
+ *    opaque tokens stay, because translucency alone is not the effect — it is
+ *    just the fire showing through the code.
+ * 3. Contrast holds because `test/content/theme.test.ts` pins every syntax
+ *    colour against `--muted`, and the pane is >60% `--muted` over a backdrop
+ *    the fire moves by single-digit alpha, so the effective surface stays
+ *    within about a point of the token in both modes. Thinning that mix is what
+ *    would break it, not the blur.
+ */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .hero-code {
+    background: color-mix(in oklab, var(--muted) 62%, transparent);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    /* The glass edge — page light caught along the pane's top, a mix of
+       `--foreground` like the fire itself, so it inverts with the page — plus a
+       soft drop so the pane floats over the fire instead of being cut out of
+       it. A raw `box-shadow` is safe here: this element carries no focus ring
+       for it to displace. */
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--foreground) 10%, transparent),
+      0 16px 40px -20px color-mix(in oklab, var(--foreground) 45%, transparent);
+  }
+
+  /* The body's own `bg-muted` fill would be a second, opaque pane inside the
+     first — the glass IS the block's surface now. */
+  .hero-code :deep(.prose-pre) {
+    background: transparent;
+  }
+
+  .hero-code :deep(.code-group-tabs) {
+    background: color-mix(in oklab, var(--card) 45%, transparent);
+  }
+
+  .hero-code :deep(.code-group-tabs [data-active]) {
+    background: color-mix(in oklab, var(--background) 55%, transparent);
+  }
+
+  /* The copy button sits ON the glass, so it only needs to stop being opaque —
+     what is behind it is already frosted. */
+  .hero-code :deep(.prose-pre > button) {
+    background: color-mix(in oklab, var(--background) 60%, transparent);
+  }
+}
+</style>

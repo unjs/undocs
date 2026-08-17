@@ -10,7 +10,7 @@ import { docsNavTree } from "@app/utils/nav.ts";
 import { findAnchor } from "@app/utils/anchor.ts";
 import AppFooter from "@app/components/app/AppFooter.vue";
 import AppHeader from "@app/components/app/AppHeader.vue";
-import FilmBackground from "@app/components/FilmBackground.vue";
+import FireplaceBackground from "@app/components/FireplaceBackground.vue";
 import GridPage from "@app/components/grid/GridPage.vue";
 import AppProvider from "@app/components/ui/AppProvider.vue";
 import Banner from "@app/components/ui/Banner.vue";
@@ -64,7 +64,7 @@ useHead({
 
 const route = useRoute();
 
-// The film backdrop belongs to the landing only — other pages, including a
+// The fireplace backdrop belongs to the landing only — other pages, including a
 // no-landing `/`, get a plain background.
 const isLanding = computed(() => route.path === "/" && landing.value);
 
@@ -119,7 +119,7 @@ provide(LANDING_KEY, landing);
         <!-- Parented to the shell, not to `<main>`: it spans the full page
              height — up behind the (transparent-at-rest,
              blurred-when-scrolled) header and down through the sections. -->
-        <FilmBackground v-if="isLanding" />
+        <FireplaceBackground v-if="isLanding" />
 
         <AppHeader />
 

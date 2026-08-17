@@ -1,5 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { brandCss, BRAND_STYLE_ID } from "../../src/app/theme-brand.ts";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import {
+  brandCss,
+  isThemeColor,
+  resolveThemeColor,
+  themeColorToken,
+  userBrandCss,
+  BRAND_STYLE_ID,
+  THEME_COLORS,
+  USER_BRAND_STYLE_ID,
+} from "../../src/app/theme-brand.ts";
 import { TOKENS, tokenContrast } from "../utils/css-tokens.ts";
 
 /**
@@ -183,5 +194,173 @@ describe("brandCss", () => {
   /** Doubled selector, so it wins over `tokens.css` whenever Vite injects it. */
   it("out-specifies the token layer", () => {
     expect(brandCss("teal")).toMatch(/^:root:root\{/);
+  });
+});
+
+/**
+ * `userBrandCss` is the same emission one layer up: the accent a VISITOR picked
+ * for themselves, over the one the docs project configured. It differs from
+ * `brandCss` in exactly two ways, and both are the point.
+ *
+ * It is stricter — its input is a `localStorage` value rather than a config
+ * file, so only the eight names the picker itself writes are honoured and
+ * everything else (junk, a stale hue name, a raw CSS colour someone typed into
+ * devtools) reads as "no pick" and lets the project's accent through.
+ *
+ * And it out-specifies `brandCss` by one `:root`, which is the whole mechanism:
+ * the two tags are written at different times by different code (unhead during
+ * SSR, an inline `<head>` program at parse time), so document order is not
+ * something either can rely on and the pecking order has to live in the
+ * selectors. See the table in `theme-brand.ts`.
+ */
+describe("userBrandCss", () => {
+  const PICKS = [...THEME_COLORS];
+
+  it.each(PICKS)("emits the same pair as the config path for %s", (color) => {
+    // Same declarations, one selector stronger — if these ever diverge, a
+    // visitor's pick and a project's config mean different things by the same
+    // name, which is a bug nothing else would catch.
+    expect(userBrandCss(color)).toBe(brandCss(color)!.replace(":root:root{", ":root:root:root{"));
+  });
+
+  it.each(PICKS)("emits tokens that tokens.css actually defines (%s)", (color) => {
+    for (const value of userBrandCss(color)!.matchAll(/var\((--[\w-]+)\)/g)) {
+      expect(TOKENS.light[value[1]], `${value[1]} in :root`).toBeDefined();
+      expect(TOKENS.dark[value[1]], `${value[1]} in .dark`).toBeDefined();
+    }
+  });
+
+  /**
+   * The picker offers the monochrome step plus every derived hue, and nothing
+   * else. A hue in `tokens.css` that never reaches this list is simply
+   * unreachable from the UI; a name in this list with no token behind it paints
+   * an empty swatch and themes the site to nothing.
+   */
+  it("offers exactly mono plus every derived hue", () => {
+    const derived = Object.keys(TOKENS.light)
+      .filter((name) => /^--brand-(?!foreground|hover)/.test(name))
+      .map((name) => name.slice("--brand-".length))
+      .sort();
+    expect([...THEME_COLORS].filter((c) => c !== "mono").sort()).toEqual(derived);
+    expect(THEME_COLORS).toContain("mono");
+  });
+
+  it("out-specifies the docs project's own tag", () => {
+    const project = brandCss("teal")!.slice(0, brandCss("teal")!.indexOf("{"));
+    const visitor = userBrandCss("teal")!.slice(0, userBrandCss("teal")!.indexOf("{"));
+    expect(visitor.length).toBeGreaterThan(project.length);
+    expect(visitor).toBe(":root:root:root");
+  });
+
+  /**
+   * Everything `brandCss` accepts beyond the eight is REJECTED here — aliases
+   * included. The picker never writes `violet`, so a stored `violet` is a stale
+   * or hand-edited entry, and honouring it would mean two spellings of the same
+   * accent could be stored under one key.
+   */
+  it.each([
+    "violet",
+    "gray",
+    "#ff8800",
+    "rgb(1 2 3)",
+    "chartreuse-ish",
+    "",
+    "  ",
+    undefined,
+    null,
+    42,
+  ])("rejects %s", (input) => {
+    expect(userBrandCss(input)).toBeNull();
+  });
+
+  it("exports a stable style id, distinct from the project's", () => {
+    expect(USER_BRAND_STYLE_ID).toBe("undocs-user-brand");
+    expect(USER_BRAND_STYLE_ID).not.toBe(BRAND_STYLE_ID);
+  });
+});
+
+describe("resolveThemeColor", () => {
+  /**
+   * What the picker uses to decide which swatch to show as already selected on a
+   * site that has never been picked for. It has to accept everything the CONFIG
+   * accepts — otherwise a `themeColor: violet` site opens the picker with no
+   * swatch selected at all, which reads as "no accent" rather than "purple".
+   */
+  it.each([
+    ["blue", "blue"],
+    ["Purple", "purple"],
+    ["  TEAL  ", "teal"],
+    ["violet", "purple"],
+    ["rose", "red"],
+    ["sky", "blue"],
+    ["mono", "mono"],
+    ["zinc", "mono"],
+  ])("resolves %s to %s", (input, expected) => {
+    expect(resolveThemeColor(input)).toBe(expected);
+  });
+
+  /** A bare CSS colour has no swatch — only `brandCss` knows what to do with it. */
+  it.each(["#ff8800", "oklch(0.7 0.1 200)", "nonsense", "", undefined, 42])(
+    "has no swatch for %s",
+    (input) => {
+      expect(resolveThemeColor(input)).toBeNull();
+    },
+  );
+
+  it("only ever returns something `isThemeColor` agrees with", () => {
+    for (const name of ["violet", "rose", "zinc", "Blue", "amber"]) {
+      expect(isThemeColor(resolveThemeColor(name))).toBe(true);
+    }
+  });
+});
+
+describe("themeColorToken", () => {
+  /**
+   * The one mapping from a pickable accent to the token behind it — read by the
+   * emitters here AND by the swatch that paints it. A second copy in the
+   * component is a picker that shows one colour and applies another.
+   */
+  it.each([...THEME_COLORS])("paints %s from the token the CSS points at", (color) => {
+    expect(userBrandCss(color)).toContain(`--brand:${themeColorToken(color)};`);
+  });
+
+  it("collapses mono onto the primary text step", () => {
+    expect(themeColorToken("mono")).toBe("var(--foreground)");
+  });
+});
+
+/**
+ * The one ordering the selectors CANNOT express: a visitor's pick and an
+ * embedder's `br` key both land at (0,3,0), so which of them wins is decided by
+ * which `<style>` the browser sees last — i.e. by the order `entry-server.ts`
+ * writes the two inline programs into `<head>`. An embedder has to win (it is
+ * restyling the whole embed, and `useThemeColor` hides the picker in that case),
+ * which means `theme-color` must be emitted BEFORE `embed-theme`.
+ *
+ * Asserted against the shell's source because that is where the order lives;
+ * there is no rendered artifact to read it off without a client build.
+ */
+describe("inline program order in the shell", () => {
+  const SHELL = readFileSync(
+    fileURLToPath(new URL("../../src/app/entry-server.ts", import.meta.url)),
+    "utf8",
+  );
+  const template = SHELL.slice(SHELL.indexOf("function htmlTemplate"));
+
+  it("writes the visitor's accent before an embedder's", () => {
+    const visitor = template.indexOf("${themeColorScript}");
+    const embed = template.indexOf("${embedThemeScript}");
+    expect(visitor).toBeGreaterThan(-1);
+    expect(embed).toBeGreaterThan(visitor);
+  });
+
+  /** Both really are at the same specificity — the reason order decides at all. */
+  it("has both writing --brand at the same specificity", () => {
+    const embedSource = readFileSync(
+      fileURLToPath(new URL("../../src/app/inline/embed-theme.ts", import.meta.url)),
+      "utf8",
+    );
+    expect(embedSource).toContain(":root:root:root{}");
+    expect(userBrandCss("blue")).toMatch(/^:root:root:root\{/);
   });
 });

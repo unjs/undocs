@@ -59,15 +59,20 @@ const activeVNode = computed<VNode | null>(() => {
 
 <template>
   <div class="prose-code-group my-4 overflow-hidden rounded-lg border border-border">
-    <!-- Tab bar -->
+    <!-- Tab bar. `code-group-tabs` and the active tab's `data-active` are naming
+         hooks, like `code-group-body` below: the surfaces here are utility
+         classes, so a caller that re-materializes the group (the landing hero's
+         glass pane) has nothing else to select — and `data-active` is what keeps
+         such an override from flattening the active/inactive distinction. -->
     <div
       v-if="tabs.length"
-      class="flex flex-wrap items-center gap-1 border-b border-border bg-card px-2 py-1.5"
+      class="code-group-tabs flex flex-wrap items-center gap-1 border-b border-border bg-card px-2 py-1.5"
     >
       <button
         v-for="(tab, i) in tabs"
         :key="i"
         type="button"
+        :data-active="i === active || undefined"
         class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition"
         :class="
           i === active

@@ -65,6 +65,7 @@ import { brandCss, BRAND_STYLE_ID } from "@app/theme-brand.ts";
 import embedThemeCode from "@app/inline/embed-theme.js?raw";
 import assetRecoveryCode from "@app/inline/asset-recovery.js?raw";
 import colorModeCode from "@app/inline/color-mode.js?raw";
+import themeColorCode from "@app/inline/theme-color.js?raw";
 import { ASSETS_BASE } from "@app/assets-base.ts";
 import { DEFAULT_COLOR_MODE } from "@app/color-mode.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
@@ -207,6 +208,15 @@ const assetRecoveryScript = import.meta.dev
 // `inline/color-mode.ts`.
 const colorModeScript = /* html */ `<script>${colorModeCode}</script>`;
 
+// The visitor's own accent, applied before the first paint — the `<style>` this
+// file inlines below carries the DOCS PROJECT's `themeColor`, which is the only
+// one the server knows. See `inline/theme-color.ts`.
+//
+// MUST come before `embedThemeScript`: the two write `--brand` at the same
+// specificity, so the later tag wins, and an embedder's pinned accent has to be
+// the one that does.
+const themeColorScript = /* html */ `<script>${themeColorCode}</script>`;
+
 // Per-embed theme override read from the URL fragment. Blocking and inline
 // because the fragment never reaches the server: SSR cannot pre-apply it, and
 // deferring to `main.ts` would flash the default theme first. See
@@ -224,6 +234,7 @@ function htmlTemplate(appHtml: string, payload: string): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     ${assetRecoveryScript}
     ${colorModeScript}
+    ${themeColorScript}
     ${embedThemeScript}
     ${devLoadingStyle}
   </head>

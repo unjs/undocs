@@ -12,6 +12,7 @@ import DocsSectionTabs from "@app/components/docs/DocsSectionTabs.vue";
 import IconMenuToggle from "@app/components/IconMenuToggle.vue";
 import SiteHeader from "@app/components/layout/SiteHeader.vue";
 import SocialButtons from "@app/components/SocialButtons.vue";
+import ThemeColorPicker from "@app/components/ThemeColorPicker.vue";
 import AppLink from "@app/components/app/AppLink.ts";
 const appConfig = useAppConfig();
 
@@ -71,13 +72,20 @@ const mobileLinks = computed(() => mobileNavLinks(navigation?.value));
       <DocsNavigation :navigation="mobileLinks" default-open :multiple="true" />
     </template>
 
-    <!-- What `AppHeaderActions` renders at `lg+`, at the drawer's foot below it. -->
+    <!-- What `AppHeaderActions` renders at `lg+`, at the drawer's foot below it.
+         The accent swatches come in flow and always-visible here: at `md+` they
+         expand out of the mode toggle on hover, which a touch device has no way
+         to ask for — so this row is how the setting is reachable at all below
+         it. -->
     <template #body-footer>
-      <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-1">
-          <SocialButtons size="lg" />
+      <div class="flex flex-col gap-3">
+        <ThemeColorPicker layout="row" />
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-1">
+            <SocialButtons size="lg" />
+          </div>
+          <ColorModeButton />
         </div>
-        <ColorModeButton />
       </div>
     </template>
   </SiteHeader>

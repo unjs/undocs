@@ -16,7 +16,7 @@
  * now the viewport's rather than the box's, and the vertical rails are gone.
  *
  * The wrapper itself stays, and is NOT a leftover. It is the containing block
- * for the landing's `FilmBackground` — hence `position: relative`. It is the
+ * for the landing's `FireplaceBackground` — hence `position: relative`. It is the
  * only element that spans header, main AND footer, so a backdrop parented here
  * runs the full height of the page (up behind the sticky header, down through
  * the sections) in one piece. Anchoring it to `<main>` instead cut it off at

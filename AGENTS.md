@@ -132,13 +132,32 @@ NEVER write E2E tests. Ask for it to be tested manually.
   the landing glow use `brand`; solid buttons and the high-contrast bar use
   `primary`. Collapsing the two undoes the system. ONE button departs
   deliberately: the landing hero's lead CTA (`color: "brand"`, applied by
-  position in `pages/index.vue`) fills with the accent so the docs' colour leads
-  the page — if a second call site appears, the two roles have merged after all.
-  Its label is `--brand-foreground` (= the page colour), and that is measured,
-  not chosen: across the hues `themeColor` can pick, in both modes, it is the only
-  foreground clearing AA on the accent fill.
+  position in `pages/landing.vue`) takes the accent so the docs' colour leads the
+  page — if a second call site appears, the two roles have merged after all. It
+  takes it as a SOLID FILL (`variant: "solid"`), which is what
+  `--brand-foreground` and `--brand-hover` exist for: the fill/label pair is
+  measured, not chosen — across the hues
+  `themeColor` can pick, in both modes, `--brand-foreground` is the only label
+  clearing AA on a solid accent fill.
   `test/app/tokens.test.ts` re-derives every text/surface contrast from the
   stylesheet rather than pinning literals.
+- **The landing hero has ONE pane of frosted glass**: the code block
+  (`.hero-code`), styled in `pages/landing.vue`'s scoped block. It exists because
+  the landing is the only page with a backdrop to show through
+  (`FireplaceBackground`) — the same treatment on a docs page is just a lighter
+  block. The lead CTA stands in the same firelight and deliberately does NOT take
+  it: a solid `--brand` fill is one of the shapes, and the fire is its contrast
+  rather than its material. Three things hold the pane up.
+  (1) It blurs ONCE. Per filter-effects-2 the backdrop root here is the
+  document (`isolation`, which `PageHero` sets, does not form one), so the fire
+  is in frame; a second `backdrop-filter` on a surface inside the pane re-blurs
+  an already-blurred backdrop for another offscreen pass. The block's tab bar,
+  active tab and copy button are TINTS over its one pane.
+  (2) `@supports` runs the enhancement way round — no `backdrop-filter`, no
+  translucency — because translucency without blur is not glass, it is the fire
+  showing through the code.
+  (3) Contrast is what bounds the mixes: the fill is >60% `--muted` so the syntax
+  colours `theme.test.ts` pins against `--muted` still hold.
 - **The accent is ONE token, and what makes that possible is a rule about
   SURFACES.** `--brand` text sits on the page, on a card, or on a wash of itself
   (≤15%) — never on `--muted` or `--accent`. The `--brand-<hue>` table derives
@@ -214,8 +233,8 @@ NEVER write E2E tests. Ask for it to be tested manually.
   against the padding box, which is where the tracks live).
 - **The shell is FULL-BLEED; the content column is what's capped.** `GridPage`
   wraps header/main/footer but sets no width — it exists for `position: relative`
-  (the landing `FilmBackground`'s containing block, the one element spanning all
-  three). Width comes from `Container`, which every piece of chrome uses, at
+  (the landing `FireplaceBackground`'s containing block, the one element
+  spanning all three). Width comes from `Container`, which every piece of chrome uses, at
   `--ui-container`, base 76.25rem/1220px — Geist's own `max-w-[1220px]`, not its
   published `--geist-page-width`/`--ds-page-width` tokens (1200/1400), which that
   page never references. So content centres while every horizontal rule

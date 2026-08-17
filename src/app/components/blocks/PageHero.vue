@@ -46,9 +46,15 @@ const primaryClass = "max-sm:h-12 max-sm:w-full max-sm:text-base";
 // `border-0`: tailwind-merge keeps the width class from the variant either way,
 // so the hairline stays in the box model and the labels don't shift by a pixel
 // against the CTA above them.
+//
+// `hover:bg-transparent` is separate from `bg-transparent` on purpose: every
+// variant's fill comes in a PAIR (`bg-* hover:bg-accent`), and tailwind-merge
+// treats a modifier as part of the group key — so clearing the resting fill
+// leaves the hover one, and the surface this class just stripped grows back
+// under the pointer. The only cue left is the colour lift on the label.
 const secondaryClass =
-  "h-auto w-auto border-transparent bg-transparent px-0 py-1 font-normal shadow-none " +
-  "text-muted-foreground hover:text-foreground underline underline-offset-4";
+  "h-auto w-auto border-transparent bg-transparent hover:bg-transparent px-0 py-1 font-normal " +
+  "shadow-none text-muted-foreground hover:text-foreground underline underline-offset-4";
 </script>
 
 <template>
@@ -97,15 +103,15 @@ const secondaryClass =
           <!-- Links -->
           <div
             v-if="slots.links || (links && links.length)"
-            class="mt-10 flex w-full flex-col gap-4 sm:w-auto"
+            class="mt-10 flex w-full flex-col gap-4 sm:w-auto sm:flex-row sm:items-center sm:gap-6"
             :class="isHorizontal ? 'items-start' : 'items-center'"
           >
             <slot name="links">
               <Button v-if="primaryLink" v-bind="primaryLink" :class="primaryClass" />
               <div
                 v-if="secondaryLinks.length"
-                class="flex flex-wrap items-center gap-x-6 gap-y-2"
-                :class="isHorizontal ? 'justify-start' : 'justify-center'"
+                class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-6 sm:gap-y-2"
+                :class="isHorizontal ? 'items-start' : 'items-center'"
               >
                 <Button
                   v-for="link in secondaryLinks"
