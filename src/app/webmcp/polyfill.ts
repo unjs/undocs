@@ -7,6 +7,11 @@
  * stringified for reference-polyfill consumers; `types.ts` accepts that and the
  * newer spec object. Installation is explicit and client-only.
  *
+ * Added beyond the reference: a registered tool carries its `outputSchema`
+ * through, so an agent reading the registry learns a tool's result shape and not
+ * just its arguments. Neither WebMCP nor the reference has the field; MCP does,
+ * and it is the only place these tools' shapes can be declared (`types.ts`).
+ *
  * Dropped, and why:
  * - declarative `form[toolname]` tools: undocs registers imperatively, so form
  *   filling and submit interception would be unused main-bundle weight.
@@ -104,6 +109,10 @@ class PolyfillModelContext extends EventTarget implements ModelContext {
       title: tool.title,
       description,
       inputSchema: tool.inputSchema ? JSON.stringify(tool.inputSchema) : undefined,
+      // Kept as an object: the stringified `inputSchema` above is compatibility
+      // with consumers that already parse it, and this field has none to keep
+      // faith with — so it is passed on the way MCP defines it (`types.ts`).
+      outputSchema: tool.outputSchema,
       window,
       origin: window.origin,
       annotations: tool.annotations,

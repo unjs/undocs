@@ -215,6 +215,69 @@ function unwrap(result: any): { text: string; data: any } {
   return { text: result.content[0].text, data: result.structuredContent };
 }
 
+/** `typeof`, but naming an array and a null for a readable schema failure. */
+function typeName(value: unknown): string {
+  if (value === null) return "null";
+  return Array.isArray(value) ? "array" : typeof value;
+}
+
+/**
+ * Validate a value against the slice of JSON Schema the tools declare — object
+ * properties, `required`, closed objects, arrays of one shape, and the scalar
+ * types. Returns a path-tagged list of what's wrong, empty when it conforms.
+ *
+ * Hand-rolled rather than pulled in as a dependency: the schemas are ours and
+ * small, and the point is drift (a result grew a field nobody described, or lost
+ * one that is declared required), not standards-grade validation.
+ */
+function schemaErrors(schema: any, value: any, path = "$"): string[] {
+  const errors: string[] = [];
+  if (schema.type === "object") {
+    if (typeName(value) !== "object") {
+      return [`${path}: expected object, got ${typeName(value)}`];
+    }
+    for (const key of schema.required ?? []) {
+      if (value[key] === undefined) errors.push(`${path}.${key}: required, but missing`);
+    }
+    for (const [key, child] of Object.entries(value)) {
+      const property = schema.properties?.[key];
+      if (!property) {
+        if (schema.additionalProperties === false) {
+          errors.push(`${path}.${key}: returned, but not described by the schema`);
+        }
+        continue;
+      }
+      // `undefined` never survives serialization, so it reads as absent.
+      if (child !== undefined) errors.push(...schemaErrors(property, child, `${path}.${key}`));
+    }
+    return errors;
+  }
+  if (schema.type === "array") {
+    if (!Array.isArray(value)) return [`${path}: expected array, got ${typeName(value)}`];
+    for (const [i, item] of value.entries()) {
+      errors.push(...schemaErrors(schema.items, item, `${path}[${i}]`));
+    }
+    return errors;
+  }
+  if (schema.type === "integer") {
+    return Number.isInteger(value) ? [] : [`${path}: expected integer, got ${typeName(value)}`];
+  }
+  return typeName(value) === schema.type
+    ? []
+    : [`${path}: expected ${schema.type}, got ${typeName(value)}`];
+}
+
+/**
+ * A tool's result, against the tool's own `outputSchema`. The schema describes
+ * the STRUCTURED half, which for the two prose tools is `structuredContent` and
+ * for the rest is the returned object itself.
+ */
+function expectValidResult(tool: ModelContextTool, result: any) {
+  expect(schemaErrors(tool.outputSchema, result?.structuredContent ?? result), tool.name).toEqual(
+    [],
+  );
+}
+
 describe("webmcp tool descriptors", () => {
   it("exposes the docs tool set", () => {
     expect(Object.keys(toolsByName())).toEqual([
@@ -235,6 +298,22 @@ describe("webmcp tool descriptors", () => {
       expect(tool.inputSchema).toMatchObject({ type: "object" });
       // Serializable: the UA stringifies the schema for `getTools()`.
       expect(() => JSON.stringify(tool.inputSchema)).not.toThrow();
+    }
+  });
+
+  // Every tool says what it ANSWERS with, not just what it takes — otherwise an
+  // agent has to call one to find out whether a hit carries a route path, or
+  // which field continues a truncated page.
+  it("declares an output schema for every tool", () => {
+    for (const tool of createDocsTools(createStubRouter())) {
+      expect(tool.outputSchema, tool.name).toMatchObject({
+        type: "object",
+        // Closed, so `webmcp.test.ts` catches an undescribed field rather than
+        // an agent meeting it in production.
+        additionalProperties: false,
+      });
+      expect(Object.keys((tool.outputSchema as any).properties).length).toBeGreaterThan(0);
+      expect(() => JSON.stringify(tool.outputSchema)).not.toThrow();
     }
   });
 
@@ -289,6 +368,49 @@ describe("webmcp tool descriptors", () => {
       expect(result.content).toBeUndefined();
       expect(result.structuredContent).toBeUndefined();
     }
+  });
+});
+
+describe("webmcp result schemas", () => {
+  // A schema an agent cannot rely on is worse than none, so every branch a tool
+  // answers through is checked against it — including the ones that leave fields
+  // out: no results, a truncated page (`nextOffset`), a redirect
+  // (`redirectedFrom`), a generated route (no `markdownUrl`/`editUrl`), and an
+  // off-site redirect, which reports a destination instead of a page.
+  const CALLS: Array<{ tool: string; input: Record<string, unknown>; at?: string }> = [
+    { tool: "search_docs", input: { query: "vercel" } },
+    { tool: "search_docs", input: { query: "zzqqxx" } },
+    { tool: "list_pages", input: {} },
+    { tool: "get_project_info", input: {} },
+    { tool: "read_page", input: { path: "/guide/deploy" } },
+    { tool: "read_page", input: { path: "/guide/long" } },
+    { tool: "read_page", input: { path: "/deploy" } },
+    { tool: "get_current_page", input: {}, at: "/guide" },
+    { tool: "get_current_page", input: {}, at: "/" },
+    { tool: "navigate", input: { path: "/guide/deploy", hash: "vercel" } },
+    { tool: "navigate", input: { path: "/" } },
+    { tool: "navigate", input: { path: "/changelog" } },
+  ];
+
+  for (const { tool, input, at } of CALLS) {
+    it(`${tool} answers the shape it declares — ${JSON.stringify(input)}`, async () => {
+      const tools = toolsByName(createStubRouter(at ?? "/guide"));
+      expectValidResult(tools[tool]!, await tools[tool]!.execute(input));
+    });
+  }
+
+  it("addresses a result the way the next tool takes input", async () => {
+    // The point of declaring the shapes: `path` and `hash` on a search hit are
+    // `read_page`'s and `navigate`'s arguments verbatim, so a chained call is a
+    // copy rather than a parse. A schema that described URLs here would send the
+    // agent stripping an origin back off.
+    const tools = toolsByName(createStubRouter("/"));
+    const hit = (tools.search_docs!.outputSchema as any).properties.results.items;
+    expect(Object.keys(hit.properties)).toContain("path");
+    expect(hit.properties.path.description).toBe(
+      (tools.read_page!.outputSchema as any).properties.path.description,
+    );
+    expect(hit.required).toContain("path");
   });
 });
 
@@ -712,6 +834,10 @@ describe("webmcp polyfill", () => {
     // polyfill consumer expects (the spec's own field is the object).
     expect(search!.inputSchema).toBeTypeOf("string");
     expect(JSON.parse(search!.inputSchema as string)).toMatchObject({ type: "object" });
+    // The output schema goes through as an OBJECT: the stringification above is
+    // owed to consumers that already parse that field, and this one — which
+    // neither WebMCP nor the reference polyfill has — takes MCP's own shape.
+    expect(search!.outputSchema).toMatchObject({ type: "object", properties: expect.any(Object) });
   });
 
   it("executes a tool by descriptor, by name and from JSON arguments", async () => {

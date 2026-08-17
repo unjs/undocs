@@ -2,6 +2,7 @@
 import type { AppRouter } from "@app/router.ts";
 import type { ModelContextTool } from "../types.ts";
 import { currentPage, routeExists } from "./content.ts";
+import { CURRENT_PAGE_PROPERTIES, objectSchema, REDIRECTED_FROM_PROPERTY } from "./schemas.ts";
 import { resolveDocsPath } from "./utils.ts";
 
 export function navigateTool(router: AppRouter): ModelContextTool {
@@ -10,6 +11,7 @@ export function navigateTool(router: AppRouter): ModelContextTool {
     title: "Open a documentation page",
     description:
       `Open a documentation page in the user's browser, optionally at a heading. ` +
+      `Returns the page it landed on. ` +
       `Use only when the user asks to navigate; use \`read_page\` to inspect content without moving them.`,
     inputSchema: {
       type: "object",
@@ -25,6 +27,23 @@ export function navigateTool(router: AppRouter): ModelContextTool {
       },
       required: ["path"],
     },
+    // The landed page, which is `get_current_page`'s shape — hence the shared
+    // properties. Only `navigated` and `url` are guaranteed: a redirect off the
+    // site leaves nothing to snapshot, so the rest of the page fields are absent
+    // there. A refused navigation throws instead of answering.
+    outputSchema: objectSchema(
+      {
+        navigated: { type: "boolean", description: "Always true; a failed navigation throws." },
+        external: {
+          type: "boolean",
+          description:
+            "Present and true when a configured redirect led off this documentation site: the browser is leaving it, `url` is the destination, and no page snapshot follows.",
+        },
+        redirectedFrom: REDIRECTED_FROM_PROPERTY,
+        ...CURRENT_PAGE_PROPERTIES,
+      },
+      ["navigated", "url"],
+    ),
     annotations: { readOnlyHint: false },
     async execute({ path: input, hash } = {}) {
       // A moved path is a real destination: resolve the docs config's redirects

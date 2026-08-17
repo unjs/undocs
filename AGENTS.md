@@ -46,7 +46,15 @@ NEVER write E2E tests. Ask for it to be tested manually.
   newline and a backslash per quote. The prose goes in `content` ONLY — copying
   it into `structuredContent` as well would double the payload for exactly the
   client that cannot unwrap it — and metadata-only tools stay plain objects,
-  since the envelope buys them nothing. Unregistration
+  since the envelope buys them nothing. Every tool also declares an
+  `outputSchema` (`tools/schemas.ts`) for that structured half — the field is
+  MCP's, NOT WebMCP's, so a native `registerTool` drops it (WebIDL discards
+  members it does not declare) and it reaches the polyfill's registry readers and
+  MCP bridges; the tool DESCRIPTION is the half that survives both paths, so it
+  still names the fields an agent must act on. The schemas are CLOSED
+  (`additionalProperties: false`) and `webmcp.test.ts` validates every branch of
+  every tool's real result against them, so an undescribed field fails there
+  rather than surprising an agent. Unregistration
   is `AbortSignal`-only (the spec's sole teardown), which is also what makes an
   HMR re-setup safe. WebMCP has NO `resources` primitive (tools are the whole
   surface), so project/page links are tool RESULTS instead — `links.ts` derives
@@ -317,6 +325,11 @@ NEVER write E2E tests. Ask for it to be tested manually.
   `navigate` tool — is what stops the next reader porting them back. Registered
   tools carry a STRINGIFIED `inputSchema` because consumers `JSON.parse` it,
   even though the spec's own field is now the object (`types.ts` covers both).
+  `outputSchema` — carried through beyond the reference, since the registry is
+  the only place these shapes can reach an agent — is deliberately NOT
+  stringified with it: the stringification is compatibility owed to consumers
+  that already parse that one field, and a field nothing has ever read takes
+  MCP's own shape instead.
 - **An agent-supplied path never touches the docs page's cache key.** The docs
   page keys its `useAsyncData` by `kebabCase(route.path)`, which is lossy
   (`/guide/deploy`, `/guide-deploy` and `/Guide/Deploy` collapse onto ONE entry),

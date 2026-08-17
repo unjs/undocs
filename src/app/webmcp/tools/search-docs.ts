@@ -14,6 +14,7 @@ import type { SearchDocument } from "@server/content/search-options.ts";
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { querySearchIndex } from "@app/composables/useContent.ts";
 import type { ModelContextTool } from "../types.ts";
+import { arraySchema, objectSchema, PATH_PROPERTY } from "./schemas.ts";
 import { clampLimit, siteName, textResult } from "./utils.ts";
 
 /**
@@ -55,6 +56,29 @@ interface SearchHit {
   hash?: string;
   preview: string;
 }
+
+/** `SearchHit`, described for the agent — the two must stay in step. */
+const SEARCH_HIT_SCHEMA = objectSchema(
+  {
+    title: { type: "string", description: "Title of the matched page or section." },
+    breadcrumb: {
+      type: "string",
+      description:
+        "Ancestor headings of the matched section, `>`-separated; absent on a page-level hit.",
+    },
+    path: PATH_PROPERTY,
+    hash: {
+      type: "string",
+      description:
+        "Anchor of the matched heading, e.g. `#vercel` — `navigate`'s `hash`; absent on a page-level hit.",
+    },
+    preview: {
+      type: "string",
+      description: "Excerpt of the section's text; an empty string when it has none.",
+    },
+  },
+  ["title", "path", "preview"],
+);
 
 /**
  * The hits as one text block, so a client that unwraps `content` reads the
@@ -100,6 +124,19 @@ export function searchDocsTool(): ModelContextTool {
       },
       required: ["query"],
     },
+    // Describes `structuredContent`; the text block beside it is the same hits
+    // rendered as prose (see `./schemas.ts`).
+    outputSchema: objectSchema(
+      {
+        query: { type: "string", description: "The query as searched, trimmed." },
+        count: {
+          type: "integer",
+          description: "Number of results returned, at most `limit`.",
+        },
+        results: arraySchema(SEARCH_HIT_SCHEMA, "Ranked matches, best first."),
+      },
+      ["query", "count", "results"],
+    ),
     annotations: { readOnlyHint: true },
     // The spec passes an object, but it's a draft behind flags — default the
     // destructure so a bare call fails with the tool's own error, not a

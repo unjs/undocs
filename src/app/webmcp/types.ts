@@ -33,6 +33,17 @@ export interface ModelContextTool {
   description: string;
   /** JSON Schema describing `execute`'s single argument object. */
   inputSchema?: Record<string, unknown>;
+  /**
+   * JSON Schema describing what the tool ANSWERS with — MCP's `Tool.outputSchema`.
+   *
+   * NOT a WebMCP member: the spec's descriptor dictionary declares no such key
+   * and WebIDL discards what it does not declare, so a native `registerTool`
+   * drops it silently. It is carried anyway because it costs nothing where it is
+   * dropped and is read by the two clients that can act on it — an agent reading
+   * `./polyfill.ts`'s registry, and a bridge mapping our tools onto MCP ones.
+   * See `./tools/schemas.ts`.
+   */
+  outputSchema?: Record<string, unknown>;
   /** Spec signature is `Promise<any> (object input)` — any structured value. */
   execute: (input: any) => unknown | Promise<unknown>;
   annotations?: ToolAnnotations;
@@ -58,6 +69,14 @@ export interface RegisteredTool {
    * those builds age out.
    */
   inputSchema?: Record<string, unknown> | string;
+  /**
+   * The tool's output schema, always an OBJECT — never stringified the way
+   * `inputSchema` is above. That stringification is a compatibility wart owed to
+   * consumers that already `JSON.parse` the field; nothing has ever read this
+   * one, so it takes the shape MCP gives `Tool.outputSchema`. Present only on a
+   * tool the polyfill registered — a native `getTools()` cannot return it.
+   */
+  outputSchema?: Record<string, unknown>;
   window: Window;
   origin: string;
   annotations?: ToolAnnotations;

@@ -5,6 +5,13 @@ import { joinURL } from "ufo";
 import type { ModelContextTool } from "../types.ts";
 import { pageLinks, probePage } from "./content.ts";
 import {
+  objectSchema,
+  PAGE_LINK_PROPERTIES,
+  PAGE_TEXT_PROPERTIES,
+  PATH_PROPERTY,
+  REDIRECTED_FROM_PROPERTY,
+} from "./schemas.ts";
+import {
   clampLimit,
   clampOffset,
   resolveDocsPath,
@@ -75,6 +82,30 @@ export function readPageTool(): ModelContextTool {
       },
       required: ["path"],
     },
+    // Describes `structuredContent`. The Markdown itself is NOT here: it rides
+    // in the result's text block, which is why this tool has an envelope at all.
+    outputSchema: objectSchema(
+      {
+        path: PATH_PROPERTY,
+        redirectedFrom: REDIRECTED_FROM_PROPERTY,
+        ...PAGE_LINK_PROPERTIES,
+        ...PAGE_TEXT_PROPERTIES,
+        length: {
+          type: "integer",
+          description: "Length of the page's whole Markdown source, in characters.",
+        },
+        offset: { type: "integer", description: "Character offset this slice starts at." },
+        truncated: {
+          type: "boolean",
+          description: "Whether Markdown remains after this slice.",
+        },
+        nextOffset: {
+          type: "integer",
+          description: "Pass as `offset` to read the next slice; absent when `truncated` is false.",
+        },
+      },
+      ["path", "url", "title", "description", "length", "offset", "truncated"],
+    ),
     annotations: { readOnlyHint: true },
     async execute({ path: input, offset, maxLength } = {}) {
       // Follow a configured redirect first: `/raw/<old>.md` has no entry in the
