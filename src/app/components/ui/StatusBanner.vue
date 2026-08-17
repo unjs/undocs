@@ -30,8 +30,10 @@ const props = withDefaults(
 
 const VARIANTS = {
   offline: {
+    // No cached-version promise while the offline service worker is disabled
+    // (see `main.ts`) — offline now simply means pages won't load.
     icon: "i-lucide-cloud-off",
-    message: "You’re offline — showing the last cached version of these docs.",
+    message: "You’re offline — parts of these docs may not load.",
   },
 } as const;
 

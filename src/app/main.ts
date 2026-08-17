@@ -216,28 +216,28 @@ function bootstrap(): void {
   // out of the production client bundle.
   if (import.meta.env.DEV) {
     import("./dev-reload.ts").then((m) => m.connectDevReload());
-
-    // Dev and prod share an origin (localhost:3000), so a SW installed by an
-    // earlier `pnpm build && pnpm start` / `vite preview` would keep controlling
-    // the dev server and fight HMR. Tear down any such leftover in dev.
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.getRegistrations?.().then((regs) => {
-        for (const reg of regs) reg.unregister();
-      });
-      caches?.keys?.().then((keys) => {
-        for (const key of keys) if (key.startsWith("undocs-offline")) caches.delete(key);
-      });
-    }
   }
 
-  // Register the offline service worker (`public/sw.js`) in production only — a
-  // SW in dev fights Vite's HMR (and the dev block above actively unregisters
-  // it). It network-first caches the shell + content API so previously-visited
-  // docs stay readable offline, and messages the client (see
-  // `composables/useOffline.ts` → `StatusBanner`) when it falls back to cache.
-  if (!import.meta.env.DEV && "serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+  // -------------------------------------------------------------------------
+  // Offline service worker — TEMPORARILY DISABLED (unreliable in the field).
+  //
+  // We no longer register `/sw.js`; instead we tear down whatever is installed,
+  // in EVERY environment. Not registering is not the same as disabling: a SW a
+  // visitor already installed keeps controlling the origin (and serving its
+  // cache) indefinitely, and in dev a SW left over from `pnpm build && pnpm
+  // start` / `vite preview` on the shared localhost origin fights HMR. This runs
+  // unconditionally so both cases die on the next page load.
+  //
+  // `public/sw.js` is a tombstone that unregisters itself too — the belt to this
+  // braces, for a client controlled by a cached bundle that never runs this
+  // code. To re-enable: restore both files (`git log -- src/app/public/sw.js`).
+  // -------------------------------------------------------------------------
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations?.().then((regs) => {
+      for (const reg of regs) reg.unregister();
+    });
+    caches?.keys?.().then((keys) => {
+      for (const key of keys) if (key.startsWith("undocs-offline")) caches.delete(key);
     });
   }
 }

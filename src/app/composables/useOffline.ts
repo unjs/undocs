@@ -4,7 +4,11 @@
  * Two independent inputs feed it, whichever fires first wins:
  *   1. The browser's own reachability — `navigator.onLine` seeded once, then the
  *      `online` / `offline` window events.
- *   2. Messages from our service worker (`public/sw.js`). The SW posts
+ *   2. Messages from our service worker (`public/sw.js`) — currently DORMANT:
+ *      the offline SW is temporarily disabled (see `main.ts`), so nothing posts
+ *      these today and input 1 is the whole signal. The listener stays because
+ *      it costs nothing and is what re-enabling the SW switches back on. The SW
+ *      posts
  *      `undocs:offline` the moment it has to serve a request from cache (a real
  *      network failure) and `undocs:online` when the network recovers. This is
  *      the indicator the SW injects for the client bundle: it means "what you're
