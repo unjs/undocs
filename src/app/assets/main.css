@@ -26,12 +26,69 @@
    * `--geist-page-width` / `--ds-page-width` tokens Geist also publishes —
    * those are 1200px and 1400px and go unreferenced on that page. The previous
    * 90rem/1440px here came from Nuxt UI, and read wide next to Geist.
+   *
+   * It GROWS IN STEPS above that (the media queries below). 1220px is Geist's
+   * marketing measure, and a docs page is not a marketing page: it spends a
+   * sidebar and a ToC before the prose starts, so on a 1440px-class laptop the
+   * boxed column left ~110px dead on each side while the ToC truncated every
+   * second heading. The steps are on the ONE token on purpose — widening only
+   * the docs body would leave the header's and footer's rules ending short of
+   * the content they sit over.
    */
   --ui-container: 76.25rem;
+  /*
+   * The docs shell's two side columns, as FIXED tracks (`Page`'s grid). They
+   * used to be 2 of 10 proportional columns, which is what pinned the desktop
+   * layout to `lg`: the same fraction is ~166px at 1024 and ~120px at 768, i.e.
+   * a sidebar too narrow to hold a nav row. A fixed track is width-independent,
+   * so the sidebar can appear at `md` and only the content column pays for the
+   * narrower viewport.
+   */
+  --ui-aside: 14rem;
+  --ui-toc: 13rem;
   /* Height reserved at the top of the page for the fixed status banner.
      Published by `StatusBanner.vue` while it is shown (measured, so it tracks
      wrapping), `0px` otherwise — so the offsets below are no-ops when hidden. */
   --status-banner-height: 0px;
+}
+
+/*
+ * The shell's steps, and they are a PAIR: the container widens, and at the
+ * widest step the side tracks widen with it. `Page`'s content column is the only
+ * one that flexes, so the container alone decides the prose MEASURE — a step
+ * that moves `--ui-container` and leaves the rails alone spends every pixel on
+ * line length, which is the one dimension that was already long enough.
+ *
+ *   ≥ 90rem  (1440px — the 14" MacBook Pro class)
+ *     container 88rem/1408 → 224 sidebar / ~848 prose / 208 ToC
+ *   ≥ 120rem (1920px and up)
+ *     container 92rem/1472, rails +2rem → 256 / ~848 prose / 240
+ *
+ * So the second step is deliberately NOT a wider measure: the 64px it adds go to
+ * the rails (the ToC stops truncating, the nav tree stops wrapping) and the prose
+ * holds the width it reached at 1440. Anything added here must keep that
+ * arithmetic — container delta = sum of the rail deltas — or the measure drifts.
+ *
+ * Plain media queries, not `clamp()` on `100vw`: the viewport unit includes the
+ * classic scrollbar, so a fluid width would size the page from a box ~15px wider
+ * than the one it lays out in and the gutters would differ per platform.
+ *
+ * `:root` here, matching the declarations above — an embed's pinned width
+ * (`inline/embed-theme.js`, which writes `--ui-container` on a `:root:root:root`
+ * rule) still outranks every step.
+ */
+@media (min-width: 90rem) {
+  :root {
+    --ui-container: 88rem;
+  }
+}
+
+@media (min-width: 120rem) {
+  :root {
+    --ui-container: 92rem;
+    --ui-aside: 16rem;
+    --ui-toc: 15rem;
+  }
 }
 
 /* Base canvas — paint the page background/foreground from the theme tokens so

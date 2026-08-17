@@ -86,7 +86,7 @@ NEVER write E2E tests. Ask for it to be tested manually.
   `seedClientIcons`) MUST run before `createSSRApp`. The inline `<head>` programs
   are the one exception, and only because they stay OUTSIDE the hydration root:
   `inline/color-mode.ts` reads `localStorage` before first paint but only touches
-  `<html>`'s class. Anything that RENDERS from the mode (`ColorModeSwitch.vue`)
+  `<html>`'s class. Anything that RENDERS from the mode (`ColorModeButton.vue`)
   must still show `DEFAULT_COLOR_MODE` on its first client render and correct
   itself `onMounted` — the server always rendered the default.
 - **`components/ui/primitives/` is ours, and it is MIT-derived from reka-ui.**
@@ -202,11 +202,17 @@ NEVER write E2E tests. Ask for it to be tested manually.
   wraps header/main/footer but sets no width — it exists for `position: relative`
   (the landing `FilmBackground`'s containing block, the one element spanning all
   three). Width comes from `Container`, which every piece of chrome uses, at
-  `--ui-container` = 76.25rem/1220px — Geist's own `max-w-[1220px]`, not its
+  `--ui-container`, base 76.25rem/1220px — Geist's own `max-w-[1220px]`, not its
   published `--geist-page-width`/`--ds-page-width` tokens (1200/1400), which that
   page never references. So content centres while every horizontal rule
   (`DocsSectionTabs`'s `border-y`, `AppFooter`'s `border-t`) runs to the
-  viewport. If you ever re-box the shell, put the max-width and rails on
+  viewport. That token STEPS with the viewport (88rem at 1440, 92rem at 1920) and
+  the steps stay on the ONE token: widen only the docs body and the header's and
+  footer's rules end short of the content above them. Because `Page`'s side
+  tracks are FIXED (`--ui-aside`/`--ui-toc`) and its content column is the only
+  one that flexes, the container alone sets the prose MEASURE — which is why the
+  1920 step moves the rails by exactly what it adds to the container, holding the
+  measure where 1440 left it. Keep that arithmetic when adding a step. If you ever re-box the shell, put the max-width and rails on
   `GridPage` itself rather than drawing an overlay at the same coordinates, which
   cannot clip the chrome's own borders. We deliberately do NOT tint the page the
   way Geist does in light: our `--card` IS that step, so the page would swallow

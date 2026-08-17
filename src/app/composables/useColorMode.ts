@@ -10,8 +10,8 @@
  * concrete mode (`"light" | "dark"`). Setting `.preference` re-applies the
  * class and re-persists (reactive watcher). `.forced` is set when an embedder
  * pinned the mode via the URL fragment — the preference is then fixed and the
- * UI hides its toggle (`ColorModeSwitch.vue`, and with it the color-mode item in
- * `AppHeaderActions.vue`'s menu).
+ * UI hides its toggle (`ColorModeButton.vue`, in the header at `md+` and at the
+ * foot of the mobile drawer below it).
  *
  * `init()` runs lazily on first `useColorMode()` call; main.ts also calls it at
  * startup so the class is applied before the app mounts. `main.css` maps those
@@ -23,7 +23,7 @@
  * storage and so reaches the same answer; this is the durable owner of the
  * state, the toggle and persistence. What the inline program cannot fix is the
  * SSR-rendered DOM: the server always renders the default mode, so anything
- * rendering FROM the mode (`ColorModeSwitch.vue`) must still show the default
+ * rendering FROM the mode (`ColorModeButton.vue`) must still show the default
  * on its first client render and correct itself `onMounted`, or hydration
  * mismatches.
  */

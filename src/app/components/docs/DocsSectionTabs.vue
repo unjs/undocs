@@ -16,7 +16,7 @@ import AppLink from "@app/components/app/AppLink.ts";
 // Visibility + tab list come from `useSectionTabs` so the sticky sidebars stay
 // in sync with whether this bar is on screen.
 const route = useRoute();
-const { tabs, trailingTabs, visible } = useSectionTabs();
+const { tabs, visible } = useSectionTabs();
 
 // `useDocsNav` already worked out which entry holds the current route, and it is
 // the only thing that can: a synthetic section's members share no path prefix
@@ -55,16 +55,6 @@ const scrolled = computed(() => y.value > 8);
           <Icon v-if="tab.icon" :name="tab.icon" class="size-4 shrink-0" />
           <span class="whitespace-nowrap">{{ tab.label }}</span>
         </AppLink>
-        <!-- Non-docs sections (Blog) sit at the far end of the bar. The auto
-             margin collapses when the tabs overflow, so it never eats scroll. -->
-        <div
-          v-if="trailingTabs.length"
-          class="ml-auto flex shrink-0 items-center gap-1 self-stretch"
-        >
-          <AppLink v-for="tab in trailingTabs" :key="tab.to" :to="tab.to" :class="tabClass(tab)">
-            <span class="whitespace-nowrap">{{ tab.label }}</span>
-          </AppLink>
-        </div>
       </nav>
     </Container>
   </div>

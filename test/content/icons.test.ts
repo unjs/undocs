@@ -5,7 +5,7 @@ describe("resolveIcon", () => {
   it("matches a known section pattern", () => {
     expect(resolveIcon("/guide")).toBe("i-lucide-book-open");
     expect(resolveIcon("/config")).toBe("i-lucide-settings");
-    expect(resolveIcon("/blog")).toBe("i-lucide-newspaper");
+    expect(resolveIcon("/blog")).toBe("i-lucide-scroll-text");
   });
 
   it("matches when the pattern is a substring of a segment", () => {

@@ -37,10 +37,12 @@ export function isWithin(path: string, base: string | undefined): boolean {
 /**
  * Is this route the blog, or a post in it?
  *
- * The blog is singled out in three places — the landing's "Get Started" CTA
- * (`firstDocsPage`), the mobile drawer (`mobileNavLinks`) and the section tabs
- * (`useSectionTabs`, which pushes it to the far end of the bar) — and all three
- * ask on the ROUTE, never on the title or on an exact `/blog`. Both of the
+ * The blog is singled out in five places — the landing's "Get Started" CTA
+ * (`firstDocsPage`), the mobile drawer (`mobileNavLinks`), the section tabs and
+ * the sidebar's section anchors (`useSectionTabs`/`layouts/docs.vue`, which both
+ * drop it), and the header's action cluster (`useBlogLink`, which is where it
+ * renders instead) — and all five ask on the ROUTE, never on the title or on an
+ * exact `/blog`. Both of the
  * obvious shortcuts are wrong: a `blog/` directory with no `index.md` borrows
  * its first post's path (`builder.ts` → `out.path = kids[0].path`), so its nav
  * item is `/blog/hello` and an `=== "/blog"` test misses it entirely; and its

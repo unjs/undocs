@@ -62,7 +62,7 @@ useHead({
       <template #headline>
         <Breadcrumb
           :items="[
-            { label: 'Blog', icon: 'i-lucide-newspaper', to: '/blog' },
+            { label: 'Blog', icon: 'i-lucide-scroll-text', to: '/blog' },
             { label: page.title },
           ]"
           class="max-w-full"

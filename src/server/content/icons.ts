@@ -6,7 +6,7 @@ export const CommonIcons: { pattern: string; icon: string }[] = [
   { pattern: "configuration", icon: "i-lucide-settings" },
   { pattern: "examples", icon: "i-lucide-code" },
   { pattern: "utils", icon: "i-lucide-square-function" },
-  { pattern: "blog", icon: "i-lucide-newspaper" },
+  { pattern: "blog", icon: "i-lucide-scroll-text" },
 ];
 
 /** Infer a navigation icon from a route path */

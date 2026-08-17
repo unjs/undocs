@@ -3,7 +3,7 @@ import { computed, nextTick, onMounted, watch } from "vue";
 import { useRoute } from "@app/router.ts";
 import { useDocsNav } from "@app/composables/useDocsNav.ts";
 import { useSectionTabs } from "@app/composables/useSectionTabs.ts";
-import { countNavRows } from "@app/utils/nav.ts";
+import { countNavRows, isBlogPath } from "@app/utils/nav.ts";
 import Container from "@app/components/Container.vue";
 import DocsNavigation from "@app/components/docs/DocsNavigation.vue";
 import Page from "@app/components/layout/Page.vue";
@@ -18,8 +18,10 @@ const route = useRoute();
 // self-index children are still folded into their header by `DocsNavigation`.
 const { visible: hasSectionTabs } = useSectionTabs();
 
-// Section anchors shown above the tree when the tabs bar isn't on screen.
-const anchorLinks = computed(() => docsNav.links.filter((l) => l.title !== "Blog"));
+// Section anchors shown above the tree when the tabs bar isn't on screen. The
+// blog is not one of them — the header carries it (`useBlogLink`) — and it is
+// asked for on the ROUTE, since a blog titled "News" is still the blog.
+const anchorLinks = computed(() => docsNav.links.filter((l) => !isBlogPath(l.to)));
 
 // Whether the left sidebar is worth rendering. Counted in ROWS, not entries —
 // see `countNavRows`. It takes at least TWO to navigate: a sidebar with one row
@@ -71,7 +73,7 @@ function scrollport(el: Element): HTMLElement | undefined {
 
 <template>
   <Container>
-    <Page :ui="{ left: 'lg:col-span-2 pr-2 border-r border-border' }">
+    <Page :ui="{ left: 'pr-2 border-r border-border' }">
       <template v-if="hasSidebar" #left>
         <PageAside>
           <!-- Tabs bar present: it already labels + switches the active section,
