@@ -1,5 +1,7 @@
 import { defineComponent, h, mergeProps } from "vue";
 import { useRouter, type RouteTarget } from "@app/router.ts";
+import { isPlainLinkClick } from "@app/link-capture.ts";
+import { isAppRoute } from "@app/utils/routes.ts";
 
 const EXTERNAL_RE = /^(https?:)?\/\/|^(?:mailto|tel):|^#/;
 
@@ -42,10 +44,18 @@ export default defineComponent({
         );
       }
 
+      // A ROOTED path the app does not render (`/llms.txt`, `/raw/x.md`, a file
+      // in `public/`) has to stay a real request — the router's catch-all would
+      // answer it with a docs 404. Same-origin, so unlike the external branch it
+      // keeps the author's own `target` instead of forcing `_blank`. Relative
+      // targets are left alone: `isAppRoute` rejects them for want of a base,
+      // but the router resolves them against the current page.
+      if (typeof to === "string" && to.startsWith("/") && !isAppRoute(to)) {
+        return h("a", mergeProps({ href: to, target: props.target }, attrs), slots.default?.());
+      }
+
       const onClick = (event: MouseEvent) => {
-        if (event.defaultPrevented) return;
-        if (event.button !== 0) return;
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        if (!isPlainLinkClick(event)) return;
         const target = (attrs as any).target ?? props.target;
         if (target && target !== "_self") return;
         event.preventDefault();

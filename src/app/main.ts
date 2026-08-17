@@ -26,6 +26,7 @@ import { seedBuiltinIcons, seedClientIcons } from "@app/ssr/icons.ts";
 import { readPayload } from "@app/ssr/payload.ts";
 import { brandCss, BRAND_STYLE_ID } from "@app/theme-brand.ts";
 import { registerUserComponents } from "@app/user-theme.ts";
+import { installLinkCapture } from "@app/link-capture.ts";
 import { installWebMCPPolyfill } from "./webmcp/polyfill.ts";
 
 // Preserve the server's first-paint brand style; inject only when absent.
@@ -73,6 +74,12 @@ function bootstrap(): void {
   applyRuntimeBrand(useAppConfig().ui?.colors?.primary);
 
   const router = createAppRouter();
+
+  // Same-origin anchors the app never rendered — raw HTML in markdown, anything a
+  // third-party script injects — navigate through the router instead of reloading
+  // the site. Before mount is fine: the listener only fires on a real click.
+  installLinkCapture(router);
+
   const RootApp = defineComponent({
     name: "RootApp",
     setup() {

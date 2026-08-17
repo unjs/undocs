@@ -340,6 +340,32 @@ NEVER write E2E tests. Ask for it to be tested manually.
 - **Router uses a runtime `typeof window` check** (`IS_BROWSER`), not
   `import.meta.client` — the latter is `undefined` in the dev browser and would
   pick memory history on the client, breaking hydration.
+- **A foreign anchor is captured; a foreign `pushState` is not.** `AppLink` routes
+  the links the app renders, but raw HTML in markdown (`_html` nodes, injected
+  with `v-html`) and anything a third-party script appends are plain anchors that
+  full-reload the site. `link-capture.ts` installs ONE delegated `click` listener
+  from `main.ts`, in the BUBBLE phase: by then a component that wanted the click
+  has run and either called `preventDefault` (skipped) or stopped propagation
+  (never seen), which is also exactly what stops it double-navigating on top of
+  `AppLink`'s own handler — capture phase would preempt them all. A scripted
+  `location.href` assignment is deliberately NOT covered: `Location`'s members are
+  `[LegacyUnforgeable]`, i.e. non-configurable own properties, so nothing can
+  patch them, and only the Navigation API's `navigate` event would — a separate,
+  feature-detected layer.
+  `history.pushState` is left alone on purpose too, since a foreign script pushing
+  state is usually tracking its OWN state rather than navigating.
+- **What the app renders is a DENYLIST** (`utils/routes.ts`'s `isAppRoute`),
+  because `router.ts`'s last record matches everything: hand `push()` a path NITRO
+  answers (`/llms.txt`, `/raw/x.md`, `/api/docs/*.json`, `/icon.svg`, the client's
+  own `/_undocs/*` chunks) and a working request becomes an SPA nav rendering a
+  docs 404. It mirrors `nitro.config.ts`'s `handlers` plus Vite's `assetsDir`, and
+  `test/app/routes.test.ts` greps both configs so the mirror cannot drift out of
+  them silently. Two rules inside it: `/api/docs/` and `/api/_content`, never
+  `/api/` — a library documenting its API owns `/api/config` — and the file check
+  is a CLOSED extension list, since `docs/nuxt.config.md` is a page at
+  `/nuxt.config`. Both DOM-side consumers ask it: the click capture above, and
+  `AppLink`, whose rooted-but-not-a-route branch keeps the anchor a real request
+  instead of forcing `_blank` the way its external branch does.
 - **Loading-bar release.** `AppPage`'s `<Suspense>` `onResolve` (and its
   `onErrorCaptured`) must call `router._pageRendered()`, or a slow/errored page
   leaves `router.pending` — and the nav loading bar — stuck on.
