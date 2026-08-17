@@ -12,7 +12,6 @@ import DocsSectionTabs from "@app/components/docs/DocsSectionTabs.vue";
 import IconMenuToggle from "@app/components/IconMenuToggle.vue";
 import SiteHeader from "@app/components/layout/SiteHeader.vue";
 import SocialButtons from "@app/components/SocialButtons.vue";
-import ThemeColorPicker from "@app/components/ThemeColorPicker.vue";
 import AppLink from "@app/components/app/AppLink.ts";
 const appConfig = useAppConfig();
 
@@ -72,20 +71,21 @@ const mobileLinks = computed(() => mobileNavLinks(navigation?.value));
       <DocsNavigation :navigation="mobileLinks" default-open :multiple="true" />
     </template>
 
-    <!-- What `AppHeaderActions` renders at `lg+`, at the drawer's foot below it.
-         The accent swatches come in flow and always-visible here: at `md+` they
-         expand out of the mode toggle on hover, which a touch device has no way
-         to ask for — so this row is how the setting is reachable at all below
-         it. -->
+    <!-- What `AppHeaderActions` renders at `lg+`, at the drawer's foot below it —
+         minus the accent swatches. The accent is the SITE's colour far more than
+         it is a visitor setting, and the drawer is a stop on the way somewhere:
+         a row of eight chips at the foot of a nav tree reads as part of the
+         navigation rather than as a preference. Light/dark is the one appearance
+         control that carries its own reason to be here (a visitor fixing a room
+         that is too bright), so it is the one that stays. Above `md` the
+         swatches cost the header nothing because they hang off the toggle's
+         hover (`ThemeColorPicker`); here they would cost a row. -->
     <template #body-footer>
-      <div class="flex flex-col gap-3">
-        <ThemeColorPicker layout="row" />
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-1">
-            <SocialButtons size="lg" />
-          </div>
-          <ColorModeButton />
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-1">
+          <SocialButtons size="lg" />
         </div>
+        <ColorModeButton />
       </div>
     </template>
   </SiteHeader>

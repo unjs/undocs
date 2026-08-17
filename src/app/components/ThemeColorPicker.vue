@@ -35,10 +35,12 @@
  * It is a HOVER affordance, so it is desktop-only by construction: a touch
  * "hover" is a tap, and a tap here already means "toggle the mode", so
  * `pointerenter` ignores `pointerType === "touch"` the same way `Tooltip` does.
- * The mobile drawer passes `layout="row"` — the same swatches, in flow and
- * always visible, because there is no hover to reveal them with. Both layouts
- * render ONE `v-for`: the only difference is whether its container is positioned
- * and animated, which is the whole of what "revealed on hover" means here.
+ * That is the whole of where the accent chooser lives — the mobile drawer
+ * deliberately carries only light/dark (see `AppHeader`'s `#body-footer`). It
+ * used to render the same swatches in flow there under a `layout="row"` prop;
+ * both are gone, so this component is the popover and nothing else. Re-adding a
+ * flow layout means re-arguing that a row of eight chips belongs at the foot of
+ * a nav tree.
  *
  * Hovering a swatch PREVIEWS it — the accent applies to the whole page while the
  * pointer is on it and drops when the pointer leaves. That is the only honest
@@ -92,8 +94,6 @@ import {
   type ThemeColor,
 } from "@app/theme-brand.ts";
 
-const props = withDefaults(defineProps<{ layout?: "popover" | "row" }>(), { layout: "popover" });
-
 const theme = useThemeColor();
 const appConfig = useAppConfig();
 
@@ -122,8 +122,6 @@ onMounted(() => {
 // reason as everything else: `forced` is client-only.
 const visible = computed(() => mounted.value && !theme.forced);
 
-const isPopover = computed(() => props.layout === "popover");
-
 /**
  * Columns in the popover's grid — 8 colours as 4×2, about two buttons wide.
  * Tailwind scans source text, so the template spells `grid-cols-4` out and this
@@ -134,13 +132,11 @@ const rowOf = (index: number): number => Math.floor(index / COLUMNS);
 const columnOf = (index: number): number => index % COLUMNS;
 
 const open = ref(false);
-/** The row is in flow and always live; only the popover has a closed state. */
-const shown = computed(() => !isPopover.value || open.value);
 
 function choose(color: ThemeColor): void {
   theme.value = color;
   theme.preview = null;
-  if (isPopover.value) open.value = false;
+  open.value = false;
 }
 
 function onPointerEnter(event: PointerEvent): void {
@@ -175,7 +171,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    :class="isPopover ? 'relative' : 'contents'"
+    class="relative"
     @pointerenter="onPointerEnter"
     @pointerleave="onLeave"
     @focusin="open = true"
@@ -186,43 +182,37 @@ onBeforeUnmount(() => {
 
     <div
       v-if="visible"
-      :inert="isPopover && !open"
+      :inert="!open"
       role="group"
       aria-label="Accent color"
       :class="
         cn(
-          isPopover
-            ? [
-                // Centred under the toggle and out of flow, so the action row
-                // keeps its collapsed width. `pt-2` — padding, never margin (see
-                // the pointer note above) — is the air the grid hangs below the
-                // bar on. No surface of its own: the control gets taller, a panel
-                // does not open.
-                //
-                // Centring is affordable only because the toggle LEADS the
-                // header's action row (`AppHeaderActions`) with the socials to
-                // its right. The grid is ~82px against a 40px button, so it hangs
-                // ~21px past each side — fine over the socials and over the gap
-                // before the centre track, but if the toggle ever becomes the
-                // trailing control it is flush with `Container`'s content edge,
-                // where the gutter is 24px at `md` and the swatches' focus ring
-                // and selected marker eat the rest of it. Anchor it `right-0`
-                // then, not here.
-                'absolute left-1/2 top-full z-50 -translate-x-1/2 pt-2',
-                // `w-max` is load-bearing, not tidying. An absolutely positioned
-                // box with `left` set and `right: auto` is shrink-to-fit against
-                // the space LEFT of its containing block's right edge — here the
-                // toggle's own 40px box minus the 20px `left-1/2` offset — so the
-                // grid resolves to about one swatch wide and stacks into a column.
-                // `width: max-content` is what lets it be as wide as its tracks.
-                'w-max',
-                // Literal, because Tailwind scans source text: `grid-cols-4` has
-                // to be spelled out here and mirrored by `COLUMNS`.
-                'grid grid-cols-4 justify-items-center gap-1.5',
-                'transition-[opacity,transform] duration-200 ease-out',
-                open ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0',
-              ]
-            : 'flex items-center justify-center gap-2',
+          // Centred under the toggle and out of flow, so the action row keeps its
+          // collapsed width. `pt-2` — padding, never margin (see the pointer note
+          // above) — is the air the grid hangs below the bar on. No surface of its
+          // own: the control gets taller, a panel does not open.
+          //
+          // Centring is affordable only because the toggle LEADS the header's
+          // action row (`AppHeaderActions`) with the socials to its right. The
+          // grid is ~82px against a 40px button, so it hangs ~21px past each
+          // side — fine over the socials and over the gap before the centre
+          // track, but if the toggle ever becomes the trailing control it is
+          // flush with `Container`'s content edge, where the gutter is 24px at
+          // `md` and the swatches' focus ring and selected marker eat the rest of
+          // it. Anchor it `right-0` then, not here.
+          'absolute left-1/2 top-full z-50 -translate-x-1/2 pt-2',
+          // `w-max` is load-bearing, not tidying. An absolutely positioned box
+          // with `left` set and `right: auto` is shrink-to-fit against the space
+          // LEFT of its containing block's right edge — here the toggle's own
+          // 40px box minus the 20px `left-1/2` offset — so the grid resolves to
+          // about one swatch wide and stacks into a column. `width: max-content`
+          // is what lets it be as wide as its tracks.
+          'w-max',
+          // Literal, because Tailwind scans source text: `grid-cols-4` has to be
+          // spelled out here and mirrored by `COLUMNS`.
+          'grid grid-cols-4 justify-items-center gap-1.5',
+          'transition-[opacity,transform] duration-200 ease-out',
+          open ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0',
         )
       "
     >
@@ -233,7 +223,7 @@ onBeforeUnmount(() => {
         :aria-label="LABELS[color]"
         :aria-pressed="selected === color"
         class="relative size-4 shrink-0 rounded-sm shadow-small transition-[transform,opacity] duration-200 ease-out hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-90"
-        :class="shown ? 'translate-y-0 scale-100 opacity-100' : '-translate-y-1 scale-50 opacity-0'"
+        :class="open ? 'translate-y-0 scale-100 opacity-100' : '-translate-y-1 scale-50 opacity-0'"
         :style="{
           background: themeColorToken(color),
           // Staggered on the way out, simultaneous on the way back: a grid that
@@ -241,8 +231,7 @@ onBeforeUnmount(() => {
           // runs by ROW, with a small offset along each — so the block falls out
           // of the button top row first, instead of eight marks appearing in an
           // order that has nothing to do with where they came from.
-          transitionDelay:
-            isPopover && open ? `${rowOf(index) * 60 + columnOf(index) * 20}ms` : '0ms',
+          transitionDelay: open ? `${rowOf(index) * 60 + columnOf(index) * 20}ms` : '0ms',
         }"
         @click="choose(color)"
         @pointerenter="theme.preview = color"

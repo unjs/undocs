@@ -53,8 +53,9 @@
  * not): the trigger for the accent grid is the one control that should be
  * WEARING the accent, and a swatch previewed under the pointer repaints it along
  * with the page. Under the default `mono` theme it is `--foreground` and reads as
- * neutral as its neighbours. The same swatches sit in flow at the foot of the
- * drawer below `md`, where there is no hover to reveal anything with.
+ * neutral as its neighbours. Below `md` there is no accent picker at all: the
+ * drawer's foot carries the mode toggle alone (see `AppHeader`'s
+ * `#body-footer`).
  *
  * The blog is an ICON here, matching the socials it now stacks with: it is a
  * single destination rather than a section of the docs, so it reads as one of
