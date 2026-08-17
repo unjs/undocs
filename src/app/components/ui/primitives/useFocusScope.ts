@@ -1,62 +1,24 @@
 /**
- * useFocusScope — a focus trap that also puts focus back where it came from.
- *
  * Ported from reka-ui's `FocusScope` (MIT, https://github.com/unovue/reka-ui).
- * Three jobs, and all three are what makes a modal a modal rather than a div
- * that happens to be on top:
+ * It autofocuses on mount, traps focus through document events and removal
+ * observation, and restores focus after teardown. Nested scopes pause through a
+ * browser-only stack; SSR returns before writes. Candidate discovery retains
+ * reka/Radix's TreeWalker approximation, with visibility checked at Tab edges.
  *
- * 1. On mount, move focus to the first tabbable child (the search input, the
- *    lightbox's close button) — or to the container itself if it has none, so
- *    the keyboard is never left pointing at the page underneath.
- * 2. While `trapped`, pull focus back in whenever it escapes. Tab wrapping alone
- *    is not enough: focus also moves by click, by programmatic `.focus()`, and
- *    by the browser's own recovery when the focused node is removed — hence the
- *    document-level `focusin`/`focusout` listeners AND the MutationObserver that
- *    re-homes focus when the element holding it is deleted from the scope.
- * 3. On teardown, restore focus to whatever had it before, on a 0ms timer so the
- *    restore happens after the node is actually gone (focusing an element that
- *    is about to be removed is a no-op the browser silently undoes).
- *
- * Nested scopes coordinate through a module-level stack: opening a scope PAUSES
- * the one below, so the outer trap does not fight the inner one for focus, and
- * closing resumes it. The stack is browser-only — the whole body of this
- * composable returns early under `import.meta.server`, and scopes are keyed to
- * DOM elements that do not exist during SSR — so it is not the per-request
- * mutable state AGENTS.md forbids.
- *
- * Differences from reka:
- *
- * - reka signals mount/unmount autofocus through cancellable `CustomEvent`s
- *   (`focusScope.autoFocusOnMount` / `…OnUnmount`) dispatched on the container,
- *   which is how its Dialog overrides the restore target. We take an
- *   `onMountAutoFocus` callback that returns `false` to opt out, and a
- *   `restoreFocus` getter that names the element to return to — the same two
- *   decisions, stated directly instead of through the DOM.
- * - reka's `getActiveElement` walks `shadowRoot.activeElement` chains. Nothing
- *   in undocs renders into a shadow root, so `document.activeElement` is used
- *   directly.
- * - The lifecycle keys off the element ref rather than a `present` prop, for the
- *   same reason as `useDismissableLayer`: `usePresence` already `v-if`s the
- *   element, so the ref is the single presence signal.
- *
- * `getTabbableCandidates` is the same TreeWalker approximation reka (and Radix,
- * and discord/focus-layers before it) uses. It is deliberately not a full
- * tabbability implementation — `findVisible` is what handles the cases a
- * property read cannot, and only for the two edges Tab actually needs.
+ * Dropped, and why:
+ * - mount/unmount autofocus `CustomEvent`s: direct veto and restore-target
+ *   callbacks express the same decisions without DOM events.
+ * - shadow-root active-element traversal: undocs renders no shadow roots.
+ * - separate `present`: the `usePresence`-controlled element ref is the single
+ *   lifecycle signal.
  */
 import { onScopeDispose, toValue, watch, type MaybeRefOrGetter, type Ref } from "vue";
 
 export interface FocusScopeOptions {
-  /** Pull focus back into the scope when it leaves. */
   trapped?: MaybeRefOrGetter<boolean>;
-  /** Wrap Tab/Shift+Tab around the scope's edges instead of leaving it. */
   loop?: MaybeRefOrGetter<boolean>;
-  /**
-   * Where focus goes when the scope tears down. Defaults to whatever was
-   * focused when it was set up (for a dialog, the trigger that opened it).
-   */
+  /** Defaults to the element focused at setup. */
   restoreFocus?: () => HTMLElement | null | undefined;
-  /** Return `false` to keep focus where it is when the scope mounts. */
   onMountAutoFocus?: () => boolean | void;
 }
 
@@ -64,7 +26,6 @@ interface FocusScopeEntry {
   paused: boolean;
 }
 
-/** Innermost scope first. */
 const scopeStack: FocusScopeEntry[] = [];
 
 function pushScope(scope: FocusScopeEntry) {
@@ -83,7 +44,6 @@ function isSelectableInput(element: Element): element is HTMLInputElement {
   return element instanceof HTMLInputElement && "select" in element;
 }
 
-/** Focus without scrolling, selecting the contents of a text input we land on. */
 export function focus(element: HTMLElement | null | undefined, select = false) {
   if (!element?.focus) return;
   const previous = document.activeElement;
@@ -91,7 +51,6 @@ export function focus(element: HTMLElement | null | undefined, select = false) {
   if (element !== previous && select && isSelectableInput(element)) element.select();
 }
 
-/** Focus the first candidate that actually takes focus; true if one did. */
 export function focusFirst(candidates: HTMLElement[], select = false): boolean {
   const previous = document.activeElement;
   for (const candidate of candidates) {
@@ -101,7 +60,6 @@ export function focusFirst(candidates: HTMLElement[], select = false): boolean {
   return false;
 }
 
-/** Every descendant that could plausibly be tabbed to, in DOM order. */
 export function getTabbableCandidates(container: HTMLElement): HTMLElement[] {
   const nodes: HTMLElement[] = [];
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT, {
@@ -126,7 +84,6 @@ function isHidden(node: HTMLElement | null, upTo: HTMLElement): boolean {
   return false;
 }
 
-/** The first and last VISIBLE tabbable elements — the two Tab wraps between. */
 function getTabbableEdges(
   container: HTMLElement,
 ): [HTMLElement | undefined, HTMLElement | undefined] {
@@ -142,12 +99,7 @@ export function useFocusScope(
 ): { onKeydown: (event: KeyboardEvent) => void } {
   const scope: FocusScopeEntry = { paused: false };
 
-  /**
-   * Tab wrapping. Only ever preventDefault()s at the edges, so Tab inside the
-   * scope keeps the browser's own ordering — including whatever the content
-   * does with it (`DocsSearch`'s palette handles its own Arrow/Enter keys and
-   * never sees Tab).
-   */
+  /* Intercept only Tab edges; preserve the browser's internal ordering. */
   const onKeydown = (event: KeyboardEvent) => {
     if (!toValue(options.loop ?? false) && !toValue(options.trapped ?? false)) return;
     if (scope.paused) return;
@@ -158,7 +110,7 @@ export function useFocusScope(
     const container = event.currentTarget as HTMLElement;
     const [first, last] = getTabbableEdges(container);
     if (!first || !last) {
-      // Nothing tabbable inside: swallow Tab so focus cannot walk out.
+      // Keep focus parked when a trapped scope has no tabbable child.
       if (focused === container) event.preventDefault();
       return;
     }
@@ -173,8 +125,7 @@ export function useFocusScope(
 
   if (import.meta.server) return { onKeydown };
 
-  // The element focus last legitimately sat on INSIDE the scope — the anchor the
-  // trap drags focus back to.
+  // Last valid in-scope focus target.
   let lastFocusedInside: HTMLElement | null = null;
 
   watch(
@@ -192,14 +143,12 @@ export function useFocusScope(
       const onFocusOut = (event: FocusEvent) => {
         if (scope.paused) return;
         const related = event.relatedTarget as HTMLElement | null;
-        // `null` means focus left the document entirely (tab away, devtools) —
-        // clawing it back would fight the browser.
+        // Do not fight focus leaving the document (for example, devtools).
         if (related === null) return;
         if (!container.contains(related)) focus(lastFocusedInside, true);
       };
 
-      // Removing the focused node hands focus to <body>; put it back on the
-      // container so the trap survives content that swaps itself out.
+      // Rehome focus when dynamic content removes its focused node.
       const observer = new MutationObserver((mutations) => {
         if (!lastFocusedInside) return;
         if (!mutations.some((mutation) => mutation.removedNodes.length > 0)) return;
@@ -230,17 +179,17 @@ export function useFocusScope(
 
       if (!container.contains(previouslyFocused) && options.onMountAutoFocus?.() !== false) {
         focusFirst(getTabbableCandidates(container), true);
-        // Nothing inside took it — park focus on the container itself, which is
-        // why the consumer must render `tabindex="-1"` on it.
+        // The consumer's `tabindex="-1"` makes the empty container a fallback.
         if (document.activeElement === previouslyFocused) focus(container);
       }
 
       onCleanup(() => {
         const target = options.restoreFocus?.() ?? previouslyFocused ?? document.body;
+        // Wait until the scope node is gone; focus on a soon-removed node is lost.
         setTimeout(() => {
           focus(target, true);
           removeScope(scope);
-          // Whatever is innermost now takes the trap back.
+          // Resume the newly innermost trap only after focus restoration.
           if (scopeStack[0]) scopeStack[0].paused = false;
         });
       });

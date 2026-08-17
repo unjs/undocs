@@ -1,22 +1,5 @@
-/**
- * AppPage → the `<router-view>` equivalent, with a per-page `<Suspense>`.
- *
- * Reads the current route's resolved component from the router
- * (`router.component`) and renders it inside a `<Suspense>`, keyed by
- * `route.path`. The reused pages have async `<script setup>` (top-level
- * `await useAsyncData`), so the page must sit inside a Suspense boundary.
- * Wrapping *inside* AppPage (rather than around the whole app) keeps the app
- * chrome (header/footer/search from `app.vue`) mounted across navigations while
- * each page resolves its own async setup.
- *
- * Keying by `route.path` remounts the component when navigating between two
- * paths served by the SAME record (e.g. two docs pages), re-running its async
- * setup. Because the key changes on an existing `<Suspense>`, Vue keeps the
- * previous page visible until the new page resolves — no blank flash.
- *
- * `<Suspense>`'s `resolve` event tells the router the new page is committed,
- * which clears the navigation loading bar (see `router.ts`).
- */
+// Key by path so catch-all pages rerun async setup. Both resolve and error must
+// release the router's loading state.
 import { defineComponent, h, onErrorCaptured, Suspense } from "vue";
 import { useRouter, useRoute } from "@app/router.ts";
 
@@ -27,9 +10,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
 
-    // A rejected async setup (e.g. `createError(404)`) makes Suspense emit ERROR,
-    // not `resolve`, so `_pageRendered` would never fire and the loading bar would
-    // hang. Clear it here; error still propagates to main.ts's root boundary.
+    // Suspense errors do not emit `resolve`.
     onErrorCaptured(() => {
       router._pageRendered();
     });

@@ -3,102 +3,22 @@ import { cn } from "@app/utils/cn.ts";
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
 /**
- * DropdownMenu — the `UDropdownMenu` replacement.
+ * Ported from reka-ui DropdownMenu/Menu (MIT,
+ * https://github.com/unovue/reka-ui). Flat items replace its context/Collection
+ * tree while preserving DOM focus, non-wrapping keyboard navigation, repeated-
+ * key typeahead, drag-release selection, trigger dismissal veto, modal gating,
+ * and request-scoped ARIA ids. Local `openOnHover` is non-modal and suppresses
+ * pointer-driven focus.
  *
- * Ported from reka-ui's `DropdownMenuRoot`/`Trigger`/`Portal`/`Content`/`Group`/
- * `Item`/`CheckboxItem`/`Separator` (MIT, https://github.com/unovue/reka-ui) and
- * the `Menu` family underneath them. Reka needs ~20 components there because a
- * `MenuContent` has to compose with submenus, radio groups, an inline filter
- * input, a Collection provider and a RovingFocusGroup, all discovered through
- * `provide`/`inject` so a stranger can rearrange them. We render menus from a
- * flat `items` array, so none of that is reachable: the whole family collapses
- * into this one component sitting on the shared primitives — `usePopper`
- * (positioning), `usePresence` (exit animation), `AsChild` (trigger + link-item
- * merge), `useDismissableLayer`, `useFocusScope`, `useBodyScrollLock` and
- * `useHideOthers`.
- *
- * The public API is unchanged. Default slot is scoped (`v-slot="{ open }"`) and
- * IS the trigger (rendered `as-child`, so a `<Button>` trigger keeps its own DOM
- * tag/classes).
- *
- * `items` accepts a flat array OR an array-of-arrays (groups, separated by a
- * separator line). Each item:
- *   `{ label, icon, to, target, type: "checkbox" | "separator", checked,
- *      color, disabled, onSelect }`
- * - `to` renders the item content as a `AppLink` (`as-child`).
- * - `type: "checkbox"` renders `role="menuitemcheckbox"`.
- * - `type: "separator"` (inline, inside a flat list) renders a separator line.
- * - `onSelect` is called on select, with the same CANCELLABLE event reka passed:
- *   `preventDefault()` on it keeps the menu open. It is never dispatched — it is
- *   a veto token, exactly as in reka's `MenuItem`.
- *
- * What is preserved exactly:
- *
- * - **Keyboard navigation lands real DOM focus** on the item, not a
- *   `data-highlighted` attribute. That is what makes the `focus:bg-accent` class
- *   below light up, and it is why `data-highlighted` (which reka also emits, and
- *   which nothing here styles) is dropped rather than tracked.
- * - **Opening with the keyboard focuses the first item; opening with the mouse
- *   focuses the menu container.** Reka reaches that split through a
- *   `RovingFocusGroup` entry-focus event vetoed by a global `useIsUsingKeyboard`
- *   tracker; here the trigger already knows which of its two handlers fired, so
- *   `openedByKeyboard` says it directly and the global goes away.
- * - **`ArrowUp`/`ArrowDown`/`Home`/`End` do not wrap**, matching reka's `loop`
- *   default of `false`, and skip disabled items (the `:not([data-disabled])` in
- *   the item selector does what reka's recursive `findNextFocusableElement` did).
- * - **Letter-key typeahead**, including reka's two subtleties: a repeated
- *   character (`aaa`) is normalized to a single one so it CYCLES through items
- *   starting with it, and the search wraps around the current item so matching
- *   always looks forward. The 1s idle reset is the same.
- * - **The press-drag-release gesture**: pointerdown on the trigger, drag onto an
- *   item, release — the item that never saw the pointerdown synthesises the
- *   click itself.
- * - **The trigger veto on outside-pointerdown.** Clicking an OPEN non-modal
- *   menu's trigger must not dismiss through the layer, or the dismissal and the
- *   trigger's own toggle cancel out and the menu never closes. Reka does this in
- *   `DropdownMenuContent.onInteractOutside`; here it is the `false` returned
- *   from `onPointerDownOutside`.
- * - **`modal` splits the same four ways it does in reka**: focus trap, body
- *   scroll lock, `aria-hidden` on everything else, and outside pointer events —
- *   all on for `modal` (the default), all off for `:modal="false"`.
- * - The ids behind `aria-controls`/`aria-labelledby` use Vue 3.5's `useId()`,
- *   which is SSR-stable and request-scoped — NOT reka's module-level counter
- *   fallback, which would hand two concurrent SSR renders the same id (see
- *   AGENTS.md on per-request state).
- *
- * Added, not in reka:
- *
- * - **`openOnHover`** — reka's `DropdownMenu` is click-only (hover-opening is
- *   `NavigationMenu`, which we do not have). See the hover-intent section below
- *   for the two things that keeps honest: the close delay that spans the
- *   `sideOffset` gap, and `focusSuppressed`, which stops a drifting pointer from
- *   taking focus away from whatever the user is actually using.
- *
- * Dropped, with reasons:
- *
- * - **Submenus** (`MenuSub`/`SubTrigger`/`SubContent`) and with them the grace
- *   area — the pointer-direction polygon that keeps a submenu open while you
- *   travel diagonally into it. No call site nests menus, and the grace area is
- *   the single largest piece of `MenuContentImpl`.
- * - **`MenuRadioGroup`/`RadioItem`, `MenuLabel`, `MenuArrow`, `MenuFilter`,
- *   `MenuItemIndicator`** — no call site renders any of them. (`type: "label"`
- *   in our own item union has never had a branch either; it falls through to a
- *   plain item, as it did before this port.)
- * - **`Collection`.** Reka registers every item through a provide/inject
- *   collection so `getItems()` stays in DOM order across teleports. Every item
- *   here is a direct descendant of the content element, so one
- *   `querySelectorAll("[data-menu-item]")` is the same list, in the same order,
- *   with no per-item registration.
- * - **`useFocusGuards`** (tabbable spans at the document edges, so `focusin`
- *   fires when focus leaves for the browser chrome). Modal menus swallow Tab
- *   outright and non-modal ones are free to lose focus, so neither has a reachable
- *   use for it — the same call `Dialog.vue` made.
- * - **`handleBlur`'s typeahead reset.** `blur` does not bubble, so reka's guard
- *   (`currentTarget.contains(target)`) is true whenever it fires at all and the
- *   search is never cleared by it. The 1s idle reset is the real one.
- * - `forceMount`, `defaultOpen`, `v-model:open`, `dir`/`useDirection`,
- *   `disableUpdateOnLayoutShift` and the rest of the Popper knobs — none are
- *   passed anywhere, and each only selects a non-default branch.
+ * Dropped, and why:
+ * - submenus and grace area: no call site nests menus.
+ * - radio, label, arrow, filter, and indicator APIs: unused.
+ * - `Collection`: items are direct DOM children and query in document order.
+ * - focus guards: modal menus swallow Tab; non-modal menus may lose focus.
+ * - blur typeahead reset: reka's non-bubbling blur guard never cleared it; the
+ *   one-second idle reset remains.
+ * - mounting, controlled-open, direction, layout-shift, and extra Popper knobs:
+ *   no caller selects those branches.
  */
 import { computed, onMounted, onScopeDispose, ref, useId, type ComponentPublicInstance } from "vue";
 import AsChild from "./primitives/AsChild.ts";
@@ -225,7 +145,6 @@ function handleTriggerKeydown(event: KeyboardEvent) {
   event.preventDefault();
 }
 
-// --- Hover intent (`openOnHover`) ------------------------------------------
 // Closing is delayed so the pointer can cross the `sideOffset` gap between
 // trigger and content without the menu vanishing under it. That gap is the only
 // dead ground here — a menu sits directly under its trigger, so the diagonal
@@ -294,7 +213,6 @@ const { wrapperStyle, contentStyle, placedSide, placedAlign } = usePopper({
   alignOffset: () => props.content?.alignOffset ?? 0,
 });
 
-/** Every enabled item, in DOM order — the list all navigation walks. */
 function menuItems(): HTMLElement[] {
   const content = contentEl.value;
   if (!content) return [];
@@ -342,7 +260,6 @@ function handleItemKeydown(item: DropdownMenuItemType, event: KeyboardEvent) {
   event.preventDefault();
 }
 
-/** Hovering an item focuses it, which is what draws the highlight. */
 function handleItemPointermove(item: DropdownMenuItemType, event: PointerEvent) {
   if (event.pointerType !== "mouse") return;
   if (item.disabled) {
@@ -361,7 +278,6 @@ function handleItemPointerleave(event: PointerEvent) {
   focus(contentEl.value);
 }
 
-/** The attributes and handlers every item carries, whatever element renders it. */
 function itemProps(item: DropdownMenuItemType, checkbox = false) {
   return {
     role: checkbox ? "menuitemcheckbox" : "menuitem",
@@ -380,7 +296,6 @@ function itemProps(item: DropdownMenuItemType, checkbox = false) {
   };
 }
 
-// --- Modal behaviours ------------------------------------------------------
 // All four are `modal`-gated, exactly as reka splits `MenuRootContentModal` from
 // `MenuRootContentNonModal`.
 
@@ -434,8 +349,6 @@ const { onKeydown: onFocusScopeKeydown } = useFocusScope(contentEl, {
     return false;
   },
 });
-
-// --- Keyboard navigation ---------------------------------------------------
 
 const FIRST_KEYS = new Set(["ArrowDown", "Home", "PageUp"]);
 const LAST_KEYS = new Set(["ArrowUp", "End", "PageDown"]);

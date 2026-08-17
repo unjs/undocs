@@ -2,21 +2,11 @@ import { defineEventHandler, HTTPError } from "nitro/h3";
 import { $fetch } from "ofetch";
 import { useRuntimeConfig } from "nitro/runtime-config";
 
-/**
- * Proxy for the external contributors API (ungh.cc), keyed off the `docs.github`
- * (`owner/repo`) slug.
- *
- * The client used to `$fetch` ungh.cc directly, which meant the request always
- * ran in the browser (client-only) and any network/CORS/host issue blanked the
- * contributors section. Routing it through here keeps the client same-origin,
- * lets the section render during SSR, and serves the last-good payload when the
- * upstream is unreachable so a transient outage never blanks it.
- */
+// Same-origin SSR proxy with last-good recovery from transient upstream failures.
 
-// Module-level cache is safe here: this is server-only route code, not per-request
-// render state, and the payload is identical for every visitor.
+// Server-only, visitor-independent cache.
 let cached: { data: unknown; at: number } | undefined;
-const MAX_AGE_MS = 5 * 60 * 1000; // serve fresh from upstream at most this often
+const MAX_AGE_MS = 5 * 60 * 1000;
 
 export default defineEventHandler(async (event) => {
   const github = (useRuntimeConfig().undocs as { github?: string }).github;
@@ -36,7 +26,6 @@ export default defineEventHandler(async (event) => {
     event.res.headers.set("Cache-Control", "public, max-age=300");
     return data;
   } catch (error) {
-    // Upstream failed — fall back to the last-good payload if we have one.
     if (cached) {
       event.res.headers.set("Cache-Control", "public, max-age=60");
       return cached.data;

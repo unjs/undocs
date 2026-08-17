@@ -1,41 +1,18 @@
 /**
- * useHideOthers — hide everything except one subtree from assistive technology.
- *
  * Ported from reka-ui's `useHideOthers` (MIT,
- * https://github.com/unovue/reka-ui), which delegates to the `aria-hidden`
- * package. Visually a modal covers the page; to a screen reader it does not —
- * without this, a reader can walk straight out of the dialog into the docs
- * behind it, which is the difference between a dialog and a div with a dark
- * backdrop. The focus trap does not help there: reader navigation is
- * independent of focus.
+ * https://github.com/unovue/reka-ui), which delegates to `aria-hidden`. It hides
+ * siblings along the target-to-body chain while preserving `aria-live` regions;
+ * a focus trap alone cannot constrain screen-reader virtual navigation.
+ * Per-element refcounts and original values keep overlapping layers from
+ * unhiding each other's content. WeakMaps are browser-only; SSR returns before
+ * writes.
  *
- * The walk is the same one `aria-hidden` performs: climb from the target to
- * `<body>`, and at each level mark every SIBLING `aria-hidden="true"`, leaving
- * the ancestor chain itself readable. Skipped along the way are `<script>` /
- * `<style>` (not in the accessibility tree to begin with) and anything carrying
- * `aria-live` — hiding a live region would silence announcements the app is
- * making on purpose, including ones the dialog itself triggers.
- *
- * Refcounted per element, because two layers can overlap (the search palette
- * opened over the diagram lightbox) and the second one must not undo the first
- * one's work when it closes. The original attribute value is remembered so an
- * element that was ALREADY `aria-hidden` for its own reasons keeps that state
- * afterwards rather than being un-hidden by us.
- *
- * Module-level state again, and browser-only again: the composable returns
- * immediately under `import.meta.server` and the maps are keyed by DOM elements,
- * so nothing is written during SSR (see AGENTS.md's per-request-state
- * invariant).
- *
- * Dropped from reka: the `[popover]:not(:popover-open)` guard, which exists
- * because reka can render content into the native popover layer before it is
- * shown. We never use the popover API.
+ * Dropped, and why:
+ * - `[popover]:not(:popover-open)` handling: undocs never uses native popovers.
  */
 import { onScopeDispose, watch, type Ref } from "vue";
 
-/** How many live layers are hiding this element. */
 const hideCount = new WeakMap<Element, number>();
-/** Its `aria-hidden` before we first touched it (`null` = attribute absent). */
 const originalAriaHidden = new WeakMap<Element, string | null>();
 
 function shouldSkip(element: Element): boolean {
@@ -80,7 +57,6 @@ function hideOthers(target: Element): () => void {
   };
 }
 
-/** Hide everything outside `target` while it is in the DOM. */
 export function useHideOthers(target: Ref<HTMLElement | null | undefined>): void {
   if (import.meta.server) return;
 

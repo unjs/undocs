@@ -1,38 +1,17 @@
-/*
- * Design tokens.
- *
- * Every token here is one of three things, and nothing else:
- *
- *   1. A SEMANTIC COLOUR — a role, not a shade. `--background`, `--muted`,
- *      `--danger-tint`. Declared as a literal in `:root` and again in `.dark`,
- *      because a role means a different colour in each mode.
- *   2. A METRIC — radius, control height, grid geometry, elevation. Mode
- *      invariant unless noted.
- *   3. A TYPE STEP — declared once in `@theme static`, which emits the variable
- *      AND generates the `text-*` utility, so there is exactly one source.
- *
- * The palette is Vercel's Geist (vercel.com/geist), but the SCALES are gone:
- * this file used to transcribe eight 10-step hue ramps plus a 10-step alpha
- * ramp in both modes — 160 declarations — to serve about fifteen actual call
- * sites. What survived is the steps those call sites wanted, named for the job
- * they do. Geist's step numbers appear only in the comments now, as provenance.
- *
- * Two things carry real weight and are explained where they are declared:
- * the derived `--brand` table, and the fact that `--primary` is NOT `--brand`.
- */
+/* Geist tokens are semantic roles, metrics, or type steps—not color scales.
+ * Color roles are literal per mode; type steps live once in `@theme static`. */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* The raised surface — cards, popovers, menus, tooltips, dialogs. */
+  /* `card` is raised, `muted` recessed, and `accent` an active fill whose text
+   * uses `foreground`. */
   --color-card: var(--card);
 
-  /* The recessed well — code blocks, table headers, inputs. */
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
 
-  /* The hover/active fill. Text on it is `--foreground`. */
   --color-accent: var(--accent);
 
   --color-primary: var(--primary);
@@ -47,19 +26,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /*
-   * Status roles. Each is a triple — text, a tint to sit that text on, and a
-   * border — so a callout is `bg-info-tint border-info-border text-info` with
-   * no `dark:` variant anywhere: all three flip in `.dark` together.
-   *
-   * These used to be spelled `bg-blue-100 border-blue-400 text-blue-900`,
-   * addressing Geist's raw scale through Tailwind utilities. That worked but
-   * cost the entire eight-hue table to express five states, and it numbered its
-   * steps by ROLE (400 = border, 900 = text) in the same 100..1000 range where
-   * Tailwind numbers by lightness — so a stray `bg-blue-500` mixed two
-   * incompatible systems silently. Naming the role removes the collision
-   * instead of guarding against it.
-   */
+  /* Each status flips its text/tint/border triple per mode. Add roles in both
+   * modes and to the test's STATUS list. */
   --color-info: var(--info);
   --color-info-tint: var(--info-tint);
   --color-info-border: var(--info-border);
@@ -80,40 +48,21 @@
   --color-important-tint: var(--important-tint);
   --color-important-border: var(--important-border);
 
-  /*
-   * Radii. The base is Geist's everyday 6px; the offsets keep the ladder
-   * MONOTONIC for any `--radius` an embed pins, including 0.
-   */
+  /* Offsets keep an embed-pinned radius ladder monotonic, including at zero. */
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 6px);
 
-  /* Geist's materials, as `shadow-small` / `shadow-tooltip` / … */
   --shadow-small: var(--elevation-small);
   --shadow-tooltip: var(--elevation-tooltip);
   --shadow-menu: var(--elevation-menu);
   --shadow-modal: var(--elevation-modal);
 }
 
-/*
- * The type scale.
- *
- * `static` rather than `inline` is load-bearing, and it is what lets this be
- * ONE block instead of two. An `inline` `@theme` substitutes its values into
- * the utilities and emits no variables, so plain CSS cannot read it; a default
- * `@theme` emits variables but tree-shakes the unused ones. `static` emits
- * every variable AND generates every utility — so `main.css`'s prose rules,
- * which style bare markdown tags rather than utility classes, read the same
- * declaration the `text-heading-32` utility compiles from.
- *
- * Sizes are named for their role and their pixel size: `heading` carries
- * tracking and 600 weight, `copy` is body prose, `label` is UI chrome, `button`
- * is 500-weight control text. Geist publishes more steps than this (72 down to
- * 12 in four families); what is here is what the app renders. Adding one back
- * is this declaration plus an entry in `utils/cn.ts` — see the note there,
- * because without it the class silently does nothing.
- */
+/* `@theme static` emits every variable and utility, letting bare prose CSS and
+ * Tailwind share one scale. Add new steps to `utils/cn.ts` too or tailwind-merge
+ * may discard their classes as colors. */
 @theme static {
   --text-heading-32: 32px;
   --text-heading-32--line-height: 40px;
@@ -156,16 +105,7 @@
 }
 
 :root {
-  /* ---- Surfaces and text — LIGHT --------------------------------------- */
-  /*
-   * The surface ladder. Each step moves AWAY from the page — one step for a
-   * raised card, two for a recessed well, three for a hover fill. In light that
-   * is progressively darker, in dark progressively lighter, which is why every
-   * one of them is redeclared in `.dark` rather than riding a scale that flips.
-   *
-   * Geist steps, for provenance: background-100 / background-200 / gray-100 /
-   * gray-200, with gray-1000 and gray-900 for the text pair.
-   */
+  /* Surface roles move away from the page in each mode, so each is redeclared. */
   --background: hsl(0 0% 100%);
   --foreground: hsl(0 0% 9%);
   --card: hsl(0 0% 98%);
@@ -173,35 +113,19 @@
   --muted-foreground: hsl(0 0% 30%);
   --accent: hsl(0 0% 92%);
 
-  /*
-   * The high-contrast pair — solid buttons. Geist is MONOCHROME here on
-   * purpose, and this is the one distinction in the file worth defending:
-   * `--primary` is near-black on white and near-white on black, and it is NOT
-   * the project's colour. The per-project accent is `--brand`, below. Links,
-   * active nav and icons take `--brand`; solid buttons take `--primary`.
-   * Collapsing the two undoes the system.
-   *
-   * It is also separately settable by an embedder (`p`/`pf` in
-   * `embed-theme.ts`), which is why it is not simply an alias of
-   * `--foreground`/`--background` even though it resolves to the same colours.
-   * `--primary-hover` recedes toward the page in BOTH modes (Geist's 900).
-   */
+  /* `primary` is the embed-settable monochrome solid-button pair, not the
+   * project `brand` used by links, active navigation, icons, and the hero CTA. */
   --primary: hsl(0 0% 9%);
   --primary-foreground: hsl(0 0% 100%);
   --primary-hover: hsl(0 0% 30%);
 
-  /* Geist's gray-alpha 400/500 — alpha, so a hairline picks up what is behind
-     it. The grid's rules deliberately do NOT use these; see `--grid-guide`. */
+  /* Alpha borders pick up their backdrop; grid guides must not use them. */
   --border: #00000014;
   --input: #00000036;
-  /* Geist's own focus colour (blue-700 light / blue-900 dark). */
   --ring: hsl(212 100% 48%);
-  /* Dialog scrim. Geist washes toward its own neutrals, not toward black; call
-     sites apply the 0.8 opacity themselves (`/80`). */
+  /* Call sites apply scrim opacity. */
   --overlay: hsl(0 0% 95%);
 
-  /* ---- Status roles — LIGHT -------------------------------------------- */
-  /* Geist's 900 / 100 / 400 steps: coloured text, its tint, its border. */
   --info: hsl(211 100% 42%);
   --info-tint: hsl(212 100% 97%);
   --info-border: hsl(209 100% 90%);
@@ -222,48 +146,10 @@
   --important-tint: hsl(276 100% 97%);
   --important-border: hsl(276 71% 92%);
 
-  /* ---- The accent — LIGHT ---------------------------------------------- */
-  /*
-   * `--brand` is the ONE per-project colour, and by default it is not a colour
-   * at all: the accent is MONO (declared under the table) until the docs config
-   * asks for a hue. `theme-brand.ts` re-points it from `themeColor`; the table
-   * below declares every hue in both modes, so a themed site needs no `dark:`
-   * variant.
-   *
-   * These are the only DERIVED values in the file, and the derivation is the
-   * spec. Each is the most saturated colour of Geist's hue angle that clears
-   * WCAG AA (measured at 4.55:1, so rounding cannot land it under 4.5) on every
-   * surface brand text is allowed to sit on — which is the whole rule:
-   *
-   *   BRAND TEXT SITS ON THE PAGE, ON A CARD, OR ON A WASH OF ITSELF (≤15%).
-   *
-   * Never on `--muted` or `--accent`. Those are neutral fills a page paints for
-   * its own reasons, they are darker than any of the four surfaces above, and
-   * putting the accent on one is what forced the accent darker than it needed
-   * to be everywhere else. An active nav item wants `bg-brand/10 text-brand`,
-   * not `bg-accent text-brand`.
-   *
-   * That rule is what collapsed three tokens into one. There used to be
-   * `--brand` (page/card), `--brand` (tints and neutral fills) and
-   * `--brand` (non-text glow), because no single value cleared AA on all
-   * of them — the accent on its own 15% wash measured 3.5-3.9, and on `--accent`
-   * it measured 4.38-4.49, i.e. under AA, which is the bug the split was hiding
-   * rather than fixing. Constraining the surfaces instead of adding tokens
-   * costs 7-11% chroma in light and buys AA everywhere, one name, and no way to
-   * pick the wrong one of three.
-   *
-   * `oklch()` over a hex literal is deliberate: it records WHY each number is
-   * what it is — L at the contrast boundary (or at the top of the accent band,
-   * where a hue has contrast to spare and its gamut cusp is higher: dark amber,
-   * green and teal), C at the sRGB gamut edge, H Geist's own. Chroma is rounded
-   * DOWN so every value sits just inside sRGB and no browser gamut-maps it.
-   *
-   * Per-mode rather than one declaration, unlike everything else derived: the
-   * constraint is against a different page colour in each mode and binds from
-   * opposite directions (an upper bound on lightness in light, a lower bound in
-   * dark). Adding a hue means two declarations. `test/app/tokens.test.ts`
-   * re-derives all of it rather than pinning the numbers.
-   */
+  /* `brand` is one per-project accent, derived per mode at Geist's hue and the
+   * sRGB edge. Brand text may sit only on the page, a card, or its own ≤15% wash—
+   * never `muted` or `accent`. Each hue needs light and dark declarations;
+   * `tokens.test.ts` rechecks gamut and AA contrast for every allowed surface. */
   --brand-blue: oklch(50.7% 0.179 256.9);
   --brand-red: oklch(51.5% 0.209 25.2);
   --brand-amber: oklch(51.4% 0.128 54.3);
@@ -272,65 +158,18 @@
   --brand-purple: oklch(52.8% 0.275 304.2);
   --brand-pink: oklch(51.8% 0.209 2.4);
 
-  /*
-   * The DEFAULT accent is MONO: no hue at all, but the primary text step, so
-   * links, active nav and icons read in body colour and the site is monochrome
-   * end to end. That is Geist's own look — the hue table above is the departure,
-   * not this — and it is the accent a docs project gets for choosing nothing.
-   * `theme-brand.ts` re-points this at a hue when the docs config asks for one
-   * (`themeColor: blue`), and points it back here for `themeColor: mono` and for
-   * the neutral spellings (`gray`, `slate`, ...).
-   *
-   * A reference rather than a literal, so it flips with the mode on its own, and
-   * `--foreground` rather than `--primary` (identical values) because what mono
-   * means is "the accent is the TEXT colour" — the pairing every rule above is
-   * about — not "the accent is the button fill".
-   */
+  /* Mono is the default accent and tracks text, not the solid-button role. */
   --brand: var(--foreground);
 
-  /*
-   * The accent used as a FILL rather than as text — the landing hero's lead
-   * CTA, the only accent-coloured button in the set (see `Button.ts`).
-   *
-   * The label is the PAGE colour, and that is measured, not chosen. Across the
-   * fourteen coloured fills `themeColor` can produce (seven hues x two modes) it
-   * is the only foreground clearing AA on all of them: white fails every hue in
-   * dark, near-black fails every hue in light. It works because the table above
-   * declares each hue per mode, so `--background` flips with the fill. Mono is
-   * the easy case and rides the same declaration: page colour on the text step
-   * is the body pairing, 17:1.
-   *
-   * It also rides the derivation for free — `--brand-foreground` IS the page,
-   * so "label on the fill" and "accent on the page" are the same ratio (5.9-6.3
-   * for a hue, because the surface rule pushed the accent past what the page
-   * alone required).
-   *
-   * The hover moves the fill 12% toward a pole, and WHICH pole is the one thing
-   * the two kinds of accent disagree about — so the direction is its own token,
-   * set alongside `--brand` by `theme-brand.ts` and never separately.
-   *
-   * A hue mixes toward `--foreground`: darker in light, brighter in dark, i.e.
-   * away from the page in both — and so away from the label, which IS the page,
-   * so its contrast only ever improves. The reflex `bg-brand/90` recedes TOWARD
-   * the page and lands at ~3.7 in light.
-   *
-   * Mono cannot use that pole: its accent already IS `--foreground`, so the mix
-   * is the identity and the button would have no hover at all. It recedes toward
-   * `--background` instead — the same move `--primary-hover` makes, for the same
-   * reason: at the end of the axis, receding is the only one left, and the label
-   * has 17:1 to spend on it.
-   */
+  /* A solid brand fill uses the page as its AA-tested label. Hues hover away
+   * from that label toward `foreground`; mono already equals `foreground`, so
+   * its paired pole recedes toward `background`. `theme-brand.ts` must set
+   * `brand` and `brand-hover-toward` together. */
   --brand-foreground: var(--background);
   --brand-hover-toward: var(--background);
   --brand-hover: color-mix(in oklab, var(--brand) 88%, var(--brand-hover-toward));
 
-  /* ---- Elevation — LIGHT ------------------------------------------------ */
-  /*
-   * Geist's materials. `--hairline` and `--edge` are the two mode-dependent
-   * ingredients: the inner 1px stroke, and the outer ring that separates a
-   * floating surface from the page (Geist's background-200 — pure black in
-   * dark, where the card itself would be invisible against the menu).
-   */
+  /* Mode-specific strokes keep floating surfaces distinct from the page. */
   --hairline: 0 0 0 1px #00000014;
   --edge: 0 0 0 1px hsl(0 0% 98%);
   --elevation-small: 0 2px 2px #0000000a;
@@ -342,58 +181,29 @@
     var(--hairline), 0 1px 1px #00000005, 0 8px 16px -4px #0000000a, 0 24px 32px -8px #0000000f,
     var(--edge);
 
-  /* ---- Metrics (mode-invariant) ---------------------------------------- */
-  /* Geist's everyday surface radius; embed-settable, hence its own token. */
   --radius: 6px;
 
-  /*
-   * Control heights — Geist's ladder for every form control. `tiny` is OURS:
-   * the Button exposes the size but upstream ships no token for it.
-   *
-   * Each height carries a paired type step (14px through medium, 16px at
-   * large); `Button.ts` follows that, because a 40px control with 14px text is
-   * not the large button, it is the medium one stretched. `Button.ts` writes
-   * them as `h-(--size-small)` and reuses the same token for width, so a square
-   * control cannot drift.
-   */
+  /* Geist control heights pair with their type steps in `Button.ts`; square
+   * controls reuse the same token for width. `tiny` is the local extra step. */
   --size-tiny: 24px;
   --size-small: 32px;
   --size-medium: 36px;
   --size-large: 40px;
 
-  /*
-   * ---- The Geist grid (vercel.com/geist/grid) ---------------------------
-   *
-   * The guides are RULE LINES — they are the design, not a component's edge —
-   * so they get their own names rather than call sites reaching for `--border`.
-   *
-   * They are SOLID, not the alpha `--border`: an 8%-black hairline tints with
-   * whatever sits behind it, and the guides cross the landing backdrop. And the
-   * step differs per mode, which is why `.dark` redeclares them: Geist's
-   * neutral ramp is not symmetric about the two page colours, so a step that
-   * separates from white is a bright scratch on a 4% page. The cross takes one
-   * rung more contrast than the guide, so it annotates the intersection rather
-   * than just thickening it.
-   *
-   * `--grid-guide-width` and `--grid-guide-style` are the FALLBACKS behind
-   * `GridSystem`'s `guideWidth` and `dashedGuides` props, which override them
-   * per-system as inherited `--ug-guide-*` properties.
-   */
+  /* Grid guides are solid, mode-specific rules rather than alpha borders so
+   * the landing backdrop cannot tint them. Crosses use the next contrast rung;
+   * width/style are fallbacks for `GridSystem`'s inherited overrides. */
   --grid-guide: hsl(0 0% 92%);
   --grid-cross: hsl(0 0% 79%);
   --grid-guide-width: 1px;
   --grid-guide-style: solid;
   --grid-cross-size: 9px;
-  /* Room inside a `GridCell` so content clears the guides on every side. */
   --grid-cell-padding: 1.5rem;
 }
 
 .dark {
   --background: hsl(0 0% 4%);
   --foreground: hsl(0 0% 93%);
-  /* The ladder walks UP from the near-black page into the gray scale here.
-     (Geist's background-200 is pure black — darker than the page — so it
-     cannot serve as the raised surface in dark the way it does in light.) */
   --card: hsl(0 0% 10%);
   --muted: hsl(0 0% 12%);
   --muted-foreground: hsl(0 0% 63%);
@@ -428,14 +238,7 @@
   --important-tint: hsl(283 30% 12%);
   --important-border: hsl(277 46% 28%);
 
-  /*
-   * Re-derived against the dark page, not flipped from the light table. Amber,
-   * green and teal sit at the top of the accent band rather than at the
-   * contrast boundary: they clear AA with room to spare (6.8-7.5) and their
-   * gamut cusps are higher, so lightness buys chroma there instead of costing
-   * it. Uncapped they run to L 87-90% and read as highlighter, not as an
-   * accent — 80% is the band.
-   */
+  /* Dark accents are independently derived, not flips of the light table. */
   --brand-blue: oklch(65.6% 0.189 250.8);
   --brand-red: oklch(67.9% 0.209 21.7);
   --brand-amber: oklch(79.9% 0.17 73.2);

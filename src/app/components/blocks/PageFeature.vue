@@ -17,9 +17,6 @@ const props = withDefaults(
 const isEmoji = computed(() => isEmojiIcon(props.icon));
 const isHorizontal = computed(() => props.orientation === "horizontal");
 
-// An emoji or a multicolor Iconify set brings its own palette; desaturate it so
-// the row of features reads as one. A `currentColor` icon is left alone — the
-// filter would grey out the `--brand` it inherits from the wrapper.
 const isColored = computed(() => isColoredIcon(props.icon));
 </script>
 

@@ -1,18 +1,3 @@
-/**
- * Client entry / bootstrap (SSR hydration).
- *
- * The server (`entry-server.ts`) renders `app.vue` into `#root` and inlines a
- * hydration payload. Here we seed the async-data + state stores from that payload
- * BEFORE creating the app, wire the shared infrastructure — @unhead/vue, our
- * color-mode + Iconify icon collection, the page router (`./router`), the
- * app composables — then hydrate the server-rendered markup with
- * `createSSRApp(...).mount("#root")`.
- *
- * Components are NOT registered globally: every component is imported explicitly
- * where it is used (`app.vue`, pages, layouts, other components). The markdown
- * renderer (`content/MarkdownRenderer.ts`) keeps its own explicit tag→component
- * registry.
- */
 import "./css.css";
 
 import {
@@ -27,8 +12,7 @@ import {
 
 import { createHead } from "@unhead/vue/client";
 
-// The app root + error page. Both have async `<script setup>` (top-level
-// `await useAsyncData("navigation", ...)`), so each is mounted inside a Suspense.
+// Both async roots require Suspense.
 import AppComponent from "@app/app.vue";
 import ErrorPage from "@app/error.vue";
 
@@ -42,15 +26,9 @@ import { seedBuiltinIcons, seedClientIcons } from "@app/ssr/icons.ts";
 import { readPayload } from "@app/ssr/payload.ts";
 import { brandCss, BRAND_STYLE_ID } from "@app/theme-brand.ts";
 import { registerUserComponents } from "@app/user-theme.ts";
-// The WebMCP polyfill only (~1 kB gzipped) — the tools themselves stay in their
-// own lazy chunk, imported below.
 import { installWebMCPPolyfill } from "./webmcp/polyfill.ts";
 
-// ---------------------------------------------------------------------------
-// Runtime brand color fallback: the server already inlines this <style> for
-// SSR (`entry-server.ts`). Only inject here if it's missing (e.g. a pure
-// client nav), keyed by `BRAND_STYLE_ID` to avoid duplicating the server's tag.
-// ---------------------------------------------------------------------------
+// Preserve the server's first-paint brand style; inject only when absent.
 function applyRuntimeBrand(themeColor: unknown): void {
   if (document.getElementById(BRAND_STYLE_ID)) return;
   const css = brandCss(themeColor);
@@ -61,18 +39,7 @@ function applyRuntimeBrand(themeColor: unknown): void {
   document.head.append(style);
 }
 
-// ---------------------------------------------------------------------------
-// Stale-build recovery. A tab left open across a deploy keeps executing the old
-// bundle, but its not-yet-loaded chunks point at hashes the server no longer
-// serves (hosts serve assets per-deployment), so the next lazy import 404s and
-// that feature silently dies. Vite's `__vitePreload` fires `vite:preloadError`
-// on exactly that, and the only real cure is to reload onto the current build.
-//
-// The sessionStorage stamp guards against a reload loop: if a chunk is genuinely
-// gone rather than merely stale, reloading again won't help, so we let the error
-// surface in the console instead. Only the built `__vitePreload` helper
-// dispatches this event, so the whole thing is inert in dev.
-// ---------------------------------------------------------------------------
+// Reload once when a stale build's lazy chunk fails; the session stamp prevents loops.
 const RELOAD_KEY = "undocs:stale-build-reload";
 const RELOAD_WINDOW = 10_000;
 
@@ -80,66 +47,36 @@ function installStaleBuildReload(): void {
   window.addEventListener("vite:preloadError", (event) => {
     try {
       const last = Number(sessionStorage.getItem(RELOAD_KEY)) || 0;
-      if (Date.now() - last < RELOAD_WINDOW) return; // already tried — don't loop
+      if (Date.now() - last < RELOAD_WINDOW) return;
       sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
     } catch {
       // Storage blocked (private mode / blocked cookies). Without it we can't
       // prove we haven't already reloaded, so don't risk the loop.
       return;
     }
-    event.preventDefault(); // handled — don't rethrow
+    event.preventDefault();
     location.reload();
   });
 }
 
 function bootstrap(): void {
-  // Installed first, so it is listening before any chunk can fail to load.
   installStaleBuildReload();
 
-  // -------------------------------------------------------------------------
-  // 0. Seed the async-data + state stores from the server payload, so awaited
-  //    `useAsyncData` calls resolve with the server's data (no refetch) and the
-  //    markup hydrates without a mismatch. Must run before the app is created.
-  // -------------------------------------------------------------------------
+  // Seed payload and icons before app creation so hydration reuses SSR state and markup.
   const payload = readPayload();
   hydrateAsyncData(payload.data);
   hydrateState(payload.state);
-  // Seed the bundled built-in icons (shipped in the client bundle, no network),
-  // then the server-resolved payload icons (the non-built-in ones the page used).
-  // Both go into Iconify storage BEFORE the app is created so icons render
-  // synchronously on the first client render — matching the server's SVGs.
   seedBuiltinIcons();
   seedClientIcons(payload.icons);
 
-  // -------------------------------------------------------------------------
-  // 1. Own infrastructure: apply the persisted color mode (toggles `.dark`
-  //    before hydration).
-  // -------------------------------------------------------------------------
   useColorMode();
-
-  // 2. Ensure the brand token is set (no-op if the server already emitted it).
   applyRuntimeBrand(useAppConfig().ui?.colors?.primary);
 
-  // -------------------------------------------------------------------------
-  // 3. Real router (page routes + layout meta). Components reach it via
-  //    our own `useRouter()` / `useRoute()` (`./router`).
-  // -------------------------------------------------------------------------
   const router = createAppRouter();
-
-  // -------------------------------------------------------------------------
-  // 4. Root: error boundary + Suspense. Fatal `createError` throws bubble to
-  //    `onErrorCaptured`, swapping in the error page (cleared on next nav).
-  //    Both pages are async, each in its own `<Suspense>`; success path is
-  //    `Suspense > app.vue`, matching the server's output for hydration.
-  // -------------------------------------------------------------------------
   const RootApp = defineComponent({
     name: "RootApp",
     setup() {
-      // Seed the boundary when the server rendered the error page, so the client's
-      // FIRST render is the error page too — matching the server DOM. Otherwise it
-      // would hydrate `app.vue`, re-run the failing page, throw, and swap mid-
-      // hydration: a mismatch that crashes Vue's unmount (`nextSibling` of null).
-      // Cleared by the route watcher below on the next navigation.
+      // Seed SSR errors before first render to avoid hydrating app.vue over an error page.
       const err = shallowRef<AppError | null>(payload.error ?? null);
 
       onErrorCaptured((e: any) => {
@@ -168,70 +105,36 @@ function bootstrap(): void {
 
   const app = createSSRApp(RootApp);
 
-  // User `.docs/components/**` registered globally (auto-import stand-in) — must
-  // run before mount so user pages/layouts resolve them, matching the server.
+  // Register user components before mount to match SSR.
   registerUserComponents(app);
 
-  // unhead — created here so the app owns the head instance.
   const head = createHead();
   app.use(head);
 
-  // Single router instance, installed before mount so `useRoute()` in RootApp
-  // and every page resolves.
   app.use(router);
 
-  // Wait for the initial route to resolve, then hydrate the server-rendered DOM.
   router.isReady().then(() => {
     app.mount("#root");
-    // Remove the dev-only loading fallback (see `entry-server.ts`) now that the
-    // app is hydrated and `import "./css.css"` has run — styles are ready. Dropping
-    // the `<style>` also clears its `#root { visibility: hidden }` rule, revealing
-    // the styled app. Guarded by the Vite static `DEV` constant, so it tree-shakes
-    // from the prod bundle.
+    // Reveal the dev app only after hydration and CSS loading.
     if (import.meta.env.DEV) {
       document.getElementById("__undocs_loading")?.remove();
       document.getElementById("__undocs_loading_style")?.remove();
     }
   });
 
-  // -------------------------------------------------------------------------
-  // WebMCP (https://webmachinelearning.github.io/webmcp/): expose docs search /
-  // navigation to a browser-resident AI agent as MCP tools (`./webmcp`). The API
-  // is a draft shipping behind flags, so a browser without it gets our polyfill
-  // (`./webmcp/polyfill.ts`) — the agents that exist today are the ones written
-  // against it. Either way the tools live in their own lazy chunk: with native
-  // support they are registered now, and behind the polyfill the chunk is not
-  // fetched until an agent actually looks for tools, so a visitor with no agent
-  // pays for neither. Opt out with `webmcp: false` in the docs config.
-  // -------------------------------------------------------------------------
+  // The polyfill is in the main bundle; tools stay lazy until lookup unless native support registers now.
   if (useAppConfig().docs?.webmcp !== false) {
     const loadTools = () => import("./webmcp/index.ts").then((m) => m.setupWebMCP(router));
     if (document.modelContext) void loadTools();
     else installWebMCPPolyfill(loadTools);
   }
 
-  // Dev-only content live-reload. `import.meta.env.DEV` is a Vite static
-  // constant (true in dev, replaced with `false` at build time), so this whole
-  // branch — and the dynamically-imported `./dev-reload` chunk — is tree-shaken
-  // out of the production client bundle.
+  // Static DEV replacement removes this lazy chunk from production.
   if (import.meta.env.DEV) {
     import("./dev-reload.ts").then((m) => m.connectDevReload());
   }
 
-  // -------------------------------------------------------------------------
-  // Offline service worker — TEMPORARILY DISABLED (unreliable in the field).
-  //
-  // We no longer register `/sw.js`; instead we tear down whatever is installed,
-  // in EVERY environment. Not registering is not the same as disabling: a SW a
-  // visitor already installed keeps controlling the origin (and serving its
-  // cache) indefinitely, and in dev a SW left over from `pnpm build && pnpm
-  // start` / `vite preview` on the shared localhost origin fights HMR. This runs
-  // unconditionally so both cases die on the next page load.
-  //
-  // `public/sw.js` is a tombstone that unregisters itself too — the belt to this
-  // braces, for a client controlled by a cached bundle that never runs this
-  // code. To re-enable: restore both files (`git log -- src/app/public/sw.js`).
-  // -------------------------------------------------------------------------
+  // Remove legacy offline workers/caches everywhere; not registering leaves existing workers active.
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations?.().then((regs) => {
       for (const reg of regs) reg.unregister();

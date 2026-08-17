@@ -1,15 +1,4 @@
 <script setup lang="ts">
-/**
- * Top progress bar shown during client navigations.
- *
- * The router flags `router.pending` while a navigation's page is loading (its
- * async `<Suspense>` in flight) and clears it once the page commits. We trickle
- * a thin bar toward ~90%, then fill to 100% and fade out on finish.
- *
- * A FAST navigation never flashes the bar: `pending` itself is deferred by
- * `PENDING_BAR_DELAY` (see `router.ts`), so only a load slower than that ever
- * flips it on.
- */
 import { onUnmounted, ref, watch } from "vue";
 import { useRouter } from "@app/router.ts";
 
@@ -31,7 +20,6 @@ function start() {
   clearTimers();
   visible.value = true;
   progress.value = 0;
-  // Ease toward 90% and stop; the last 10% is filled by finish().
   trickle = setInterval(() => {
     progress.value = Math.min(90, progress.value + (90 - progress.value) * 0.12 + 0.4);
   }, 160);
@@ -60,10 +48,7 @@ onUnmounted(clearTimers);
     :class="visible ? 'opacity-100' : 'opacity-0'"
     aria-hidden="true"
   >
-    <!-- The glow reads `--brand` directly, NOT `--color-brand`: the
-         latter is declared in `@theme inline`, which emits no variables at all.
-         Vivid rather than plain `--brand` because a 2px bar carries no text —
-         the accent's contrast derivation would only cost it saturation here. -->
+    <!-- `@theme inline` does not emit a readable `--color-brand` variable. -->
     <div
       class="h-full bg-brand shadow-[0_0_8px_var(--brand)] transition-[width] duration-150 ease-out"
       :style="{ width: `${progress}%` }"

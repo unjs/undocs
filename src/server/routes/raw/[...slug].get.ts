@@ -3,15 +3,13 @@ import { withLeadingSlash } from "ufo";
 import { pageSource } from "../../content/source.ts";
 import { getIndex } from "../../content/store.ts";
 
-/** Serve the source markdown for a page at `/raw/<path>.md`. */
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, "slug");
   if (!slug?.endsWith(".md")) {
     throw new HTTPError({ status: 404, statusText: "Page not found" });
   }
 
-  // `/raw/index.md` is the docs root: `toRoutePath` strips `index` from every
-  // route, so `/index` is never a page of its own and the alias is unambiguous.
+  // `/index` cannot be a page route, so it unambiguously aliases the docs root.
   const path = withLeadingSlash(slug.replace(/\.md$/, "")).replace(/^\/index$/, "/");
   const index = await getIndex();
   const page = index.byPath.get(path) || index.byPath.get(path + "/");

@@ -2,21 +2,6 @@
 import { cn } from "@app/utils/cn.ts";
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
-/**
- * Button — the `UButton` replacement.
- *
- * Renders a `<AppLink :to>` when `to` is set, else a native `<button>`.
- * Accepts the prop values the codebase passes: `variant`
- * (solid|outline|soft|subtle|ghost|link), `color` (primary|neutral|white),
- * `size` (xs|sm|md|lg), `icon`/`trailing-icon` (rendered via `<Icon>`),
- * `square`, `label`, `disabled`, `loading`, and a `:ui` part-class hook for
- * `leadingIcon`/`trailingIcon`.
- *
- * Icon-only detection: when there's no default slot content and no `label`
- * but an `icon`/`trailing-icon` is set, the button auto-squares (matches
- * several call sites — e.g. `PageHeaderLinks`'s chevron trigger — that never
- * pass `square` explicitly).
- */
 import { computed, useSlots } from "vue";
 import { buttonVariants, buttonSquareSizeClass, type ButtonVariants } from "./Button.ts";
 
@@ -54,7 +39,7 @@ const rootClass = computed(() =>
   cn(
     buttonVariants({ color: props.color, variant: props.variant, size: props.size }),
     isSquare.value ? buttonSquareSizeClass[props.size ?? "md"] : undefined,
-    // `<a>` has no native `:disabled`, so fake it visually + for a11y.
+    // Anchors need explicit disabled semantics.
     isDisabled.value && props.to ? "pointer-events-none opacity-50" : undefined,
     props.class,
   ),

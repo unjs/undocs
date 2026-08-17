@@ -1,10 +1,6 @@
 import { defineEventHandler } from "nitro/h3";
 import { getIndex } from "../../../content/store.ts";
 
-/**
- * The `/blog/` listing, newest-first. A fixed, query-less path so it prerenders
- * to disk like `navigation`/`search`.
- */
 export default defineEventHandler(async () => {
   const prefix = "/blog/";
   const index = await getIndex();

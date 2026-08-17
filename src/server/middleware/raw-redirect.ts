@@ -1,11 +1,7 @@
 import { defineEventHandler, getRequestURL, redirect } from "nitro/h3";
 
-/**
- * Rewrite `/path/to/route.md` → `/raw/path/to/route.md` via redirect, so a
- * bare `.md` URL resolves to the source-markdown route. Skips paths already
- * under `/raw/`. Query string is preserved. Runs as route middleware before
- * the matched handler (returning here closes the request).
- */
+// Public `.md` alias preserves the query while redirecting to the raw route.
+
 export default defineEventHandler((event) => {
   const url = getRequestURL(event);
   if (!url.pathname.endsWith(".md") || url.pathname.startsWith("/raw/")) {

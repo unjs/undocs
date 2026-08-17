@@ -6,11 +6,8 @@ import { render } from "takumi-js";
 import { container, image, text } from "takumi-js/helpers";
 import { getIndex } from "../../content/store.ts";
 
-// `themeColor` name -> the colour the card draws with. The card is always dark
-// (`#0a0a0a`), so these are the DARK-mode readings of the site's accent — which
-// is why `mono` and the neutral spellings resolve to `--foreground`'s dark value
-// rather than to CSS's mid-grey `gray`, and why they are listed at all: without
-// them the default site would render its OG card in a colour it never uses.
+// Cards are always dark, so map names to dark-mode accents; neutral spellings
+// must resolve to the site's foreground rather than CSS mid-grey.
 const themeColorMap: Record<string, string> = {
   mono: "#ededed",
   monochrome: "#ededed",
@@ -40,11 +37,7 @@ const themeColorMap: Record<string, string> = {
 };
 
 export default defineLazyEventHandler(async () => {
-  // Server assets are registered in `nitro.config.ts` under these baseNames:
-  //   - `og-image`     → bundled fonts + the UnJS fallback mark (`unjs.svg`)
-  //   - `og-public`    → the app default public dir (`icon.svg`, ...)
-  //   - `og-docs`      → the docs `.docs/public` override dir (if present)
-  // The docs override wins, then the app default, then the bundled UnJS mark.
+  // Icon precedence: docs override, app default, bundled UnJS fallback.
   const ogImage = useStorage("assets/og-image");
   const publicAssets = useStorage("assets/og-public");
   const docsPublic = useStorage("assets/og-docs");
@@ -55,8 +48,7 @@ export default defineLazyEventHandler(async () => {
     (await ogImage.getItem<string>("unjs.svg")) ||
     "";
 
-  // Load fonts once at startup from bundled assets and reuse them across requests.
-  // Kept local (no Google Fonts fetch) so rendering never depends on the network.
+  // Lazy handler caches bundled fonts without a network dependency.
   const loadFont = async (file: string, weight: number) => {
     const data = (await ogImage.getItemRaw(`fonts/${file}`)) as Uint8Array | Buffer | null;
     if (!data) {
@@ -71,11 +63,7 @@ export default defineLazyEventHandler(async () => {
   ]);
 
   return defineEventHandler(async (event) => {
-    // The card is addressed by content path (`/_og/<path>.png`); the meta is
-    // loaded here from the content index rather than trusted from the query.
-    // `_index` is the landing page (no DocPage), which falls back to site meta.
-    // Prefer the matched router param, falling back to the pathname (the route
-    // is mounted at `/_og/`) so it also resolves without a matched param.
+    // Trust indexed page metadata, not query input; `_index` uses site metadata.
     const slug =
       getRouterParam(event, "slug") ||
       decodeURIComponent(event.url.pathname).replace(/^\/_og\//, "");
@@ -103,8 +91,7 @@ export default defineLazyEventHandler(async () => {
     }
 
     const themeColor = (undocs.themeColor as string) || "mono";
-    // Names are matched case-insensitively (as `theme-brand.ts` does); anything
-    // unrecognised is passed through as a CSS colour, casing intact.
+    // Match names case-insensitively; preserve custom CSS colors verbatim.
     const themeColorValue = themeColorMap[themeColor.toLowerCase()] || themeColor;
 
     const meta = { name: siteName, title, description };
@@ -121,7 +108,6 @@ export default defineLazyEventHandler(async () => {
   });
 });
 
-// Append an alpha channel to a `#rrggbb` color; pass other color strings through untouched.
 function withAlpha(color: string, alpha: number) {
   if (!/^#[0-9a-f]{6}$/i.test(color)) {
     return color;
@@ -157,11 +143,9 @@ function template({
       backgroundColor: "#0a0a0a",
       color: "white",
       fontFamily: "Public Sans",
-      // Crisp inner frame so the card reads as a deliberate surface, not a raw crop.
       boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
     },
     children: [
-      // Primary theme glow, anchored off the top-right corner.
       container({
         style: {
           position: "absolute",
@@ -171,7 +155,6 @@ function template({
         },
         children: [],
       }),
-      // Faint tech grid, masked to fade out toward the bottom-left so it stays subtle.
       container({
         style: {
           position: "absolute",
@@ -183,7 +166,6 @@ function template({
         },
         children: [],
       }),
-      // Branded top accent hairline.
       container({
         style: {
           position: "absolute",
@@ -195,7 +177,6 @@ function template({
         },
         children: [],
       }),
-      // Kicker: theme dot + package/section name.
       ...(name
         ? [
             container({
@@ -227,8 +208,7 @@ function template({
             }),
           ]
         : []),
-      // Title — shrink to a single line so long titles never overflow.
-      // NOTE: no `letterSpacing` here; it defeats takumi's `textFit` measurement
+      // No `letterSpacing`: it defeats takumi's `textFit` measurement
       // and lets long titles overflow the frame.
       text(title, {
         fontSize: 84,
@@ -250,7 +230,6 @@ function template({
             }),
           ]
         : []),
-      // Soft glow behind the brand mark.
       container({
         style: {
           position: "absolute",

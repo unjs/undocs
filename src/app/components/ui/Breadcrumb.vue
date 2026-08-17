@@ -2,12 +2,6 @@
 import { cn } from "@app/utils/cn.ts";
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
-/**
- * Breadcrumb — the `UBreadcrumb` replacement. Plain markup (no Reka
- * primitive needed for a static trail). Items: `{ label, icon?, to? }`,
- * separated by a chevron icon. The last item renders as plain (non-link)
- * text even if it has a `to`, matching the usual "current page" convention.
- */
 import { computed } from "vue";
 
 const props = defineProps<{

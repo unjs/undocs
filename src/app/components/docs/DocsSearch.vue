@@ -51,12 +51,6 @@ const query = ref("");
 const activeIndex = ref(0);
 const listEl = ref<HTMLElement | null>(null);
 
-// --- fuzzy search ------------------------------------------------------------
-// MiniSearch does the matching. The server ships a pre-built, serialized index
-// (`/api/docs/search`) that we rehydrate with `MiniSearch.loadJS` — the browser
-// never re-indexes. A search hit carries the section's stored fields (title,
-// titles, level, content) plus `terms` (the indexed words that matched), which
-// we use to highlight occurrences.
 const RESULT_LIMIT = 40;
 
 interface ResultRow {
@@ -64,20 +58,14 @@ interface ResultRow {
   terms: string[];
 }
 
-// Instant fallback: the nav tree is seeded into the SSR payload, so it's on the
-// client immediately, whereas the full index is fetched lazily from
-// /api/docs/search after the palette first opens. We index the nav pages
-// on-device (same options) and search that until the richer index (headings +
-// body text) lands, then transparently upgrade.
+// Search the hydrated nav immediately, then replace it with the lazy full index.
 function flattenNav(
   items: NavItem[] | null | undefined,
   out: SearchSection[] = [],
   seen: Set<string> = new Set(),
 ): SearchSection[] {
   for (const item of items || []) {
-    // A section with an index page appears twice in the tree — as the `page`
-    // parent and as its own re-added first child (same `path`). Dedupe by path so
-    // the browse list and the fallback index don't carry duplicates.
+    // Section index pages appear as both parent and child.
     if (item.page && item.path && !seen.has(item.path)) {
       seen.add(item.path);
       out.push({
@@ -95,17 +83,13 @@ function flattenNav(
 
 const navSections = computed(() => flattenNav(props.navigation));
 
-// The nav-only fallback index, built on-device from the SSR-seeded nav tree.
-// `markRaw` keeps Vue from deep-proxying the instance's internal Maps.
+// MiniSearch's internal Maps must not be deeply proxied.
 const navIndex = computed(() => {
   const ms = new MiniSearch<SearchDocument>(MINISEARCH_OPTIONS);
   ms.addAll(toSearchDocuments(navSections.value));
   return markRaw(ms);
 });
 
-// The full index is fetched + rehydrated lazily the first time the palette opens
-// (see the `open` watcher below) — not on every page load. `shallowRef` (not a
-// deep `ref`) so the MiniSearch instance is stored as-is, never proxied.
 const fullIndex = shallowRef<MiniSearch<SearchDocument> | null>(null);
 const indexPending = ref(false);
 let indexRequested = false;
@@ -114,12 +98,8 @@ async function loadIndex() {
   if (indexRequested) return;
   indexRequested = true;
   indexPending.value = true;
-  // Route through the shared "search" async-data entry: if `prefetch.ts` already
-  // warmed it, this resolves instantly with the cached serialized index and no
-  // second request is made. `useAsyncData` stores errors on the entry (never
-  // rejects), so we inspect the refs rather than catch.
+  // Reuse the prefetch cache; useAsyncData records errors instead of rejecting.
   const entry = await useAsyncData("search", () => querySearchIndex());
-  // A prior attempt (or a failed prefetch) leaves the entry empty — refetch once.
   if (entry.error.value || !entry.data.value) {
     await entry.refresh();
   }
@@ -128,26 +108,21 @@ async function loadIndex() {
       MiniSearch.loadJS<SearchDocument>(entry.data.value, MINISEARCH_OPTIONS),
     );
   } else {
-    indexRequested = false; // still failed — allow a retry on the next open
+    indexRequested = false;
   }
   indexPending.value = false;
 }
 
 const index = computed<MiniSearch<SearchDocument>>(() => fullIndex.value ?? navIndex.value);
 
-// True while the instant nav fallback is serving results and the full index is
-// still loading — drives the spinner so the upgrade is visible.
 const indexLoading = computed(() => indexPending.value && navSections.value.length > 0);
 
 const results = computed<ResultRow[]>(() => {
   const q = query.value.trim();
   if (!q) {
-    // No query: surface the top nav pages as a browse list.
     return navSections.value.slice(0, 20).map((section) => ({ section, terms: [] }));
   }
-  // Strict pass first (precise: all terms must match). If it finds nothing, fall
-  // back to a relaxed pass that tolerates typos, partial words, and incomplete
-  // input — better to show approximate results than an empty "no results" state.
+  // Match all terms first; use the typo-tolerant pass only as a fallback.
   let hits = index.value.search(q, MINISEARCH_SEARCH_OPTIONS);
   if (hits.length === 0) {
     hits = index.value.search(q, MINISEARCH_FUZZY_SEARCH_OPTIONS);
@@ -161,8 +136,6 @@ const results = computed<ResultRow[]>(() => {
         title: hit.title,
         titles: hit.titles || [],
         level: hit.level,
-        // `content` isn't stored (indexed only); the bounded `preview` is what we
-        // render as the snippet.
         content: hit.preview || "",
       },
       terms: hit.terms,
@@ -171,11 +144,6 @@ const results = computed<ResultRow[]>(() => {
   return rows;
 });
 
-// "Did you mean …": when even the relaxed pass finds nothing, ask MiniSearch for
-// the closest query it *could* satisfy. `autoSuggest` re-runs the search with the
-// given (fuzzy) options and assembles candidate query strings from the terms of
-// matching documents — so "llmsfulsss" → "llms full". Only surfaced in the empty
-// state, and only when the suggestion actually differs from what was typed.
 const suggestion = computed<string>(() => {
   const q = query.value.trim();
   if (!q || results.value.length > 0) return "";
@@ -187,7 +155,6 @@ function applySuggestion() {
   if (suggestion.value) query.value = suggestion.value;
 }
 
-// Fetch the full index on first open; reset input/selection on close.
 watch(open, (value) => {
   if (value) {
     loadIndex();
@@ -197,7 +164,6 @@ watch(open, (value) => {
   }
 });
 
-// --- match highlighting ------------------------------------------------------
 const SNIPPET_MAX = 140;
 
 interface Segment {
@@ -205,13 +171,12 @@ interface Segment {
   mark: boolean;
 }
 
-// Split `text` into plain/marked segments from [start, end) exclusive ranges.
 function toSegments(text: string, ranges: [number, number][]): Segment[] {
   if (!ranges.length) return text ? [{ text, mark: false }] : [];
   const out: Segment[] = [];
   let cursor = 0;
   for (const [start, end] of ranges) {
-    if (end <= cursor) continue; // fully covered by a previous range
+    if (end <= cursor) continue;
     const from = Math.max(start, cursor);
     if (from > cursor) out.push({ text: text.slice(cursor, from), mark: false });
     out.push({ text: text.slice(from, end), mark: true });
@@ -225,10 +190,7 @@ function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// MiniSearch returns which indexed *terms* matched, not character offsets. Find
-// each term in `text` (case-insensitively, only where a word starts with it,
-// since matches are prefix/word-based) and extend to the end of that word so the
-// whole matched word is highlighted. Ranges come back in ascending order.
+// MiniSearch returns terms, not offsets; highlight whole prefix-matched words.
 function matchRanges(text: string, terms: string[]): [number, number][] {
   const words = terms.filter(Boolean);
   if (!text || !words.length) return [];
@@ -241,7 +203,7 @@ function matchRanges(text: string, terms: string[]): [number, number][] {
   let m: RegExpExecArray | null;
   while ((m = re.exec(text))) {
     ranges.push([m.index, m.index + m[0].length]);
-    if (m.index === re.lastIndex) re.lastIndex++; // guard against zero-length matches
+    if (m.index === re.lastIndex) re.lastIndex++;
   }
   return ranges;
 }
@@ -250,7 +212,6 @@ function highlight(text: string, terms: string[]): Segment[] {
   return toSegments(text, matchRanges(text, terms));
 }
 
-// Build a snippet windowed around the first content match, with highlights.
 function snippet(content: string, terms: string[]): Segment[] {
   const raw = content || "";
   if (!raw.trim()) return [];
@@ -272,7 +233,6 @@ function routeFor(section: SearchSection): { path: string; hash?: string } {
   return anchor ? { path, hash: `#${anchor}` } : { path };
 }
 
-// --- grouping ----------------------------------------------------------------
 // Consecutive hits that resolve to the same page are collapsed into one grouped
 // item: a page header (the page-level hit if one matched, else a synthesized
 // entry that navigates to the page top) with the page's matching sections nested
@@ -307,8 +267,6 @@ const grouped = computed<{
   nav: SearchSection[];
   selectable: number[];
 }>(() => {
-  // First pass: bucket consecutive rows by page path, splitting each page's own
-  // level-1 hit (no `#anchor`) from its section hits.
   const buckets: { path: string; pageRow?: ResultRow; sections: ResultRow[] }[] = [];
   let current: (typeof buckets)[number] | null = null;
   for (const row of results.value) {
@@ -321,14 +279,10 @@ const grouped = computed<{
     else current.pageRow = row;
   }
 
-  // Second pass: build the render groups and, in lockstep, the flat nav list so
-  // every entry gets its keyboard index in render order (header, then sections).
   const groups: RenderGroup[] = [];
   const nav: SearchSection[] = [];
   const selectable: number[] = [];
   for (const b of buckets) {
-    // Highlight the page title with every term matched anywhere in the group, so
-    // a page that only matched via a section still highlights in the header.
     const terms = [
       ...new Set([...(b.pageRow?.terms || []), ...b.sections.flatMap((s) => s.terms)]),
     ];
@@ -359,7 +313,6 @@ const grouped = computed<{
         section: row.section,
         terms: row.terms,
         heading: row.section.title,
-        // Drop the leading page title (shown in the header) from the breadcrumb.
         crumb: (row.section.titles || []).slice(1).join(" › "),
       };
       selectable.push(item.index);
@@ -374,8 +327,6 @@ const grouped = computed<{
 const renderGroups = computed(() => grouped.value.groups);
 const navList = computed(() => grouped.value.nav);
 
-// Reset the selection whenever the result set changes — onto the first selectable
-// entry, which isn't always index 0 (a group can open with a synthesized lead).
 watch(grouped, (value) => {
   activeIndex.value = value.selectable[0] ?? 0;
 });
@@ -386,29 +337,20 @@ function select(section: SearchSection | undefined) {
   close();
 }
 
-// A group header is either a real page-level hit (navigate to the page) or a
-// synthesized lead for a page that only matched via its sections. The synthesized
-// lead has no content of its own, so selecting it jumps to the group's first
-// matching section rather than the bare page top.
 function headerTarget(group: RenderGroup): SearchSection {
   return group.header.isHit || !group.sections.length
     ? group.header.section
     : group.sections[0].section;
 }
 
-// --- keyboard navigation -----------------------------------------------------
-// Arrow keys step through the real hits only, skipping synthesized group leads:
-// a lead has no content of its own and navigates to the same place as the first
-// section under it, so stopping on it would be a wasted keypress. Groups whose
-// header *is* a page-level hit are stepped onto normally.
+// Skip synthesized group labels during keyboard navigation.
 function move(delta: number) {
   const items = grouped.value.selectable;
   if (items.length === 0) return;
   const current = items.indexOf(activeIndex.value);
   activeIndex.value =
     current === -1
-      ? // Selection is off the selectable list — enter from the edge we came from.
-        items[delta > 0 ? 0 : items.length - 1]
+      ? items[delta > 0 ? 0 : items.length - 1]
       : items[(current + delta + items.length) % items.length];
   scrollActiveIntoView();
 }
@@ -448,15 +390,12 @@ function onInputKeydown(event: KeyboardEvent) {
     }
     case "Enter": {
       event.preventDefault();
-      // Only real hits are selectable, so the flat entry is always the target —
-      // no `headerTarget` indirection needed (that's for clicking a lead).
       select(navList.value[activeIndex.value]);
       break;
     }
   }
 }
 
-// --- global shortcut (e.g. "meta_k" → Cmd/Ctrl+K) ----------------------------
 function matchesShortcut(event: KeyboardEvent): boolean {
   const parts = (props.shortcut || "").toLowerCase().split("_").filter(Boolean);
   if (parts.length === 0) return false;
@@ -499,7 +438,6 @@ onUnmounted(() => {
     description="Search across the documentation and jump to a section."
     content-class="fixed left-1/2 top-[12vh] z-50 w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-card text-foreground shadow-modal data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2"
   >
-    <!-- input -->
     <div class="flex items-center gap-2 border-b border-border px-4">
       <Icon name="i-lucide-search" class="size-4 shrink-0 text-muted-foreground" />
       <input
@@ -522,7 +460,6 @@ onUnmounted(() => {
       <Kbd class="hidden sm:inline-flex">Esc</Kbd>
     </div>
 
-    <!-- results -->
     <div ref="listEl" class="max-h-[60vh] overflow-y-auto p-2">
       <template v-if="renderGroups.length">
         <div
@@ -530,7 +467,6 @@ onUnmounted(() => {
           :key="`${group.path}#${group.header.index}`"
           class="mb-1 last:mb-0"
         >
-          <!-- page header -->
           <button
             type="button"
             :data-active="group.header.index === activeIndex"
@@ -577,7 +513,6 @@ onUnmounted(() => {
             </span>
           </button>
 
-          <!-- matching sections within the page -->
           <div v-if="group.sections.length" class="ml-4 border-l border-border pl-1">
             <button
               v-for="s in group.sections"

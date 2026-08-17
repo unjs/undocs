@@ -4,14 +4,12 @@ import Icon from "@app/components/global/Icon.vue";
 import { useCodeIcon } from "@app/composables/useCodeIcon.ts";
 
 defineProps<{
-  /** Sync group key (accepted for compatibility; not persisted in MVP). */
   sync?: string;
 }>();
 
 const slots = useSlots();
 const resolveCodeIcon = useCodeIcon();
 
-/** Flatten the default slot into a flat list of child vnodes. */
 const items = computed<VNode[]>(() => {
   const raw = slots.default?.() ?? [];
   const out: VNode[] = [];
@@ -19,12 +17,10 @@ const items = computed<VNode[]>(() => {
     for (const n of nodes) {
       if (n == null || typeof n === "boolean") continue;
       const vnode = n as VNode;
-      // Unwrap fragments (e.g. produced by v-for) into their children.
       if (vnode.type === Fragment && Array.isArray(vnode.children)) {
         walk(vnode.children as unknown[]);
         continue;
       }
-      // Skip bare text/comment nodes between prose blocks.
       if (typeof vnode.type === "symbol") continue;
       out.push(vnode);
     }
@@ -40,8 +36,6 @@ const tabs = computed(() =>
     const filename = vnode.props?.filename as string | undefined;
     return {
       label: filename || `Code ${i + 1}`,
-      // Only resolve an icon for tabs that carry a filename; unnamed blocks
-      // (`Code N`) stay label-only.
       icon: filename
         ? resolveCodeIcon(filename, vnode.props?.language, vnode.props?.icon)
         : undefined,
@@ -49,7 +43,6 @@ const tabs = computed(() =>
   }),
 );
 
-/** The active child, with its `filename` stripped (tabs already show it). */
 const activeVNode = computed<VNode | null>(() => {
   const vnode = items.value[active.value];
   if (!vnode) return null;
@@ -86,7 +79,6 @@ const activeVNode = computed<VNode | null>(() => {
       </button>
     </div>
 
-    <!-- Active panel -->
     <div class="code-group-body">
       <component :is="activeVNode" v-if="activeVNode" />
     </div>
@@ -94,7 +86,6 @@ const activeVNode = computed<VNode | null>(() => {
 </template>
 
 <style scoped>
-/* Children are ProsePre — drop their own border/rounding/margin inside the group. */
 .code-group-body :deep(.prose-pre) {
   margin: 0;
   border: 0;

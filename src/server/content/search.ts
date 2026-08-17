@@ -1,8 +1,4 @@
-// Tests: test/content/builder.test.ts, test/api.test.ts
-// NODE-ONLY (pulls in md4x): builds the flat section list + serialized
-// MiniSearch index for `/api/docs/search`. Client-safe MiniSearch
-// options/`toSearchDocuments` live in `./search-options` so md4x stays
-// out of the client bundle.
+// Node-only: keep md4x out of client-safe search-options.
 import * as md4x from "md4x/wasm";
 import MiniSearch from "minisearch";
 import { slugify, textContent } from "./utils.ts";
@@ -12,10 +8,7 @@ import type { AsPlainObject } from "minisearch";
 import type { SearchDocument } from "./search-options.ts";
 import type { DocPage, MarkNode, SearchSection, TocLink } from "./types.ts";
 
-// --- search sections ---
-// One section per page (the h1/title) plus one per h2/h3 heading, each carrying
-// the FULL prose under it (full-text search); the payload stays bounded because
-// only a short `preview` is stored (see `toSearchDocuments`).
+// Index full prose per page and h2/h3; only bounded previews are stored in hits.
 export function buildSearch(pages: DocPage[]): SearchSection[] {
   const sections: SearchSection[] = [];
   for (const p of pages) {
@@ -40,21 +33,14 @@ export function buildSearch(pages: DocPage[]): SearchSection[] {
   return sections;
 }
 
-// Build the MiniSearch index from the flat section list and serialize it to a
-// plain object (`toJSON`). The client rehydrates it via `MiniSearch.loadJS`
-// (`src/app/components/docs/DocsSearch.vue`); shipping the pre-built index means
-// the browser never re-indexes, and the query-less `/api/docs/search` route is
-// baked to a static file at prerender. Options MUST match `MINISEARCH_OPTIONS`.
+// Serialize the built index so the client can rehydrate without re-indexing.
 export function buildSearchIndex(sections: SearchSection[]): AsPlainObject {
   const ms = new MiniSearch<SearchDocument>(MINISEARCH_OPTIONS);
   ms.addAll(toSearchDocuments(sections));
   return ms.toJSON();
 }
 
-// Render a section's raw body text (markdown + lifted `_html` nodes) to clean
-// plain text via md4x and normalize whitespace. Kept in full for indexing;
-// only `toSearchDocuments` trims it to a short `preview`. Assumes
-// `md4x.init()` already ran (the builder calls it upfront).
+// md4x must already be initialized by the builder.
 function cleanText(s: string): string {
   return md4x.renderToText(s).replace(/\s+/g, " ").trim();
 }
@@ -63,14 +49,8 @@ function isHeading(node: MarkNode): node is [string, Record<string, any>, ...Mar
   return Array.isArray(node) && typeof node[0] === "string" && /^h[1-6]$/.test(node[0]);
 }
 
-// Walk the flat block body and collect the prose under each h2/h3 heading
-// (keyed by the same slug the TOC uses), plus any intro text before the first
-// heading. Deeper headings (h4+) fold into their enclosing section's text.
-//
-// The key is READ off the node (`props.id`), not re-slugified from the text:
-// `buildToc` allocates each heading's id once and stamps it there, and its
-// de-duplication (`options`, `options-2`) is not something a second derivation
-// could reproduce from one heading in isolation.
+// Fold h4+ into the current h2/h3 section. Read parser-assigned IDs so TOC and
+// search share de-duplicated anchors rather than re-slugging independently.
 function sectionTexts(body: MarkNode[]): { intro: string; bySlug: Map<string, string> } {
   const bySlug = new Map<string, string>();
   const introParts: string[] = [];

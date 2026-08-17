@@ -3,7 +3,6 @@ import { useRuntimeConfig } from "nitro/runtime-config";
 import { pageSource } from "../content/source.ts";
 import { getIndex } from "../content/store.ts";
 
-/** Generate `/llms-full.txt`: the full markdown of every page concatenated. */
 export default defineEventHandler(async (event) => {
   const cfg = useRuntimeConfig().undocs as {
     llmsFull: { title: string; description: string };

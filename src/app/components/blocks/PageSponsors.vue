@@ -5,13 +5,8 @@ import Avatar from "@app/components/ui/Avatar.vue";
 import Button from "@app/components/ui/Button.vue";
 import PageSection from "@app/components/blocks/PageSection.vue";
 import Tooltip from "@app/components/ui/Tooltip.vue";
-// SSR-rendered: `useSponsors()` goes through the same-origin `/api/docs/sponsors`
-// proxy (cached, last-good fallback), so the server can fetch it during render and
-// hydrate it into the payload — no client request.
-//
-// `lazy` so a CLIENT-side navigation to the landing page (no payload to seed
-// from) doesn't hold the page's `<Suspense>` — and with it the hero and the
-// loading bar — behind a proxied third-party request. See `useAsyncData`.
+// Lazy prevents a client navigation from holding the page Suspense behind a
+// third-party proxy; SSR still fetches and hydrates the result.
 const { data: sponsors } = await useAsyncData("sponsors", () => useSponsors(), { lazy: true });
 </script>
 

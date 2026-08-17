@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// Based on Nuxt UI `UMain` component. Primary `<main>` wrapper sitting under the sticky header.
-// `min-height` is also enforced globally in `main.css`; we add vertical rhythm
-// so page content never hugs the header/footer.
+// Based on Nuxt UI's `UMain`.
 </script>
 
 <template>

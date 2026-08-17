@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { useSlots } from "vue";
 import { cn } from "@app/utils/cn.ts";
-// Based on Nuxt UI `UPageHeader` component. Page title/description block with `#headline` (above
-// the title, e.g. breadcrumb) and `#links` (right-aligned actions) slots.
-//
-// `ui.wrapper` styles the title+links row (callers pass
-// `flex-row items-center flex-wrap justify-between`); `ui.headline` styles the
-// headline container.
+// Based on Nuxt UI's `UPageHeader`.
 defineProps<{
   title?: string;
   description?: string;

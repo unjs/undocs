@@ -1,9 +1,5 @@
 <script setup lang="ts">
 import { cn } from "@app/utils/cn.ts";
-/**
- * Skeleton — the `USkeleton` replacement. Class-only pulsing placeholder
- * block; every visual (size, shape) comes from the caller's `class`.
- */
 const props = defineProps<{
   class?: unknown;
 }>();

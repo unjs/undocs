@@ -8,20 +8,12 @@ import { useSectionTabs } from "@app/composables/useSectionTabs.ts";
 import Container from "@app/components/Container.vue";
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
-// Secondary, horizontal "section switcher" bar that sits directly under the
-// header (inspired by reka-ui's DocTopbar). Each top-level docs section becomes
-// a tab with an icon + label and an underline active indicator, so switching
-// sections is a first-class action separate from the deep sidebar tree.
-//
-// Visibility + tab list come from `useSectionTabs` so the sticky sidebars stay
-// in sync with whether this bar is on screen.
+// Inspired by reka-ui's `DocTopbar`.
 const route = useRoute();
 const { tabs, visible } = useSectionTabs();
 
-// `useDocsNav` already worked out which entry holds the current route, and it is
-// the only thing that can: a synthetic section's members share no path prefix
-// with it, so matching `route.path` against the tab's own path would leave the
-// bar with nothing marked while the reader is inside it.
+// Synthetic sections require useDocsNav's precomputed active state because
+// their member routes do not share the section path.
 const isActive = (tab: { active?: boolean }) => !!tab.active;
 
 const tabClass = (tab: { originalPath?: string; to?: string }) =>
@@ -32,7 +24,6 @@ const tabClass = (tab: { originalPath?: string; to?: string }) =>
       : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
   );
 
-// Same scroll-reactive chrome as the header so the two bars fade in together.
 const { y } = useWindowScroll();
 const scrolled = computed(() => y.value > 8);
 </script>

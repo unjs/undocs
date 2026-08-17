@@ -9,7 +9,6 @@ const appConfig = useAppConfig();
 
 <template>
   <footer class="relative mt-16 border-t border-border">
-    <!-- Logo badge centered as a notch on the top border -->
     <AppLink
       :to="`https://github.com/${appConfig.docs.github}`"
       target="_blank"

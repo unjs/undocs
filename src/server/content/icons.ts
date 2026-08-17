@@ -1,4 +1,3 @@
-// Tests: test/content/icons.test.ts
 export const CommonIcons: { pattern: string; icon: string }[] = [
   { pattern: "guide", icon: "i-lucide-book-open" },
   { pattern: "components", icon: "i-lucide-component" },
@@ -9,7 +8,6 @@ export const CommonIcons: { pattern: string; icon: string }[] = [
   { pattern: "blog", icon: "i-lucide-scroll-text" },
 ];
 
-/** Infer a navigation icon from a route path */
 export function resolveIcon(path = ""): string | undefined {
   const paths = path
     .slice(1)

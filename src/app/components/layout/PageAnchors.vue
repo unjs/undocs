@@ -4,16 +4,12 @@ import { cn } from "@app/utils/cn.ts";
 import { isWithin } from "@app/utils/nav.ts";
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
-// Renders top-level quick links (from `useDocsNav().links`) as a vertical
-// icon + label list. Each link exposes both the `to`/`label` shape and the raw
-// NavItem shape (`path`/`title`); we accept either.
 interface AnchorLink {
   to?: string;
   path?: string;
   label?: string;
   title?: string;
   icon?: string;
-  /** Precomputed by `useDocsNav` — see `isActive`. */
   active?: boolean;
   [key: string]: any;
 }
@@ -23,15 +19,11 @@ defineProps<{
 }>();
 
 const route = useRoute();
-// `useDocsNav` links carry their own answer, which is the only correct one for an
-// entry holding pages that don't share its path (a synthetic section — see
-// `groupLoosePages`). Raw `NavItem`s fall back to matching the path.
+// Synthetic sections require the precomputed state because members do not share its path.
 const isActive = (link: AnchorLink) => link.active ?? isWithin(route.path, link.to || link.path);
 </script>
 
 <template>
-  <!-- Same row geometry as `DocsNavigation` (they stack in one aside): a 40px
-       row with 14px copy, bled 8px each side so labels align with the tree. -->
   <nav class="-mx-2 flex flex-col gap-0.5">
     <AppLink
       v-for="(link, index) in links"

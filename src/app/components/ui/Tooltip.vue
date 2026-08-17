@@ -1,61 +1,15 @@
 <script setup lang="ts">
 import { cn } from "@app/utils/cn.ts";
 /**
- * Tooltip — a label that appears next to whatever you wrap.
+ * Ported from reka-ui Tooltip (MIT, https://github.com/unovue/reka-ui).
+ * Preserves delayed/instant states, click-focus suppression, pointermove opening
+ * for overlapping triggers, request-scoped ARIA ids, and separate positioning/
+ * animation elements.
  *
- * Ported from reka-ui's `TooltipRoot`/`Trigger`/`Portal`/`Content` (MIT,
- * https://github.com/unovue/reka-ui). Reka spreads that over seven components
- * plus a Popper family, because a `TooltipContent` there has to be composable
- * with an arrow, a custom anchor, and content you can move the pointer INTO.
- * All six call sites here pass a string and an optional side, so the family
- * collapses to this one component sitting on four shared primitives:
- * `usePopper` (positioning), `usePresence` (exit animation), `AsChild` (the
- * trigger merge) and `useTooltipGroup` (the delay/skip-delay timers).
- *
- * The public prop API is unchanged — `text`, `kbds`, `delayDuration`, `side`,
- * `disabled`, `class` — and so are the classes on the content, so the rendered
- * result is the same tooltip.
- *
- * What is preserved exactly:
- *
- * - **The three-valued `data-state`.** `delayed-open` when the group was cold
- *   and the tooltip waited, `instant-open` when the group was already warm,
- *   `closed` otherwise. The classes below animate `delayed-open` and `closed`
- *   only, so sweeping across a row of icons after the first one has opened is
- *   deliberately instant and un-animated. That is reka's behaviour with these
- *   classes, and losing the distinction would make the sweep look sluggish.
- * - **The full trigger event set**, including the two non-obvious ones:
- *   `pointerdown` closes and latches `isPointerDown`, so the `focus` that
- *   follows a mouse click does NOT re-open the tooltip you just clicked
- *   through; and `pointermove` (not `pointerenter`) opens, because moving from
- *   a trigger onto an overlapping sibling fires no fresh `enter`.
- * - **`aria-describedby`** while open, wired with Vue 3.5's `useId()` — which is
- *   SSR-stable and request-scoped, NOT reka's module-level counter fallback
- *   (see AGENTS.md on per-request state).
- * - The two-element popper shape (positioned wrapper > styled content), which
- *   `usePopper` explains: the content owns the zoom keyframes, so it cannot also
- *   own the position transform.
- *
- * Dropped, with reasons:
- *
- * - **Hoverable content** (`TooltipContentHoverable` + `useGraceArea`): reka
- *   keeps a tooltip open while the pointer travels through a polygon between
- *   trigger and content, so you can reach into the tooltip. Nothing in ours is
- *   reachable — they hold a label and, at most, a `<kbd>` — so the tooltip now
- *   closes when the pointer leaves the trigger, which is reka's own
- *   `disableHoverableContent` behaviour. That also removes the shared
- *   `isPointerInTransitRef` that reka MUTATES on the provider context from
- *   whichever content mounted last, which is precisely the kind of cross-render
- *   shared state we are trying not to have.
- * - **The `VisuallyHidden` duplicate of the content.** reka renders the visible
- *   content, then a second hidden `<span role="tooltip">` holding the same text,
- *   and points `aria-describedby` at the copy. Here the id and `role="tooltip"`
- *   sit on the visible element, which is the ARIA authoring-practices shape and
- *   makes the description resolve to the thing that is actually on screen.
- * - `TooltipArrow` (no call site draws one), `forceMount`, `defaultOpen`,
- *   `v-model:open`, `ignoreNonKeyboardFocus`, `disableClosingTrigger` and
- *   `ariaLabel` — none are passed anywhere, and each only selects a non-default
- *   branch.
+ * Dropped, and why:
+ * - hoverable content/grace area: local tooltips are labels, not interactive.
+ * - hidden duplicate: the visible tooltip carries the ARIA id and role.
+ * - arrow, mounting/controlled-open, and extra focus/close options: unused.
  */
 import { computed, onMounted, ref, useId, watch, type ComponentPublicInstance } from "vue";
 import AsChild from "./primitives/AsChild.ts";
@@ -83,8 +37,6 @@ const group = useTooltipGroup();
 const contentId = useId();
 
 const open = ref(false);
-// True when this open had to wait out `delayDuration` — the only input to the
-// `delayed-open` / `instant-open` split.
 const wasOpenDelayed = ref(false);
 const state = computed(() =>
   open.value ? (wasOpenDelayed.value ? "delayed-open" : "instant-open") : "closed",
@@ -134,7 +86,6 @@ watch(open, (isOpen) => {
 
 // A `focus` fired by a mouse click must not re-open what the click just closed.
 let isPointerDown = false;
-// `pointermove` fires continuously; only the first one inside the trigger opens.
 let hasPointerMoveOpened = false;
 
 function handlePointerUp() {

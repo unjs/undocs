@@ -3,14 +3,6 @@ import { cn } from "@app/utils/cn.ts";
 import Button from "@app/components/ui/Button.vue";
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
-/**
- * Banner — the `UBanner` replacement (custom, no Reka primitive).
- *
- * Driven by props (used as `v-bind="appConfig.docs.banner"` in `app.vue`).
- * Renders nothing when there's no `title`. Dismissible via `close` (persisted
- * to localStorage keyed by `id` — changing `id` shows the banner again, per
- * the schema docs).
- */
 import { computed, onMounted, ref } from "vue";
 
 interface BannerAction {
@@ -45,8 +37,7 @@ const props = withDefaults(
 
 const STORAGE_KEY = computed(() => `undocs-banner-${props.id ?? props.title ?? "default"}`);
 
-// Start un-dismissed so the server render and first client render agree (no
-// hydration mismatch); read the persisted flag after mount, hiding it then if set.
+// Read persisted dismissal after mount to preserve hydration parity.
 const dismissed = ref(false);
 onMounted(() => {
   if (window.localStorage.getItem(STORAGE_KEY.value) === "1") dismissed.value = true;
@@ -59,13 +50,7 @@ function dismiss(): void {
   }
 }
 
-/**
- * Every status colour is one role's tint with that role's text on top — the
- * pairing the tokens are derived for, and one that flips correctly in dark mode
- * without a `dark:` variant. Deliberately NOT `bg-primary`: since Geist made
- * `--primary` the high-contrast near-black/near-white, a solid primary bar would
- * swallow the action buttons rendered on top of it. `primary` is the brand tint.
- */
+// Pair each status text with its derived tint; `primary` maps to the brand tint.
 const colorClass = computed(() => {
   switch (props.color) {
     case "neutral":
@@ -84,9 +69,6 @@ const colorClass = computed(() => {
   }
 });
 
-// The `color` values accepted here include semantic names our Button doesn't
-// map (secondary/success/info/warning) — fall back to "neutral" for those so
-// action buttons still render sensibly on top of the banner tint.
 function normalizeActionColor(color?: string): "primary" | "neutral" | "white" {
   return color === "primary" || color === "neutral" || color === "white" ? color : "neutral";
 }

@@ -7,15 +7,8 @@ import Button from "@app/components/ui/Button.vue";
 import PageSection from "@app/components/blocks/PageSection.vue";
 import Tooltip from "@app/components/ui/Tooltip.vue";
 const docsConfig = useAppConfig().docs;
-// SSR-rendered: `useContributors()` goes through the same-origin
-// `/api/docs/contributors` proxy (cached, last-good fallback), so the server can
-// fetch it during render and hydrate it into the payload — no client request.
-//
-// `lazy` for the OTHER path: a client-side navigation to the landing page has no
-// payload to seed from, and this is a decorative block sitting inside the page's
-// `<Suspense>` — awaiting it there would hold the whole page (hero included)
-// behind a proxied GitHub request. Lazy keeps the SSR fetch and lets the client
-// fill the section in reactively; it renders nothing until then.
+// Lazy prevents a client navigation from holding the page Suspense behind a
+// third-party proxy; SSR still fetches and hydrates the result.
 const { data: contributors } = await useAsyncData("contributors", () => useContributors(), {
   lazy: true,
 });

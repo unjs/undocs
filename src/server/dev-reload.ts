@@ -1,4 +1,3 @@
-// Dev-only shared singleton holding connected WebSocket peers.
 export const peers = new Set<any>();
 
 export function broadcastReload() {
@@ -6,7 +5,7 @@ export function broadcastReload() {
     try {
       p.send("reload");
     } catch {
-      // ignore send failures on dead peers
+      // Dead peers are removed by WebSocket close/error handlers.
     }
   }
 }

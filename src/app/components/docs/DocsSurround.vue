@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
-// Based on Nuxt UI `UContentSurround` component. Prev/next navigation cards from the
-// `[prev, next]` surround tuple (either entry may be null). A passed `class`
-// falls through onto the root grid.
+// Based on Nuxt UI's `UContentSurround`.
 import type { SurroundItem } from "../../../server/content/types.ts";
 
 defineProps<{

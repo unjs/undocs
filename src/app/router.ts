@@ -31,10 +31,6 @@ import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { isExternalRedirect, normalizeRedirects, resolveRedirect } from "@app/utils/redirects.ts";
 import { findAnchor } from "@app/utils/anchor.ts";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export interface RouteLocation {
   /** Pathname only, e.g. `/blog/post`. */
   path: string;
@@ -86,10 +82,6 @@ export interface AppRouter {
   _pageRendered(): void;
 }
 
-// ---------------------------------------------------------------------------
-// Histories
-// ---------------------------------------------------------------------------
-
 export function createWebHistory(): RouterHistory {
   const read = () => window.location.pathname + window.location.search + window.location.hash;
   const listeners = new Set<(loc: string) => void>();
@@ -131,12 +123,7 @@ export function createMemoryHistory(start = "/"): RouterHistory {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Route table
-//
-// Order matters — first match wins: `/` and `/blog` are exact, `/blog/*` is
-// the blog catch-all, and the trailing record catches the rest as a docs page.
-// ---------------------------------------------------------------------------
+// Order matters: exact routes precede catch-alls.
 
 // User `.docs/pages/**` routes (via the `undocs:user-theme` plugin), compiled
 // from their emitted `RegExp` sources. Layered BEFORE the built-ins so a user
@@ -177,7 +164,6 @@ const routes: RouteRecord[] = [
 ];
 
 function matchRoute(path: string): RouteRecord {
-  // The trailing record matches everything, so `find` always succeeds.
   return routes.find((r) => r.match(path))!;
 }
 
@@ -187,10 +173,6 @@ function matchRoute(path: string): RouteRecord {
 // covers in-app navigation (`AppLink`), which never reaches the server and would
 // otherwise land on the docs catch-all and 404.
 const redirects = normalizeRedirects(useAppConfig().docs?.redirects);
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function parseLocation(loc: string): Omit<RouteLocation, "meta"> {
   const url = new URL(loc, "http://undocs.local");
@@ -223,10 +205,6 @@ const IS_BROWSER = typeof window !== "undefined";
  * common quick nav. Only a load slower than this reveals the bar.
  */
 const PENDING_BAR_DELAY = 150;
-
-// ---------------------------------------------------------------------------
-// Router
-// ---------------------------------------------------------------------------
 
 const ROUTER_KEY = Symbol("undocs-router");
 const ROUTE_KEY = Symbol("undocs-route");
@@ -269,7 +247,6 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     pending.value = false;
   }
 
-  // Resolved-component cache (dynamic-import modules are stable per record).
   const cache = new Map<RouteRecord, Component>();
   // Scroll offsets keyed by fullPath, for back/forward restoration. Kept current
   // by the `scroll` listener below — a pop offers no chance to record the
@@ -311,8 +288,6 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
 
   function applyScroll(hash: string, top?: number) {
     if (!IS_BROWSER) return;
-    // Hash anchors: `app.vue` also runs its own scroll-into-view retry loop for
-    // async-rendered content; try an immediate scroll here too.
     if (hash) {
       // `findAnchor` decodes the fragment before looking the id up (a non-ASCII
       // anchor is percent-encoded in `location.hash`) and never throws on a hash
@@ -330,8 +305,6 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
   ): Promise<void> {
     const token = ++navToken;
 
-    // Cancel a not-yet-fired loading-bar timer from a superseded navigation, so
-    // an abandoned nav can't flip the bar on after this one takes over.
     clearPendingTimer();
 
     let parsed = parseLocation(loc);
@@ -366,8 +339,6 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     if (opts.client && !samePath) schedulePending();
 
     const comp = await resolveComponent(record);
-    // A newer navigation started during the dynamic import; abandon this one so
-    // it can't commit its route on top of the newer one.
     if (token !== navToken) return;
 
     applyState(parsed, record, comp);
@@ -384,7 +355,6 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     // render — the sidebar revealing its active entry, layout settling — would
     // otherwise move the viewport after us.
     if (samePath) {
-      // Same page, so the DOM is already right — nothing to wait for.
       applyScroll(parsed.hash, opts.savedScroll);
     } else if (opts.pop) {
       // Back/forward: put the visitor back where they left this entry. With no
@@ -400,8 +370,6 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
       pendingScroll = { hash: parsed.hash };
       if (!parsed.hash) applyScroll("");
     }
-    // The initial route (`client: false`) is SSR hydration: leave the visitor's
-    // scroll — and the browser's restore-on-reload — untouched.
 
     navigated = true;
     readyResolve();
@@ -468,10 +436,6 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
 
   return router;
 }
-
-// ---------------------------------------------------------------------------
-// Composables
-// ---------------------------------------------------------------------------
 
 export function useRouter(): AppRouter {
   const router = inject<AppRouter>(ROUTER_KEY);

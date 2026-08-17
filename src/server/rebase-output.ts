@@ -1,16 +1,7 @@
 import type { NitroModule } from "nitro/types";
 
-// Relocate the build output into the DOCS project instead of the undocs package.
-//
-// `rootDir` must stay `pkgRoot` (needed for config discovery and to resolve
-// `vite` as undocs's own dep, not the docs project's), so Nitro derives
-// `output.dir` under `pkgRoot/.output` by default. Instead of repointing
-// `rootDir` (which would break both of the above), we let the preset compute
-// its output paths as usual, then rebase their BASE from `pkgRoot` to
-// `docsDir` — preserving the preset's shape, no hardcoded `output.*` override.
-//
-// Runs in `setup`, before any `compiled` hook, so `bundle-docs` / `vercel`
-// (which read `output.*` in `compiled`) always see the rebased paths.
+// Keep `rootDir` at pkgRoot for config/dependency resolution; rebase preset-derived
+// output paths during setup, before compiled hooks consume them.
 export function rebaseOutput(docsDir: string): NitroModule {
   return {
     name: "undocs:rebase-output",

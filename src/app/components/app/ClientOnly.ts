@@ -1,10 +1,4 @@
-/**
- * ClientOnly → renders its default slot only after mount.
- *
- * In pure CSR everything is client-side anyway, but components used inside
- * `<ClientOnly>` (e.g. a content-search dialog) can rely on browser APIs, so
- * we defer to `onMounted` and render the optional `#fallback` slot until then.
- */
+// Defer browser-only children until after hydration.
 import { defineComponent, onMounted, ref } from "vue";
 
 export default defineComponent({

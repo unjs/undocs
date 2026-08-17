@@ -1,49 +1,11 @@
 /**
- * `buttonVariants` — the CVA class matrix for `Button`.
+ * `primary` is the monochrome high-contrast role; `brand` is the project accent.
+ * Brand washes must stay at or below 15%, the surface assumed by the derived
+ * contrast tokens. Solid brand labels must use `--brand-foreground`; that
+ * variant is reserved for the landing's lead CTA.
  *
- * Two-axis matrix (the values the codebase passes):
- * `color` (`primary` | `brand` | `neutral` | `white`) × `variant` (`solid` |
- * `outline` | `soft` | `subtle` | `ghost` | `link`), plus a `size` axis
- * (`xs` | `sm` | `md` | `lg`). Exported separately from `Button.vue` (shadcn-vue
- * convention) so sibling components (`ButtonGroup`, ...) can reuse it without
- * importing the whole SFC.
- *
- * Geist has no accent-coloured button: its primary action is the high-contrast
- * one (`--primary`, so near-black on white and near-white on black) and its
- * secondary is a bordered surface. `color: "primary"` therefore renders
- * MONOCHROME here — the project's `themeColor` lives in `--brand` and tints
- * links, active nav, and icons, not button fills.
- *
- * `color: "brand"` is the deliberate exception, and it is a DEPARTURE from
- * Geist rather than a port of it: it carries the project's accent so the
- * landing hero's primary CTA reads in the docs' colour instead of the neutral
- * ramp. Keep it scarce, and keep the FILL scarcer still: the accent-filled
- * shape is one call site (`pages/landing.vue`), and the rest are tinted GLYPHS
- * in the chrome, which is a use `tokens.css` sanctions outright — the header's
- * active blog link and the accent picker's own trigger (`ColorModeButton`,
- * given `color="brand"` by `AppHeaderActions`), both `ghost`, both resting on
- * the page and hovering onto a 10% wash of themselves. If a second accent FILL
- * appears, `--primary` and `--brand` have collapsed into one role and the
- * monochrome system is gone. Everything else, hero secondary included, stays on
- * `primary`; that contrast is what makes the accented button read as the
- * page's single action.
- *
- * That call site takes `solid` — the accent as a FILL. Its label is
- * `--brand-foreground`, which is measured rather than chosen: across the seven
- * hues `themeColor` can pick, in both modes, it is the only label clearing AA
- * on the fill. Same for `--brand-hover`, whose direction is a token because the
- * two kinds of accent (a hue, and mono) recede opposite ways. Read the note on
- * both in `tokens.css` before retuning any of it.
- *
- * Sizes are Geist's control ladder, read from the `--size-*` tokens rather
- * than hardcoded — the `h-(--token)` form is Tailwind v4's shorthand for a bare
- * `var()` height, and is what Vercel's own CSS emits. Each height carries the
- * type step Geist pairs with it (14px through medium, 16px at large), because a
- * tall control with small text reads as a stretched medium, not as a large.
- *
- * Write these as the shorthand ONLY. Spelling the bracket-and-`var()` form out
- * anywhere in this file — even inside a comment — makes Tailwind scan it as a
- * class candidate and emit a second, dead rule for it.
+ * Keep token heights in Tailwind's shorthand form: class-like text in comments
+ * is scanned too and can emit dead utilities.
  */
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -77,15 +39,11 @@ export const buttonVariants = cva(
       },
     },
     compoundVariants: [
-      // ---- primary (Geist: high-contrast, monochrome) ---------------------
-      // `--primary-hover` recedes toward the page in BOTH modes — darker than
-      // `--primary` in light, lighter in dark — and keeps AA against the label.
       {
         color: "primary",
         variant: "solid",
         class: "bg-primary text-primary-foreground shadow-small hover:bg-primary-hover",
       },
-      // Geist's secondary button: page surface, hairline border, hover fill.
       {
         color: "primary",
         variant: "outline",
@@ -106,30 +64,18 @@ export const buttonVariants = cva(
         variant: "ghost",
         class: "text-foreground bg-transparent hover:bg-accent",
       },
-      // The one accented variant: it reads as a link, so it takes the brand.
       {
         color: "primary",
         variant: "link",
         class: "text-brand bg-transparent underline-offset-4 hover:underline",
       },
 
-      // ---- brand (the accent fill — see the header) -----------------------
       {
         color: "brand",
         variant: "solid",
         class: "bg-brand text-brand-foreground shadow-small hover:bg-brand-hover",
       },
-      // The tinted variants pair the accent with a 10-15% wash of ITSELF, which
-      // is one of the three surfaces `--brand` is derived against (the page, a
-      // card, a wash of itself — see `tokens.css`). Those washes are the reason
-      // the accent is a shade darker than the page alone would require, and the
-      // reason it can be one token instead of three. 15% is the ceiling the
-      // derivation assumes: a deeper wash needs a re-derivation, not a tweak.
-      // No `dark:` variant — the table is declared per mode.
-      //
-      // `outline` and `ghost` are in this group for their HOVER state alone:
-      // they rest on `--background`, where the wash never appears, but hovering
-      // slides a 10% one under text that cannot change colour at the same time.
+      // Brand text may sit only on the page, a card, or a <=15% brand wash.
       {
         color: "brand",
         variant: "outline",
@@ -156,7 +102,6 @@ export const buttonVariants = cva(
         class: "text-brand bg-transparent underline-offset-4 hover:underline",
       },
 
-      // ---- neutral -------------------------------------------------------
       {
         color: "neutral",
         variant: "solid",
@@ -189,13 +134,10 @@ export const buttonVariants = cva(
         class: "text-foreground bg-transparent underline-offset-4 hover:underline",
       },
 
-      // ---- white (pops on colored/hero backgrounds) -----------------------
       {
         color: "white",
         variant: "solid",
-        // Mode-INVARIANT: this variant sits on hero/coloured artwork, so its
-        // label must stay black even in dark mode (`--foreground` would flip
-        // to near-white and vanish against the white fill).
+        // White artwork buttons require a mode-invariant black label.
         class: "bg-white text-black shadow-small hover:bg-white/90",
       },
       {

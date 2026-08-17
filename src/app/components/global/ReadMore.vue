@@ -43,6 +43,5 @@ const createBreadcrumb = (link: string = "here") => {
     .replace("Api", "API");
 };
 
-// Guess title from link!
 const computedTitle = computed<string>(() => props.title || createBreadcrumb(props.to));
 </script>

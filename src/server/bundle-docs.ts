@@ -2,10 +2,8 @@ import type { NitroModule } from "nitro/types";
 import { resolve, join, dirname } from "node:path";
 import { mkdir, copyFile, glob } from "node:fs/promises";
 
-// TEMPORARY: `runtimeConfig.undocs.dir` is an absolute path baked at build time,
-// so it won't exist on deploy. Copy `.md`/`.yml` into `<output>/server/docs` at
-// the `compiled` hook so `store.ts` has a fallback anywhere. Remove once content
-// is embedded properly (see AGENTS.md).
+// TEMPORARY: the baked docs path may not exist on deploy. Bundle a server-relative
+// fallback at the compiled hook; remove once content is embedded properly.
 export function bundleDocs(dir: string): NitroModule {
   return {
     name: "bundle-docs",
@@ -17,7 +15,7 @@ export function bundleDocs(dir: string): NitroModule {
       nitro.hooks.hook("compiled", async () => {
         const dest = resolve(nitro.options.output.serverDir, "docs");
         let count = 0;
-        // Mirror the builder's scan: all `.md`/`.yml`, minus build artefacts.
+        // Keep exclusions synchronized with the content builder.
         for await (const f of glob("**/*.{md,yml}", { cwd: dir })) {
           const rel = f.split("\\").join("/");
           if (/(^|\/)(node_modules|dist|\.docs)\//.test(rel)) {

@@ -2,19 +2,11 @@ import { defineEventHandler, HTTPError } from "nitro/h3";
 import { $fetch } from "ofetch";
 import { useRuntimeConfig } from "nitro/runtime-config";
 
-/**
- * Proxy for the external sponsors JSON API (`docs.sponsors.api`).
- *
- * The client used to `$fetch` the third-party host directly, which fails on any
- * network/CORS/host issue. Routing it through here keeps the client same-origin
- * and lets us serve the last-good payload when the upstream is unreachable, so a
- * transient outage never blanks the sponsors section.
- */
+// Same-origin SSR proxy with last-good recovery from transient upstream failures.
 
-// Module-level cache is safe here: this is server-only route code, not per-request
-// render state, and the payload is identical for every visitor.
+// Server-only, visitor-independent cache.
 let cached: { data: unknown; at: number } | undefined;
-const MAX_AGE_MS = 5 * 60 * 1000; // serve fresh from upstream at most this often
+const MAX_AGE_MS = 5 * 60 * 1000;
 
 export default defineEventHandler(async (event) => {
   const api = (useRuntimeConfig().undocs as { sponsorsAPI?: string }).sponsorsAPI;
@@ -34,7 +26,6 @@ export default defineEventHandler(async (event) => {
     event.res.headers.set("Cache-Control", "public, max-age=300");
     return data;
   } catch (error) {
-    // Upstream failed — fall back to the last-good payload if we have one.
     if (cached) {
       event.res.headers.set("Cache-Control", "public, max-age=60");
       return cached.data;

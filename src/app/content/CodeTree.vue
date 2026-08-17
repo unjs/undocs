@@ -1,37 +1,17 @@
 <script setup lang="ts">
-/**
- * CodeTree
- * --------
- * A VS-Code-style file browser: a folder/file EXPLORER on the left, the
- * currently-selected file's syntax-highlighted code on the right.
- *
- * Input shape mirrors `ProseCodeGroup` — the default slot is a set of child
- * `ProsePre` code blocks, each carrying a `filename` (path), `language` and
- * `icon` off its props. A `filename` with `/` (e.g. `server/routes/index.ts`)
- * nests into folders. The children are already highlighted by the content
- * pipeline, so we never run the highlighter on the client: we just DISPLAY the
- * selected child vnode.
- *
- * Hydration parity: the selected file and the expanded folders are seeded
- * DETERMINISTICALLY in `setup` (from `defaultValue` / `expandAll`, else the
- * first file), so the SSR render and the client's first render are identical.
- * Clicking only mutates refs post-hydration.
- */
+// Selection and expansion are deterministic in setup for hydration parity.
 import { cloneVNode, computed, Fragment, ref, useSlots, type VNode } from "vue";
 import Icon from "@app/components/global/Icon.vue";
 import { useCodeIcon } from "@app/composables/useCodeIcon.ts";
 
 const props = defineProps<{
-  /** Path of the file selected on first render (falls back to the first file). */
   defaultValue?: string;
-  /** Expand every folder on first render (else only the selected file's path). */
   expandAll?: boolean;
 }>();
 
 const slots = useSlots();
 const resolveCodeIcon = useCodeIcon();
 
-/** Flatten the default slot into a flat list of child (ProsePre) vnodes. */
 const items = computed<VNode[]>(() => {
   const raw = slots.default?.() ?? [];
   const out: VNode[] = [];
@@ -39,12 +19,10 @@ const items = computed<VNode[]>(() => {
     for (const n of nodes) {
       if (n == null || typeof n === "boolean") continue;
       const vnode = n as VNode;
-      // Unwrap fragments (e.g. produced by v-for) into their children.
       if (vnode.type === Fragment && Array.isArray(vnode.children)) {
         walk(vnode.children as unknown[]);
         continue;
       }
-      // Skip bare text/comment nodes between prose blocks.
       if (typeof vnode.type === "symbol") continue;
       out.push(vnode);
     }
@@ -59,7 +37,6 @@ interface FileMeta {
   vnode: VNode;
 }
 
-/** Every file, indexed by its (unique) path. */
 const files = computed<FileMeta[]>(() =>
   items.value.map((vnode, i) => {
     const filename = (vnode.props?.filename as string | undefined) || `Code ${i + 1}`;
@@ -71,9 +48,7 @@ const files = computed<FileMeta[]>(() =>
   }),
 );
 
-// --- Nested tree, built from the file paths (split on `/`). Folders sort
-// before files; both alphabetically — a deterministic order independent of
-// authoring order (matters for hydration parity of the flattened row list). ---
+// Deterministic sorting keeps SSR and hydration row order aligned.
 type TreeFile = { type: "file"; name: string; path: string };
 type TreeFolder = { type: "folder"; name: string; path: string; children: TreeNode[] };
 type TreeNode = TreeFile | TreeFolder;
@@ -109,9 +84,7 @@ const tree = computed<TreeNode[]>(() => {
   return sort(root);
 });
 
-// --- Selected file: `defaultValue` when it names a real file, else the first.
-// The default is derived lazily (a computed) so the default slot is invoked
-// during render, not during setup — a click stores an override that wins. ---
+// Keep slot access lazy so it occurs during render, not setup.
 const firstPath = computed(() => files.value[0]?.path ?? "");
 const defaultSelected = computed(() =>
   props.defaultValue && files.value.some((f) => f.path === props.defaultValue)
@@ -129,15 +102,10 @@ const selectedFile = computed<FileMeta | undefined>(
   () => files.value.find((f) => f.path === selected.value) ?? files.value[0],
 );
 
-/** The selected child, with its `filename` stripped (the tree shows it). */
 const selectedVNode = computed<VNode | null>(() =>
   selectedFile.value ? cloneVNode(selectedFile.value.vnode, { filename: null }) : null,
 );
 
-// --- Expanded folders (deterministic seed). With `expandAll`, every folder;
-// otherwise only the folders on the path to the initially-selected file. Like
-// the selection, the seed is a computed (no slot access in setup); a toggle
-// stores an override layered on top. ---
 const expandedDefault = computed<Record<string, boolean>>(() => {
   const state: Record<string, boolean> = {};
   if (props.expandAll) {
@@ -170,12 +138,10 @@ function toggle(path: string) {
   expandedOverride.value = { ...expandedOverride.value, [path]: !expanded.value[path] };
 }
 
-/** Resolve the language/filename icon for a file row. */
 function fileIcon(path: string): string {
   return files.value.find((f) => f.path === path)?.icon ?? "i-lucide-file";
 }
 
-/** Flatten the tree into visible rows (children of collapsed folders hidden). */
 interface Row {
   node: TreeNode;
   depth: number;
@@ -197,7 +163,6 @@ const rows = computed<Row[]>(() => {
 
 <template>
   <div class="code-tree my-4 flex max-h-96 overflow-hidden rounded-lg border border-border bg-card">
-    <!-- Explorer -->
     <div class="w-56 shrink-0 overflow-y-auto border-r border-border bg-muted/40 py-2 text-sm">
       <div
         v-for="({ node, depth }, i) in rows"
@@ -230,9 +195,7 @@ const rows = computed<Row[]>(() => {
       </div>
     </div>
 
-    <!-- Code panel: the selected file's already-highlighted content. Stretches
-         to the row height (matching the tree) via an unbroken flex-column chain
-         down to the <pre>, which owns the scroll. -->
+    <!-- The selected pre owns scrolling and stretches through the flex chain. -->
     <div class="code-tree-body flex min-h-0 min-w-0 flex-1 flex-col">
       <component :is="selectedVNode" v-if="selectedVNode" />
     </div>
@@ -240,12 +203,7 @@ const rows = computed<Row[]>(() => {
 </template>
 
 <style scoped>
-/*
- * The panel child is a ProsePre — drop its own border/rounding/margin, and make
- * it fill the row height so the code side always matches the (possibly taller)
- * file tree. The chain: row (items-stretch) → this panel (flex col) → .prose-pre
- * (flex col, grows) → its body (grows, min-height:0, owns the scroll).
- */
+/* Flatten ProsePre's frame and stretch it to the tree row. */
 .code-tree-body :deep(.prose-pre) {
   margin: 0;
   border: 0;
@@ -257,11 +215,7 @@ const rows = computed<Row[]>(() => {
   flex-direction: column;
 }
 
-/*
- * The highlighted body (or plain-code fallback) grows within the capped row
- * (`.code-tree` max-h-96) and owns the vertical scroll; horizontal scroll stays
- * as a fallback for unbreakable tokens (see word-wrap below).
- */
+/* The capped code body owns overflow. */
 .code-tree-body :deep(.code-hl-wrapper),
 .code-tree-body :deep(.prose-pre > pre) {
   flex: 1 1 0%;
@@ -269,12 +223,7 @@ const rows = computed<Row[]>(() => {
   overflow: auto;
 }
 
-/*
- * Soft-wrap long lines so a wide file doesn't blow out the panel width;
- * `pre-wrap` preserves indentation, `overflow-wrap: anywhere` breaks long
- * unbreakable tokens, and the containers above keep `overflow-x: auto` so a
- * horizontal scrollbar still appears when a token truly cannot wrap.
- */
+/* Soft-wrap long lines while retaining overflow for unbreakable tokens. */
 .code-tree-body :deep(.code-hl),
 .code-tree-body :deep(.prose-pre > pre) {
   white-space: pre-wrap;

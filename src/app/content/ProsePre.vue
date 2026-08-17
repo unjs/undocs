@@ -16,7 +16,6 @@ const props = defineProps<{
 const slots = useSlots();
 const hasSlot = computed(() => !!slots.default);
 
-// The filename-bar icon, resolved from the theme `ui.prose.codeIcon` map.
 const resolveCodeIcon = useCodeIcon();
 const fileIcon = computed(() => resolveCodeIcon(props.filename, props.language, props.icon));
 
@@ -37,7 +36,6 @@ async function copy() {
     class="prose-pre group relative my-4 overflow-hidden rounded-lg border border-border bg-muted"
     :class="props.class"
   >
-    <!-- Optional filename header bar -->
     <div
       v-if="filename"
       class="flex items-center gap-2 border-b border-border bg-card px-4 py-2 text-xs font-medium text-muted-foreground"
@@ -46,7 +44,6 @@ async function copy() {
       <span class="truncate">{{ filename }}</span>
     </div>
 
-    <!-- Copy-to-clipboard button (top-right) -->
     <button
       type="button"
       class="absolute right-2 z-10 inline-flex size-7 items-center justify-center rounded-md border border-border bg-background text-muted-foreground opacity-0 transition hover:text-foreground group-hover:opacity-100"
@@ -57,7 +54,6 @@ async function copy() {
       <Icon :name="copied ? 'i-lucide-check' : 'i-lucide-copy'" class="size-3.5" />
     </button>
 
-    <!-- Body: prefer highlighted HTML, then slot content, then raw code. -->
     <div v-if="highlighted" class="code-hl-wrapper overflow-x-auto text-sm" v-html="highlighted" />
     <pre v-else-if="hasSlot" class="overflow-x-auto px-4 py-3 text-sm"><code><slot /></code></pre>
     <pre v-else class="overflow-x-auto px-4 py-3 text-sm"><code>{{ code }}</code></pre>
@@ -75,7 +71,6 @@ async function copy() {
   padding: 0.75rem 1rem;
 }
 
-/* Plain (non-highlighted) fallback code — match the `.code-hl` block padding. */
 .prose-pre :deep(pre) {
   margin: 0;
   padding: 0.75rem 1rem;

@@ -1,17 +1,8 @@
 import { defineEventHandler, html } from "nitro/h3";
 import { getIndex, getDocsDir, invalidateIndex } from "../../content/store.ts";
 
-/**
- * Debug page: content build timing (load/parse/transform/highlight) +
- * sizes, rendered as a simple HTML page.
- *
- * The index is built once and cached (see `store.ts`), so `stats` reflects that
- * one real build. `resolveMs` is how long *this* request waited on `getIndex()`
- * — ~0 on a warm cache hit, ≈ build time right after a cold rebuild.
- *
- * Query:
- *   ?fresh   force a cold rebuild first, so `stats` re-measures a full load.
- */
+// `?fresh` rebuilds the cached index; `resolveMs` measures this request's wait.
+
 export default defineEventHandler(async (event) => {
   const q = event.url.searchParams;
   const fresh = q.has("fresh") && q.get("fresh") !== "false";
@@ -26,7 +17,6 @@ export default defineEventHandler(async (event) => {
   const round = (n: number) => Math.round(n * 100) / 100;
   const fmtMs = (n: number) => `${round(n)} ms`;
 
-  // Phase rows, widest bar = the slowest phase.
   const phaseEntries = Object.entries(s.phases);
   const maxPhase = Math.max(...phaseEntries.map(([, v]) => v), 0.0001);
   const phaseRows = phaseEntries

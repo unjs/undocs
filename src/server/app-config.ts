@@ -1,25 +1,9 @@
 import { loadDocsConfig } from "./docs-config.ts";
 import { highlightCode } from "./content/highlight.ts";
 
-/**
- * Generate the client app-config from the docs project config (loaded via c12).
- *
- * This is the build-time source for the `virtual:undocs/app-config` module
- * (see `vite.config.ts`): the Vite virtual plugin calls this once, serializes
- * the result, and the client `useAppConfig()` composable merges it over the
- * undocs theme config (`src/app/app.config.ts`).
- *
- * Shape (consumed by the reused `app/` sources):
- *
- *   { docs, site: { name, description, url }, ui: { colors: { primary } } }
- *
- * It loads `<docsDir>/.config/docs.*` via `loadDocsConfig` (c12 + the
- * `package.json` name inference), converts
- * `landing.features[].description` markdown → HTML (md4x), highlights
- * `landing.heroCode` (`contentHighlighted`), and infers `branch` (default
- * "main"). md4x/the highlighter are wrapped in try/catch so a highlight/markdown
- * failure degrades gracefully instead of failing the build.
- */
+// Build-time source for the virtual config; feature rendering and hero
+// highlighting fail soft.
+
 export interface UndocsAppConfig {
   docs: Record<string, any>;
   site: { name: string; description: string; url: string | undefined };
@@ -29,15 +13,11 @@ export interface UndocsAppConfig {
 export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfig> {
   const docs = await loadDocsConfig(docsDir);
 
-  // Guess branch (MVP: default to "main"; git/env inference is a later step).
   docs.branch = docs.branch || "main";
 
-  // `landing` doubles as an on/off switch, so it may be a boolean here — only
-  // the object form carries anything to normalize.
+  // Boolean `landing` is only an on/off switch.
   const landing = typeof docs.landing === "object" ? docs.landing : undefined;
 
-  // Convert markdown → HTML for landing feature descriptions. Uses md4x (the
-  // same parser as the doc content) via its `md4x/wasm` entry.
   if (landing?.features) {
     try {
       const md4x = await import("md4x/wasm");
@@ -52,10 +32,7 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
     }
   }
 
-  // Normalize and syntax-highlight the hero code sample. Reuses the doc-content
-  // highlighter (`highlightCode`) so the landing hero renders with the exact
-  // same grammars, aliases and `.code-hl` token markup as every other block —
-  // no separate config that drifts out of sync.
+  // Share the docs highlighter so hero grammar and token markup cannot drift.
   if (landing?.heroCode) {
     try {
       if (typeof landing.heroCode === "string") {
@@ -82,10 +59,7 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
     },
     ui: {
       colors: {
-        // The default accent is `mono` — no hue, the primary text step. It is
-        // also what `tokens.css` seeds, so naming it here changes nothing about
-        // the render; it keeps the config's answer to "what colour is this site"
-        // honest for anything that reads it (the OG card, `theme-brand.ts`).
+        // Match the mono accent seeded by tokens.css.
         primary: docs.themeColor || "mono",
       },
     },

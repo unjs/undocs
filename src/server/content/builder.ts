@@ -1,4 +1,3 @@
-// Tests: test/content/builder.test.ts
 import { readFile, glob } from "node:fs/promises";
 import { join, dirname, basename } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -27,13 +26,9 @@ import type {
   TocLink,
 } from "./types.ts";
 
-// Content files, plus `.navigation.yml` directory-config files. The latter are
-// dot-prefixed, so they need their own glob (a `**/*` glob never matches leading
-// dots) and an EXCLUDE exemption below.
+// Dot-prefixed `.navigation.yml` needs its own glob and bypasses the dotfile exclusion below.
 const INCLUDE = ["**/*.{md,yml}", "**/.navigation.yml"];
-// Tested against a LEADING-slash path ("/" + relative). Shared with the dev
-// watcher (`dev-watch.ts`), which must not descend into what we never scan —
-// `node_modules` alone is ~20x the directory count of real content.
+// These match leading-slash paths and are shared with the dev watcher.
 export const EXCLUDE = [/(^|\/)\./, /\/node_modules\//, /\/dist\//, /\/\.docs\//];
 
 export interface BuildOptions {
@@ -44,23 +39,8 @@ export interface BuildOptions {
 const now = () => performance.now();
 
 /**
- * Sort key for the scanned files: an unnumbered index page leads its directory.
- *
- * `orderKey` gives an unnumbered file the key `999999<name>`, which sorts it
- * alphabetically among its unnumbered siblings — and that is wrong for an index
- * page specifically, because an index IS its directory and cannot meaningfully
- * come after the pages inside it. Left alone, `index.md` beside `another.md`
- * lists the docs' front page second, and `guide/README.md` lands after
- * `guide/2.usage.md`.
- *
- * So an index page's own segment drops out of the key, leaving its directory's —
- * which sorts ahead of every numbered and unnumbered sibling. Only when the
- * author did not say otherwise: a numbered `1.index.md` keeps its number, since
- * that is an explicit ordering choice.
- *
- * One key drives the file walk, and with it the nav tree, `index.order` and
- * prev/next — so pinning it here keeps all three agreeing, which a nav-only
- * special case would not.
+ * Make an unnumbered index lead its directory; numbered indexes preserve the
+ * author's explicit order. This key also drives navigation and prev/next.
  */
 function scanKey(rel: string): string {
   const name = rel.slice(rel.lastIndexOf("/") + 1);
@@ -70,19 +50,8 @@ function scanKey(rel: string): string {
 }
 
 /**
- * Drop a `README.md` that sits beside an `index.md` in the same directory.
- *
- * The two are aliases (`isIndexFile`), so both resolve to the SAME route — a
- * directory holding both would otherwise build two pages onto one path, and
- * which of them won would come down to sort order. The explicit `index.md` is
- * the one that wins; the README is left out of the build entirely (it is
- * usually a repo-facing stub pointing at the real docs).
- *
- * Only a `.md` file can shadow. `isIndexFile` ignores the extension (it also
- * names the route a `.yml` would take, and `toRoutePath` strips both), but no
- * page is ever built from a `.yml` — so a data file that happens to be called
- * `index.yml` is not an index PAGE, and counting it here dropped the sibling
- * README without anything replacing it: the directory's route vanished.
+ * Prefer `index.md` over its same-directory `README.md` route alias. Only
+ * Markdown can shadow: an `index.yml` never builds a replacement page.
  */
 function dropShadowedReadmes(files: string[]): string[] {
   const dirOf = (rel: string) => rel.slice(0, rel.lastIndexOf("/") + 1);
@@ -93,23 +62,9 @@ function dropShadowedReadmes(files: string[]): string[] {
 }
 
 /**
- * Drop files whose route path a previous file already claimed.
- *
- * `dropShadowedReadmes` only settles the README-vs-index pair inside ONE
- * directory; `toRoutePath` collapses far more than that. `guide.md` and
- * `guide/index.md` both resolve to `/guide`, as do `index.md` and `1.index.md`
- * at the root. Left alone, both files build: `byPath` silently keeps whichever
- * came last (the other page is unreachable, with no diagnostic), `index.order`
- * lists the route twice — and since prev/next is `order.indexOf(page.path)`,
- * the page's "Next" card then points at itself.
- *
- * The winner is the file that comes FIRST in the build's own walk order (the
- * caller has already sorted by `scanKey`). That is deterministic across
- * filesystems, and it leaves the surviving page exactly where the route already
- * sat in `index.order` and the nav tree — dropping a LATER file cannot move it.
- * The loser is named in the warning, since a silently missing page is the whole
- * defect. `.yml` files pass through untouched: `.navigation.yml` is keyed by its
- * directory, not by a route of its own.
+ * Keep the first sorted file for each route and warn about later collisions.
+ * This prevents duplicate order entries from making a page its own neighbor.
+ * YAML passes through because its config is directory-keyed, not a page route.
  */
 function dropDuplicateRoutes(files: string[]): string[] {
   const winners = new Map<string, string>();
@@ -127,21 +82,8 @@ function dropDuplicateRoutes(files: string[]): string[] {
 }
 
 /**
- * A leading node that can hold neither the page title nor its description.
- *
- * The unjs README shape opens with exactly this: automd markers
- * (`<!-- automd:badges -->`, parsed as `[null, {}, …]`), the badge row they wrap
- * (a paragraph of images/links with no prose), and/or a raw
- * `<div align="center">` header. None of it is content, but all of it sits ahead
- * of the `h1` the title/description probes are looking for.
- *
- * Deliberately narrow — anything carrying readable text stops the walk, so a
- * page with a real intro paragraph never has a mid-page `h2`-ish `h1` mistaken
- * for its title. Raw HTML is a block `html` node here: these probes run BEFORE
- * `transformBody`, which is what lifts it to `_html` (matched too, so the
- * predicate stays correct on either side of that transform). The badge row is
- * caught by the empty-paragraph arm — `textContent` reads no text out of the
- * images and raw tags it is made of.
+ * Skip only non-prose README preamble (automd comments, badge-only paragraphs,
+ * and block HTML) before probing for title/description. Real text stops the scan.
  */
 function isPreamble(node: MarkNode | undefined): boolean {
   if (typeof node === "string") return node.trim() === "";
@@ -152,7 +94,6 @@ function isPreamble(node: MarkNode | undefined): boolean {
   return tag === "p" && textContent(node).trim() === "";
 }
 
-/** Index of the first node at or after `from` that the probes may inspect. */
 function firstProbeIndex(body: MarkNode[], from = 0): number {
   let i = from;
   while (i < body.length && isPreamble(body[i])) i++;
@@ -183,14 +124,12 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
 
   const automdTransform = opts.automd ? await createAutomd(dir, opts.automd) : undefined;
 
-  // scan
   mark = now();
   const scanned: string[] = [];
   const seen = new Set<string>();
   for await (const f of glob(INCLUDE, { cwd: dir })) {
     const rel = f.split("\\").join("/");
-    // `.navigation.yml` is deliberately dot-prefixed; let it past the dotfile
-    // rule (the other EXCLUDE rules — node_modules/dist/.docs — still apply).
+    // Let `.navigation.yml` bypass only the dotfile exclusion.
     const isNavConfig = basename(rel) === ".navigation.yml";
     const rules = isNavConfig ? EXCLUDE.slice(1) : EXCLUDE;
     if (rules.some((re) => re.test("/" + rel))) continue;
@@ -199,10 +138,7 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     scanned.push(rel);
   }
   const sorted = dropShadowedReadmes(scanned);
-  // The `|| a.localeCompare(b)` tiebreak is what makes the walk — and with it
-  // the duplicate-route winner below — independent of readdir order in the one
-  // case `scanKey` can tie (two index-named files in a directory, e.g.
-  // `index.md` beside `Index.md`).
+  // Stabilize duplicate-route winners when two index names share a scan key.
   sorted.sort((a, b) => scanKey(a).localeCompare(scanKey(b)) || a.localeCompare(b));
   const files = dropDuplicateRoutes(sorted);
   phases.scan = now() - mark;
@@ -216,8 +152,7 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
         mark = now();
         const ymlRaw = await readFile(join(dir, rel), "utf8");
         phases.read += now() - mark;
-        // Key by the directory's route path. `dirname` is "." at the docs root,
-        // which would derive the bogus key "/." — normalize it to "/".
+        // Avoid deriving the docs-root key as `/.`.
         const relDir = dirname(rel);
         const dirPath = relDir === "." ? "/" : toRoutePath(relDir + "/index.md");
         navYml[dirPath] = parseNavYml(ymlRaw);
@@ -245,34 +180,21 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     let body = tree.nodes as MarkNode[];
     const path = toRoutePath(rel);
 
-    // title & description (frontmatter, else first h1 / first blockquote)
     let title: string | undefined = fm.title;
     let description: string = fm.description || "";
-    // Both probes start at the first node that could BE a title or description,
-    // not at `body[0]` — a README-shaped page opens with material that is neither
-    // (see `isPreamble`). Looking only at `body[0]` there leaves the h1
-    // undetected, so the title falls back to the file name, the description stays
-    // empty, and the h1 renders a second time below the page header.
+    // README preamble may precede the title and description.
     const h1Index = firstProbeIndex(body);
     const h1 = body[h1Index];
-    // Where the description probe starts. Normally the h1's own slot — it is
-    // spliced out, so the blockquote slides into it.
     let descFrom = h1Index;
     if (Array.isArray(h1) && h1[0] === "h1") {
-      // md4x resolves entities in the AST's text, so this is already `A & B` and
-      // compares equal to a frontmatter `title: A & B` below — read as entity
-      // SOURCE the two would look like different titles and the heading would
-      // render a second time under the page header.
+      // md4x-resolved text must compare to the likewise resolved frontmatter title.
       const t = textContent(h1);
       if (!title) title = t;
-      // Consumed by the page header — drop it in place (it may sit under
-      // preamble, so `shift()` would remove the wrong node).
+      // Remove in place because preamble may precede it.
       if (t === title) {
         body.splice(h1Index, 1);
       } else {
-        // Frontmatter named a different title, so the h1 is body content and
-        // STAYS (the header shows the frontmatter title, this renders below it).
-        // The description blockquote is then the node after it, not at h1Index.
+        // A distinct frontmatter title leaves this heading as body content.
         descFrom = h1Index + 1;
       }
     }
@@ -280,9 +202,7 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     const bq = body[bqIndex];
     if (Array.isArray(bq) && bq[0] === "blockquote") {
       const t = textContent(bq).trim();
-      // Skip GitHub alert blockquotes (`> [!NOTE]`, `> !...`) — they're callouts,
-      // not the page description. This runs before `transformBody` normalizes
-      // alerts, so the raw blockquote text is still what we see here.
+      // Raw GitHub alert blockquotes are callouts, not page descriptions.
       if (t && !/^\[?!/.test(t) && !description) {
         description = t;
         body.splice(bqIndex, 1);
@@ -290,7 +210,6 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     }
     if (!title) title = titleCase(path.split("/").pop() || "Home");
 
-    // transforms + highlight
     mark = now();
     body = transformBody(body, rel);
     phases.transform += now() - mark;
@@ -298,8 +217,7 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
     codeBlocks += highlightBody(body);
     phases.highlight += now() - mark;
 
-    // toc (nested h2 > h3) — also stamps every heading's `id`, so it must run
-    // after the transforms that rewrite heading nodes.
+    // Heading IDs must follow transforms that rewrite heading nodes.
     const toc = buildToc(body);
     const icon = fm.icon || fm.navigation?.icon || resolveIcon(path) || undefined;
 
@@ -326,10 +244,7 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
   const search = buildSearch(pages);
   const searchIndex = buildSearchIndex(search);
   phases.search = now() - mark;
-  // Prev/next is a LISTING, so it obeys the same hiding the nav tree does — a
-  // page the author kept out of the sidebar must not resurface as its neighbour's
-  // "Next" card. A hidden page is still routable and searchable; it simply has no
-  // place in the chain, so `order.indexOf` misses it and it renders no surround.
+  // Prev/next follows navigation visibility; hidden pages remain routable/searchable.
   const order = pages
     .filter((p) => !hidden.has(p.path) && p.path !== "/blog" && !p.path.startsWith("/blog/"))
     .map((p) => p.path);
@@ -351,7 +266,6 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
   return { pages, byPath, navigation, search, searchIndex, order, stats };
 }
 
-// Total number of nodes in the navigation tree (for build stats).
 function countNav(items: NavItem[]): number {
   let n = 0;
   for (const item of items) {
@@ -360,28 +274,10 @@ function countNav(items: NavItem[]): number {
   return n;
 }
 
-// --- toc + heading ids ---
 /**
- * Collect the h2/h3 headings into the page's TOC, reading the anchor md4x
- * already put on each heading node.
- *
- * The ids are NOT derived here. md4x allocates them during the parse —
- * GitHub-compatible slugs, de-duplicated across the document, and an explicit
- * `## Title {#anchor}` honoured over the generated one — and stamps each on its
- * heading node, which is the single derivation everything downstream reads: this
- * TOC, `search.ts`'s sections, and the `id` `MarkdownRenderer` puts in the DOM.
- *
- * That it happens at PARSE time is what makes it safe. Anything that re-derived
- * an id from a finished body would be counting a different heading LIST than the
- * parser saw — the page's `h1` is spliced out above, raw-HTML headings never
- * reach the renderer — so its de-duplication suffixes would drift and the TOC
- * would link to anchors no element carries.
- *
- * Only a heading md4x could slug nothing out of (`## 🚀`) arrives without an id,
- * and it gets one here, numbered clear of every id already on the page.
- *
- * The walk recurses, because md4x anchors headings inside containers (`::tabs`)
- * too and the renderer deep-links them all the same.
+ * Read parser-assigned heading IDs; re-slugging after transforms would drift
+ * de-duplication suffixes. Allocate collision-free fallbacks only for empty IDs,
+ * and recurse for headings inside containers.
  */
 const FALLBACK_HEADING_ID = "section";
 
@@ -396,8 +292,7 @@ function buildToc(body: MarkNode[]): TocLink[] {
   };
   visit(body);
 
-  // Seeded with every id the parser handed out, so a fallback can never collide
-  // with a heading further down the page that has not been reached yet.
+  // Include later IDs before allocating fallbacks.
   const used = new Set<string>();
   for (const node of headings) {
     const id = node[1]?.id;
@@ -425,15 +320,11 @@ function buildToc(body: MarkNode[]): TocLink[] {
   return links;
 }
 
-// --- navigation tree ---
 function isPlainObject(v: unknown): v is Record<string, any> {
   return !!v && typeof v === "object" && !Array.isArray(v);
 }
 
-// Structural keys user-supplied YAML/frontmatter must never override — doing so
-// would corrupt the tree (e.g. a `.navigation.yml` with a `children:` key would
-// be emitted verbatim as a node's children). Display fields like title/icon/
-// path/description and arbitrary custom flags are still allowed through.
+// User config may set display/custom fields, but never structural bookkeeping.
 const RESERVED_NAV_KEYS = new Set([
   "_seg",
   "_children",
@@ -454,33 +345,18 @@ function stripReserved(fields: Record<string, any>): Record<string, any> {
   return out;
 }
 
-// Fields a page's own `navigation:` frontmatter contributes to its nav item.
-// Everything under an object-valued `navigation` key (title, icon, badge, arbitrary flags) is spread over the item, so `navigation: { title, icon, ... }` overrides the derived values.
 function navOverride(source: Record<string, any> | undefined): Record<string, any> {
   const nav = source?.navigation;
   return isPlainObject(nav) ? stripReserved(nav) : {};
 }
 
-// Fields a directory's `.navigation.yml` contributes to its section node.
-// We support flat top-level keys too (back-compat) and overlay
-// the nested `navigation` object on top so it wins.
+// Nested `navigation` overrides legacy flat config fields.
 function configFields(cfg: Record<string, any>): Record<string, any> {
   const { navigation, ...flat } = cfg;
   return stripReserved({ ...flat, ...(isPlainObject(navigation) ? navigation : {}) });
 }
 
-/**
- * Overlay a directory's `.navigation.yml` onto its node, recording whether it
- * NAMED the section.
- *
- * Every other title in the tree is derived — from the directory segment, or from
- * the index page — and `mobileNavLinks` re-derives one of them from the other to
- * keep a drawer group's header from repeating its own index child. By the time
- * the client sees the tree those two cases are indistinguishable from an
- * author's explicit `title:`, so the fact is recorded here, at the only place
- * that still knows it. The flag tracks the last assignment, since a config
- * without a `title:` leaves the derived one in place.
- */
+/** Preserve whether a section title was explicitly configured for client nav shaping. */
 function applyConfigFields(node: Record<string, any>, cfg: Record<string, unknown>): void {
   const fields = configFields(cfg);
   Object.assign(node, fields);
@@ -488,39 +364,14 @@ function applyConfigFields(node: Record<string, any>, cfg: Record<string, unknow
 }
 
 /**
- * Every page the author hid from the navigation, by path.
- *
- * Two ways to say it: `navigation: false` in a page's own frontmatter, or a
- * directory `.navigation.yml` carrying `navigation: false`, which hides its whole
- * subtree. Hidden means "routable but not listed" — the page still builds, still
- * answers on its route and still lands in the search index.
- *
- * The docs ROOT is the one directory that does NOT hide its subtree, and that is
- * deliberate. Its subtree is the whole docs set, so reading it the way every
- * other directory reads it would empty the sidebar outright — and empty the
- * prev/next chain with it, since `index.order` consumes this same set. A docs
- * site with no navigation at all is not something anyone configures on purpose,
- * whereas the narrow reading is useful and is what an author who wrote it was
- * almost certainly after: drop the "Home" entry from the sidebar, keep the rest.
- * So a root `navigation: false` hides exactly `/`. The rest of that file is
- * untouched by this: the root `.navigation.yml` is also where a docs set names
- * itself, and `buildNavigation` still applies its title/icon/… to the root nav
- * item — the item `navigation: false` is the one key that removes.
- * That narrow behaviour is what shipped, but only by accident: the subtree test
- * used to be `path.startsWith(d + "/")`, which for the root key is `"//"` and
- * matches nothing. Splitting exact matches from prefixes states the intent and
- * removes the string-concatenation coincidence holding it up. Since the same
- * spelling means something wider in every other directory, say so once per build.
- *
- * The set is computed ONCE, here, because two listings consume it: the nav tree
- * below and `index.order` (prev/next). Deriving it twice is how the surround
- * cards came to link at pages the sidebar had dropped.
+ * Resolve page and directory `navigation: false` once for both nav and prev/next.
+ * Hidden pages remain routable/searchable. Root config hides only `/`; treating
+ * it as a subtree would erase the entire site navigation.
  */
 function hiddenPaths(
   pages: DocPage[],
   navYml: Record<string, Record<string, unknown>>,
 ): Set<string> {
-  // Directories explicitly hidden via `.navigation.yml` → `navigation: false`.
   const hiddenSelf = new Set<string>();
   const hiddenSubtrees: string[] = [];
   for (const [dirPath, cfg] of Object.entries(navYml)) {
@@ -561,16 +412,10 @@ function buildNavigation(
   const root: RawNode[] = [];
 
   for (const p of pages) {
-    // A page can opt out of the nav tree with `navigation: false` — its own, or
-    // its directory's — while staying routable and searchable (`hiddenPaths`).
+    // Hidden pages remain in the content and search indexes.
     if (hidden.has(p.path)) continue;
 
-    // The docs-root `index.md`. It has no path segment, so the walk below never
-    // sees it — add it directly as the tree's first item (content is sorted by
-    // `orderKey`, and a root index sorts ahead of every sibling). Flagged `root`
-    // so a landing-page site can strip it back out: with a landing owning `/`,
-    // a "Home" entry in the sidebar would just point at the landing (see
-    // `app.vue` → `resolveLanding`).
+    // Root has no path segment; mark it so landing sites can remove the duplicate `/` link.
     if (p.path === "/") {
       const node: RawNode = {
         _seg: "",
@@ -612,13 +457,10 @@ function buildNavigation(
         node.page = true;
         node._page = p;
         node.description = p.description;
-        // A directory index page (`index.md` / `README.md`) is exposed as its own
-        // first child in the nav tree — so a section with an index keeps its own
-        // identity instead of collapsing into a lone subchild.
+        // Preserve a directory index as the section's first child.
         node._index = isIndexFile(p.rel);
-        // The page's own `navigation:` frontmatter overrides derived fields...
         Object.assign(node, navOverride(p.meta));
-        // ...but the directory's `.navigation.yml` still wins over the index page.
+        // Directory config wins over page frontmatter.
         if (navYml[curPath]) applyConfigFields(node, navYml[curPath]);
       }
       level = node._children;
@@ -627,26 +469,15 @@ function buildNavigation(
 
   const clean = (nodes: RawNode[]): NavItem[] =>
     nodes.map((n) => {
-      // Carry every non-internal field through (title/path/icon/description plus
-      // custom nav flags like badge/section), stripping only the build-time
-      // bookkeeping keys.
-      // `titleFromConfig` comes out with the bookkeeping keys rather than with
-      // `fields`: the self-index child below spreads `fields` and then overwrites
-      // the title with the PAGE's, so carrying the flag through would claim the
-      // author named a title they did not.
+      // Strip bookkeeping while preserving custom fields. Do not leak the section's
+      // `titleFromConfig` onto its page child below.
       const { _seg, _children, _page, _index, page, titleFromConfig, ...fields } = n;
       void _seg;
       const out: NavItem = { ...fields, page: !!page };
       if (titleFromConfig) out.titleFromConfig = true;
       const kids = _children.length ? clean(_children) : [];
       if (_index) {
-        // Re-add the index page itself as the section's first child. The section
-        // header (`out`) keeps the directory `.navigation.yml` title/icon, but the
-        // child link represents the PAGE — so it carries the page's own
-        // title/icon/description (plus any page `navigation:` override), NOT the
-        // directory override. Otherwise the index link just duplicates the
-        // section label (e.g. a "Guide" link under the "Guide" section instead of
-        // "Getting Started").
+        // The child represents the page, not the directory-configured section label.
         const idx = _page!;
         out.children = [
           {
@@ -669,31 +500,13 @@ function buildNavigation(
   return clean(root);
 }
 
-// --- .navigation.yml parser ---
-// The file is a YAML block; parse it as frontmatter via md4x. `md4x.init()`
-// has already run by the time this is called.
 function parseNavYml(raw: string): Record<string, unknown> {
   return md4x.parseMeta(`---\n${raw}\n---\n`).frontmatter ?? {};
 }
 
-// --- automd ---
 /**
- * The automd transform for this docs set, or `undefined` if automd is unusable.
- *
- * Every failure here is RECOVERABLE — the page still builds, from its
- * untransformed source — and that is exactly why each one is announced. A
- * generated block that silently kept its previous contents (or its empty
- * placeholder) looks like a page the author forgot to update, and the build
- * reports nothing to contradict that reading. So all three failure modes name
- * the file and say the source was kept: automd itself failing to load (the
- * docs config asked for it, so this is never "not configured"), a `transform`
- * that threw, and a transform whose generators reported issues.
- *
- * The issues case keeps the ORIGINAL contents rather than the partly-generated
- * ones: automd writes an `<!-- ⚠️ (generator) … -->` comment into the block it
- * could not generate, and shipping that into a published page is worse than
- * shipping the source. It does mean the blocks that DID generate are rolled
- * back with it, which is the other half of what the warning is for.
+ * Automd failures are recoverable but warned: retain the entire original source
+ * rather than publishing partial output or generated issue comments.
  */
 async function createAutomd(dir: string, automdConfig: unknown) {
   try {
