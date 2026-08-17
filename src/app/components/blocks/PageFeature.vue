@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import Icon from "@app/components/global/Icon.vue";
+import { isColoredIcon, isEmojiIcon } from "@app/utils/icons.ts";
 const props = withDefaults(
   defineProps<{
     title?: string;
@@ -13,8 +14,13 @@ const props = withDefaults(
   },
 );
 
-const isEmoji = computed(() => Boolean(props.icon && /\p{Emoji}/u.test(props.icon)));
+const isEmoji = computed(() => isEmojiIcon(props.icon));
 const isHorizontal = computed(() => props.orientation === "horizontal");
+
+// An emoji or a multicolor Iconify set brings its own palette; desaturate it so
+// the row of features reads as one. A `currentColor` icon is left alone — the
+// filter would grey out the `--brand` it inherits from the wrapper.
+const isColored = computed(() => isColoredIcon(props.icon));
 </script>
 
 <template>
@@ -28,8 +34,8 @@ const isHorizontal = computed(() => props.orientation === "horizontal");
   >
     <div v-if="$slots.leading || icon" class="text-brand shrink-0">
       <slot name="leading">
-        <span v-if="isEmoji" class="w-8 h-8 text-2xl leading-none">{{ icon }}</span>
-        <Icon v-else :name="icon!" class="w-8 h-8" />
+        <span v-if="isEmoji" class="w-8 h-8 text-2xl leading-none grayscale">{{ icon }}</span>
+        <Icon v-else :name="icon!" :class="['w-8 h-8', isColored && 'grayscale']" />
       </slot>
     </div>
 

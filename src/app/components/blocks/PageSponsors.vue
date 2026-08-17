@@ -33,6 +33,9 @@ const { data: sponsors } = await useAsyncData("sponsors", () => useSponsors(), {
       </Button>
     </template>
 
+    <!-- Every logo and avatar here is desaturated: sponsor artwork arrives in
+         whatever brand colours it ships with, and a row of them is the one place
+         the page would otherwise carry colour nothing in the theme aims. -->
     <div id="sponsors" class="flex flex-col items-center gap-8">
       <div
         v-for="(tier, i) of sponsors.sponsors.slice(0, 2)"
@@ -50,7 +53,7 @@ const { data: sponsors } = await useAsyncData("sponsors", () => useSponsors(), {
               v-if="s.image"
               :src="s.image"
               :alt="s.name"
-              class="object-contain rounded-lg"
+              class="object-contain rounded-lg grayscale"
               :style="{
                 width: i === 0 ? '80px' : '48px',
                 height: i === 0 ? '80px' : '48px',
@@ -65,14 +68,14 @@ const { data: sponsors } = await useAsyncData("sponsors", () => useSponsors(), {
       <div class="flex flex-wrap justify-center gap-2">
         <Tooltip v-for="s in sponsors.sponsors[2]" :key="s.name" :text="s.name" :delay-duration="0">
           <a :href="s.website" target="_blank" class="opacity-80 hover:opacity-100">
-            <Avatar :alt="s.name" :src="s.image" size="2xl" />
+            <Avatar :alt="s.name" :src="s.image" size="2xl" class="grayscale" />
           </a>
         </Tooltip>
       </div>
       <div class="flex flex-wrap justify-center gap-1">
         <Tooltip v-for="s in sponsors.sponsors[3]" :key="s.name" :text="s.name" :delay-duration="0">
           <a :href="s.website" target="_blank" class="opacity-80 hover:opacity-100">
-            <Avatar :alt="s.name" :src="s.image" />
+            <Avatar :alt="s.name" :src="s.image" class="grayscale" />
           </a>
         </Tooltip>
       </div>

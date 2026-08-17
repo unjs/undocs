@@ -88,5 +88,11 @@ function apply(rule: CSSStyleRule, source: unknown): void {
     if (!token || typeof value !== "string" || value.length > EMBED_MAX_VALUE) continue;
     if (FETCHING_VALUE.test(value)) continue;
     rule.style.setProperty(token, value);
+    // An embedder that supplies `br` is supplying a HUE, so its hover has to
+    // move AWAY from the page like every other hue does. The site's own seeded
+    // pole is mono's — it recedes toward the page, which is right only for an
+    // accent that already sits at the far end. See `--brand-hover-toward` in
+    // `tokens.css`; `theme-brand.ts` sets the same pair for `themeColor`.
+    if (token === "--brand") rule.style.setProperty("--brand-hover-toward", "var(--foreground)");
   }
 }

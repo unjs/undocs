@@ -82,7 +82,11 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
     },
     ui: {
       colors: {
-        primary: docs.themeColor || "amber",
+        // The default accent is `mono` — no hue, the primary text step. It is
+        // also what `tokens.css` seeds, so naming it here changes nothing about
+        // the render; it keeps the config's answer to "what colour is this site"
+        // honest for anything that reads it (the OG card, `theme-brand.ts`).
+        primary: docs.themeColor || "mono",
       },
     },
   };

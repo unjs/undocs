@@ -262,7 +262,7 @@
     },
     "themeColor": {
       "type": "string",
-      "description": "The accent color of the documentation site.\nAccepts a Geist hue (`blue`, `red`, `amber`, `green`, `teal`, `purple`, `pink`), a Tailwind palette name that maps onto the nearest Geist hue (`violet` -> purple, `cyan` -> teal, `rose` -> red, ...), a neutral name (`gray`, `slate`, `zinc`, `neutral`, `stone`) for a fully monochrome site, or any CSS color.\nIt tints links, active navigation, icons, and the landing glow, and is used for the `theme-color` meta tag. Buttons and other solid fills stay monochrome, as they are in Geist."
+      "description": "The accent color of the documentation site. Defaults to `mono`.\nAccepts `mono` (no accent — links and active navigation read in body color, the monochrome default), a Geist hue (`blue`, `red`, `amber`, `green`, `teal`, `purple`, `pink`), a Tailwind palette name that maps onto the nearest Geist hue (`violet` -> purple, `cyan` -> teal, `rose` -> red, ...), a neutral name (`gray`, `slate`, `zinc`, `neutral`, `stone`) as a synonym for `mono`, or any CSS color.\nIt tints links, active navigation, icons, and the landing glow, and is used for the `theme-color` meta tag. Buttons and other solid fills stay monochrome, as they are in Geist."
     },
     "automd": {
       "type": "boolean",

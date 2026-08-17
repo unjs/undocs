@@ -31,7 +31,9 @@ export const EMBED_THEME_TOKENS: Readonly<Record<string, string>> = Object.freez
   // the project accent that tints links, active nav and the header glow. An
   // embedder that wants the site to pick up its own brand colour wants `br`,
   // and `br` alone — the accent is one token, so there is no second role left
-  // pointing at our blue.
+  // pointing at a stale hue. (The inline program pairs `br` with the hue's
+  // hover pole on its own; the site's default accent is mono, whose pole goes
+  // the other way. See `--brand-hover-toward` in `tokens.css`.)
   p: "--primary",
   pf: "--primary-foreground",
   br: "--brand",

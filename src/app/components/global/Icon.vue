@@ -3,19 +3,12 @@
  * Icon — the `UIcon` replacement.
  *
  * Wraps `@iconify/vue`'s `<Icon>` and normalizes the name syntaxes used across
- * the codebase (and user docs configs) into Iconify's `collection:name` form.
- * A leading `i-` (the UnoCSS-preset convention) is stripped first, then:
+ * the codebase (and user docs configs) into Iconify's `collection:name` form —
+ * see `normalizeIconName`, which the blocks that decide how to PAINT an icon
+ * read the collection from, so the two cannot disagree about what an author's
+ * `i-vscode-icons-file-type-node` names.
  *
- *   - Colon form:  `simple-icons:markdown` / `i-simple-icons:markdown`
- *                  / `vscode-icons:file-type-node`  -> `collection:name` as-is.
- *   - Dash form:   `i-lucide-arrow-right`   -> `lucide:arrow-right`
- *                  `i-simple-icons-github`  -> `simple-icons:github`
- *     Rule: the FIRST dash separates collection from icon name — EXCEPT for
- *     known multi-word collections (`simple-icons`, `vscode-icons`, ...) whose
- *     own name contains a dash, which are matched by prefix first.
- *
- * All resolve from the Iconify HTTP API at runtime (current behavior). Any
- * multi-word collection not listed below should be written in colon form.
+ * All resolve from the Iconify HTTP API at runtime (current behavior).
  *
  * `class` is declared as a prop so it can be forwarded explicitly onto the
  * inner icon; any other attrs (style, aria-*, ...) fall through normally.
@@ -23,40 +16,14 @@
 import { computed, onMounted, ref } from "vue";
 import { Icon as IconifyIcon, iconLoaded } from "@iconify/vue";
 import { isIconSeeded, registerServerIcon } from "@app/ssr/icons.ts";
-
-// Iconify collections whose name itself contains a dash — the first-dash split
-// would otherwise mangle them (e.g. `simple-icons-github` -> `simple:...`).
-const MULTIWORD_COLLECTIONS = [
-  "simple-icons",
-  "vscode-icons",
-  "flat-color-icons",
-  "file-icons",
-  "line-md",
-  "material-symbols",
-  "skill-icons",
-  "devicon-plain",
-];
+import { normalizeIconName } from "@app/utils/icons.ts";
 
 const props = defineProps<{
   name?: string;
   class?: unknown;
 }>();
 
-const normalized = computed<string>(() => {
-  let n = props.name;
-  if (!n) return "";
-  // Strip the UnoCSS-preset `i-` prefix first, so `i-simple-icons:markdown`
-  // reduces to a clean `collection:name`.
-  if (n.startsWith("i-")) n = n.slice(2);
-  if (n.includes(":")) return n; // already `collection:name`
-  // Dash form: honor multi-word collection names before the first-dash split.
-  for (const c of MULTIWORD_COLLECTIONS) {
-    if (n.startsWith(`${c}-`)) return `${c}:${n.slice(c.length + 1)}`;
-  }
-  const dash = n.indexOf("-");
-  if (dash === -1) return n;
-  return `${n.slice(0, dash)}:${n.slice(dash + 1)}`;
-});
+const normalized = computed<string>(() => normalizeIconName(props.name));
 
 // `@iconify/vue` resolves icon data asynchronously from the Iconify HTTP API, so
 // it can't render the real `<svg>` during a single synchronous render unless the

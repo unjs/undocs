@@ -39,10 +39,12 @@ const { data: contributors } = await useAsyncData("contributors", () => useContr
       </Button>
     </template>
 
+    <!-- Desaturated: a wall of avatars is a texture here, and third-party
+         artwork is the one colour on the page nothing in the theme aims. -->
     <div class="flex flex-wrap justify-center gap-2">
       <Tooltip v-for="c in contributors" :key="c.username" :text="c.name" :delay-duration="0">
         <a :href="c.profile" target="_blank" class="opacity-80 hover:opacity-100">
-          <Avatar :alt="c.name" :src="c.avatar" size="3xl" />
+          <Avatar :alt="c.name" :src="c.avatar" size="3xl" class="grayscale" />
         </a>
       </Tooltip>
     </div>

@@ -126,7 +126,9 @@ NEVER write E2E tests. Ask for it to be tested manually.
   them, so Tailwind's own ramps are back and mean what they normally mean.
   `--primary` is the high-contrast pair (near-black on white, near-white on
   black) and is NOT the project's colour; the per-project accent is `--brand`,
-  aimed by `theme-brand.ts` from `docs.themeColor`. Links, active nav, icons and
+  aimed by `theme-brand.ts` from `docs.themeColor` — which DEFAULTS to `mono`,
+  i.e. `--brand: var(--foreground)`, no hue at all (Geist's own look; the hue
+  table is the departure). Links, active nav, icons and
   the landing glow use `brand`; solid buttons and the high-contrast bar use
   `primary`. Collapsing the two undoes the system. ONE button departs
   deliberately: the landing hero's lead CTA (`color: "brand"`, applied by
@@ -155,6 +157,18 @@ NEVER write E2E tests. Ask for it to be tested manually.
   (3) The rule is enforced on the SOURCE: `tokens.test.ts` greps `src/app` for
   `text-brand` on `bg-accent`/`bg-muted` and fails. An active nav item wants
   `bg-brand/10 text-brand`.
+- **`mono` is the default accent, and its hover goes the OTHER WAY.**
+  `--brand-hover` (one consumer: the hero CTA) mixes the fill 12% along the
+  neutral axis toward `--brand-hover-toward`, and that pole is the one thing the
+  two kinds of accent disagree about — so `brandCss` emits it WITH `--brand`,
+  always, and neither is ever set alone. A hue moves toward `--foreground`, away
+  from the page and so away from the label (the label IS the page, so its
+  contrast only improves; the reflex `bg-brand/90` recedes toward the page and
+  lands at ~3.7). Mono's accent already IS `--foreground`, so that pole is the
+  identity and the button gets no hover at all; it recedes toward `--background`
+  instead, exactly as `--primary-hover` does. `tokens.css` seeds mono's pair, so
+  a hue emitting only `--brand` would inherit mono's direction — which is why the
+  emission is unconditional and `theme-brand.test.ts` pins both poles.
 - **Status colour is FIVE roles, each a triple.** `--info`/`--success`/
   `--warning`/`--danger`/`--important`, each with `-tint` (the surface its text
   sits on) and `-border`. `Alert`, `ProseCallout` and `Banner` render all three

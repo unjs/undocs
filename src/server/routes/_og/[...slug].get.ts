@@ -6,7 +6,20 @@ import { render } from "takumi-js";
 import { container, image, text } from "takumi-js/helpers";
 import { getIndex } from "../../content/store.ts";
 
+// `themeColor` name -> the colour the card draws with. The card is always dark
+// (`#0a0a0a`), so these are the DARK-mode readings of the site's accent — which
+// is why `mono` and the neutral spellings resolve to `--foreground`'s dark value
+// rather than to CSS's mid-grey `gray`, and why they are listed at all: without
+// them the default site would render its OG card in a colour it never uses.
 const themeColorMap: Record<string, string> = {
+  mono: "#ededed",
+  monochrome: "#ededed",
+  gray: "#ededed",
+  grey: "#ededed",
+  slate: "#ededed",
+  zinc: "#ededed",
+  neutral: "#ededed",
+  stone: "#ededed",
   red: "#ff6467",
   orange: "#ff8904",
   amber: "#ffb900",
@@ -89,8 +102,10 @@ export default defineLazyEventHandler(async () => {
       description = page.description || siteDescription;
     }
 
-    const themeColor = (undocs.themeColor as string) || "amber";
-    const themeColorValue = themeColorMap[themeColor] || themeColor;
+    const themeColor = (undocs.themeColor as string) || "mono";
+    // Names are matched case-insensitively (as `theme-brand.ts` does); anything
+    // unrecognised is passed through as a CSS colour, casing intact.
+    const themeColorValue = themeColorMap[themeColor.toLowerCase()] || themeColor;
 
     const meta = { name: siteName, title, description };
 

@@ -2,11 +2,19 @@
  * Runtime brand-color CSS shared by SSR and CSR.
  *
  * Geist itself is monochrome — solid buttons are `--primary`, and the only
- * colour in a stock Geist UI is the blue focus ring. undocs still lets each docs
- * project pick an accent (`docs.themeColor`, surfaced as
- * `useAppConfig().ui.colors.primary`), so this module resolves that name to one
- * of the seven derived brand hues and points `--brand` at it. `--primary` is
- * never touched: buttons stay monochrome, links and active nav pick up the accent.
+ * colour in a stock Geist UI is the blue focus ring. undocs is monochrome by
+ * DEFAULT for the same reason (`themeColor: mono`, which is what `tokens.css`
+ * seeds), but it still lets each docs project pick an accent
+ * (`docs.themeColor`, surfaced as `useAppConfig().ui.colors.primary`), so this
+ * module resolves that name to one of the seven derived brand hues and points
+ * `--brand` at it. `--primary` is never touched: buttons stay monochrome, links
+ * and active nav pick up the accent.
+ *
+ * Two declarations, always: the accent and the pole its hover mixes toward. A
+ * hue moves AWAY from the page on hover, mono is already there and recedes
+ * toward it, and the seeded default is mono's — so a hue that emitted only
+ * `--brand` would inherit mono's direction and hover the wrong way. See the
+ * `--brand-hover` comment in `tokens.css` for why the two disagree.
  *
  * The emitted value is a `var(--brand-<hue>)` REFERENCE rather than a literal,
  * which is safe here and was not safe for the Tailwind palettes this replaced:
@@ -44,8 +52,21 @@ const HUE_ALIASES: Record<string, string> = {
   rose: "red",
 };
 
-/** Neutral names: a monochrome site, where the accent IS the primary text. */
-const NEUTRALS = new Set(["gray", "grey", "slate", "zinc", "neutral", "stone"]);
+/**
+ * `mono` — the DEFAULT — and the neutral palette names that mean the same
+ * thing: no accent, the primary text step. `tokens.css` seeds exactly this, so
+ * naming it explicitly is a no-op; it is spelled out anyway because a config
+ * that says `themeColor: mono` should keep meaning that if the seed ever moves.
+ */
+const MONO = new Set(["mono", "monochrome", "gray", "grey", "slate", "zinc", "neutral", "stone"]);
+
+/**
+ * The pole `--brand-hover` mixes toward. A hue moves away from the page (and so
+ * away from the CTA's label, which IS the page); mono sits at that end already,
+ * so it recedes toward the page instead, exactly as `--primary-hover` does.
+ */
+const HOVER_TOWARD_PAGE = "var(--background)";
+const HOVER_TOWARD_TEXT = "var(--foreground)";
 
 export const BRAND_STYLE_ID = "undocs-runtime-brand";
 
@@ -54,13 +75,15 @@ export function brandCss(themeColor: unknown): string | null {
   const color = themeColor.trim().toLowerCase();
 
   let brand: string;
+  let toward = HOVER_TOWARD_TEXT;
   const hue = HUE_ALIASES[color] ?? color;
   if (BRAND_HUES.has(hue)) {
     brand = `var(--brand-${hue})`;
-  } else if (NEUTRALS.has(hue)) {
+  } else if (MONO.has(hue)) {
     // A monochrome site: the accent collapses onto the primary-text step, which
-    // is what `--primary` already uses. Geist's own look.
+    // is what `--primary` already uses. Geist's own look, and ours by default.
     brand = "var(--foreground)";
+    toward = HOVER_TOWARD_PAGE;
   } else if (/^(#|rgb|hsl|oklch|oklab|lab|lch|color\()/i.test(color)) {
     // A bare CSS colour is used verbatim in both modes — we cannot derive a
     // per-mode pair from it, and inverting it would surprise more than it helps.
@@ -72,5 +95,5 @@ export function brandCss(themeColor: unknown): string | null {
   }
 
   // The doubled selector beats `tokens.css` even when Vite injects it later.
-  return `:root:root{--brand:${brand};}`;
+  return `:root:root{--brand:${brand};--brand-hover-toward:${toward};}`;
 }

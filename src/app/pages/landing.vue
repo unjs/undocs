@@ -5,6 +5,7 @@ import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { queryBlog, queryPage } from "@app/composables/useContent.ts";
 import { usePageSEO } from "@app/composables/usePageSEO.ts";
 import { titleCase } from "@app/utils/title.ts";
+import { isColoredIcon, isEmojiIcon } from "@app/utils/icons.ts";
 import Button from "@app/components/ui/Button.vue";
 import Container from "@app/components/Container.vue";
 import Grid from "@app/components/grid/Grid.vue";
@@ -99,16 +100,6 @@ usePageSEO({
   description: landing!.description,
 });
 
-// On mobile the hero links stack; emphasize the first (primary) action and
-// demote the rest to minimal links so they don't read as a wall of buttons.
-// `sm:` and up keep the default `lg` button look.
-const heroPrimaryLinkClass = "max-sm:h-12 max-sm:w-full max-sm:text-base";
-const heroSecondaryLinkClass =
-  "max-sm:h-auto max-sm:w-auto max-sm:self-center max-sm:border-transparent " +
-  "max-sm:bg-transparent max-sm:px-0 max-sm:py-1 max-sm:font-normal max-sm:shadow-none " +
-  "max-sm:text-muted-foreground max-sm:hover:text-foreground " +
-  "max-sm:underline max-sm:underline-offset-4";
-
 function normalizeHeroLinks(links: LandingConfig["heroLinks"]) {
   return (
     Object.entries(links || {})
@@ -131,9 +122,10 @@ function normalizeHeroLinks(links: LandingConfig["heroLinks"]) {
       .sort((a, b) => a!.order - b!.order)
       // The lead CTA carries the docs' accent (`color: "brand"`, the one
       // accent-filled button in the set — see `Button.ts`). Keyed on POSITION,
-      // like `heroPrimaryLinkClass` in the template, so it follows whichever link
-      // actually renders first rather than the built-in `primary` key; a config
-      // link that names its own `color` still wins, since `link` spreads last.
+      // like `PageHero`'s own primary/secondary split, so it follows whichever
+      // link actually renders first rather than the built-in `primary` key; a
+      // config link that names its own `color` still wins, since `link` spreads
+      // last.
       .map((link, index) => (index === 0 ? { color: "brand", ...link } : link)) as any[]
   );
 }
@@ -241,15 +233,6 @@ const [{ data: latest }, { data: root }] = await Promise.all([
         {{ landing.heroDescription }}
       </template>
 
-      <template #links>
-        <Button
-          v-for="(link, index) in hero.links"
-          :key="link.label"
-          v-bind="link"
-          :class="index === 0 ? heroPrimaryLinkClass : heroSecondaryLinkClass"
-        />
-      </template>
-
       <ProseCodeGroup v-if="hero.code" class="mx-auto" style="max-width: 100%">
         <ProsePre
           :filename="hero.code.title || 'Terminal'"
@@ -293,11 +276,18 @@ const [{ data: latest }, { data: root }] = await Promise.all([
           <GridCell v-for="feature in landing.features" :key="feature.title" role="listitem">
             <PageFeature v-bind="feature" orientation="vertical">
               <template #leading>
+                <!-- Colored art (emoji, a multicolor Iconify set) is desaturated
+                     so the grid reads as one; a `currentColor` icon is not,
+                     since the filter would grey out its inherited `--brand`. -->
                 <template v-if="feature.icon">
-                  <span v-if="/\p{Emoji}/u.test(feature.icon)" class="w-8 h-8 text-2xl">
+                  <span v-if="isEmojiIcon(feature.icon)" class="w-8 h-8 text-2xl grayscale">
                     {{ feature.icon }}
                   </span>
-                  <Icon v-else :name="feature.icon" class="w-8 h-8" />
+                  <Icon
+                    v-else
+                    :name="feature.icon"
+                    :class="['w-8 h-8', isColoredIcon(feature.icon) && 'grayscale']"
+                  />
                 </template>
               </template>
               <template #description>

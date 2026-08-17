@@ -86,7 +86,7 @@ describe("structure", () => {
    * duplicate said, which is how a themed site ends up rendering in two accents.
    */
   it("keeps the derived brand roles as single declarations", () => {
-    for (const name of ["--brand", "--brand-foreground", "--brand-hover"]) {
+    for (const name of ["--brand", "--brand-foreground", "--brand-hover", "--brand-hover-toward"]) {
       expect(DARK_BLOCK[name], `${name} should not be redeclared in .dark`).toBeUndefined();
       expect(TOKENS.light[name], `${name} missing from :root`).toBeDefined();
     }
@@ -241,19 +241,59 @@ describe("the derived accent", () => {
         `${hue} fill (${mode})`,
       ).toBeGreaterThanOrEqual(4.5);
     }
+    // ...and the default accent, which is no hue at all.
+    expect(
+      contrast(resolve(mode, "--brand-foreground"), resolve(mode, "--brand")),
+      `mono fill (${mode})`,
+    ).toBeGreaterThanOrEqual(4.5);
   });
 
   /**
-   * ...and the hover only ever helps, because it mixes toward `--foreground` —
-   * darker in light, brighter in dark, i.e. AWAY from the page, and so away from
-   * the label, which IS the page. The reflex reach for `bg-brand/90` recedes
-   * TOWARD it and lands at ~3.7 in light. Asserted structurally: `color-mix`
-   * cannot be resolved here, but its direction can.
+   * The DEFAULT accent is mono: `--brand` is the primary text step until
+   * `theme-brand.ts` re-points it from `themeColor`. A literal here (or a
+   * per-mode redeclaration, caught above) would freeze the accent in one mode;
+   * the reference is what themes both.
    */
-  it("moves the brand hover away from the page, not toward it", () => {
+  it("defaults to the monochrome accent", () => {
+    expect(TOKENS.light["--brand"]).toBe("var(--foreground)");
+    for (const mode of MODES) {
+      expect(resolve(mode, "--brand")).toBe(resolve(mode, "--foreground"));
+    }
+  });
+
+  /**
+   * ...and the hover only ever helps, because it moves the fill AWAY from the
+   * label, which IS the page. Which pole that is depends on the accent, so the
+   * direction is a token: a hue mixes toward `--foreground` (darker in light,
+   * brighter in dark) — the reflex reach for `bg-brand/90` recedes toward the
+   * page and lands at ~3.7 in light — while mono, whose accent already IS
+   * `--foreground`, would get no hover at all from that pole and recedes toward
+   * the page instead, exactly as `--primary-hover` does.
+   *
+   * Asserted structurally: `color-mix` cannot be resolved here, but its
+   * direction can. The seeded pole is mono's, since mono is the default;
+   * `theme-brand.test.ts` covers the pole a hue emits.
+   */
+  it("mixes the brand hover toward a pole set with the accent", () => {
     expect(resolve("light", "--brand-hover")).toMatch(
-      /^color-mix\(in oklab, var\(--brand\) \d+%, var\(--foreground\)\)$/,
+      /^color-mix\(in oklab, var\(--brand\) \d+%, var\(--brand-hover-toward\)\)$/,
     );
+    expect(TOKENS.light["--brand-hover-toward"]).toBe("var(--background)");
+  });
+
+  /**
+   * Mono's hover has to stay visible AND legible: it recedes toward the page, so
+   * it is the one direction that can cost the label contrast. Both modes at 88%.
+   */
+  it.each(MODES)("keeps the mono hover legible and visible in %s mode", (mode) => {
+    const hover = composite(resolve(mode, "--background"), resolve(mode, "--brand"), 0.12);
+    expect(contrast(resolve(mode, "--brand-foreground"), hover), `label (${mode})`).toBeGreaterThan(
+      4.5,
+    );
+    expect(
+      Math.abs(luminance(hover) - luminance(resolve(mode, "--brand"))),
+      `movement (${mode})`,
+    ).toBeGreaterThan(0);
   });
 
   /**

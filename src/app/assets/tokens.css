@@ -224,9 +224,11 @@
 
   /* ---- The accent — LIGHT ---------------------------------------------- */
   /*
-   * `--brand` is the ONE per-project colour. `theme-brand.ts` re-points it at
-   * another hue from the docs config's `themeColor`; the table below declares
-   * every hue in both modes, so a themed site needs no `dark:` variant.
+   * `--brand` is the ONE per-project colour, and by default it is not a colour
+   * at all: the accent is MONO (declared under the table) until the docs config
+   * asks for a hue. `theme-brand.ts` re-points it from `themeColor`; the table
+   * below declares every hue in both modes, so a themed site needs no `dark:`
+   * variant.
    *
    * These are the only DERIVED values in the file, and the derivation is the
    * spec. Each is the most saturated colour of Geist's hue angle that clears
@@ -270,29 +272,57 @@
   --brand-purple: oklch(52.8% 0.275 304.2);
   --brand-pink: oklch(51.8% 0.209 2.4);
 
-  --brand: var(--brand-blue);
+  /*
+   * The DEFAULT accent is MONO: no hue at all, but the primary text step, so
+   * links, active nav and icons read in body colour and the site is monochrome
+   * end to end. That is Geist's own look — the hue table above is the departure,
+   * not this — and it is the accent a docs project gets for choosing nothing.
+   * `theme-brand.ts` re-points this at a hue when the docs config asks for one
+   * (`themeColor: blue`), and points it back here for `themeColor: mono` and for
+   * the neutral spellings (`gray`, `slate`, ...).
+   *
+   * A reference rather than a literal, so it flips with the mode on its own, and
+   * `--foreground` rather than `--primary` (identical values) because what mono
+   * means is "the accent is the TEXT colour" — the pairing every rule above is
+   * about — not "the accent is the button fill".
+   */
+  --brand: var(--foreground);
 
   /*
    * The accent used as a FILL rather than as text — the landing hero's lead
    * CTA, the only accent-coloured button in the set (see `Button.ts`).
    *
    * The label is the PAGE colour, and that is measured, not chosen. Across the
-   * fourteen fills `themeColor` can produce (seven hues x two modes) it is the
-   * only foreground clearing AA on all of them: white fails every hue in dark,
-   * near-black fails every hue in light. It works because the table above
-   * declares each hue per mode, so `--background` flips with the fill.
+   * fourteen coloured fills `themeColor` can produce (seven hues x two modes) it
+   * is the only foreground clearing AA on all of them: white fails every hue in
+   * dark, near-black fails every hue in light. It works because the table above
+   * declares each hue per mode, so `--background` flips with the fill. Mono is
+   * the easy case and rides the same declaration: page colour on the text step
+   * is the body pairing, 17:1.
    *
    * It also rides the derivation for free — `--brand-foreground` IS the page,
    * so "label on the fill" and "accent on the page" are the same ratio (5.9-6.3
-   * here, up from ~4.6, because the surface rule pushed the accent past what
-   * the page alone required).
+   * for a hue, because the surface rule pushed the accent past what the page
+   * alone required).
    *
-   * The hover mixes toward `--foreground`: darker in light, brighter in dark,
-   * i.e. away from the page in both — so the label's contrast only ever
-   * improves. The reflex `bg-brand/90` recedes TOWARD the page and fails.
+   * The hover moves the fill 12% toward a pole, and WHICH pole is the one thing
+   * the two kinds of accent disagree about — so the direction is its own token,
+   * set alongside `--brand` by `theme-brand.ts` and never separately.
+   *
+   * A hue mixes toward `--foreground`: darker in light, brighter in dark, i.e.
+   * away from the page in both — and so away from the label, which IS the page,
+   * so its contrast only ever improves. The reflex `bg-brand/90` recedes TOWARD
+   * the page and lands at ~3.7 in light.
+   *
+   * Mono cannot use that pole: its accent already IS `--foreground`, so the mix
+   * is the identity and the button would have no hover at all. It recedes toward
+   * `--background` instead — the same move `--primary-hover` makes, for the same
+   * reason: at the end of the axis, receding is the only one left, and the label
+   * has 17:1 to spend on it.
    */
   --brand-foreground: var(--background);
-  --brand-hover: color-mix(in oklab, var(--brand) 88%, var(--foreground));
+  --brand-hover-toward: var(--background);
+  --brand-hover: color-mix(in oklab, var(--brand) 88%, var(--brand-hover-toward));
 
   /* ---- Elevation — LIGHT ------------------------------------------------ */
   /*

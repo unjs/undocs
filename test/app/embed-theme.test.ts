@@ -132,7 +132,30 @@ describe("embed-theme script", () => {
   it("covers every documented token key", () => {
     const all = Object.fromEntries(Object.keys(EMBED_THEME_TOKENS).map((k) => [k, "red"]));
     const out = run(`#~${payload(all)}`);
-    expect(Object.keys(out.light!).sort()).toEqual(Object.values(EMBED_THEME_TOKENS).sort());
+    // `--brand-hover-toward` is DERIVED rather than mapped — see below.
+    expect(Object.keys(out.light!).sort()).toEqual(
+      [...Object.values(EMBED_THEME_TOKENS), "--brand-hover-toward"].sort(),
+    );
+  });
+
+  /**
+   * An embedder supplying `br` is supplying a HUE, and a hue's hover has to move
+   * AWAY from the page (`tokens.css`). The site's seeded pole is mono's — the
+   * default accent — which recedes TOWARD it, so inheriting it would hover the
+   * hero CTA the wrong way, at ~3.7:1 on a label that is the page colour. The
+   * pole is not settable on its own: it travels with the accent, per rule, so a
+   * payload that only overrides `br` in dark still gets both there.
+   */
+  it("pairs an embedded accent with the hue hover pole", () => {
+    const out = run(`#~${payload({ br: "#0ea5e9", d: { br: "#38bdf8" } })}`);
+    expect(out.light).toEqual({
+      "--brand": "#0ea5e9",
+      "--brand-hover-toward": "var(--foreground)",
+    });
+    expect(out.dark).toEqual({
+      "--brand": "#38bdf8",
+      "--brand-hover-toward": "var(--foreground)",
+    });
   });
 
   it("ignores unmapped keys, non-strings, over-long and url() values", () => {

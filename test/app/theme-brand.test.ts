@@ -47,14 +47,14 @@ describe("brandCss", () => {
   });
 
   /**
-   * `--brand` and nothing else. An extra declaration here is how the accent gets
-   * split back into roles by accident — a second token pointing at a different
-   * hue themes the site in two colours at once, which reads as a bug in whatever
-   * component happens to use the stale one rather than as a bug in this
-   * function.
+   * The accent and the direction its hover moves in — and nothing else. A third
+   * declaration here is how the accent gets split back into roles by accident: a
+   * second token pointing at a different hue themes the site in two colours at
+   * once, which reads as a bug in whatever component happens to use the stale
+   * one rather than as a bug in this function.
    */
-  it.each(GEIST_HUES)("themes exactly one token (%s)", (hue) => {
-    expect(Object.keys(parseAll(brandCss(hue)!))).toEqual(["--brand"]);
+  it.each(GEIST_HUES)("themes exactly the accent and its hover pole (%s)", (hue) => {
+    expect(Object.keys(parseAll(brandCss(hue)!))).toEqual(["--brand", "--brand-hover-toward"]);
   });
 
   it.each(GEIST_HUES)("emits tokens that tokens.css actually defines (%s)", (hue) => {
@@ -99,15 +99,47 @@ describe("brandCss", () => {
   });
 
   /**
-   * A "gray" accent is a request for the monochrome look — which is the primary
-   * text colour, and the look Geist ships by default.
+   * `mono` is the DEFAULT accent: the primary text colour, and the look Geist
+   * ships by default. The neutral palette names are synonyms for it — a "gray"
+   * accent is a request for the same thing.
    */
-  it.each(["gray", "grey", "slate", "zinc", "neutral", "stone"])(
+  it.each(["mono", "monochrome", "gray", "grey", "slate", "zinc", "neutral", "stone"])(
     "collapses %s onto the monochrome step",
     (name) => {
       expect(parse(brandCss(name)!)).toBe("var(--foreground)");
     },
   );
+
+  /**
+   * What mono emits has to be what `tokens.css` SEEDS, because a site that names
+   * the default and a site that omits `themeColor` are the same site. They are
+   * declared in two places (the stylesheet cannot read this module), so the only
+   * thing keeping them equal is this assertion.
+   */
+  it("reproduces the seeded default exactly", () => {
+    expect(parseAll(brandCss("mono")!)).toEqual({
+      "--brand": TOKENS.light["--brand"],
+      "--brand-hover-toward": TOKENS.light["--brand-hover-toward"],
+    });
+  });
+
+  /**
+   * The hover pole travels WITH the accent, and the two kinds disagree about it:
+   * a hue moves away from the page on hover (so the CTA's label — which IS the
+   * page — only gains contrast), while mono already sits at that end and has to
+   * recede toward the page instead, exactly as `--primary-hover` does.
+   *
+   * Emitting it unconditionally is the point. The seed is mono's, so a hue that
+   * emitted `--brand` alone would inherit mono's direction and hover the wrong
+   * way — at ~3.7:1 on the label, which is the failure `tokens.css` describes.
+   */
+  it.each([...GEIST_HUES, "violet", "#ff8800"])("moves %s's hover away from the page", (name) => {
+    expect(parseAll(brandCss(name)!)["--brand-hover-toward"]).toBe("var(--foreground)");
+  });
+
+  it.each(["mono", "gray"])("recedes %s's hover toward the page", (name) => {
+    expect(parseAll(brandCss(name)!)["--brand-hover-toward"]).toBe("var(--background)");
+  });
 
   /**
    * A bare CSS colour is used verbatim in both modes. The derived table cannot

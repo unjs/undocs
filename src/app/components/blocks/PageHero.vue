@@ -28,6 +28,27 @@ const slots = useSlots();
 
 const isHorizontal = computed(() => props.orientation === "horizontal");
 const hasAside = computed(() => Boolean(slots.default));
+
+// The hero has ONE action. The first link is the filled CTA; everything after
+// it drops below as a text link, at every breakpoint — a row of equally solid
+// buttons reads as several primaries and none of them leads. This used to be a
+// `max-sm:` treatment on the landing page only; it is now the hero's design, so
+// an MDC `::page-hero` gets it too.
+//
+// Keyed on POSITION, like the `color: "brand"` the landing page hands the first
+// link — the two have to agree about which link is the lead one.
+const primaryLink = computed(() => props.links?.[0]);
+const secondaryLinks = computed(() => props.links?.slice(1) || []);
+
+// On mobile the lead CTA goes full-bleed; `sm:` and up it keeps its own size.
+const primaryClass = "max-sm:h-12 max-sm:w-full max-sm:text-base";
+// Strips the button surface back to a link. `border-transparent` rather than
+// `border-0`: tailwind-merge keeps the width class from the variant either way,
+// so the hairline stays in the box model and the labels don't shift by a pixel
+// against the CTA above them.
+const secondaryClass =
+  "h-auto w-auto border-transparent bg-transparent px-0 py-1 font-normal shadow-none " +
+  "text-muted-foreground hover:text-foreground underline underline-offset-4";
 </script>
 
 <template>
@@ -76,11 +97,23 @@ const hasAside = computed(() => Boolean(slots.default));
           <!-- Links -->
           <div
             v-if="slots.links || (links && links.length)"
-            class="mt-10 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap"
-            :class="isHorizontal ? 'sm:justify-start' : 'sm:justify-center'"
+            class="mt-10 flex w-full flex-col gap-4 sm:w-auto"
+            :class="isHorizontal ? 'items-start' : 'items-center'"
           >
             <slot name="links">
-              <Button v-for="link in links" :key="link.label" v-bind="link" />
+              <Button v-if="primaryLink" v-bind="primaryLink" :class="primaryClass" />
+              <div
+                v-if="secondaryLinks.length"
+                class="flex flex-wrap items-center gap-x-6 gap-y-2"
+                :class="isHorizontal ? 'justify-start' : 'justify-center'"
+              >
+                <Button
+                  v-for="link in secondaryLinks"
+                  :key="link.label"
+                  v-bind="link"
+                  :class="secondaryClass"
+                />
+              </div>
             </slot>
           </div>
         </div>
