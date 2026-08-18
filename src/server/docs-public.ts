@@ -23,3 +23,11 @@ export function docsIconFiles(docsDir: string): string[] {
 export function resolveDocsIcon(docsDir: string): string | undefined {
   return docsIconFiles(docsDir).find((file) => existsSync(file));
 }
+
+// Marker `generateAppConfig` parks in `docs.logo` when the logo is the project's
+// OWN detected `icon.svg` rather than a URL the author wrote. The
+// `virtual:undocs/app-config` plugin swaps it for a real ESM import of that file,
+// so the mark goes through Vite (hashed/inlined into the client bundle) instead
+// of being fetched raw from the site root. Config-shaped values are strings, and
+// a NUL cannot appear in one, so this can never collide with a user's `logo`.
+export const DOCS_ICON_ASSET = "\0undocs:docs-icon";

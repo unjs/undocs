@@ -183,8 +183,19 @@ export default defineConfig((configEnv) => ({
       // `import.meta.server=true` / `client=false` for the SSR render env.
       define: { "import.meta.server": "true", "import.meta.client": "false" },
       build: {
+        // Assets are named EXACTLY as in the client build above. Both envs see
+        // the same asset imports (the docs project's `icon.svg`, reached through
+        // `virtual:undocs/app-config`) and each resolves the import to a URL of
+        // its own making — so a different `assetsDir`/`assetFileNames` here
+        // renders `<img src>` and the favicon at one URL on the server and
+        // another on hydrate. Same config + Vite's content hash = one URL, and
+        // the two envs emit the same file rather than two copies.
+        assetsDir: "_undocs",
         rollupOptions: {
           input: r("./src/app/entry-server.ts"),
+          output: {
+            assetFileNames: clientAssetName,
+          },
         },
       },
     },

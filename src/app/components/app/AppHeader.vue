@@ -5,6 +5,7 @@ import { mobileNavLinks } from "@app/utils/nav.ts";
 import type { NavItem } from "@server/content/types.ts";
 import AppHeaderActions from "@app/components/app/AppHeaderActions.vue";
 import AppHeaderVersionsMenu from "@app/components/app/AppHeaderVersionsMenu.vue";
+import AppLogo from "@app/components/app/AppLogo.vue";
 import ColorModeButton from "@app/components/ColorModeButton.vue";
 import DocsNavigation from "@app/components/docs/DocsNavigation.vue";
 import DocsSearchButton from "@app/components/docs/DocsSearchButton.vue";
@@ -29,12 +30,7 @@ const mobileLinks = computed(() => mobileNavLinks(navigation?.value));
         class="focus-visible:outline-brand min-w-0 font-bold text-xl text-foreground flex items-end gap-1.5"
         :aria-label="appConfig.site.name"
       >
-        <img
-          v-if="appConfig.docs.logo"
-          :src="appConfig.docs.logo"
-          :alt="`${appConfig.site.name} logo`"
-          class="h-7 w-7 shrink-0"
-        />
+        <AppLogo class="h-7 w-7 shrink-0" />
         <span class="select-none truncate">
           {{ appConfig.site.name }}
         </span>

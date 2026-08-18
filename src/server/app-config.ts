@@ -1,5 +1,5 @@
 import { loadDocsConfig } from "./docs-config.ts";
-import { resolveDocsIcon } from "./docs-public.ts";
+import { DOCS_ICON_ASSET, resolveDocsIcon } from "./docs-public.ts";
 import { highlightCode } from "./content/highlight.ts";
 
 // Build-time source for the virtual config; feature rendering and hero
@@ -16,13 +16,15 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
 
   docs.branch = docs.branch || "main";
 
-  // undocs ships no logo of its own, so `/icon.svg` is only a real URL when the
-  // docs project drops one into a public dir (`.docs/public` or `public`, the
-  // dirs `nitro.config.ts` serves at the site root). Default to it only then —
-  // otherwise `logo` stays undefined and the header/footer/favicon render
-  // nothing rather than someone else's mark.
+  // undocs ships no logo of its own, so a logo exists only when the docs project
+  // drops an `icon.svg` into a public dir (`.docs/public` or `public`) or names
+  // one in its config. Default to the detected file only then — otherwise `logo`
+  // stays undefined and the header/footer/favicon render nothing rather than
+  // someone else's mark. The value is a MARKER, not a URL: the file is a build
+  // input, so the virtual-module plugin turns it into a Vite asset import and
+  // the app gets a hashed (or inlined) URL instead of a raw `/icon.svg` fetch.
   if (!docs.logo && resolveDocsIcon(docsDir)) {
-    docs.logo = "/icon.svg";
+    docs.logo = DOCS_ICON_ASSET;
   }
 
   // Boolean `landing` is only an on/off switch.

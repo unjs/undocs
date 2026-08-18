@@ -5,7 +5,11 @@ export default defineAppConfig({
     // No default: undocs ships no logo of its own. `generateAppConfig` fills
     // this in only when the docs project actually has one (see app-config.ts);
     // otherwise every logo site (header, footer badge, favicon) renders nothing.
+    // `logo` is the URL (the favicon's only usable form); `logoSvg` is the same
+    // mark's MARKUP, set only for a project's own detected `icon.svg` so
+    // `AppLogo` can inline it. An author-supplied `logo` gets no `logoSvg`.
     logo: undefined,
+    logoSvg: undefined,
     github: undefined,
     socials: {},
     banner: {},

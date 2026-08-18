@@ -97,6 +97,28 @@ NEVER write E2E tests. Ask for it to be tested manually.
   `<html>`'s class. Anything that RENDERS from the mode (`ColorModeButton.vue`)
   must still show `DEFAULT_COLOR_MODE` on its first client render and correct
   itself `onMounted` — the server always rendered the default.
+- **The project's own mark is a build INPUT, in two forms.** `app-config.ts`
+  parks the `DOCS_ICON_ASSET` marker in `docs.logo` when the logo is the docs
+  project's own detected `icon.svg`, and the `virtual:undocs/app-config` plugin
+  swaps it for two bundler imports of that file: `?raw` → `docs.logoSvg`, the
+  MARKUP `AppLogo` inlines (no request, no data-URI encoding, and the SVG takes
+  the caller's CSS — the footer's `grayscale`, `currentColor`), and `?url` →
+  `docs.logo`, for the one consumer that can only take a URL, the favicon
+  `<link>`. Carrying both duplicates the icon in each bundle only while it is
+  small enough to inline; over `assetsInlineLimit` the `?url` copy is just a
+  path. A `logo` the AUTHOR wrote is a URL they own — never touched, and given no
+  `logoSvg`, so it stays an `<img>`. Two rules hold this up.
+  (1) The `assetsDir`/`assetFileNames` pair the `ssr` env repeats from `client`
+  in `vite.config.ts`: BOTH envs import this module and each resolves `?url` to a
+  URL of its own making, so without the pair the server renders
+  `/assets/icon-<hash>.svg` and the client hydrates against
+  `/_undocs/icon-<hash>.svg` (and the file is emitted twice). Only assets OVER
+  `assetsInlineLimit` show it — a small icon inlines to the same `data:` URI
+  either way, which is why the docs fixture cannot catch it.
+  (2) `AppLogo`'s `v-html` is safe for the same reason the `.docs/` theme layer
+  is: the file is the docs project's own and is read at BUILD time. Inlining it
+  twice per page also means any `id` inside the SVG appears twice — fine for a
+  self-contained mark, wrong the moment one is referenced across documents.
 - **`components/ui/primitives/` is ours, and it is MIT-derived from reka-ui.**
   reka-ui is no longer a dependency, which makes the attribution comment at the
   top of each file MORE load-bearing, not less — it is now the only record of the

@@ -2,7 +2,7 @@ import { resolve, basename } from "node:path";
 import { glob, readFile } from "node:fs/promises";
 import type { Plugin, ViteDevServer } from "vite";
 import { generateAppConfig } from "./src/server/app-config.ts";
-import { docsIconFiles } from "./src/server/docs-public.ts";
+import { DOCS_ICON_ASSET, docsIconFiles, resolveDocsIcon } from "./src/server/docs-public.ts";
 import { BUILTIN_ICONS } from "./src/app/builtin-icons.ts";
 
 // DEV: reload the browser AND Nitro's cached SSR entry.
@@ -84,7 +84,31 @@ export function undocsAppConfig(docsDir: string): Plugin {
     async load(id) {
       if (id !== RESOLVED_ID) return;
       const config = await generateAppConfig(docsDir);
-      return `export default ${JSON.stringify(config)};`;
+
+      // The project's own `icon.svg` is a build INPUT, so it goes through the
+      // bundler, in the two forms the app actually needs. `?raw` is the MARK:
+      // `AppLogo` inlines that markup, so the header and footer cost no request
+      // and can style the SVG. `?url` is for the one consumer that can only take
+      // a URL, the favicon `<link>` — hashed, or inlined as a `data:` URI under
+      // `assetsInlineLimit`. Both suffixes state the intent explicitly; a bare
+      // `.svg` resolves like `?url` today, but only because no plugin ahead of
+      // Vite's asset handling claims the extension, and this module is also
+      // imported into the Nitro/SSR graph, where a server bundler's raw-asset
+      // conventions would hand back BYTES instead. A `logo` the author WROTE is
+      // a URL they own and stays untouched — and gets no `logoSvg`.
+      const iconFile = config.docs.logo === DOCS_ICON_ASSET ? resolveDocsIcon(docsDir) : undefined;
+      if (!iconFile) {
+        return `export default ${JSON.stringify(config)};`;
+      }
+      config.docs.logo = undefined;
+      return [
+        `import logo from ${JSON.stringify(iconFile + "?url")};`,
+        `import logoSvg from ${JSON.stringify(iconFile + "?raw")};`,
+        `const config = ${JSON.stringify(config)};`,
+        `config.docs.logo = logo;`,
+        `config.docs.logoSvg = logoSvg;`,
+        `export default config;`,
+      ].join("\n");
     },
 
     configureServer(server: ViteDevServer) {

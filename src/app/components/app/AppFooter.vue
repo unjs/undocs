@@ -4,6 +4,7 @@ import AppFooterNotes from "@app/components/app/AppFooterNotes.vue";
 import AppLink from "@app/components/app/AppLink.ts";
 import Container from "@app/components/Container.vue";
 import SocialButtons from "@app/components/SocialButtons.vue";
+import AppLogo from "@app/components/app/AppLogo.vue";
 const appConfig = useAppConfig();
 </script>
 
@@ -19,11 +20,7 @@ const appConfig = useAppConfig();
       :aria-label="`${appConfig.site.name} on GitHub`"
       class="absolute left-1/2 top-0 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background transition-colors hover:border-brand"
     >
-      <img
-        :src="appConfig.docs.logo"
-        :alt="`${appConfig.site.name} logo`"
-        class="size-7 grayscale"
-      />
+      <AppLogo class="size-7 grayscale" />
     </AppLink>
 
     <Container>

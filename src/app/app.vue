@@ -59,7 +59,12 @@ useHead({
         {
           rel: "icon",
           href: browserTabIcon,
-          type: browserTabIcon.endsWith(".svg") ? "image/svg+xml" : undefined,
+          // A bundled icon arrives as a hashed `.svg` URL or, under
+          // `assetsInlineLimit`, as a `data:` URI that never ends in `.svg`.
+          type:
+            browserTabIcon.endsWith(".svg") || browserTabIcon.startsWith("data:image/svg+xml")
+              ? "image/svg+xml"
+              : undefined,
         },
       ]
     : [],
