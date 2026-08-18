@@ -1,11 +1,12 @@
 import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { defineNitroConfig } from "nitro/config";
 import { loadDocsConfig } from "./src/server/docs-config.ts";
 import { vercel } from "./src/server/vercel.ts";
 import { bundleDocs } from "./src/server/bundle-docs.ts";
 import { rebaseOutput } from "./src/server/rebase-output.ts";
+import { docsPublicDirs, resolveDocsIcon } from "./src/server/docs-public.ts";
 import { normalizeRedirects } from "./src/app/utils/redirects.ts";
 import { crossOriginIsolationHeaders } from "./src/server/cross-origin-isolation.ts";
 import pkg from "./package.json" with { type: "json" };
@@ -62,24 +63,25 @@ const coiHeaders = crossOriginIsolationHeaders(docs.crossOriginIsolation);
 // this is harmless for the default node-server build.
 const vercelLinkDirs = [process.cwd()];
 
-// Static asset dirs served at the site root. undocs ships no logo, so a docs
-// project's `<docsDir>/.docs/public/icon.svg` is the ONLY source of `/icon.svg`
-// (and of the app-config `logo`, defaulted in `generateAppConfig` only when that
-// file exists). Order: docs public first (docs-specific overrides), then the app
-// defaults (`robots.txt`/`sw.js`/`unjs.svg`). Existing dirs only.
-const docsPublicDir = resolve(docsDir, ".docs/public");
-const publicAssets = [
-  existsSync(docsPublicDir) ? { dir: docsPublicDir, maxAge: 0 } : undefined,
-  { dir: r("./src/app/public"), maxAge: 0 },
-].filter(Boolean) as { dir: string; maxAge: number }[];
+// Static asset dirs served at the site root: the docs project's own public dirs
+// (`docsPublicDirs`, in override order) ahead of the app defaults
+// (`robots.txt`/`sw.js`/`unjs.svg`). Existing dirs only. undocs ships no logo, so
+// those docs dirs are the ONLY source of `/icon.svg` (and of the app-config
+// `logo`, defaulted in `generateAppConfig` only when one of them has the file).
+const publicAssets = [...docsPublicDirs(docsDir), r("./src/app/public")]
+  .filter((dir) => existsSync(dir))
+  .map((dir) => ({ dir, maxAge: 0 }));
 
 // Server assets for the dynamic OG-image route (`/_og/**`): Public Sans fonts
-// (`og-image`) plus the docs-override public dir (`og-docs`) so the card can use
-// a project's own `icon.svg` — the card draws no mark without one. Storage
-// mounts (`assets/<baseName>`), distinct from `publicAssets`.
+// (`og-image`) plus the docs public dir the project's `icon.svg` actually lives
+// in (`og-docs`) so the card can draw a project's own mark — it draws none
+// without one. That mount exists for the icon alone, so it FOLLOWS the icon
+// rather than pinning one dir. Storage mounts (`assets/<baseName>`), distinct
+// from `publicAssets`.
+const docsIconFile = resolveDocsIcon(docsDir);
 const serverAssets = [
   { baseName: "og-image", dir: r("./src/server/og-assets") },
-  ...(existsSync(docsPublicDir) ? [{ baseName: "og-docs", dir: docsPublicDir }] : []),
+  ...(docsIconFile ? [{ baseName: "og-docs", dir: dirname(docsIconFile) }] : []),
 ];
 
 export default defineNitroConfig({

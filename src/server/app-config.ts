@@ -1,6 +1,5 @@
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
 import { loadDocsConfig } from "./docs-config.ts";
+import { resolveDocsIcon } from "./docs-public.ts";
 import { highlightCode } from "./content/highlight.ts";
 
 // Build-time source for the virtual config; feature rendering and hero
@@ -18,11 +17,11 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
   docs.branch = docs.branch || "main";
 
   // undocs ships no logo of its own, so `/icon.svg` is only a real URL when the
-  // docs project drops one under `.docs/public` (the override dir
-  // `nitro.config.ts` serves at the site root). Default to it only then —
+  // docs project drops one into a public dir (`.docs/public` or `public`, the
+  // dirs `nitro.config.ts` serves at the site root). Default to it only then —
   // otherwise `logo` stays undefined and the header/footer/favicon render
   // nothing rather than someone else's mark.
-  if (!docs.logo && existsSync(resolve(docsDir, ".docs/public/icon.svg"))) {
+  if (!docs.logo && resolveDocsIcon(docsDir)) {
     docs.logo = "/icon.svg";
   }
 

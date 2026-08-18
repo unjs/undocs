@@ -2,6 +2,7 @@ import { resolve, basename } from "node:path";
 import { glob, readFile } from "node:fs/promises";
 import type { Plugin, ViteDevServer } from "vite";
 import { generateAppConfig } from "./src/server/app-config.ts";
+import { docsIconFiles } from "./src/server/docs-public.ts";
 import { BUILTIN_ICONS } from "./src/app/builtin-icons.ts";
 
 // DEV: reload the browser AND Nitro's cached SSR entry.
@@ -68,9 +69,9 @@ export function undocsAppConfig(docsDir: string): Plugin {
   const RESOLVED_ID = "\0" + VIRTUAL_ID;
   const configDir = resolve(docsDir, ".config");
   // The generated config also DERIVES from a file: `logo` defaults to
-  // `/icon.svg` only when the docs project ships one (see `generateAppConfig`),
-  // so adding or removing that file must regenerate too.
-  const iconFile = resolve(docsDir, ".docs/public/icon.svg");
+  // `/icon.svg` only when the docs project ships one, in either public dir (see
+  // `generateAppConfig`), so adding or removing either must regenerate too.
+  const iconFiles = docsIconFiles(docsDir);
 
   return {
     name: "undocs:app-config",
@@ -90,9 +91,9 @@ export function undocsAppConfig(docsDir: string): Plugin {
       // The docs dir usually lives outside the Vite root, so add its `.config`
       // to the watcher explicitly.
       server.watcher.add(configDir);
-      server.watcher.add(iconFile);
+      server.watcher.add(iconFiles);
       const onChange = (file: string) => {
-        if (!file.startsWith(configDir) && file !== iconFile) return;
+        if (!file.startsWith(configDir) && !iconFiles.includes(file)) return;
         for (const env of Object.values(server.environments)) {
           const mod = env.moduleGraph.getModuleById(RESOLVED_ID);
           if (mod) env.moduleGraph.invalidateModule(mod);
