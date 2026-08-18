@@ -6,8 +6,8 @@ import SocialButtons from "@app/components/SocialButtons.vue";
 
 <template>
   <div class="hidden items-center gap-1 md:flex">
-    <ThemeColorPicker class="-mr-2">
-      <ColorModeButton color="brand" class="rounded-full" />
+    <ThemeColorPicker v-slot="{ accentGlow }" class="-mr-2">
+      <ColorModeButton :accent-glow="accentGlow" class="rounded-full" />
     </ThemeColorPicker>
     <SocialButtons size="lg" stacked blog />
   </div>

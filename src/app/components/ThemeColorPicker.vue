@@ -5,6 +5,13 @@
  * Closed swatches stay mounted for exit transitions but are `inert` so they
  * cannot receive focus or pointer input. Rendering waits until mount because the
  * selected accent comes from client-only storage.
+ *
+ * The trigger's own glyph stays neutral: the current accent shows as a barely
+ * visible glow beneath it (the `accentGlow` slot prop, rendered by
+ * `ColorModeButton`), not as a tint over the whole icon. A MONOCHROME accent
+ * gets none, and that absence is what says "no accent picked". The picker
+ * answers that question because it is the one holding both halves of it (the
+ * visitor's pick and the project's own).
  */
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { cn } from "@app/utils/cn.ts";
@@ -34,9 +41,26 @@ const LABELS: Record<ThemeColor, string> = {
 const projectColor = computed(() => resolveThemeColor(appConfig.ui?.colors?.primary));
 const selected = computed(() => theme.value ?? projectColor.value);
 
+/**
+ * Is the accent on screen monochrome? A raw CSS colour in the config does not
+ * resolve to a `ThemeColor` but is still very much a hue, so the project's own
+ * accent is judged from whether it was SET, not from `projectColor`.
+ */
+const projectIsMono = computed(() => {
+  const configured = appConfig.ui?.colors?.primary;
+  return configured ? resolveThemeColor(configured) === "mono" : true;
+});
+
 const mounted = ref(false);
 onMounted(() => {
   mounted.value = true;
+});
+
+// The pick is client-only, so the SSR shape (the project's accent) has to
+// survive the first client render — same `mounted` gate as `visible` below.
+const accentGlow = computed(() => {
+  const picked = mounted.value ? (theme.preview ?? theme.value) : null;
+  return picked ? picked !== "mono" : !projectIsMono.value;
 });
 
 // `forced` is client-only, so preserve the SSR shape until mount.
@@ -89,7 +113,7 @@ onBeforeUnmount(() => {
     @focusout="onFocusOut"
     @keydown.escape="open = false"
   >
-    <slot />
+    <slot :accent-glow="accentGlow" />
 
     <div
       v-if="visible"

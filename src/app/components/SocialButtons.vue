@@ -40,34 +40,25 @@ const rowLinks = computed<RowLink[]>(() => {
 });
 
 const overlapClass: Record<NonNullable<ButtonVariants["size"]>, string> = {
-  xs: "-ml-1",
-  sm: "-ml-2",
-  md: "-ml-3",
-  lg: "-ml-4",
-};
-
-const expandedOverlapClass: Record<NonNullable<ButtonVariants["size"]>, string> = {
-  xs: "group-hover/socials:-ml-0.5 group-focus-within/socials:-ml-0.5",
-  sm: "group-hover/socials:-ml-1 group-focus-within/socials:-ml-1",
-  md: "group-hover/socials:-ml-1.5 group-focus-within/socials:-ml-1.5",
-  lg: "group-hover/socials:-ml-2 group-focus-within/socials:-ml-2",
+  xs: "-ml-0.5",
+  sm: "-ml-1",
+  md: "-ml-1.5",
+  lg: "-ml-2",
 };
 
 const stackedClass = computed(() =>
   props.stacked
     ? cn(
         "relative rounded-full hover:z-10",
-        "transition-[margin-left,background-color,color] duration-200 ease-out",
+        "transition-[background-color,color] duration-200 ease-out",
         overlapClass[props.size],
-        expandedOverlapClass[props.size],
-        // Repeat `first:` for equal specificity in both expanded states.
-        "first:ml-0 first:group-hover/socials:ml-0 first:group-focus-within/socials:ml-0",
+        "first:ml-0",
       )
     : undefined,
 );
 </script>
 <template>
-  <div :class="stacked ? 'group/socials isolate flex items-center' : 'contents'">
+  <div :class="stacked ? 'isolate flex items-center' : 'contents'">
     <Tooltip v-for="link of rowLinks" :key="link.label" :text="link.label">
       <Button
         :aria-label="link.label"
