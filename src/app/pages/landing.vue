@@ -262,7 +262,7 @@ const [{ data: latest }, { data: root }] = await Promise.all([
     backdrop-filter: blur(20px);
     box-shadow:
       inset 0 1px 0 color-mix(in oklab, var(--foreground) 10%, transparent),
-      0 16px 40px -20px color-mix(in oklab, var(--foreground) 45%, transparent);
+      0 12px 32px -24px color-mix(in oklab, var(--foreground) 28%, transparent);
   }
 
   .hero-code :deep(.prose-pre) {

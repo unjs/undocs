@@ -59,8 +59,11 @@ const secondaryClass =
             <slot name="headline" />
           </div>
 
+          <!-- The glow is `--brand`, like the landing backdrop it usually sits on,
+               so it defaults to a neutral halo under `mono` and picks up the
+               project's accent when one is set. -->
           <h1
-            class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground text-balance"
+            class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground text-balance [text-shadow:0_0_2.5rem_color-mix(in_oklab,var(--brand)_25%,transparent)]"
           >
             <slot name="title">{{ title }}</slot>
           </h1>
