@@ -37,16 +37,12 @@ const themeColorMap: Record<string, string> = {
 };
 
 export default defineLazyEventHandler(async () => {
-  // Icon precedence: docs override, app default, bundled UnJS fallback.
+  // The docs project's own mark, or none: undocs ships no default logo, and a
+  // fallback mark here would put someone else's brand on every card.
   const ogImage = useStorage("assets/og-image");
-  const publicAssets = useStorage("assets/og-public");
   const docsPublic = useStorage("assets/og-docs");
 
-  const iconSvg =
-    (await docsPublic.getItem<string>("icon.svg").catch(() => null)) ||
-    (await publicAssets.getItem<string>("icon.svg").catch(() => null)) ||
-    (await ogImage.getItem<string>("unjs.svg")) ||
-    "";
+  const iconSvg = (await docsPublic.getItem<string>("icon.svg").catch(() => null)) || "";
 
   // Lazy handler caches bundled fonts without a network dependency.
   const loadFont = async (file: string, weight: number) => {
@@ -230,24 +226,30 @@ function template({
             }),
           ]
         : []),
-      container({
-        style: {
-          position: "absolute",
-          right: 60,
-          bottom: 44,
-          width: 160,
-          height: 160,
-          opacity: 0.55,
-          backgroundImage: `radial-gradient(closest-side, ${themeColor} 0%, transparent 70%)`,
-        },
-        children: [],
-      }),
-      image({
-        src: icon,
-        width: 120,
-        height: 120,
-        style: { position: "absolute", right: 80, bottom: 64 },
-      }),
+      // The glow only exists to sit behind the mark, so both go together when
+      // the docs project has no icon.
+      ...(icon
+        ? [
+            container({
+              style: {
+                position: "absolute",
+                right: 60,
+                bottom: 44,
+                width: 160,
+                height: 160,
+                opacity: 0.55,
+                backgroundImage: `radial-gradient(closest-side, ${themeColor} 0%, transparent 70%)`,
+              },
+              children: [],
+            }),
+            image({
+              src: icon,
+              width: 120,
+              height: 120,
+              style: { position: "absolute", right: 80, bottom: 64 },
+            }),
+          ]
+        : []),
     ],
   });
 }

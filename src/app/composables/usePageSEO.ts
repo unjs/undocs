@@ -1,7 +1,7 @@
 import { useRoute } from "@app/router.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { hintPrerenderRoute } from "@app/composables/useContent.ts";
-import { useHead, useSeoMeta } from "@unhead/vue";
+import { useSeoMeta } from "@unhead/vue";
 export interface PageMeta {
   title: string;
   description: string;
@@ -55,16 +55,6 @@ export function usePageSEO(page: PageMeta) {
       height: 630,
       alt: description,
     },
-  });
-
-  useHead({
-    link: [
-      {
-        rel: "icon",
-        type: "image/svg+xml",
-        href: "/icon.svg",
-      },
-    ],
   });
 
   // Prerender the page's OG image alongside its HTML. The card route is now

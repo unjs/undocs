@@ -9,7 +9,11 @@ const appConfig = useAppConfig();
 
 <template>
   <footer class="relative mt-16 border-t border-border">
+    <!-- The badge exists to hang the logo over the footer rule; with no logo
+         there is nothing to hang, so it goes rather than leaving an empty
+         circle (the GitHub link is still in `SocialButtons` below). -->
     <AppLink
+      v-if="appConfig.docs.logo"
       :to="`https://github.com/${appConfig.docs.github}`"
       target="_blank"
       :aria-label="`${appConfig.site.name} on GitHub`"

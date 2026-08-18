@@ -62,23 +62,23 @@ const coiHeaders = crossOriginIsolationHeaders(docs.crossOriginIsolation);
 // this is harmless for the default node-server build.
 const vercelLinkDirs = [process.cwd()];
 
-// Static asset dirs served at the site root. The app-config `logo` is
-// `/icon.svg`; the docs may override it with their own copy under
-// `<docsDir>/.docs/public`. Order: docs public first (docs-specific overrides),
-// then the app defaults (`icon.svg`/`robots.txt`/`unjs.svg`). Existing dirs only.
+// Static asset dirs served at the site root. undocs ships no logo, so a docs
+// project's `<docsDir>/.docs/public/icon.svg` is the ONLY source of `/icon.svg`
+// (and of the app-config `logo`, defaulted in `generateAppConfig` only when that
+// file exists). Order: docs public first (docs-specific overrides), then the app
+// defaults (`robots.txt`/`sw.js`/`unjs.svg`). Existing dirs only.
 const docsPublicDir = resolve(docsDir, ".docs/public");
 const publicAssets = [
   existsSync(docsPublicDir) ? { dir: docsPublicDir, maxAge: 0 } : undefined,
   { dir: r("./src/app/public"), maxAge: 0 },
 ].filter(Boolean) as { dir: string; maxAge: number }[];
 
-// Server assets for the dynamic OG-image route (`/_og/**`): Public Sans fonts +
-// the UnJS fallback mark (`og-image`), plus app default and docs-override
-// public dirs (`og-public`/`og-docs`) so the card can use a project's own
-// `icon.svg`. Storage mounts (`assets/<baseName>`), distinct from `publicAssets`.
+// Server assets for the dynamic OG-image route (`/_og/**`): Public Sans fonts
+// (`og-image`) plus the docs-override public dir (`og-docs`) so the card can use
+// a project's own `icon.svg` — the card draws no mark without one. Storage
+// mounts (`assets/<baseName>`), distinct from `publicAssets`.
 const serverAssets = [
   { baseName: "og-image", dir: r("./src/server/og-assets") },
-  { baseName: "og-public", dir: r("./src/app/public") },
   ...(existsSync(docsPublicDir) ? [{ baseName: "og-docs", dir: docsPublicDir }] : []),
 ];
 
@@ -111,7 +111,7 @@ export default defineNitroConfig({
   // `src/app/entry-server.ts` — which server-renders `app.vue` and inlines the
   // hydration payload consumed by the client bundle.
 
-  // Serve docs/app static files (icon.svg, robots.txt, unjs.svg, ...) at the
+  // Serve docs/app static files (robots.txt, sw.js, docs icon.svg, ...) at the
   // site root. Copied into `.output/public` at build time and served by the
   // node-server preset.
   publicAssets,

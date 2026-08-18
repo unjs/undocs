@@ -54,12 +54,15 @@ useHead({
   htmlAttrs: {
     lang: appConfig.docs.lang || "en",
   },
-  link: [
-    {
-      rel: "icon",
-      href: browserTabIcon,
-    },
-  ],
+  link: browserTabIcon
+    ? [
+        {
+          rel: "icon",
+          href: browserTabIcon,
+          type: browserTabIcon.endsWith(".svg") ? "image/svg+xml" : undefined,
+        },
+      ]
+    : [],
 });
 
 const route = useRoute();

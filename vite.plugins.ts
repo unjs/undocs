@@ -67,6 +67,10 @@ export function undocsAppConfig(docsDir: string): Plugin {
   const VIRTUAL_ID = "virtual:undocs/app-config";
   const RESOLVED_ID = "\0" + VIRTUAL_ID;
   const configDir = resolve(docsDir, ".config");
+  // The generated config also DERIVES from a file: `logo` defaults to
+  // `/icon.svg` only when the docs project ships one (see `generateAppConfig`),
+  // so adding or removing that file must regenerate too.
+  const iconFile = resolve(docsDir, ".docs/public/icon.svg");
 
   return {
     name: "undocs:app-config",
@@ -86,8 +90,9 @@ export function undocsAppConfig(docsDir: string): Plugin {
       // The docs dir usually lives outside the Vite root, so add its `.config`
       // to the watcher explicitly.
       server.watcher.add(configDir);
+      server.watcher.add(iconFile);
       const onChange = (file: string) => {
-        if (!file.startsWith(configDir)) return;
+        if (!file.startsWith(configDir) && file !== iconFile) return;
         for (const env of Object.values(server.environments)) {
           const mod = env.moduleGraph.getModuleById(RESOLVED_ID);
           if (mod) env.moduleGraph.invalidateModule(mod);

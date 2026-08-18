@@ -11,18 +11,17 @@ import {
   MINISEARCH_SEARCH_OPTIONS,
 } from "../src/server/content/search-options.ts";
 
-// og.get pulls its fonts + fallback icon from Nitro asset storage
-// (`useStorage("assets/og-*")`), which only exists in a built server. Back those
-// bases with the real on-disk asset dirs so the route can render a genuine PNG:
-//   assets/og-image → src/server/og-assets  (bundled fonts + unjs.svg)
-//   assets/og-public → src/app/public       (icon.svg)
-//   assets/og-docs   → (absent — the docs override dir; falls through)
+// og.get pulls its fonts from Nitro asset storage (`useStorage("assets/og-*")`),
+// which only exists in a built server. Back those bases with the real on-disk
+// asset dirs so the route can render a genuine PNG:
+//   assets/og-image → src/server/og-assets  (bundled fonts)
+//   assets/og-docs   → (absent — the docs override dir, the only icon source;
+//                       the card renders without a mark)
 // The factory is hoisted above imports, so it may not close over module-scope
 // vars: it resolves dirs from process.cwd() and imports node:fs lazily at call time.
 vi.mock("nitro/storage", () => {
   const dirs: Record<string, string> = {
     "assets/og-image": "src/server/og-assets",
-    "assets/og-public": "src/app/public",
   };
   const read = async (base: string, key: string, raw: boolean) => {
     const dir = dirs[base];

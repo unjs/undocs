@@ -30,6 +30,7 @@ const mobileLinks = computed(() => mobileNavLinks(navigation?.value));
         :aria-label="appConfig.site.name"
       >
         <img
+          v-if="appConfig.docs.logo"
           :src="appConfig.docs.logo"
           :alt="`${appConfig.site.name} logo`"
           class="h-7 w-7 shrink-0"
