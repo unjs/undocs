@@ -292,6 +292,90 @@ body {
   border-radius: var(--radius-md);
 }
 
+/* The search palette's preview pane renders the SAME `.md` prose the page does,
+ * in a ~30rem column — so this steps the scale down one notch and tightens the
+ * rhythm. SIZES AND SPACING ONLY: colours, code highlighting, callouts and tables
+ * stay exactly as the page renders them, which is the entire point of rendering
+ * the real thing rather than a text approximation. Both classes land on the one
+ * `.md-body` element, so these must stay AFTER the `.md` rules above — equal
+ * specificity, later wins. */
+.md-preview {
+  font-size: var(--text-copy-14);
+  line-height: var(--text-copy-14--line-height);
+}
+
+.md-preview h1 {
+  font-size: var(--text-heading-20);
+  line-height: var(--text-heading-20--line-height);
+  letter-spacing: var(--text-heading-20--letter-spacing);
+  margin-bottom: 0.75rem;
+}
+
+.md-preview h2 {
+  font-size: var(--text-heading-16);
+  line-height: var(--text-heading-16--line-height);
+  letter-spacing: var(--text-heading-16--letter-spacing);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  padding-top: 1rem;
+}
+
+.md-preview h3 {
+  font-size: var(--text-heading-14);
+  line-height: var(--text-heading-14--line-height);
+  letter-spacing: var(--text-heading-14--letter-spacing);
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.md-preview h4,
+.md-preview h5,
+.md-preview h6 {
+  font-size: var(--text-copy-14);
+  line-height: var(--text-copy-14--line-height);
+  letter-spacing: normal;
+  margin-top: 1rem;
+  margin-bottom: 0.375rem;
+}
+
+.md-preview p,
+.md-preview ul,
+.md-preview ol,
+.md-preview blockquote {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.md-preview hr {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.md-preview table {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: var(--text-label-12);
+  line-height: var(--text-label-12--line-height);
+}
+
+/* The pane is `inert`, so a heading's `#` could only ever be a hover artefact of
+ * a page the visitor is not on. */
+.md-preview .md-anchor {
+  display: none;
+}
+
+/* Search-term highlight inside the RENDERED preview. Unlike the result list's
+ * mark it does not recolour the text: it lands on prose that already owns its
+ * colour roles (a link, a `strong`, an inline code span), and a wash of `--brand`
+ * over any of those stays legible where re-colouring to `--brand` would fight
+ * them. Injected by `utils/search-preview.ts`, never authored in content. */
+.md-mark {
+  padding: 0 0.125rem;
+  border-radius: var(--radius-sm);
+  background-color: color-mix(in oklab, var(--brand) 18%, transparent);
+  color: inherit;
+}
+
 /* rangi emits `shj-*` classes; this is the sole Vesper palette because rangi
  * has no Vesper theme and Vesper has no light variant. `theme.test.ts` pins every
  * rangi token type and requires both branches to clear AA against `--muted`.

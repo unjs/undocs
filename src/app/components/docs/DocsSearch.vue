@@ -11,9 +11,11 @@ import {
   toSearchDocuments,
 } from "@server/content/search-options.ts";
 import type { SearchDocument } from "@server/content/search-options.ts";
+import { highlight, snippet } from "@app/utils/search-highlight.ts";
 import Icon from "@app/components/global/Icon.vue";
 import Dialog from "@app/components/ui/Dialog.vue";
 import Kbd from "@app/components/ui/Kbd.vue";
+import DocsSearchPreview from "@app/components/docs/DocsSearchPreview.vue";
 import MiniSearch from "minisearch";
 
 interface SearchSection {
@@ -164,70 +166,6 @@ watch(open, (value) => {
   }
 });
 
-const SNIPPET_MAX = 140;
-
-interface Segment {
-  text: string;
-  mark: boolean;
-}
-
-function toSegments(text: string, ranges: [number, number][]): Segment[] {
-  if (!ranges.length) return text ? [{ text, mark: false }] : [];
-  const out: Segment[] = [];
-  let cursor = 0;
-  for (const [start, end] of ranges) {
-    if (end <= cursor) continue;
-    const from = Math.max(start, cursor);
-    if (from > cursor) out.push({ text: text.slice(cursor, from), mark: false });
-    out.push({ text: text.slice(from, end), mark: true });
-    cursor = end;
-  }
-  if (cursor < text.length) out.push({ text: text.slice(cursor), mark: false });
-  return out;
-}
-
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-// MiniSearch returns terms, not offsets; highlight whole prefix-matched words.
-function matchRanges(text: string, terms: string[]): [number, number][] {
-  const words = terms.filter(Boolean);
-  if (!text || !words.length) return [];
-  const alt = words
-    .map(escapeRegExp)
-    .sort((a, b) => b.length - a.length)
-    .join("|");
-  const re = new RegExp(`(?<![\\p{L}\\p{N}])(?:${alt})[\\p{L}\\p{N}]*`, "giu");
-  const ranges: [number, number][] = [];
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text))) {
-    ranges.push([m.index, m.index + m[0].length]);
-    if (m.index === re.lastIndex) re.lastIndex++;
-  }
-  return ranges;
-}
-
-function highlight(text: string, terms: string[]): Segment[] {
-  return toSegments(text, matchRanges(text, terms));
-}
-
-function snippet(content: string, terms: string[]): Segment[] {
-  const raw = content || "";
-  if (!raw.trim()) return [];
-  const ranges = matchRanges(raw, terms);
-  const offset = ranges.length && ranges[0][0] > 40 ? ranges[0][0] - 40 : 0;
-  const text = raw.slice(offset, offset + SNIPPET_MAX);
-  const shifted = ranges
-    .map(([s, e]) => [s - offset, e - offset] as [number, number])
-    .filter(([s, e]) => e > 0 && s < text.length)
-    .map(([s, e]) => [Math.max(0, s), Math.min(text.length, e)] as [number, number]);
-  const segments = toSegments(text, shifted);
-  if (offset > 0) segments.unshift({ text: "…", mark: false });
-  if (offset + SNIPPET_MAX < raw.length) segments.push({ text: "…", mark: false });
-  return segments;
-}
-
 function routeFor(section: SearchSection): { path: string; hash?: string } {
   const [path, anchor] = section.id.split("#");
   return anchor ? { path, hash: `#${anchor}` } : { path };
@@ -238,7 +176,7 @@ function routeFor(section: SearchSection): { path: string; hash?: string } {
 // entry that navigates to the page top) with the page's matching sections nested
 // beneath it. Only *consecutive* runs are merged, so relevance ranking is
 // preserved — a page whose sections rank far apart still appears as separate
-// groups. `navList` re-flattens the groups in render order and `activeIndex`
+// groups. `nav` re-flattens the groups in render order and `activeIndex`
 // indexes into that flat list; `selectable` is the subset of those indices that
 // are real hits (a synthesized lead is a label, not a result — see `move`).
 interface RenderSection {
@@ -262,9 +200,23 @@ interface RenderGroup {
   sections: RenderSection[];
 }
 
+/**
+ * One row of the flat list `activeIndex` addresses. It carries what the PREVIEW
+ * pane needs as well as the target, because the pane titles itself with the
+ * active result's own label rather than re-deriving one from the page.
+ */
+interface NavEntry {
+  section: SearchSection;
+  terms: string[];
+  label: string;
+  /** Full breadcrumb — unlike the list's, this one keeps the page title, since
+   *  the pane has no group header above it to carry that context. */
+  crumb: string;
+}
+
 const grouped = computed<{
   groups: RenderGroup[];
-  nav: SearchSection[];
+  nav: NavEntry[];
   selectable: number[];
 }>(() => {
   const buckets: { path: string; pageRow?: ResultRow; sections: ResultRow[] }[] = [];
@@ -280,7 +232,7 @@ const grouped = computed<{
   }
 
   const groups: RenderGroup[] = [];
-  const nav: SearchSection[] = [];
+  const nav: NavEntry[] = [];
   const selectable: number[] = [];
   for (const b of buckets) {
     const terms = [
@@ -305,18 +257,24 @@ const grouped = computed<{
       terms,
       isHit: !!b.pageRow,
     };
-    nav.push(headerSection);
+    nav.push({ section: headerSection, terms, label: title, crumb: parents.join(" › ") });
     if (header.isHit) selectable.push(header.index);
     const sections = b.sections.map<RenderSection>((row) => {
+      const titles = row.section.titles || [];
       const item = {
         index: nav.length,
         section: row.section,
         terms: row.terms,
         heading: row.section.title,
-        crumb: (row.section.titles || []).slice(1).join(" › "),
+        crumb: titles.slice(1).join(" › "),
       };
       selectable.push(item.index);
-      nav.push(row.section);
+      nav.push({
+        section: row.section,
+        terms: row.terms,
+        label: row.section.title,
+        crumb: titles.join(" › "),
+      });
       return item;
     });
     groups.push({ path: b.path, header, sections });
@@ -325,7 +283,13 @@ const grouped = computed<{
 });
 
 const renderGroups = computed(() => grouped.value.groups);
-const navList = computed(() => grouped.value.nav);
+
+/** The row the preview pane reads, and the one Enter opens. */
+const activeEntry = computed<NavEntry | undefined>(() => grouped.value.nav[activeIndex.value]);
+
+const activeRoute = computed(() =>
+  activeEntry.value ? routeFor(activeEntry.value.section) : undefined,
+);
 
 watch(grouped, (value) => {
   activeIndex.value = value.selectable[0] ?? 0;
@@ -390,7 +354,7 @@ function onInputKeydown(event: KeyboardEvent) {
     }
     case "Enter": {
       event.preventDefault();
-      select(navList.value[activeIndex.value]);
+      select(activeEntry.value?.section);
       break;
     }
   }
@@ -431,12 +395,28 @@ onUnmounted(() => {
        Arrow/Enter through `onInputKeydown` on the input, and the shell
        deliberately does not compete for those keys (its focus scope only claims
        Tab, at the scope's edges). Escape is the shell's, and the palette never
-       looks at it. -->
+       looks at it.
+
+       From `md` up the panel is TWO columns: a fixed-width result list and a
+       preview of the active result's real content (`DocsSearchPreview`). Below
+       `md` there is no room for a second column, so the pane is dropped and each
+       row keeps the inline snippet that stands in for it.
+
+       The panel is frosted glass, so the overlay passed here does two things
+       differently from the shell's default: it drops `backdrop-blur-sm`, because
+       the blur belongs to ONE surface, and it dims only lightly. The overlay
+       paints UNDER the panel and is therefore most of what the panel's filter
+       samples — at the shell's `/80` there is no page left in frame and the pane
+       is a wash of overlay colour no matter how thin its own fill gets. Dimming
+       is the knob that decides whether this is glass at all; the fill only
+       decides how much. `bg-card` is off the panel for the same reason the
+       opaque fallback lives in CSS — see the `<style>` block below. -->
   <Dialog
     v-model:open="open"
     title="Search documentation"
     description="Search across the documentation and jump to a section."
-    content-class="fixed left-1/2 top-[12vh] z-50 w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-card text-foreground shadow-modal data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2"
+    overlay-class="fixed inset-0 z-50 bg-[var(--overlay)]/30 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0"
+    content-class="search-panel fixed left-1/2 top-[10vh] z-50 flex w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 flex-col overflow-hidden rounded-xl border border-border text-foreground shadow-modal md:top-[8vh] md:max-w-3xl lg:max-w-4xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2"
   >
     <div class="flex items-center gap-2 border-b border-border px-4">
       <Icon name="i-lucide-search" class="size-4 shrink-0 text-muted-foreground" />
@@ -457,11 +437,15 @@ onUnmounted(() => {
         class="size-4 shrink-0 animate-spin text-muted-foreground"
         aria-label="Loading full search index"
       />
-      <Kbd class="hidden sm:inline-flex">Esc</Kbd>
+      <!-- The hint moves into the footer once there is a footer to hold it. -->
+      <Kbd class="hidden sm:inline-flex md:hidden">Esc</Kbd>
     </div>
 
-    <div ref="listEl" class="max-h-[60vh] overflow-y-auto p-2">
-      <template v-if="renderGroups.length">
+    <div v-if="renderGroups.length" class="flex min-h-0 md:h-[min(70vh,34rem)]">
+      <div
+        ref="listEl"
+        class="max-h-[60vh] w-full overflow-y-auto p-2 md:max-h-none md:w-[19rem] md:shrink-0 md:border-r md:border-border"
+      >
         <div
           v-for="group in renderGroups"
           :key="`${group.path}#${group.header.index}`"
@@ -479,10 +463,10 @@ onUnmounted(() => {
             @click="select(headerTarget(group))"
             @mousemove="group.header.isHit && onItemMouseMove($event, group.header.index)"
           >
-            <span v-if="group.header.parents.length" class="text-xs text-muted-foreground">
+            <span v-if="group.header.parents.length" class="truncate text-xs text-muted-foreground">
               {{ group.header.parents.join(" › ") }}
             </span>
-            <span class="flex items-center gap-2 text-sm font-medium">
+            <span class="flex w-full items-center gap-2 text-sm font-medium">
               <Icon name="i-lucide-file-text" class="size-3.5 shrink-0 text-muted-foreground" />
               <span class="min-w-0 truncate">
                 <template
@@ -495,12 +479,13 @@ onUnmounted(() => {
                 >
               </span>
             </span>
+            <!-- The preview pane supersedes this on desktop. -->
             <span
               v-if="
                 group.header.isHit &&
                 snippet(group.header.section.content, group.header.terms).length
               "
-              class="truncate text-xs text-muted-foreground"
+              class="truncate text-xs text-muted-foreground md:hidden"
             >
               <template
                 v-for="(seg, i) in snippet(group.header.section.content, group.header.terms)"
@@ -528,10 +513,10 @@ onUnmounted(() => {
               @click="select(s.section)"
               @mousemove="onItemMouseMove($event, s.index)"
             >
-              <span v-if="s.crumb" class="text-xs text-muted-foreground">
+              <span v-if="s.crumb" class="truncate text-xs text-muted-foreground">
                 {{ s.crumb }}
               </span>
-              <span class="flex items-center gap-2 text-sm font-medium">
+              <span class="flex w-full items-center gap-2 text-sm font-medium">
                 <Icon name="i-lucide-hash" class="size-3.5 shrink-0 text-muted-foreground" />
                 <span class="min-w-0 truncate">
                   <template v-for="(seg, i) in highlight(s.heading, s.terms)" :key="i"
@@ -544,7 +529,7 @@ onUnmounted(() => {
               </span>
               <span
                 v-if="snippet(s.section.content, s.terms).length"
-                class="truncate text-xs text-muted-foreground"
+                class="truncate text-xs text-muted-foreground md:hidden"
               >
                 <template v-for="(seg, i) in snippet(s.section.content, s.terms)" :key="i"
                   ><mark v-if="seg.mark" class="bg-transparent font-medium text-foreground">{{
@@ -556,25 +541,96 @@ onUnmounted(() => {
             </button>
           </div>
         </div>
-      </template>
-
-      <div
-        v-else
-        class="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center text-sm text-muted-foreground"
-      >
-        <Icon name="i-lucide-search-x" class="size-6" />
-        <span>No results for "{{ query }}"</span>
-        <span v-if="suggestion">
-          Did you mean
-          <button
-            type="button"
-            class="font-medium text-brand underline-offset-2 hover:underline"
-            @click="applySuggestion"
-          >
-            {{ suggestion }}</button
-          >?
-        </span>
       </div>
+
+      <div class="hidden min-w-0 flex-1 md:flex">
+        <DocsSearchPreview
+          class="flex-1"
+          :path="activeRoute?.path || ''"
+          :anchor="activeRoute?.hash?.slice(1)"
+          :terms="activeEntry?.terms || []"
+          :title="activeEntry?.label || ''"
+          :crumb="activeEntry?.crumb"
+          @open="select(activeEntry?.section)"
+        />
+      </div>
+    </div>
+
+    <div
+      v-else
+      class="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center text-sm text-muted-foreground"
+    >
+      <Icon name="i-lucide-search-x" class="size-6" />
+      <span>No results for "{{ query }}"</span>
+      <span v-if="suggestion">
+        Did you mean
+        <button
+          type="button"
+          class="font-medium text-brand underline-offset-2 hover:underline"
+          @click="applySuggestion"
+        >
+          {{ suggestion }}</button
+        >?
+      </span>
+    </div>
+
+    <div
+      class="hidden items-center gap-4 border-t border-border px-4 py-2 text-label-12 text-muted-foreground md:flex"
+    >
+      <span class="flex items-center gap-1.5">
+        <Kbd :keys="['↑']" />
+        <Kbd :keys="['↓']" />
+        navigate
+      </span>
+      <span class="flex items-center gap-1.5">
+        <Kbd :keys="['↵']" />
+        open
+      </span>
+      <span class="ml-auto flex items-center gap-1.5">
+        <Kbd>Esc</Kbd>
+        close
+      </span>
     </div>
   </Dialog>
 </template>
+
+<style>
+/* The palette's pane of glass. The page behind a modal is a real backdrop, so
+ * this earns the treatment the landing's hero code block does — and, like it,
+ * blurs exactly ONCE: the backdrop root is the document, so the shell's overlay
+ * (which would otherwise blur that same backdrop first, leaving this a second
+ * pass over an already-blurred image) is passed above with dimming only.
+ * Everything inside the panel — row hover/active fills, the header/footer rules,
+ * the preview pane — is a tint over this one surface.
+ *
+ * The @supports runs the enhancement way round: without `backdrop-filter`,
+ * translucency is not glass, it is the page showing through a text-dense
+ * palette.
+ *
+ * What bounds the transparency is contrast, and the thing that BUYS it is the
+ * tone clamp in the filter, not the fill. A pane over an arbitrary page has no
+ * worst case until the backdrop is bounded: `contrast()` compresses whatever is
+ * behind toward mid, `brightness()` then lands that band where the mode's own
+ * page sits, and only then does the 50% `--card` fill go over it. So the pane
+ * still SHOWS the page — the band it maps into is wide enough to read shapes —
+ * while a full-bleed black code block (light) or light screenshot (dark) can no
+ * longer drag the small `--muted-foreground` labels below AA: worst case ~5.0:1
+ * light and ~4.7:1 dark, against ~6:1 over an ordinary page. This is why the
+ * overlay could go down to 30% at all. Retune the three numbers together. */
+.search-panel {
+  background: var(--card);
+  --panel-glass-tone: contrast(0.4) brightness(1.4);
+}
+
+html.dark .search-panel {
+  --panel-glass-tone: contrast(0.4) brightness(0.55);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .search-panel {
+    background: color-mix(in oklab, var(--card) 50%, transparent);
+    -webkit-backdrop-filter: blur(24px) var(--panel-glass-tone);
+    backdrop-filter: blur(24px) var(--panel-glass-tone);
+  }
+}
+</style>

@@ -171,13 +171,32 @@ NEVER write E2E tests. Ask for it to be tested manually.
   clearing AA on a solid accent fill.
   `test/app/tokens.test.ts` re-derives every text/surface contrast from the
   stylesheet rather than pinning literals.
-- **The landing hero has ONE pane of frosted glass**: the code block
-  (`.hero-code`), styled in `pages/landing.vue`'s scoped block. It exists because
-  the landing is the only page with a backdrop to show through
-  (`FireplaceBackground`) — the same treatment on a docs page is just a lighter
-  block. The lead CTA stands in the same firelight and deliberately does NOT take
-  it: a solid `--brand` fill is one of the shapes, and the fire is its contrast
-  rather than its material. Three things hold the pane up.
+- **Glass is for a surface with a real backdrop, and there are exactly TWO.**
+  The landing hero's code block (`.hero-code`, styled in `pages/landing.vue`'s
+  scoped block) and the search palette's panel (`.search-panel`, in
+  `DocsSearch.vue`'s). Each has something to show through — the landing's
+  `FireplaceBackground`, and the page a modal covers — which is the whole
+  qualification: the same treatment on a docs page block is just a lighter
+  block. The three rules below hold BOTH panes up; the palette meets (1) by
+  passing `Dialog` an `overlayClass` WITHOUT the shell's default
+  `backdrop-blur-sm`, since the overlay paints under the panel and blurring
+  there would make the panel's own filter a second pass over an already-blurred
+  image (the shell's default keeps the blur, for `Mermaid.vue`, which has no
+  glass of its own), and it dims only 30%: THE OVERLAY DECIDES WHETHER THERE IS
+  GLASS AT ALL. It paints under the panel, so it is most of what the panel's
+  filter averages over — at the shell's `/80` no page is left in frame and the
+  pane is a wash of overlay colour however thin its own fill gets. Which is also
+  why the palette answers (3) differently from the hero: a pane over an arbitrary
+  page has no worst case until the BACKDROP is bounded, so the filter carries a
+  per-mode tone clamp (`--panel-glass-tone`: `contrast()` compresses what is
+  behind toward mid, `brightness()` lands that band where the mode's own page
+  sits) and the fill is only 50% `--card`. The clamp is what pays for both the
+  thin fill and the thin overlay; retune the three together, since a dense field
+  of small `--muted-foreground` labels is what the mix has to keep above AA. The
+  landing's lead CTA stands in the same firelight as the
+  hero pane and deliberately does NOT take the treatment: a solid `--brand` fill
+  is one of the shapes, and the fire is its contrast rather than its material.
+  Three things hold a pane up.
   (1) It blurs ONCE. Per filter-effects-2 the backdrop root here is the
   document (`isolation`, which `PageHero` sets, does not form one), so the fire
   is in frame; a second `backdrop-filter` on a surface inside the pane re-blurs
@@ -186,8 +205,8 @@ NEVER write E2E tests. Ask for it to be tested manually.
   (2) `@supports` runs the enhancement way round — no `backdrop-filter`, no
   translucency — because translucency without blur is not glass, it is the fire
   showing through the code.
-  (3) Contrast is what bounds the mixes: the fill is >60% `--muted` so the syntax
-  colours `theme.test.ts` pins against `--muted` still hold.
+  (3) Contrast is what bounds the mixes: the hero's fill is >60% `--muted` so the
+  syntax colours `theme.test.ts` pins against `--muted` still hold.
 - **The accent is ONE token, and what makes that possible is a rule about
   SURFACES.** `--brand` text sits on the page, on a card, or on a wash of itself
   (≤15%) — never on `--muted` or `--accent`. The `--brand-<hue>` table derives
@@ -361,7 +380,42 @@ NEVER write E2E tests. Ask for it to be tested manually.
   path real does NOT earn the key either — two paths that BOTH exist collide the
   same way, and the visitor gets the other page's title/description/outline.
   Agent input goes through `probePage`/`routeExists` (own key namespace);
-  `page()` is only for the visitor's own route.
+  `page()` is only for the visitor's own route. The search palette's preview pane
+  (`DocsSearchPreview.vue`) is the other reader of a path that is not the
+  visitor's route, and it stays off `useAsyncData` entirely: it fetches a page
+  per arrow-key step, so even its own namespace would leave one permanent entry
+  per hovered page in a store that never evicts. Its cache is an
+  instance-local `Map` — instance, not module, so "never written during SSR"
+  holds by construction rather than by comment.
+- **The search preview renders the page's OWN AST, and the pane is `inert`.**
+  `DocsSearchPreview.vue` slices the fetched `body.value` from the matched
+  heading (`utils/search-preview.ts`'s `previewNodes`) and hands it to
+  `MarkdownRenderer` — never a second markdown parser in the browser. The AST it
+  already has is the TRANSFORMED, rangi-HIGHLIGHTED one; re-parsing markdown
+  source client-side would pull in a wasm parser to arrive at strictly less
+  (unhighlighted fences, unresolved links, no MDC components). Four rules hold
+  the pane up.
+  (1) `MarkdownRenderer` is dynamically imported under a LOCAL `<Suspense>`. The
+  boundary is not optional: without it the async component joins `AppPage`'s
+  `<Suspense>` and a palette preview holds the whole PAGE. Its fallback is
+  `previewBlocks`, a flat text outline off the same AST, so the pane is never
+  blank — on a docs page the chunk is already resident and it flashes for a tick,
+  on the landing page (which never loads it) it covers a real fetch.
+  (2) The rendered subtree is `inert`. `MarkdownRenderer` emits real links, real
+  `#` heading anchors (which `scrollTo` the window) and real copy buttons; inside
+  a focus-trapped dialog those are a navigation hazard AND a Tab stop apiece.
+  `inert` is one attribute for both, with `pointer-events-none` alongside for
+  browsers predating it — and it is what lets a click fall through to the
+  scroller, which opens the result.
+  (3) Heading ids are namespaced (`search-preview-`). The renderer stamps an `id`
+  on every heading, slugifying one where the node has none, so the pane would
+  otherwise duplicate the ids of the page BEHIND the modal — the same page, in
+  the common case of searching from the page you are reading.
+  (4) `.md-preview` in `main.css` re-steps the `.md` scale for a ~30rem column and
+  must stay AFTER the `.md` rules: both classes land on the one `.md-body`
+  element, so equal specificity means source order decides. It changes SIZES AND
+  SPACING ONLY — colours, highlighting, callouts and tables render exactly as the
+  page renders them, which is the entire point.
 - **Heading anchors come from md4x, at parse time.** It slugs every heading
   GitHub-compatibly, de-duplicates within the document (`same`, `same-1`) and
   honours an explicit `## Title {#anchor}`, stamping the result on the node.
