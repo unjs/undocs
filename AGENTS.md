@@ -558,6 +558,16 @@ NEVER write E2E tests. Ask for it to be tested manually.
   Anything else that invalidates an SSR module by hand (the `virtual:undocs/*`
   watchers) must reload through `fullReload(server)`, not a bare `server.ws.send`
   (browser-only).
+  The reload is a RACE, not a barrier, and cannot be made one from our side:
+  nitro's dev worker swaps its entry namespace only after `runner.import()`
+  resolves and serves every request in the meantime from the PREVIOUS entry
+  (nitrojs/nitro#4536), so a straddled render still happens roughly once per
+  edit. That is why every INJECTION KEY in `src/app` is `Symbol.for(...)`, never
+  `Symbol(...)` — a registry symbol is the same key in both copies, so the
+  straddled render succeeds instead of throwing, and the finished reload
+  replaces it. Add a key the same way (`router.ts`, `useLanding.ts`,
+  `useTooltipGroup.ts`); `useBodyScrollLock`'s per-call `token` is an identity,
+  not a key, and MUST stay a unique `Symbol()`.
 - **Build flags DCE, except in the dev browser.**
   `import.meta.{server,client,dev,prerender}` are compile-time constants
   (`define` per Vite env), but Vite doesn't apply those `define`s to dev-served

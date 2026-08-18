@@ -21,8 +21,15 @@ import { inject, type Ref } from "vue";
 import type { DocsConfig } from "../../../schema/config.d.ts";
 import type { NavItem } from "@server/content/types.ts";
 
-/** Injection key for the resolved flag (provided by `app.vue`). */
-export const LANDING_KEY = Symbol("undocs-landing");
+/**
+ * Injection key for the resolved flag (provided by `app.vue`).
+ *
+ * A REGISTRY symbol, for the reason `router.ts` spells out: `app.vue` provides
+ * it from the SSR entry's graph while `pages/index.vue` injects it from a
+ * request-time `import()`, and in dev those two can briefly be separate
+ * evaluations — with a unique symbol `useLanding()` would throw instead.
+ */
+export const LANDING_KEY = Symbol.for("undocs-landing");
 
 /** Is this top-level item a section of pages rather than a single page? */
 function isSection(item: NavItem): boolean {

@@ -27,7 +27,12 @@ export interface TooltipGroupOptions {
   skipDelayDuration?: MaybeRefOrGetter<number>;
 }
 
-const TOOLTIP_GROUP = Symbol("undocs-tooltip-group") as InjectionKey<TooltipGroupContext>;
+// A registry symbol, same reason as `router.ts`'s keys: provider and consumer can
+// land in different chunks, and in dev a render can straddle two evaluations of
+// this file. Here the inject is optional, so a mismatch only loses the shared
+// group for a render rather than throwing — matching the others still costs
+// nothing.
+const TOOLTIP_GROUP = Symbol.for("undocs-tooltip-group") as InjectionKey<TooltipGroupContext>;
 
 export function createTooltipGroup(options: TooltipGroupOptions = {}): TooltipGroupContext {
   // Temperature is read imperatively, so keep it outside the reactivity graph.

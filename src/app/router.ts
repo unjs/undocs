@@ -206,8 +206,18 @@ const IS_BROWSER = typeof window !== "undefined";
  */
 const PENDING_BAR_DELAY = 150;
 
-const ROUTER_KEY = Symbol("undocs-router");
-const ROUTE_KEY = Symbol("undocs-route");
+// Registry symbols (`Symbol.for`), not unique ones. In DEV a render can straddle
+// two evaluations of this file: nitro's dev worker keeps serving requests from
+// the PREVIOUS SSR entry while a reload is in flight (nitrojs/nitro#4536), so
+// the stale entry's `app.vue` provides from one copy while the page component
+// the router `import()`s at request time evaluates fresh and injects from
+// another. With unique symbols that mismatch is fatal — `useRoute()` throws
+// "called outside of a router-enabled app" and the page fails to SSR. A registry
+// symbol is the same key across duplicate module instances, so the render
+// survives the split and the completed reload replaces it a moment later. In
+// prod there is only ever one evaluation, so this is free.
+const ROUTER_KEY = Symbol.for("undocs-router");
+const ROUTE_KEY = Symbol.for("undocs-route");
 
 /**
  * @param history Injected by the server entry as a memory history (per-request,
