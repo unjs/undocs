@@ -18,9 +18,12 @@ const appConfig = useAppConfig();
       :to="`https://github.com/${appConfig.docs.github}`"
       target="_blank"
       :aria-label="`${appConfig.site.name} on GitHub`"
-      class="absolute left-1/2 top-0 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background transition-colors hover:border-brand"
+      class="group absolute left-1/2 top-0 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background transition-colors hover:border-brand"
     >
-      <AppLogo class="size-7 grayscale" />
+      <!-- The mark sits monochrome with the rest of the footer chrome and
+           takes its own colours back on hover, as a hint that the badge is a
+           link. -->
+      <AppLogo class="size-7 grayscale transition-[filter] duration-200 group-hover:grayscale-0" />
     </AppLink>
 
     <Container>
