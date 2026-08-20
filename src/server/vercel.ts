@@ -13,6 +13,9 @@ export function vercel(linkDirs: string[]): NitroModule {
         return;
       }
 
+      nitro.options.vercel ??= {}
+      nitro.options.vercel.immutableStaticFiles = true
+
       nitro.hooks.hook("compiled", async () => {
         await rewriteRoutes(nitro.options.output.dir);
         await linkOutput(nitro.options.output.dir, linkDirs);
