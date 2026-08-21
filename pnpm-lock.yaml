@@ -81,8 +81,8 @@ importers:
         specifier: ^2.4.0
         version: 2.4.0(@vueuse/core@14.4.0(vue@3.5.41(typescript@7.0.2)))(vue@3.5.41(typescript@7.0.2))
       nitro:
-        specifier: npm:nitro-nightly@3.0.1-20260820-224726-7536de7e
-        version: nitro-nightly@3.0.1-20260820-224726-7536de7e(vite@8.2.1(@types/node@26.2.0)(jiti@2.7.0))
+        specifier: npm:nitro-nightly@3.0.1-20260821-005124-e36e7a60
+        version: nitro-nightly@3.0.1-20260821-005124-e36e7a60
       ofetch:
         specifier: ^1.5.1
         version: 1.5.1
@@ -1587,15 +1587,10 @@ packages:
   nf3@0.3.23:
     resolution: {integrity: sha512-RWVLAWozmVD3AaDmaU3qMGB3v+yNlH5d9qqStI4e/WLlNQVnJ4YErGDbYCIrGFyrHdbF6I6Baf0Ae6c7tFYmSg==}
 
-  nitro-nightly@3.0.1-20260820-224726-7536de7e:
-    resolution: {integrity: sha512-Wx6gVpumKLCBSDWd4PFnBq15QAXBQ/NwcP1YWHyVHDUUQvBSu/9CqB4DZH9Uod3635ArJNBm3ro9wI5gl6psWQ==}
+  nitro-nightly@3.0.1-20260821-005124-e36e7a60:
+    resolution: {integrity: sha512-aq9jxMgz4ebAl+r1YQezwsdqSAdejaTVQwQaFSvsX7jpQZjes78UbWf1DLMHmOsoUsFo481Ih6D6OydC30a5ew==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
-    peerDependencies:
-      vite: ^7 || ^8
-    peerDependenciesMeta:
-      vite:
-        optional: true
 
   node-addon-api@7.1.1:
     resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
@@ -3025,7 +3020,7 @@ snapshots:
 
   nf3@0.3.23: {}
 
-  nitro-nightly@3.0.1-20260820-224726-7536de7e(vite@8.2.1(@types/node@26.2.0)(jiti@2.7.0)):
+  nitro-nightly@3.0.1-20260821-005124-e36e7a60:
     dependencies:
       consola: 3.4.2
       crossws: 0.4.12(srvx@0.12.7)
@@ -3041,8 +3036,6 @@ snapshots:
       srvx: 0.12.7
       unenv: 2.0.0-rc.24
       unstorage: 2.0.0-alpha.9
-    optionalDependencies:
-      vite: 8.2.1(@types/node@26.2.0)(jiti@2.7.0)
 
   node-addon-api@7.1.1: {}
 
