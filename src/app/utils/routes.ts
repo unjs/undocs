@@ -29,8 +29,23 @@
  * with an `/api` SECTION is entirely ordinary — a library documenting its API is
  * the common case, and `/api/config` is one of its pages. Only what a handler
  * actually claims is denied.
+ *
+ * `/_vercel/` is the second home of the built bundle: `immutableStaticFiles`
+ * moves it to `/_vercel/immutable/<salt>/undocs/` (`src/server/vercel.ts`). The
+ * whole prefix is RESERVED by the host — insights, image optimization, the
+ * immutable store — so denying it covers the bundle wherever the preset puts it
+ * inside, and keeps this list a constant rather than something the build has to
+ * thread in. A docs page cannot live there either way.
  */
-const SERVER_PREFIXES = ["/api/docs/", "/api/_content", "/raw/", "/_og/", "/_undocs/", "/@"];
+const SERVER_PREFIXES = [
+  "/api/docs/",
+  "/api/_content",
+  "/raw/",
+  "/_og/",
+  "/_undocs/",
+  "/_vercel/",
+  "/@",
+];
 
 /**
  * Extensions the server answers as a FILE rather than a page.

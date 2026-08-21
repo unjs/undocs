@@ -526,6 +526,33 @@ NEVER write E2E tests. Ask for it to be tested manually.
   add a header but not remove one; COOP/COEP are inert on the JSON/markdown/PNG
   routes anyway. It is the second producer of a runtime-handler route rule, so the
   h3-rules note above applies to it too.
+- **The client bundle's assets dir is not ours alone to choose, so the name
+  patterns stay UNSET.** `vite.config.ts` asks for `_undocs`; Vercel's
+  `immutableStaticFiles` (turned on in `src/server/vercel.ts`) repoints the whole
+  client build at `_vercel/immutable/<VERCEL_HASH_SALT>/undocs` — the only path
+  that host serves from its cross-deployment store — by setting
+  `nitro.options.buildAssetsDir`, which nitro's vite plugin writes into
+  `build.assetsDir` for the `client` and `ssr` envs alike (so hydration parity
+  survives the override). It supplies `entry`/`chunk`/`assetFileNames` in the
+  same pass, but ONLY where each is unset: a pattern of our own has to spell the
+  dir itself — a rollup/rolldown name is relative to `output.dir`, and there is
+  no assets-dir token — and nitro will not rewrite what it finds (a string only
+  has its `[hash]` widened, a callback is opaque). So OUR dir is the one that
+  survives, which leaves the entry chunk in the immutable dir and every other
+  chunk outside it. Nitro does not warn (its manifest check fires only at ZERO
+  files, and one file is not zero), so nothing catches it but a look at the
+  output. We used to have such callbacks, for readable chunk names; they are
+  gone, and the names are worse for it (`_...slug_` twice, `dist` for mermaid).
+  That is a KNOWN trade, and the cheap-looking ways out have been measured:
+  `codeSplitting.groups` and `manualChunks` name chunks without touching the dir,
+  but either one switches rolldown off its default per-dynamic-import splitting —
+  `MarkdownRenderer` merges into the docs page chunk, so the LANDING page's
+  search preview pulls it, breaking the boundary the preview invariant rests on.
+  Readable names cost a plugin that reads `build.assetsDir` back after nitro has
+  set it; there is no free version. Runtime code that must RECOGNISE a bundle URL
+  sidesteps all of this: `assets-base.ts` lists `/_undocs/` and the reserved
+  `/_vercel/immutable/` as constants, which is also why `isAppRoute` denies
+  `/_vercel/` whole rather than mirroring the dir inside it.
 - **Output lives in the docs dir, via rebase — not `rootDir`.** Nitro's `rootDir`
   MUST stay `pkgRoot`: it drives both c12 config discovery (finding our
   `nitro.config.ts`) and builder-package resolution (`vite` is undocs's dep, not

@@ -63,10 +63,9 @@ import { brandCss, BRAND_STYLE_ID } from "@app/theme-brand.ts";
 // `src/app/inline/*.ts`; `scripts/build-inline.mjs` compiles them with rolldown
 // to the checked-in `.js` beside each one. See `src/app/inline/README.md`.
 import embedThemeCode from "@app/inline/embed-theme.js?raw";
-import assetRecoveryCode from "@app/inline/asset-recovery.js?raw";
 import colorModeCode from "@app/inline/color-mode.js?raw";
 import themeColorCode from "@app/inline/theme-color.js?raw";
-import { ASSETS_BASE } from "@app/assets-base.ts";
+import { isAssetPath } from "@app/assets-base.ts";
 import { DEFAULT_COLOR_MODE } from "@app/color-mode.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { registerUserComponents } from "@app/user-theme.ts";
@@ -194,15 +193,6 @@ const devLoadingOverlay = import.meta.dev
   ? /* html */ `<div id="__undocs_loading" aria-hidden="true"><span class="s"></span></div>`
   : "";
 
-// Recovery for HTML that outlived its assets — see `inline/asset-recovery.ts`
-// for what it does and why it has to be inline.
-//
-// Prod only: in dev a missing chunk is usually Vite mid-restart, and reloading
-// would fight HMR. `import.meta.dev` is compile-time, so this DCEs to `""`.
-const assetRecoveryScript = import.meta.dev
-  ? ""
-  : /* html */ `<script>${assetRecoveryCode}</script>`;
-
 // The visitor's color mode, applied before the first paint — the shell below
 // ships the default mode because the server can't know the preference. See
 // `inline/color-mode.ts`.
@@ -232,7 +222,6 @@ function htmlTemplate(appHtml: string, payload: string): string {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    ${assetRecoveryScript}
     ${colorModeScript}
     ${themeColorScript}
     ${embedThemeScript}
@@ -258,7 +247,7 @@ const handler = defineHandler(async (event): Promise<Response> => {
   // by pattern, before knowing the file exists, so a cacheable 404 here gets
   // stored for a year and never revalidated. Vercel gets the same treatment at
   // the routing layer (`src/server/vercel.ts`); this covers every other preset.
-  if (event.url.pathname.startsWith(ASSETS_BASE)) {
+  if (isAssetPath(event.url.pathname)) {
     return new Response("Not Found", {
       status: 404,
       headers: { "content-type": "text/plain;charset=utf-8", "cache-control": "no-store" },

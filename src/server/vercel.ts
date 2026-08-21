@@ -13,11 +13,21 @@ export function vercel(linkDirs: string[]): NitroModule {
         return;
       }
 
+      // Serve the client bundle from Vercel's cross-deployment immutable store.
+      // The preset acts on this in `build:before`, repointing
+      // `nitro.options.buildAssetsDir` at `_vercel/immutable/<salt>/undocs`, and
+      // nitro's Vite plugin then supplies that dir as the client and `ssr` name
+      // patterns — which works only because `vite.config.ts` leaves those unset
+      // (see the assets-dir invariant in AGENTS.md). The preset self-disables,
+      // with a warning, on a real Vercel build that has not enabled the feature
+      // and on a non-root `baseURL`.
       nitro.options.vercel ??= {};
       nitro.options.vercel.immutableStaticFiles = true;
 
       nitro.hooks.hook("compiled", async () => {
-        await rewriteRoutes(nitro.options.output.dir);
+        // Read at `compiled` time, after the preset had its say. Falls back to
+        // Vite's own `assetsDir` when the feature is off or self-disabled.
+        await rewriteRoutes(nitro.options.output.dir, nitro.options.buildAssetsDir || "_undocs");
         await linkOutput(nitro.options.output.dir, linkDirs);
       });
     },
@@ -25,7 +35,7 @@ export function vercel(linkDirs: string[]): NitroModule {
 }
 
 // https://vercel.com/docs/build-output-api/configuration#routes
-async function rewriteRoutes(outputDir: string) {
+async function rewriteRoutes(outputDir: string, assetsDir: string) {
   const vcJSON = resolve(outputDir, "config.json");
   const vcConfig = JSON.parse(await readFile(vcJSON, "utf8"));
   vcConfig.routes.unshift(
@@ -53,13 +63,16 @@ async function rewriteRoutes(outputDir: string) {
     },
   );
 
-  // Nitro marks `/_undocs/*` immutable before filesystem lookup. Terminate misses
+  // Nitro marks the bundle's own prefix immutable before the filesystem lookup —
+  // from the public-asset entry for `/_undocs/`, or, once
+  // `immutableStaticFiles` moved the bundle, from the preset's generated
+  // `/_vercel/immutable/**` header route. Either way, terminate misses
   // immediately after that lookup with `no-store`, or ISR can cache a transient
   // deployment 404 for a year.
   const fsPhase = vcConfig.routes.findIndex((r: { handle?: string }) => r.handle === "filesystem");
   if (fsPhase !== -1) {
     vcConfig.routes.splice(fsPhase + 1, 0, {
-      src: "^/_undocs/(?:.*)$",
+      src: `^/${assetsDir}/(?:.*)$`,
       status: 404,
       headers: { "cache-control": "no-store" },
     });

@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
-import { resolve, dirname, basename, extname } from "node:path";
-import { defineConfig, type Rolldown } from "vite";
+import { resolve, dirname } from "node:path";
+import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { nitro } from "nitro/vite";
 import tailwindcss from "@tailwindcss/vite";
@@ -159,18 +159,23 @@ export default defineConfig((configEnv) => ({
       build: {
         // Emit hashed client assets under `/_undocs` instead of Vite's default
         // `/assets`, so they don't collide with docs `public/assets/*` files.
+        //
+        // A PRESET MAY OVERRIDE THIS: Vercel's `immutableStaticFiles`
+        // (`src/server/vercel.ts`) repoints the bundle at
+        // `_vercel/immutable/<salt>/undocs`, the only path that host serves from
+        // its cross-deployment store. Nitro supplies the dir it chose as
+        // `entry`/`chunk`/`assetFileNames` — but only while all three are UNSET,
+        // so leave them that way. A pattern of our own has to spell the prefix
+        // itself, string or callback alike (nitro only widens `[hash]` inside a
+        // string it finds, never the dir), and the one that gets spelled is the
+        // one nitro could not replace — which leaves the entry chunk in the
+        // immutable dir and every other chunk outside it, silently.
         assetsDir: "_undocs",
-        rollupOptions: {
+        rolldownOptions: {
           // Client build entry. Previously `index.html`; now the bare `main.ts`
           // module, which the shell renderer (`src/app/entry-server.ts`) imports
           // as `main.ts?assets=client` to inject the hashed bundle into <head>.
           input: r("./src/app/main.ts"),
-          output: {
-            // Readable names for split/shared chunks (see `clientChunkName`) and
-            // kind-grouped subdirs for emitted assets (see `clientAssetName`).
-            chunkFileNames: clientChunkName,
-            assetFileNames: clientAssetName,
-          },
         },
       },
     },
@@ -186,66 +191,17 @@ export default defineConfig((configEnv) => ({
         // Assets are named EXACTLY as in the client build above. Both envs see
         // the same asset imports (the docs project's `icon.svg`, reached through
         // `virtual:undocs/app-config`) and each resolves the import to a URL of
-        // its own making — so a different `assetsDir`/`assetFileNames` here
-        // renders `<img src>` and the favicon at one URL on the server and
-        // another on hydrate. Same config + Vite's content hash = one URL, and
-        // the two envs emit the same file rather than two copies.
+        // its own making — so a different `assetsDir` here renders `<img src>`
+        // and the favicon at one URL on the server and another on hydrate. Same
+        // config + Vite's content hash = one URL, and the two envs emit the same
+        // file rather than two copies. Leaving the name patterns to Vite is part
+        // of that: nitro applies a preset's assets dir to BOTH envs, so they stay
+        // in step through an override too.
         assetsDir: "_undocs",
-        rollupOptions: {
+        rolldownOptions: {
           input: r("./src/app/entry-server.ts"),
-          output: {
-            assetFileNames: clientAssetName,
-          },
         },
       },
     },
   },
 }));
-
-// Friendlier client chunk names, derived from the chunk's primary module.
-// Rolldown otherwise names shared chunks `chunk-<hash>`, dep chunks keep the
-// vendor's own build hash in their basename, and dynamic-route pages collide
-// on an unreadable `_..._` (`pages/[...slug].vue` vs `pages/blog/[...slug]`).
-// Instead:
-//   - app source   → module path under `src/app`, route brackets stripped
-//     (`pages/[...slug].vue` → `pages/slug`).
-//   - vendored dep → `vendor/<pkg>/<leaf>-<hash>.js`, stripping the trailing
-//     build-hash suffix and flattening anonymous `chunk-<hash>` splits.
-//   - anything else → the chunk's name, module basename, or `chunk`.
-// Trailing `[hash]` still guarantees uniqueness.
-function clientChunkName(chunk: Rolldown.PreRenderedChunk): string {
-  const id = chunk.facadeModuleId ?? chunk.moduleIds.at(-1);
-  if (id?.startsWith(appDir)) {
-    const rel = id
-      .slice(appDir.length + 1)
-      .replace(/\.\w+$/, "") // ext
-      .replace(/\[\.\.\.([^\]]+)\]/g, "$1") // catch-all route `[...slug]` → `slug`
-      .replace(/\[([^\]]+)\]/g, "$1"); // dynamic route `[id]` → `id`
-    return `_undocs/${rel}-[hash].js`;
-  }
-  const dep = id?.match(/node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?((?:@[^/]+\/)?[^/]+)/);
-  if (dep && id) {
-    const pkg = dep[1].replace(/^@/, "");
-    const leaf = basename(id)
-      .replace(/\.\w+$/, "") // ext
-      .replace(/(-[A-Z0-9]{8})+$/, "") // vendor build-hash suffix (`journeyDiagram-WII6DRMM`)
-      .replace(/^chunk-.+$/, "chunk"); // vendor's own anonymous `chunk-<hash>` splits
-    return `_undocs/vendor/${pkg}/${leaf || "chunk"}-[hash].js`;
-  }
-  if (chunk.name && !chunk.name.startsWith("chunk")) return `_undocs/${chunk.name}-[hash].js`;
-  if (id) return `_undocs/${basename(id).replace(/\.\w+$/, "")}-[hash].js`;
-  return "_undocs/chunk-[hash].js";
-}
-
-// Group emitted client assets by kind so `_undocs/` isn't a flat dump: fonts →
-// `_undocs/fonts/`, stylesheets → `_undocs/css/`, everything else stays at the
-// `_undocs/` root. Rolldown rewrites the (hashed) references, so nesting is safe.
-function clientAssetName(asset: Rolldown.PreRenderedAsset): string {
-  // Key off the emitted asset name (`main.css`), not `originalFileNames` — the
-  // latter points at the importer (`main.ts`/`index.vue`) for bundled CSS.
-  const src = asset.names?.[0] ?? asset.originalFileNames?.[0] ?? "";
-  const ext = extname(src).toLowerCase();
-  if (/^\.(?:woff2?|ttf|otf|eot)$/.test(ext)) return "_undocs/fonts/[name]-[hash][extname]";
-  if (ext === ".css") return "_undocs/css/[name]-[hash][extname]";
-  return "_undocs/[name]-[hash][extname]";
-}

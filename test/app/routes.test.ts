@@ -56,6 +56,12 @@ describe("isAppRoute", () => {
     expect(assetsDir).toBe("_undocs");
     expect(isAppRoute(`/${assetsDir}/entry-DEADBEEF.js`)).toBe(false);
     expect(isAppRoute(`/${assetsDir}/main-DEADBEEF.css`)).toBe(false);
+    // That dir is only the DEFAULT: the Vercel preset's `immutableStaticFiles`
+    // repoints the whole bundle at the host's reserved `/_vercel/` namespace
+    // (`src/server/vercel.ts`), which is denied as a prefix so the exact dir
+    // inside it — salt, framework name — doesn't have to be mirrored here.
+    expect(isAppRoute("/_vercel/immutable/undocs/main-DEADBEEF0123456.js")).toBe(false);
+    expect(isAppRoute("/_vercel/insights/script.js")).toBe(false);
     // Vite's dev-server namespace.
     expect(isAppRoute("/@vite/client")).toBe(false);
     expect(isAppRoute("/@fs/home/user/undocs/src/app/main.ts")).toBe(false);
