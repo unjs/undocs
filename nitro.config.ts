@@ -8,6 +8,7 @@ import { bundleDocs } from "./src/server/bundle-docs.ts";
 import { rebaseOutput } from "./src/server/rebase-output.ts";
 import { docsPublicDirs, resolveDocsIcon } from "./src/server/docs-public.ts";
 import { normalizeRedirects } from "./src/app/utils/redirects.ts";
+import { resolveI18nConfig } from "./src/app/utils/locale.ts";
 import { crossOriginIsolationHeaders } from "./src/server/cross-origin-isolation.ts";
 import pkg from "./package.json" with { type: "json" };
 
@@ -29,6 +30,7 @@ const docsDir = process.env.UNDOCS_DIR ? resolve(process.env.UNDOCS_DIR) : r("./
 // runtimeConfig in sync). `loadDocsConfig` is shared with the client app-config
 // so an inferred `name` is identical on both sides.
 const docs = await loadDocsConfig(docsDir);
+const i18n = resolveI18nConfig(docs);
 
 // Mirror the CLI: `dir` is resolved relative to the docs cwd (falls back to the
 // docs dir itself when the config omits it).
@@ -257,6 +259,12 @@ export default defineNitroConfig({
         title: llms.full?.title || docs.name || "",
         description: llms.full?.description || docs.description || "",
       },
+      // Multilingual docs — content builder + surround stay locale-scoped.
+      i18n: {
+        localeCodes: i18n.localeCodes,
+        defaultLocale: i18n.defaultLocale,
+        strategy: i18n.strategy,
+      },
     },
   },
 
@@ -278,7 +286,18 @@ export default defineNitroConfig({
   prerender: {
     crawlLinks: true,
     failOnError: true,
-    routes: ["/", "/llms.txt", "/llms-full.txt"],
+    routes: [
+      "/",
+      "/llms.txt",
+      "/llms-full.txt",
+      // Locale homes when i18n is on — switcher/nav for the default locale hide
+      // other locale trees, so crawlLinks alone never reaches `/ru`.
+      ...(i18n.enabled
+        ? i18n.localeCodes
+            .filter((code) => i18n.strategy === "prefix" || code !== i18n.defaultLocale)
+            .map((code) => `/${code}`)
+        : []),
+    ],
     ignore: [],
   },
 });

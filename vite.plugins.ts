@@ -72,6 +72,9 @@ export function undocsAppConfig(docsDir: string): Plugin {
   // `/icon.svg` only when the docs project ships one, in either public dir (see
   // `generateAppConfig`), so adding or removing either must regenerate too.
   const iconFiles = docsIconFiles(docsDir);
+  // UI / MD translation JSON — same virtual module carries `_i18nMessages`.
+  let translationDir = resolve(docsDir, "locales");
+  let devServer: ViteDevServer | undefined;
 
   return {
     name: "undocs:app-config",
@@ -84,6 +87,8 @@ export function undocsAppConfig(docsDir: string): Plugin {
     async load(id) {
       if (id !== RESOLVED_ID) return;
       const config = await generateAppConfig(docsDir);
+      translationDir = resolve(docsDir, config.docs.i18n?.translationDir || "locales");
+      if (devServer) devServer.watcher.add(translationDir);
 
       // The project's own `icon.svg` is a build INPUT, so it goes through the
       // bundler, in the two forms the app actually needs. `?raw` is the MARK:
@@ -113,11 +118,17 @@ export function undocsAppConfig(docsDir: string): Plugin {
 
     configureServer(server: ViteDevServer) {
       // The docs dir usually lives outside the Vite root, so add its `.config`
-      // to the watcher explicitly.
+      // (and translation JSON) to the watcher explicitly.
+      devServer = server;
       server.watcher.add(configDir);
       server.watcher.add(iconFiles);
+      server.watcher.add(translationDir);
       const onChange = (file: string) => {
-        if (!file.startsWith(configDir) && !iconFiles.includes(file)) return;
+        const inTranslations =
+          file === translationDir ||
+          file.startsWith(translationDir + "/") ||
+          file.startsWith(translationDir + "\\");
+        if (!file.startsWith(configDir) && !iconFiles.includes(file) && !inTranslations) return;
         for (const env of Object.values(server.environments)) {
           const mod = env.moduleGraph.getModuleById(RESOLVED_ID);
           if (mod) env.moduleGraph.invalidateModule(mod);

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed, inject, type Ref } from "vue";
+import { computed, inject, watch, type Ref } from "vue";
 import { useRoute } from "@app/router.ts";
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { createError } from "@app/composables/createError.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { useLocaleDocsConfig } from "@app/composables/useLocaleDocsConfig.ts";
+import { useI18nDisableMeta } from "@app/composables/useI18nDisableMeta.ts";
 import { useHead } from "@unhead/vue";
 import { queryPage, hintPrerenderRoute } from "@app/composables/useContent.ts";
 import { usePageSEO } from "@app/composables/usePageSEO.ts";
@@ -22,9 +24,13 @@ import { navBreadcrumb } from "@app/utils/nav.ts";
 import { joinURL } from "ufo";
 import { kebabCase } from "scule";
 import type { NavItem } from "@server/content/types.ts";
+import { useUndocsT } from "@app/composables/useUndocsT.ts";
 
 const appConfig = useAppConfig();
+const localeDocs = useLocaleDocsConfig();
 const route = useRoute();
+const { t } = useUndocsT();
+const disableMetaRef = useI18nDisableMeta();
 
 const { data: page } = await useAsyncData(kebabCase(route.path), () => queryPage(route.path));
 if (!page.value) {
@@ -36,6 +42,15 @@ if (!page.value) {
   });
 }
 
+const pageDisableMeta = computed(() => Boolean((page.value?.meta as any)?.i18n?.disableMeta));
+watch(
+  pageDisableMeta,
+  (v) => {
+    disableMetaRef.value = v;
+  },
+  { immediate: true },
+);
+
 // Prev/next comes embedded in the page payload (single request per navigation).
 const surround = computed(() => page.value?.surround ?? []);
 
@@ -43,9 +58,11 @@ const navigation = inject<Ref<NavItem[]>>("navigation");
 
 const breadcrumb = computed(() => navBreadcrumb(navigation?.value, page.value.path));
 
+const siteName = computed(() => localeDocs.value.name || appConfig.site.name);
+
 usePageSEO({
-  title: `${page.value?.title} - ${appConfig.site.name}`,
-  description: page.value?.description,
+  title: `${page.value?.title} - ${siteName.value}`,
+  description: page.value?.description || localeDocs.value.description || "",
 });
 
 const path = computed(() => route.path.replace(/\/$/, ""));
@@ -97,7 +114,11 @@ useHead({
     </PageHeader>
 
     <template v-if="page.body?.toc?.links?.length" #right>
-      <DocsToc title="On this page" :links="page.body?.toc?.links || []" highlight />
+      <DocsToc
+        :title="page.body?.toc?.title || t('toc.title')"
+        :links="page.body?.toc?.links || []"
+        highlight
+      />
     </template>
 
     <PageBody prose class="break-words">
@@ -112,7 +133,7 @@ useHead({
           :links="[
             {
               icon: 'i-lucide-square-pen',
-              label: `Edit this page ${page.automd ? '(some contents are generated with automd from source)' : ''}`,
+              label: `${t('nav.editPage')}${page.automd ? t('nav.editPageAutomd') : ''}`,
               to: `https://github.com/${appConfig.docs.github}/edit/${appConfig.docs.branch || 'main'}/docs/${page.id.replace(/^content\//, '')}`,
               target: '_blank',
             },

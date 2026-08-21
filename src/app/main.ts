@@ -28,6 +28,8 @@ import { brandCss, BRAND_STYLE_ID } from "@app/theme-brand.ts";
 import { registerUserComponents } from "@app/user-theme.ts";
 import { installLinkCapture } from "@app/link-capture.ts";
 import { installWebMCPPolyfill } from "./webmcp/polyfill.ts";
+import { createUndocsI18n } from "@app/i18n/setup.ts";
+import { resolveI18nConfig } from "@app/utils/locale.ts";
 
 // Preserve the server's first-paint brand style; inject only when absent.
 function applyRuntimeBrand(themeColor: unknown): void {
@@ -74,6 +76,8 @@ function bootstrap(): void {
   applyRuntimeBrand(useAppConfig().ui?.colors?.primary);
 
   const router = createAppRouter();
+  const i18nConfig = resolveI18nConfig(useAppConfig().docs as { lang?: string; i18n?: any });
+  const i18n = i18nConfig.enabled ? createUndocsI18n(router, window.location.pathname) : null;
 
   // Same-origin anchors the app never rendered — raw HTML in markdown, anything a
   // third-party script injects — navigate through the router instead of reloading
@@ -119,6 +123,7 @@ function bootstrap(): void {
   app.use(head);
 
   app.use(router);
+  if (i18n) app.use(i18n as any);
 
   router.isReady().then(() => {
     app.mount("#root");

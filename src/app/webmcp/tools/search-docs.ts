@@ -13,6 +13,9 @@ import type { SearchDocument } from "@server/content/search-options.ts";
 
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { querySearchIndex } from "@app/composables/useContent.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import type { AppRouter } from "@app/router.ts";
+import { getLocaleFromPath, isSameLocalePath, resolveI18nConfig } from "@app/utils/locale.ts";
 import type { ModelContextTool } from "../types.ts";
 import { arraySchema, objectSchema, PATH_PROPERTY } from "./schemas.ts";
 import { clampLimit, siteName, textResult } from "./utils.ts";
@@ -101,7 +104,7 @@ function formatHits(query: string, hits: SearchHit[]): string {
     .join("\n\n");
 }
 
-export function searchDocsTool(): ModelContextTool {
+export function searchDocsTool(router: AppRouter): ModelContextTool {
   return {
     name: "search_docs",
     title: "Search documentation",
@@ -154,18 +157,40 @@ export function searchDocsTool(): ModelContextTool {
       let hits = index.search(q, MINISEARCH_SEARCH_OPTIONS);
       if (hits.length === 0) hits = index.search(q, MINISEARCH_FUZZY_SEARCH_OPTIONS);
 
-      const results: SearchHit[] = hits.slice(0, clampLimit(limit, 10, 50)).map((hit) => {
+      const docs = useAppConfig().docs as { lang?: string; i18n?: any };
+      const i18nConfig = resolveI18nConfig(docs);
+      const currentLocale = getLocaleFromPath(
+        router.currentRoute.path,
+        i18nConfig.localeCodes,
+        i18nConfig.defaultLocale,
+        i18nConfig.strategy,
+      );
+
+      const results: SearchHit[] = [];
+      for (const hit of hits) {
+        if (results.length >= clampLimit(limit, 10, 50)) break;
         const stored = hit as unknown as SearchDocument;
-        // Section ids are `path#slug` — the page plus the heading anchor.
         const [path, hash = ""] = String(stored.id).split("#");
-        return {
+        if (
+          !isSameLocalePath(
+            path || "/",
+            currentLocale,
+            i18nConfig.localeCodes,
+            i18nConfig.defaultLocale,
+            i18nConfig.strategy,
+            i18nConfig.enabled,
+          )
+        ) {
+          continue;
+        }
+        results.push({
           title: stored.title,
           breadcrumb: (stored.titles || []).join(" > ") || undefined,
           path,
           hash: hash ? `#${hash}` : undefined,
           preview: stored.preview || "",
-        };
-      });
+        });
+      }
 
       // Previews are prose (up to `PREVIEW_MAX` of the section's own text), so
       // this result gets the text block too — the structured hits carry the

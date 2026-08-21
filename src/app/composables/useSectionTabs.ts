@@ -2,6 +2,8 @@ import { computed } from "vue";
 import { useRoute } from "@app/router.ts";
 import { useDocsNav } from "@app/composables/useDocsNav.ts";
 import { useLanding } from "@app/composables/useLanding.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { getLocaleFromPath, localeHomePath, resolveI18nConfig } from "@app/utils/locale.ts";
 import { isBlogPath } from "@app/utils/nav.ts";
 
 // Shared source of truth for the horizontal section-tabs sub-nav (rendered by
@@ -12,6 +14,7 @@ export function useSectionTabs() {
   const docsNav = useDocsNav();
   const route = useRoute();
   const landing = useLanding();
+  const i18nConfig = resolveI18nConfig(useAppConfig().docs as { lang?: string; i18n?: any });
 
   // Blog is a section too, but it is not part of the docs tree the tabs switch
   // between — it is a destination alongside them, and it lives in the header's
@@ -37,9 +40,16 @@ export function useSectionTabs() {
   //
   // The exclusion is the landing itself: it is not in any section, so there is
   // no tab to mark active. (A no-landing `/` IS in a section, and keeps the bar.)
-  const visible = computed(
-    () => docsNav.hasSections && tabs.value.length > 1 && !(landing.value && route.path === "/"),
-  );
+  const visible = computed(() => {
+    const locale = getLocaleFromPath(
+      route.path,
+      i18nConfig.localeCodes,
+      i18nConfig.defaultLocale,
+      i18nConfig.strategy,
+    );
+    const home = localeHomePath(locale, i18nConfig.defaultLocale, i18nConfig.strategy);
+    return docsNav.hasSections && tabs.value.length > 1 && !(landing.value && route.path === home);
+  });
 
   return { tabs, visible };
 }

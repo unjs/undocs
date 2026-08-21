@@ -26,7 +26,7 @@ import { searchDocsTool } from "./search-docs.ts";
  */
 export function createDocsTools(router: AppRouter): ModelContextTool[] {
   return [
-    searchDocsTool(),
+    searchDocsTool(router),
     listPagesTool(),
     projectInfoTool(),
     readPageTool(),

@@ -30,6 +30,7 @@ import { pages as userPages } from "virtual:undocs/user-pages";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { isExternalRedirect, normalizeRedirects, resolveRedirect } from "@app/utils/redirects.ts";
 import { findAnchor } from "@app/utils/anchor.ts";
+import { resolveI18nConfig } from "@app/utils/locale.ts";
 
 export interface RouteLocation {
   /** Pathname only, e.g. `/blog/post`. */
@@ -139,20 +140,41 @@ const userRoutes: RouteRecord[] = userPages.map((p) => {
   };
 });
 
+// Locale-prefixed homes / blog (`/ru`, `/ru/blog`, `/ru/blog/post`) when i18n is on.
+const i18nResolved = resolveI18nConfig(useAppConfig().docs as { lang?: string; i18n?: any });
+const { localeCodes, defaultLocale, strategy, enabled: i18nEnabled } = i18nResolved;
+const prefixedLocales = i18nEnabled
+  ? localeCodes.filter((code) => strategy === "prefix" || code !== defaultLocale)
+  : [];
+const localeHomeRe =
+  prefixedLocales.length > 0 ? new RegExp(`^/(${prefixedLocales.map(escapeRe).join("|")})$`) : null;
+const localeBlogRe =
+  prefixedLocales.length > 0
+    ? new RegExp(`^/(${prefixedLocales.map(escapeRe).join("|")})/blog$`)
+    : null;
+const localeBlogPostRe =
+  prefixedLocales.length > 0
+    ? new RegExp(`^/(${prefixedLocales.map(escapeRe).join("|")})/blog/`)
+    : null;
+
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 const routes: RouteRecord[] = [
   ...userRoutes,
   {
-    match: (p) => p === "/",
+    match: (p) => p === "/" || (!!localeHomeRe && localeHomeRe.test(p)),
     component: () => import("@app/pages/index.vue"),
     meta: {},
   },
   {
-    match: (p) => p === "/blog",
+    match: (p) => p === "/blog" || (!!localeBlogRe && localeBlogRe.test(p)),
     component: () => import("@app/pages/blog/index.vue"),
     meta: {},
   },
   {
-    match: (p) => p.startsWith("/blog/"),
+    match: (p) => p.startsWith("/blog/") || (!!localeBlogPostRe && localeBlogPostRe.test(p)),
     component: () => import("@app/pages/blog/[...slug].vue"),
     meta: { layout: "blog" },
   },
@@ -429,8 +451,11 @@ export function createAppRouter(history?: RouterHistory): AppRouter {
     install(app: App) {
       app.provide(ROUTER_KEY, router);
       app.provide(ROUTE_KEY, route);
-      app.config.globalProperties.$router = router;
-      app.config.globalProperties.$route = route;
+      // Cast: installing `vue-router` (peer of `@i18n-micro/vue`) augments
+      // `$router`/`$route` with vue-router types; undocs uses its own router.
+      const globals = app.config.globalProperties as Record<string, unknown>;
+      globals.$router = router;
+      globals.$route = route;
     },
     _pageRendered() {
       stopPending();

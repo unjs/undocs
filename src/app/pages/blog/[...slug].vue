@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { watch } from "vue";
 import { useRoute } from "@app/router.ts";
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { createError } from "@app/composables/createError.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { useLocaleDocsConfig } from "@app/composables/useLocaleDocsConfig.ts";
+import { useI18nDisableMeta } from "@app/composables/useI18nDisableMeta.ts";
 import { queryPage, hintPrerenderRoute } from "@app/composables/useContent.ts";
 import { usePageSEO } from "@app/composables/usePageSEO.ts";
 import { useHead } from "@unhead/vue";
@@ -18,6 +21,8 @@ import MarkdownRenderer from "@app/content/MarkdownRenderer.ts";
 import { kebabCase } from "scule";
 
 const route = useRoute();
+const localeDocs = useLocaleDocsConfig();
+const disableMetaRef = useI18nDisableMeta();
 
 const { data: page } = await useAsyncData(kebabCase(route.path), () => queryPage(route.path));
 
@@ -32,9 +37,17 @@ if (!page.value) {
 
 const appConfig = useAppConfig();
 
+watch(
+  () => Boolean((page.value?.meta as any)?.i18n?.disableMeta),
+  (v) => {
+    disableMetaRef.value = v;
+  },
+  { immediate: true },
+);
+
 usePageSEO({
-  title: `${page.value?.title} - ${appConfig.site.name}`,
-  description: page.value?.description,
+  title: `${page.value?.title} - ${localeDocs.value.name || appConfig.site.name}`,
+  description: page.value?.description || localeDocs.value.description || "",
 });
 
 const rawPath = joinURL("/raw", `${route.path.replace(/\/$/, "")}.md`);

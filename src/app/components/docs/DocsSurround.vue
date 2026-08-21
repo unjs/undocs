@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
-// Based on Nuxt UI's `UContentSurround`.
+import { useUndocsT } from "@app/composables/useUndocsT.ts";
 import type { SurroundItem } from "../../../server/content/types.ts";
 
 defineProps<{
   surround: Array<SurroundItem | null>;
 }>();
+
+const { t } = useUndocsT();
 </script>
 
 <template>
@@ -18,7 +20,7 @@ defineProps<{
     >
       <span class="flex items-center gap-1 text-xs text-muted-foreground">
         <Icon name="i-lucide-chevron-left" class="size-3.5" />
-        Previous
+        {{ t("surround.previous") }}
       </span>
       <span class="font-medium text-foreground group-hover:text-brand">
         {{ surround[0].title }}
@@ -32,7 +34,7 @@ defineProps<{
       class="group flex flex-col items-end gap-1 rounded-lg border border-border p-4 text-right transition-colors hover:border-brand hover:bg-muted/50"
     >
       <span class="flex items-center gap-1 text-xs text-muted-foreground">
-        Next
+        {{ t("surround.next") }}
         <Icon name="i-lucide-chevron-right" class="size-3.5" />
       </span>
       <span class="font-medium text-foreground group-hover:text-brand">

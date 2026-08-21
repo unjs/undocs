@@ -66,16 +66,7 @@ export default defineConfig((configEnv) => ({
       // uses the PUBLIC `undocs/src/*` subpath export (below) — the path a real
       // external consumer would use.
       "@app": r("./src/app"),
-
-      // Public subpath for the docs `.docs/` theme (and any external consumer):
-      // `undocs/src/*` → this package's `src/*`, matching the `exports` map in
-      // package.json. This alias makes Vite/rolldown resolve it deterministically
-      // without relying on a `node_modules/undocs` symlink.
-      "undocs/src": r("./src"),
-
-      // Companion alias for the Nitro/server sources. Node-only engine code
-      // lives here — keep client imports of `@server/*` limited to the
-      // client-safe helpers (`utils.ts`, `types.ts`) per the client/server split.
+      "@shared": r("./src/shared"),
       "@server": r("./src/server"),
 
       // `@vueuse/core` (used directly + transitively by motion-v) is pinned

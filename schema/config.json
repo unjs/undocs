@@ -15,6 +15,58 @@
       "description": "The language of the documentation site.",
       "default": "en"
     },
+    "i18n": {
+      "type": "object",
+      "description": "Multilingual docs. Non-default locales live under docs/<code>/ and are served at /<code>/… . UI chrome uses @i18n-micro/vue.",
+      "additionalProperties": false,
+      "properties": {
+        "locales": {
+          "type": "array",
+          "description": "Locale list (codes or { code, iso, displayName }).",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["code"],
+                "properties": {
+                  "code": { "type": "string" },
+                  "iso": { "type": "string" },
+                  "displayName": { "type": "string" },
+                  "name": { "type": "string" },
+                  "shortDescription": { "type": "string" },
+                  "description": { "type": "string" },
+                  "landing": {
+                    "description": "Per-locale landing overrides (merged onto root via defu)."
+                  },
+                  "banner": { "description": "Per-locale banner overrides." },
+                  "versions": { "description": "Per-locale versions menu overrides." },
+                  "navigation": {
+                    "description": "Nav overrides: full tree or path→{ title, hide } patch map."
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "defaultLocale": {
+          "type": "string",
+          "description": "Default locale code (defaults to docs.lang)."
+        },
+        "strategy": {
+          "type": "string",
+          "enum": ["prefix", "prefix_except_default"],
+          "default": "prefix_except_default",
+          "description": "URL prefix strategy. Content folders follow prefix_except_default (default locale at docs root, others under docs/<code>/). `prefix` rewrites URLs only — keep the same folder layout unless you also prefix the default locale on disk."
+        },
+        "translationDir": {
+          "type": "string",
+          "default": "locales",
+          "description": "Directory (relative to docs root) for UI / MD translation JSON."
+        }
+      }
+    },
     "name": {
       "type": "string",
       "description": "The name of the documentation site.\nDefaults to the `name` of the closest `package.json` (searching upwards from the docs directory up to the repository root)."

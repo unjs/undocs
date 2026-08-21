@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://unpkg.com/undocs/schema/config.json
+
+name: "my-package"
+description: "What this project does."
+github: "unjs/my-package"
+url: "https://my-package.unjs.io"
+themeColor: "blue"

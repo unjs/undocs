@@ -26,6 +26,13 @@ import type {
   TocLink,
 } from "./types.ts";
 
+/** Locale of a route path given configured codes (`/ru/guide` → `ru`). */
+export function localeOfPath(path: string, localeCodes: string[], defaultLocale: string): string {
+  const seg = path.replace(/^\//, "").split("/")[0];
+  if (seg && localeCodes.includes(seg)) return seg;
+  return defaultLocale;
+}
+
 // Dot-prefixed `.navigation.yml` needs its own glob and bypasses the dotfile exclusion below.
 const INCLUDE = ["**/*.{md,yml}", "**/.navigation.yml"];
 // These match leading-slash paths and are shared with the dev watcher.
@@ -34,6 +41,9 @@ export const EXCLUDE = [/(^|\/)\./, /\/node_modules\//, /\/dist\//, /\/\.docs\//
 export interface BuildOptions {
   dir: string;
   automd?: unknown;
+  /** Configured locale codes (from docs.i18n); empty / single = monolingual. */
+  localeCodes?: string[];
+  defaultLocale?: string;
 }
 
 const now = () => performance.now();
@@ -231,7 +241,9 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
       order: orderKey(rel),
       automd,
       meta: fm,
-      body: { type: "mark", value: body, toc: { title: "On this page", links: toc } },
+      // TOC title is translated at render time via `t('toc.title')` — do not
+      // hardcode locale strings in the content builder.
+      body: { type: "mark", value: body, toc: { links: toc } },
     });
   }
 

@@ -24,6 +24,7 @@ import PageHero from "../components/blocks/PageHero.vue";
 import PageSection from "../components/blocks/PageSection.vue";
 import PageFeature from "../components/blocks/PageFeature.vue";
 import PageCard from "../components/blocks/PageCard.vue";
+import I18nMd from "./I18nMd.vue";
 
 const COMPONENTS: Record<string, Component> = {
   pre: ProsePre,
@@ -45,6 +46,9 @@ const COMPONENTS: Record<string, Component> = {
   "page-section": PageSection,
   "page-feature": PageFeature,
   "page-card": PageCard,
+  i18n: I18nMd,
+  "i18n-t": I18nMd,
+  I18nT: I18nMd,
 };
 
 // Built-ins win so user components cannot shadow parser-sensitive overrides.

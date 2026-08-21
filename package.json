@@ -41,6 +41,7 @@
     "@floating-ui/dom": "^1.8.0",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
+    "@i18n-micro/vue": "1.4.0",
     "@iconify-json/lucide": "^1.2.124",
     "@iconify-json/vscode-icons": "^1.2.74",
     "@iconify/utils": "^3.1.4",

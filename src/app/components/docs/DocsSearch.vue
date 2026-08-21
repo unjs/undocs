@@ -17,6 +17,10 @@ import Dialog from "@app/components/ui/Dialog.vue";
 import Kbd from "@app/components/ui/Kbd.vue";
 import DocsSearchPreview from "@app/components/docs/DocsSearchPreview.vue";
 import MiniSearch from "minisearch";
+import { useRoute } from "@app/router.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { isSameLocalePath, getLocaleFromPath, resolveI18nConfig } from "@app/utils/locale.ts";
+import { useUndocsT } from "@app/composables/useUndocsT.ts";
 
 interface SearchSection {
   id: string;
@@ -47,6 +51,29 @@ const props = withDefaults(
 );
 
 const router = useRouter();
+const route = useRoute();
+const { t } = useUndocsT();
+const i18nConfig = resolveI18nConfig(useAppConfig().docs as { lang?: string; i18n?: any });
+const currentLocale = computed(() =>
+  getLocaleFromPath(
+    route.path,
+    i18nConfig.localeCodes,
+    i18nConfig.defaultLocale,
+    i18nConfig.strategy,
+  ),
+);
+
+function sameLocale(path: string): boolean {
+  return isSameLocalePath(
+    path,
+    currentLocale.value,
+    i18nConfig.localeCodes,
+    i18nConfig.defaultLocale,
+    i18nConfig.strategy,
+    i18nConfig.enabled,
+  );
+}
+
 const { open, close } = useDocsSearch();
 
 const query = ref("");
@@ -122,7 +149,10 @@ const indexLoading = computed(() => indexPending.value && navSections.value.leng
 const results = computed<ResultRow[]>(() => {
   const q = query.value.trim();
   if (!q) {
-    return navSections.value.slice(0, 20).map((section) => ({ section, terms: [] }));
+    return navSections.value
+      .filter((section) => sameLocale(section.id.split("#")[0] || "/"))
+      .slice(0, 20)
+      .map((section) => ({ section, terms: [] }));
   }
   // Match all terms first; use the typo-tolerant pass only as a fallback.
   let hits = index.value.search(q, MINISEARCH_SEARCH_OPTIONS);
@@ -132,6 +162,8 @@ const results = computed<ResultRow[]>(() => {
   const rows: ResultRow[] = [];
   for (let i = 0; i < hits.length && rows.length < RESULT_LIMIT; i++) {
     const hit = hits[i] as unknown as SearchDocument & { terms: string[] };
+    const path = (hit.id || "").split("#")[0] || "/";
+    if (!sameLocale(path)) continue;
     rows.push({
       section: {
         id: hit.id,
@@ -413,8 +445,8 @@ onUnmounted(() => {
        opaque fallback lives in CSS — see the `<style>` block below. -->
   <Dialog
     v-model:open="open"
-    title="Search documentation"
-    description="Search across the documentation and jump to a section."
+    :title="t('search.title')"
+    :description="t('search.description')"
     overlay-class="fixed inset-0 z-50 bg-[var(--overlay)]/30 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0"
     content-class="search-panel fixed left-1/2 top-[10vh] z-50 flex w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 flex-col overflow-hidden rounded-xl border border-border text-foreground shadow-modal md:top-[8vh] md:max-w-3xl lg:max-w-4xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2"
   >
@@ -423,7 +455,7 @@ onUnmounted(() => {
       <input
         v-model="query"
         type="text"
-        placeholder="Search documentation..."
+        :placeholder="t('search.placeholder')"
         autocomplete="off"
         autocorrect="off"
         autocapitalize="off"
@@ -561,7 +593,7 @@ onUnmounted(() => {
       class="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center text-sm text-muted-foreground"
     >
       <Icon name="i-lucide-search-x" class="size-6" />
-      <span>No results for "{{ query }}"</span>
+      <span>{{ t("search.noResultsFor", { query }) }}</span>
       <span v-if="suggestion">
         Did you mean
         <button

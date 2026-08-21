@@ -7,9 +7,11 @@ import DropdownMenu from "@app/components/ui/DropdownMenu.vue";
 import { useClipboard } from "@vueuse/core";
 import { $fetch } from "ofetch";
 import { useRuntimeConfig } from "@app/composables/useRuntimeConfig.ts";
+import { useUndocsT } from "@app/composables/useUndocsT.ts";
 
 const route = useRoute();
 const appBaseURL = useRuntimeConfig().app?.baseURL || "/";
+const { t } = useUndocsT();
 
 const { copy, copied } = useClipboard();
 
@@ -21,9 +23,9 @@ const markdownLink = computed(() => {
   const origin = !import.meta.server ? window.location.origin : "";
   return `${origin}${appBaseURL}raw${route.path}.md`;
 });
-const items = [
+const items = computed(() => [
   {
-    label: "Copy Markdown Link",
+    label: t("copy.markdownLink"),
     icon: "i-lucide-link",
     onSelect() {
       copy(markdownLink.value);
@@ -47,7 +49,7 @@ const items = [
     target: "_blank",
     to: `https://claude.ai/new?q=${encodeURIComponent(`Read ${markdownLink.value} so I can ask questions about it.`)}`,
   },
-];
+]);
 
 async function copyPage() {
   const page = await $fetch<string>(`/raw${route.path}.md`);
@@ -62,8 +64,8 @@ async function copyPage() {
       :icon="copied ? 'i-lucide-check' : 'i-lucide-copy'"
       color="neutral"
       variant="soft"
-      aria-label="Copy page as Markdown"
-      title="Copy page as Markdown"
+      :aria-label="t('copy.page')"
+      :title="t('copy.page')"
       :ui="{
         leadingIcon: 'text-neutral',
       }"

@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { useLocaleDocsConfig } from "@app/composables/useLocaleDocsConfig.ts";
 import Button from "@app/components/ui/Button.vue";
 import DropdownMenu from "@app/components/ui/DropdownMenu.vue";
-const appConfig = useAppConfig();
+
+const localeDocs = useLocaleDocsConfig();
+
+const versions = computed(() => localeDocs.value.versions || []);
 
 const activeVersion = computed(() => {
-  return appConfig.docs.versions.find((version) => version.active) || appConfig.docs.versions[0];
+  return versions.value.find((version) => version.active) || versions.value[0];
 });
 const items = computed(() => {
-  return appConfig.docs.versions.map((version) => {
+  return versions.value.map((version) => {
     if (activeVersion.value === version) {
       return {
         label: version.label,

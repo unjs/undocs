@@ -4,6 +4,34 @@ name: "UnDocs"
 shortDescription: "Docs, made easy."
 description: "Elegant documentation tooling for UnJS ecosystem."
 github: "unjs/undocs"
+lang: en
+i18n:
+  defaultLocale: en
+  strategy: prefix_except_default
+  locales:
+    - code: en
+      iso: en-US
+      displayName: English
+    - code: ru
+      iso: ru-RU
+      displayName: Русский
+      name: "UnDocs"
+      shortDescription: "Документация без боли."
+      description: "Элегантный тулинг документации для экосистемы UnJS."
+      landing:
+        heroTitle: "Документация UnDocs"
+        heroSubtitle: "Документация без боли."
+        heroDescription: "Элегантный тулинг документации для экосистемы UnJS."
+        features:
+          - title: "Просто использовать"
+            icon: "⚡"
+            description: "Пишите *документацию* в Markdown — не возитесь с тулингом."
+          - title: "Nitro + Vite"
+            icon: "logos:vitejs"
+            description: "На [Nitro](https://nitro.build), [Vite](https://vite.dev) и [Vue](https://vuejs.org)."
+          - title: "Деплой куда угодно"
+            icon: "✨"
+            description: "Документацию можно разместить на любом static-хостинге."
 # themeColor: blue
 socials:
   x: "https://x.com/unjsio"
@@ -14,6 +42,7 @@ sponsors:
 url: "https://undocs.pages.dev"
 redirects:
   "/docs": "/guide"
+  "/ru/docs": "/ru/guide"
 automd: true
 landing:
   heroLinks:

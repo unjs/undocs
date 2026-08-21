@@ -58,6 +58,8 @@ import {
 import { PAYLOAD_GLOBAL, serializePayload, type UndocsPayload } from "@app/ssr/payload.ts";
 import { builtinIconNames, seedBuiltinIcons } from "@app/ssr/icons.ts";
 import { brandCss, BRAND_STYLE_ID } from "@app/theme-brand.ts";
+import { createUndocsI18n } from "@app/i18n/setup.ts";
+import { getLocaleFromPath, resolveI18nConfig } from "@app/utils/locale.ts";
 
 // The compiled inline `<head>` programs, imported as text. Sources live in
 // `src/app/inline/*.ts`; `scripts/build-inline.mjs` compiles them with rolldown
@@ -98,6 +100,8 @@ async function renderRoot(
   if (brand) head.push({ style: [{ id: BRAND_STYLE_ID, innerHTML: brand }] });
 
   const router = createAppRouter(createMemoryHistory());
+  const i18nConfig = resolveI18nConfig(useAppConfig().docs as { lang?: string; i18n?: any });
+  const i18n = i18nConfig.enabled ? createUndocsI18n(router, routePath) : null;
   const app = createSSRApp({ setup: () => rootRender });
 
   // User `.docs/components/**` registered globally (auto-import stand-in), so the
@@ -116,6 +120,7 @@ async function renderRoot(
   };
 
   app.use(router);
+  if (i18n) app.use(i18n as any);
   app.use(head);
 
   await router.push(routePath);
@@ -216,9 +221,9 @@ const themeColorScript = /* html */ `<script>${themeColorCode}</script>`;
 // and has to win over the visitor's stored preference.
 const embedThemeScript = /* html */ `<script>${embedThemeCode}</script>`;
 
-function htmlTemplate(appHtml: string, payload: string): string {
+function htmlTemplate(appHtml: string, payload: string, htmlLang = "en"): string {
   return /* html */ `<!DOCTYPE html>
-<html lang="en" dir="ltr" class="${DEFAULT_COLOR_MODE}">
+<html lang="${htmlLang}" dir="ltr" class="${DEFAULT_COLOR_MODE}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -333,7 +338,23 @@ const handler = defineHandler(async (event): Promise<Response> => {
     ...(errorProp ? { error: errorProp } : {}),
   };
 
-  const html = await transformHtmlTemplate(head, htmlTemplate(appHtml, serializePayload(payload)));
+  const htmlLang = (() => {
+    const docs = useAppConfig().docs as { lang?: string; i18n?: any; url?: string };
+    const cfg = resolveI18nConfig(docs);
+    const pathOnly = url.pathname;
+    if (!cfg.enabled) {
+      const loc = cfg.locales.find((l) => l.code === (docs.lang || cfg.defaultLocale));
+      return loc?.iso || docs.lang || cfg.defaultLocale || "en";
+    }
+    const code = getLocaleFromPath(pathOnly, cfg.localeCodes, cfg.defaultLocale, cfg.strategy);
+    const loc = cfg.locales.find((l) => l.code === code);
+    return loc?.iso || code;
+  })();
+
+  const html = await transformHtmlTemplate(
+    head,
+    htmlTemplate(appHtml, serializePayload(payload), htmlLang),
+  );
 
   const headers: Record<string, string> = { "content-type": "text/html;charset=utf-8" };
 

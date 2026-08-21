@@ -3,6 +3,7 @@
 import Icon from "@app/components/global/Icon.vue";
 import { computed, ref, useSlots } from "vue";
 import { useCodeIcon } from "@app/composables/useCodeIcon.ts";
+import { useUndocsT } from "@app/composables/useUndocsT.ts";
 
 const props = defineProps<{
   code?: string;
@@ -15,6 +16,7 @@ const props = defineProps<{
 
 const slots = useSlots();
 const hasSlot = computed(() => !!slots.default);
+const { t } = useUndocsT();
 
 const resolveCodeIcon = useCodeIcon();
 const fileIcon = computed(() => resolveCodeIcon(props.filename, props.language, props.icon));
@@ -48,7 +50,7 @@ async function copy() {
       type="button"
       class="absolute right-2 z-10 inline-flex size-7 items-center justify-center rounded-md border border-border bg-background text-muted-foreground opacity-0 transition hover:text-foreground group-hover:opacity-100"
       :class="filename ? 'top-9' : 'top-2'"
-      :aria-label="copied ? 'Copied' : 'Copy code'"
+      :aria-label="copied ? t('copy.copied') : t('copy.code')"
       @click="copy"
     >
       <Icon :name="copied ? 'i-lucide-check' : 'i-lucide-copy'" class="size-3.5" />

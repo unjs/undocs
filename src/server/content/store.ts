@@ -28,9 +28,18 @@ function resolveDir(configuredDir?: string): string {
 export function getIndex(): Promise<ContentIndex> {
   if (!cache) {
     const config = useRuntimeConfig();
-    const docs = (config.undocs || {}) as { dir?: string; automd?: unknown };
+    const docs = (config.undocs || {}) as {
+      dir?: string;
+      automd?: unknown;
+      i18n?: { localeCodes?: string[]; defaultLocale?: string };
+    };
     const dir = resolveDir(docs.dir);
-    cache = buildIndex({ dir, automd: docs.automd });
+    cache = buildIndex({
+      dir,
+      automd: docs.automd,
+      localeCodes: docs.i18n?.localeCodes,
+      defaultLocale: docs.i18n?.defaultLocale,
+    });
   }
   return cache;
 }

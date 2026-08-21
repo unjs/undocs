@@ -51,7 +51,14 @@ export function isWithin(path: string, base: string | undefined): boolean {
  * out of it.
  */
 export function isBlogPath(path: string | undefined): boolean {
-  return isWithin(path ?? "", "/blog");
+  const p = path ?? "";
+  if (isWithin(p, "/blog")) return true;
+  // Locale-prefixed blog: `/ru/blog`, `/ru/blog/post` (first segment ≠ "blog").
+  const parts = p.replace(/^\//, "").split("/");
+  if (parts.length >= 2 && parts[1] === "blog") {
+    return parts.length === 2 || p.startsWith(`/${parts[0]}/blog/`);
+  }
+  return false;
 }
 
 /**

@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { computed, inject, type Ref } from "vue";
+import { computed, inject, watch, type Ref } from "vue";
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { useLocaleDocsConfig } from "@app/composables/useLocaleDocsConfig.ts";
+import { useI18nDisableMeta } from "@app/composables/useI18nDisableMeta.ts";
+import { useUndocsT } from "@app/composables/useUndocsT.ts";
 import { queryBlog, queryPage } from "@app/composables/useContent.ts";
 import { usePageSEO } from "@app/composables/usePageSEO.ts";
+import { useRoute } from "@app/router.ts";
 import { titleCase } from "@app/utils/title.ts";
 import { isColoredIcon, isEmojiIcon } from "@app/utils/icons.ts";
 import Button from "@app/components/ui/Button.vue";
@@ -30,60 +34,81 @@ import { defu } from "defu";
 
 type LandingConfig = Exclude<DocsConfig["landing"], boolean | undefined>;
 
+const route = useRoute();
 const appConfig = useAppConfig();
+const localeDocs = useLocaleDocsConfig();
+const disableMetaRef = useI18nDisableMeta();
+const { t } = useUndocsT();
 
-const docsConfig = appConfig.docs as DocsConfig;
+const docsConfig = computed(() => localeDocs.value as DocsConfig);
 
 // Boolean landing values only toggle the route; only object values configure this page.
-const landingConfig: LandingConfig =
-  typeof docsConfig.landing === "object" ? docsConfig.landing : {};
+const landingConfig = computed<LandingConfig>(() =>
+  typeof docsConfig.value.landing === "object" && docsConfig.value.landing
+    ? docsConfig.value.landing
+    : {},
+);
 
 // Derive the default CTA from rendered nav so it cannot point to `/`; omit it for empty docs.
 const navigation = inject<Ref<NavItem[]>>("navigation");
 const startPath = firstDocsPage(navigation?.value);
 
-const landing: LandingConfig & { _github: string } = defu(landingConfig, {
-  navigation: false,
+const landing = computed(() => {
+  const cfg = docsConfig.value;
+  const lc = landingConfig.value;
+  const merged: LandingConfig & { _github: string } = defu(lc, {
+    navigation: false,
 
-  title: docsConfig.name,
-  description: docsConfig.description,
+    title: cfg.name,
+    description: cfg.description,
 
-  heroTitle: docsConfig.name,
-  heroSubtitle: docsConfig.shortDescription,
-  heroDescription: docsConfig.description,
-  heroLinks: {
-    ...(startPath && {
-      primary: {
-        label: "Get Started",
-        icon: "i-lucide-rocket",
-        to: startPath,
-        order: 0,
+    heroTitle: cfg.name,
+    heroSubtitle: cfg.shortDescription,
+    heroDescription: cfg.description,
+    heroLinks: {
+      ...(startPath && {
+        primary: {
+          label: "Get Started",
+          icon: "i-lucide-rocket",
+          to: startPath,
+          order: 0,
+        },
+      }),
+      github: {
+        label: "View on GitHub",
+        icon: "i-simple-icons-github",
+        color: "white",
+        to: `https://github.com/${cfg.github}`,
+        target: "_blank",
+        order: 100,
       },
-    }),
-    github: {
-      label: "View on GitHub",
-      icon: "i-simple-icons-github",
-      color: "white",
-      to: `https://github.com/${docsConfig.github}`,
-      target: "_blank",
-      order: 100,
     },
-  },
 
-  featuresTitle: "",
-  features: [],
+    featuresTitle: "",
+    features: [],
 
-  _github: docsConfig.github,
+    _github: cfg.github,
+  });
+
+  merged._heroMdTitle =
+    merged._heroMdTitle ||
+    `[${merged.heroTitle}]{.text-brand} :br [${merged.heroSubtitle}]{.text-4xl}`;
+  return merged;
 });
-
-landing._heroMdTitle =
-  landing._heroMdTitle ||
-  `[${landing.heroTitle}]{.text-brand} :br [${landing.heroSubtitle}]{.text-4xl}`;
 
 usePageSEO({
-  title: `${appConfig.site.name} - ${landing!.heroSubtitle}`,
-  description: landing!.description,
+  title: `${localeDocs.value.name || appConfig.site.name} - ${landing.value.heroSubtitle}`,
+  description: landing.value.description || localeDocs.value.description || "",
 });
+
+// Landing has no page frontmatter for disableMeta — keep locale SEO on.
+watch(
+  () => route.path,
+  () => {
+    disableMetaRef.value = false;
+  },
+  { immediate: true },
+);
 
 function normalizeHeroLinks(links: LandingConfig["heroLinks"]) {
   return (
@@ -113,24 +138,24 @@ function normalizeHeroLinks(links: LandingConfig["heroLinks"]) {
 }
 
 const hero = computed(() => {
-  if (!landing!._heroMdTitle) {
+  const L = landing.value;
+  if (!L._heroMdTitle) {
     return;
   }
-  const withFeatures =
-    !landing!.heroCode && landing.featuresLayout === "hero" && landing.features?.length > 0;
+  const withFeatures = !L.heroCode && L.featuresLayout === "hero" && (L.features?.length ?? 0) > 0;
   return {
-    title: landing!._heroMdTitle,
-    description: landing!.heroDescription,
-    links: normalizeHeroLinks(landing!.heroLinks),
+    title: L._heroMdTitle,
+    description: L.heroDescription,
+    links: normalizeHeroLinks(L.heroLinks),
     withFeatures,
-    orientation: landing!.heroCode || withFeatures ? "horizontal" : "vertical",
-    code: landing!.heroCode,
+    orientation: L.heroCode || withFeatures ? "horizontal" : "vertical",
+    code: L.heroCode,
   } as const;
 });
 
 // Grid draws empty tracks, so responsive row counts and corner lines are explicit.
 const featureGrid = computed(() => {
-  const count = landing.features?.length || 0;
+  const count = landing.value.features?.length || 0;
   const columns = { sm: 1, md: 2, lg: 3 };
   const rows = {
     sm: Math.max(1, count),
@@ -156,8 +181,8 @@ const featureGrid = computed(() => {
 const [{ data: latest }, { data: root }] = await Promise.all([
   useAsyncData("blog-latest", () => queryBlog().then((res) => res[0] || null)),
 
-  // This param-less root query is also discoverable by the prerender recorder.
-  useAsyncData("index", () => queryPage("/")),
+  // Locale-aware root page under the hero (e.g. `/ru` index.md).
+  useAsyncData(`index:${localeDocs.value._locale}`, () => queryPage(route.path || "/")),
 ]);
 </script>
 
@@ -198,7 +223,7 @@ const [{ data: latest }, { data: root }] = await Promise.all([
       </ProseCodeGroup>
 
       <div v-else-if="hero.withFeatures" class="flex flex-col gap-6">
-        <h2 class="sr-only">{{ landing.featuresTitle || "Features" }}</h2>
+        <h2 class="sr-only">{{ landing.featuresTitle || t("landing.features") }}</h2>
         <PageCard v-for="(item, index) of landing.features" :key="index" v-bind="item" />
       </div>
     </PageHero>
@@ -212,7 +237,7 @@ const [{ data: latest }, { data: root }] = await Promise.all([
     <PageSection
       v-if="landing.features?.length > 0"
       :title="landing.featuresTitle || undefined"
-      :sr-title="landing.featuresTitle || 'Features'"
+      :sr-title="landing.featuresTitle || t('landing.features')"
       :ui="{
         container: 'pt-4 sm:pt-8 lg:pt-12',
         body: 'mt-0',

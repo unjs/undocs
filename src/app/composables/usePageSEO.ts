@@ -2,11 +2,17 @@ import { useRoute } from "@app/router.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { hintPrerenderRoute } from "@app/composables/useContent.ts";
 import { useSeoMeta } from "@unhead/vue";
+
 export interface PageMeta {
   title: string;
   description: string;
 }
 
+/**
+ * Page title/description + OG/Twitter cards.
+ * Locale SEO (hreflang / og:locale) is owned by `app.vue` via `useLocaleHead`
+ * and page frontmatter locale-SEO opt-out — never gated here.
+ */
 export function usePageSEO(page: PageMeta) {
   const route = useRoute();
   const appConfig = useAppConfig();

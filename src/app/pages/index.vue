@@ -1,24 +1,32 @@
 <script setup lang="ts">
-// The `/` route, which is one of two pages depending on the docs' shape:
-// the marketing landing (`landing.vue`), or the docs-root `index.md` rendered
-// as an ordinary docs page (`[...slug].vue`, whose `queryPage(route.path)`
-// resolves `/` to the root page). `useLanding` explains the choice; `AppLayout`
-// reads the same flag to give the second case the docs layout and its sidebar.
-//
-// The branch is a `v-if` over two statically-imported pages rather than a
-// component picked in `router.ts`, because the decision needs the content tree,
-// which is only fetched once `app.vue`'s setup has run — after the router has
-// already matched `/` and resolved its component. Both branches have async
-// `<script setup>`; they resolve inside `AppPage`'s `<Suspense>` exactly as a
-// directly-routed page would, and only the rendered branch's setup runs.
+// Locale homes (`/`, `/ru`, …) share the landing when `resolveLanding` is true
+// for that locale's merged docs config.
+import { computed } from "vue";
 import { useLanding } from "@app/composables/useLanding.ts";
+import { useRoute } from "@app/router.ts";
+import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { getLocaleFromPath, localeHomePath, resolveI18nConfig } from "@app/utils/locale.ts";
 import DocsPage from "@app/pages/[...slug].vue";
 import LandingPage from "@app/pages/landing.vue";
 
 const landing = useLanding();
+const route = useRoute();
+const i18nConfig = resolveI18nConfig(useAppConfig().docs as { lang?: string; i18n?: any });
+const currentLocale = computed(() =>
+  getLocaleFromPath(
+    route.path,
+    i18nConfig.localeCodes,
+    i18nConfig.defaultLocale,
+    i18nConfig.strategy,
+  ),
+);
+const localeHome = computed(() =>
+  localeHomePath(currentLocale.value, i18nConfig.defaultLocale, i18nConfig.strategy),
+);
+const showLanding = computed(() => landing.value && route.path === localeHome.value);
 </script>
 
 <template>
-  <LandingPage v-if="landing" />
+  <LandingPage v-if="showLanding" />
   <DocsPage v-else />
 </template>
