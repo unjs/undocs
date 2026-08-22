@@ -81,7 +81,6 @@ export async function loadServerPlugins(
   return plugins;
 }
 
-/** Client import specifiers for the Vite virtual module (static graph). */
 /** Normalized plugin specs for the client virtual module. */
 export function resolveClientPluginSpecifiers(
   docsDir: string,
@@ -127,27 +126,70 @@ export function pickClientPluginExport(mod: Record<string, unknown>): unknown {
   return d?.client ?? mod.client ?? d ?? mod;
 }
 
+function hasServerHooks(o: Record<string, unknown>): boolean {
+  return !!(o.appConfig || o.nitro || o.vite || o.content);
+}
+
+function hasClientHooks(o: Record<string, unknown>): boolean {
+  return !!(
+    o.install ||
+    o.routes ||
+    o.navigation ||
+    o.docsConfig ||
+    o.filterPath ||
+    o.head ||
+    o.components ||
+    o.headerActions
+  );
+}
+
+/** Whether a loaded module exposes a client plugin (not server-only). */
+export function moduleHasClientExport(mod: Record<string, unknown>): boolean {
+  if (mod.client != null) return true;
+  const d = mod.default;
+  if (!d || typeof d !== "object") return false;
+  const o = d as Record<string, unknown>;
+  if (o.client != null) return true;
+  if ("server" in o && !("client" in o)) return false;
+  if (hasServerHooks(o) && !hasClientHooks(o)) return false;
+  return hasClientHooks(o);
+}
+
+async function importHasClientExport(entry: string): Promise<boolean> {
+  try {
+    const mod = await import(pathToFileURL(entry).href);
+    return moduleHasClientExport(mod as Record<string, unknown>);
+  } catch {
+    return false;
+  }
+}
+
 /** Resolve a client entry path, or `null` when none exists on disk. */
-export function resolveClientPluginImport(
+export async function resolveClientPluginImport(
   spec: ResolvedPluginSpec,
   docsDir: string,
-): string | null {
+): Promise<string | null> {
   const id = spec.id;
   if (id.startsWith(".") || isAbsolute(id)) {
     const base = resolve(docsDir, id);
     for (const candidate of localClientCandidates(base)) {
       const entry = resolveExistingClientFile(candidate);
-      if (entry) return entry;
+      if (entry && (await importHasClientExport(entry))) return entry;
     }
     return null;
   }
   const req = createRequire(resolve(docsDir, "package.json"));
-  for (const suffix of ["/client", ""]) {
-    try {
-      return req.resolve(`${id}${suffix}`);
-    } catch {
-      // try next
-    }
+  try {
+    return req.resolve(`${id}/client`);
+  } catch {
+    // no `./client` export — fall through to root only when it exposes client
   }
+  let root: string;
+  try {
+    root = req.resolve(id);
+  } catch {
+    return null;
+  }
+  if (await importHasClientExport(root)) return root;
   return null;
 }

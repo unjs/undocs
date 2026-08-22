@@ -147,11 +147,14 @@ export function undocsPluginsClient(docsDir: string): Plugin {
   const generate = async (): Promise<string> => {
     const docs = await loadDocsConfig(docsDir);
     const specs = resolveClientPluginSpecifiers(docsDir, docs);
-    const resolved = specs
-      .map((spec) => ({ spec, entry: resolveClientPluginImport(spec, docsDir) }))
-      .filter(
-        (item): item is { spec: (typeof specs)[number]; entry: string } => item.entry != null,
-      );
+    const resolved = (
+      await Promise.all(
+        specs.map(async (spec) => ({
+          spec,
+          entry: await resolveClientPluginImport(spec, docsDir),
+        })),
+      )
+    ).filter((item): item is { spec: (typeof specs)[number]; entry: string } => item.entry != null);
     if (!resolved.length) return "export const clientPlugins = [];\n";
     const imports = resolved.map(({ entry }, i) => {
       return `import * as __p${i} from ${JSON.stringify(entry)};`;
