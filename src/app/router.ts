@@ -28,6 +28,7 @@ import {
 } from "vue";
 import { pages as userPages } from "virtual:undocs/user-pages";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { pluginHost } from "@app/plugins/host.ts";
 import { isExternalRedirect, normalizeRedirects, resolveRedirect } from "@app/utils/redirects.ts";
 import { findAnchor } from "@app/utils/anchor.ts";
 
@@ -62,6 +63,8 @@ interface RouteRecord {
   component: () => Promise<Component | { default: Component }> | Component;
   meta: Record<string, unknown>;
 }
+
+export type { RouteRecord };
 
 export interface AppRouter {
   /** The reactive current route (same object returned by `useRoute()`). */
@@ -139,29 +142,32 @@ const userRoutes: RouteRecord[] = userPages.map((p) => {
   };
 });
 
-const routes: RouteRecord[] = [
-  ...userRoutes,
-  {
-    match: (p) => p === "/",
-    component: () => import("@app/pages/index.vue"),
-    meta: {},
-  },
-  {
-    match: (p) => p === "/blog",
-    component: () => import("@app/pages/blog/index.vue"),
-    meta: {},
-  },
-  {
-    match: (p) => p.startsWith("/blog/"),
-    component: () => import("@app/pages/blog/[...slug].vue"),
-    meta: { layout: "blog" },
-  },
-  {
-    match: () => true,
-    component: () => import("@app/pages/[...slug].vue"),
-    meta: { layout: "docs" },
-  },
-];
+const routes: RouteRecord[] = pluginHost.routes(
+  [
+    ...userRoutes,
+    {
+      match: (p) => p === "/",
+      component: () => import("@app/pages/index.vue"),
+      meta: {},
+    },
+    {
+      match: (p) => p === "/blog",
+      component: () => import("@app/pages/blog/index.vue"),
+      meta: {},
+    },
+    {
+      match: (p) => p.startsWith("/blog/"),
+      component: () => import("@app/pages/blog/[...slug].vue"),
+      meta: { layout: "blog" },
+    },
+    {
+      match: () => true,
+      component: () => import("@app/pages/[...slug].vue"),
+      meta: { layout: "docs" },
+    },
+  ],
+  useAppConfig().docs,
+);
 
 function matchRoute(path: string): RouteRecord {
   return routes.find((r) => r.match(path))!;

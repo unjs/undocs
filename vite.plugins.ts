@@ -2,6 +2,11 @@ import { resolve, basename } from "node:path";
 import { glob, readFile } from "node:fs/promises";
 import type { Plugin, ViteDevServer } from "vite";
 import { generateAppConfig } from "./src/server/app-config.ts";
+import { loadDocsConfig } from "./src/server/docs-config.ts";
+import {
+  resolveClientPluginImport,
+  resolveClientPluginSpecifiers,
+} from "./src/server/plugins/resolve.ts";
 import { DOCS_ICON_ASSET, docsIconFiles, resolveDocsIcon } from "./src/server/docs-public.ts";
 import { BUILTIN_ICONS } from "./src/app/builtin-icons.ts";
 
@@ -127,6 +132,59 @@ export function undocsAppConfig(docsDir: string): Plugin {
       server.watcher.on("change", onChange);
       server.watcher.on("add", onChange);
       server.watcher.on("unlink", onChange);
+    },
+  };
+}
+
+// `virtual:undocs/plugins-client` — statically imports client plugin entries
+// declared in `docs.plugins` so Rollup can bundle them (no runtime dynamic import).
+export function undocsPluginsClient(docsDir: string): Plugin {
+  const VIRTUAL_ID = "virtual:undocs/plugins-client";
+  const RESOLVED_ID = "\0" + VIRTUAL_ID;
+
+  const generate = async (): Promise<string> => {
+    const docs = await loadDocsConfig(docsDir);
+    const specs = resolveClientPluginSpecifiers(docsDir, docs);
+    if (!specs.length) return "export const clientPlugins = [];\n";
+    const imports = specs.map((spec, i) => {
+      const entry = resolveClientPluginImport(spec, docsDir);
+      return `import __p${i} from ${JSON.stringify(entry)};`;
+    });
+    const pick = (i: number) =>
+      `(__p${i}.default?.client ?? __p${i}.client ?? (__p${i}.default?.name ? undefined : __p${i}.default) ?? __p${i})`;
+    return `${imports.join("\n")}\nexport const clientPlugins = [\n${specs.map((_, i) => `  ${pick(i)}`).join(",\n")}\n].filter(Boolean);\n`;
+  };
+
+  let cached = "";
+
+  return {
+    name: "undocs:plugins-client",
+
+    resolveId(id) {
+      if (id === VIRTUAL_ID) return RESOLVED_ID;
+      return undefined;
+    },
+
+    async load(id) {
+      if (id !== RESOLVED_ID) return;
+      cached = await generate();
+      return cached;
+    },
+
+    configureServer(server: ViteDevServer) {
+      const configDir = resolve(docsDir, ".config");
+      const regen = async (file: string) => {
+        if (!file.startsWith(configDir)) return;
+        cached = await generate();
+        for (const env of Object.values(server.environments)) {
+          const mod = env.moduleGraph.getModuleById(RESOLVED_ID);
+          if (mod) env.moduleGraph.invalidateModule(mod);
+        }
+        fullReload(server);
+      };
+      server.watcher.on("change", regen);
+      server.watcher.on("add", regen);
+      server.watcher.on("unlink", regen);
     },
   };
 }

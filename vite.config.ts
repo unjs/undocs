@@ -7,6 +7,7 @@ import { nitro } from "nitro/vite";
 import tailwindcss from "@tailwindcss/vite";
 import {
   undocsAppConfig,
+  undocsPluginsClient,
   undocsUserTheme,
   undocsBuiltinIcons,
   excludeDocsFromTailwindDev,
@@ -103,6 +104,8 @@ export default defineConfig((configEnv) => ({
     // undocs theme config (`src/app/app.config.ts`). Replaces the old runtime
     // `/api/docs/config` HTTP fetch.
     undocsAppConfig(docsDir),
+
+    undocsPluginsClient(docsDir),
 
     // `virtual:undocs/user-{components,pages,layouts}` — the user THEME layer
     // (`<docsDir>/.docs/{components,pages,layouts}`), loaded into the app via the

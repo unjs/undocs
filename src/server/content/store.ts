@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 import { buildIndex } from "./builder.ts";
 import type { ContentIndex } from "./types.ts";
 import { useRuntimeConfig } from "nitro/runtime-config";
+import { loadDocsConfig } from "../docs-config.ts";
+import { getPluginRuntime } from "../plugins/runtime.ts";
 
 let cache: Promise<ContentIndex> | undefined;
 
@@ -30,7 +32,15 @@ export function getIndex(): Promise<ContentIndex> {
     const config = useRuntimeConfig();
     const docs = (config.undocs || {}) as { dir?: string; automd?: unknown };
     const dir = resolveDir(docs.dir);
-    cache = buildIndex({ dir, automd: docs.automd });
+    cache = (async () => {
+      const docsConfig = await loadDocsConfig(dir);
+      const pluginRuntime = await getPluginRuntime(dir, docsConfig);
+      return buildIndex({
+        dir,
+        automd: docs.automd,
+        pluginRuntime,
+      });
+    })();
   }
   return cache;
 }

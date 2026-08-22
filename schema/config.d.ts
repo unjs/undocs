@@ -66,6 +66,12 @@ export interface DocsConfig {
    */
   crossOriginIsolation?: boolean | "credentialless" | "require-corp";
   automd?: unknown;
+  /**
+   * Undocs plugins (`@undocs/i18n`, local paths, …). Each package exports a
+   * `./server` hook surface and an optional `./client` entry baked into
+   * `virtual:undocs/plugins-client` at build time.
+   */
+  plugins?: import("../shared/plugins/types.ts").PluginSpec[];
   buildCache?: boolean;
   /**
    * Expose docs search/navigation to browser AI agents via WebMCP
