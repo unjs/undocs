@@ -24,8 +24,9 @@ import PageHero from "../components/blocks/PageHero.vue";
 import PageSection from "../components/blocks/PageSection.vue";
 import PageFeature from "../components/blocks/PageFeature.vue";
 import PageCard from "../components/blocks/PageCard.vue";
+import { pluginHost } from "@app/plugins/host.ts";
 
-const COMPONENTS: Record<string, Component> = {
+const COMPONENTS: Record<string, Component> = pluginHost.mergeMarkdownComponents({
   pre: ProsePre,
   "code-group": ProseCodeGroup,
   "code-tree": CodeTree,
@@ -45,7 +46,7 @@ const COMPONENTS: Record<string, Component> = {
   "page-section": PageSection,
   "page-feature": PageFeature,
   "page-card": PageCard,
-};
+});
 
 // Built-ins win so user components cannot shadow parser-sensitive overrides.
 for (const [name, component] of Object.entries(userComponents)) {

@@ -17,6 +17,7 @@ export default defineConfig({
       // Same deal for the user-pages vfs, which `router.ts` and `webmcp/tools/`
       // (its "is this a real route?" check) both read.
       "virtual:undocs/user-pages": r("./test/stubs/user-pages.ts"),
+      "virtual:undocs/plugins-client": r("./test/stubs/plugins-client.ts"),
     },
   },
   test: {

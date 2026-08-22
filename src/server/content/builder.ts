@@ -25,6 +25,8 @@ import type {
   NavItem,
   TocLink,
 } from "./types.ts";
+import type { PluginRuntime } from "../plugins/runtime.ts";
+import { excludeFromOrder } from "../plugins/apply.ts";
 
 // Dot-prefixed `.navigation.yml` needs its own glob and bypasses the dotfile exclusion below.
 const INCLUDE = ["**/*.{md,yml}", "**/.navigation.yml"];
@@ -34,6 +36,7 @@ export const EXCLUDE = [/(^|\/)\./, /\/node_modules\//, /\/dist\//, /\/\.docs\//
 export interface BuildOptions {
   dir: string;
   automd?: unknown;
+  pluginRuntime?: PluginRuntime;
 }
 
 const now = () => performance.now();
@@ -246,7 +249,13 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
   phases.search = now() - mark;
   // Prev/next follows navigation visibility; hidden pages remain routable/searchable.
   const order = pages
-    .filter((p) => !hidden.has(p.path) && p.path !== "/blog" && !p.path.startsWith("/blog/"))
+    .filter((p) => {
+      if (hidden.has(p.path)) return false;
+      if (opts.pluginRuntime) {
+        return !excludeFromOrder(p.path, opts.pluginRuntime.plugins, opts.pluginRuntime.ctx);
+      }
+      return p.path !== "/blog" && !p.path.startsWith("/blog/");
+    })
     .map((p) => p.path);
 
   const stats: BuildStats = {

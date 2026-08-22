@@ -1,9 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { useRuntimeConfig } from "nitro/runtime-config";
 import { getDocsDir, getIndex, invalidateIndex } from "../../src/server/content/store.ts";
+import { loadDocsConfig } from "../../src/server/docs-config.ts";
+import { applyBuildOptionsPlugins } from "../../src/server/plugins/apply.ts";
+import { getPluginRuntime, resetPluginRuntimeCache } from "../../src/server/plugins/runtime.ts";
 
 // `store.ts` reads the docs dir from Nitro's runtime config. Outside a Nitro
 // build, `useRuntimeConfig()` returns a cached stub object; seed `undocs.dir` on
@@ -17,6 +21,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  resetPluginRuntimeCache();
   if (dir) await rm(dir, { recursive: true, force: true });
 });
 
@@ -43,5 +48,37 @@ describe("getIndex / invalidateIndex", () => {
     invalidateIndex();
     const after = getIndex();
     expect(after).not.toBe(before);
+  });
+
+  it("applies plugin buildOptions before indexing", async () => {
+    const echoDir = fileURLToPath(new URL("../fixtures/plugins/echo", import.meta.url));
+    const pluginDir = await mkdtemp(join(tmpdir(), "undocs-store-plugin-"));
+    await writeFile(join(pluginDir, "index.md"), "# Home\n\nHi.\n");
+    await mkdir(join(pluginDir, ".config"), { recursive: true });
+    await writeFile(
+      join(pluginDir, ".config/docs.yaml"),
+      `plugins:\n  - ${JSON.stringify(echoDir)}\n`,
+    );
+    (useRuntimeConfig() as any).undocs = { dir: pluginDir };
+    resetPluginRuntimeCache();
+    invalidateIndex();
+
+    const docsConfig = await loadDocsConfig(pluginDir);
+    const pluginRuntime = await getPluginRuntime(pluginDir, docsConfig);
+    expect(pluginRuntime.plugins).toHaveLength(1);
+    const buildOpts = applyBuildOptionsPlugins(
+      { dir: pluginDir, automd: undefined, pluginRuntime },
+      pluginRuntime.plugins,
+      pluginRuntime.ctx,
+    );
+    expect(buildOpts.automd).toBe("echo-marker");
+
+    const index = await getIndex();
+    expect(index.byPath.get("/")?.title).toBe("Home");
+
+    resetPluginRuntimeCache();
+    invalidateIndex();
+    (useRuntimeConfig() as any).undocs = { dir };
+    await rm(pluginDir, { recursive: true, force: true });
   });
 });

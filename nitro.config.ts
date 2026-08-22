@@ -9,6 +9,8 @@ import { rebaseOutput } from "./src/server/rebase-output.ts";
 import { docsPublicDirs, resolveDocsIcon } from "./src/server/docs-public.ts";
 import { normalizeRedirects } from "./src/app/utils/redirects.ts";
 import { crossOriginIsolationHeaders } from "./src/server/cross-origin-isolation.ts";
+import { loadServerPlugins } from "./src/server/plugins/resolve.ts";
+import { applyNitroPlugins, pluginContext } from "./src/server/plugins/apply.ts";
 import pkg from "./package.json" with { type: "json" };
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
@@ -29,6 +31,8 @@ const docsDir = process.env.UNDOCS_DIR ? resolve(process.env.UNDOCS_DIR) : r("./
 // runtimeConfig in sync). `loadDocsConfig` is shared with the client app-config
 // so an inferred `name` is identical on both sides.
 const docs = await loadDocsConfig(docsDir);
+const serverPlugins = await loadServerPlugins(docsDir, docs);
+const pluginCtx = pluginContext(docsDir, docs);
 
 // Mirror the CLI: `dir` is resolved relative to the docs cwd (falls back to the
 // docs dir itself when the config omits it).
@@ -84,7 +88,7 @@ const serverAssets = [
   ...(docsIconFile ? [{ baseName: "og-docs", dir: dirname(docsIconFile) }] : []),
 ];
 
-export default defineNitroConfig({
+const nitroConfig = defineNitroConfig({
   // No hardcoded preset: Nitro auto-detects from the environment (`NITRO_PRESET`
   // / `VERCEL` / …), falling back to `node-server`. This lets a Vercel build
   // resolve the `vercel` preset (producing `.vercel/output`, which the `vercel`
@@ -282,3 +286,7 @@ export default defineNitroConfig({
     ignore: [],
   },
 });
+
+await applyNitroPlugins(nitroConfig, serverPlugins, pluginCtx);
+
+export default nitroConfig;

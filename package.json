@@ -16,6 +16,7 @@
   ],
   "type": "module",
   "exports": {
+    "./plugin": "./src/plugin.ts",
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },

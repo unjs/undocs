@@ -42,6 +42,11 @@ declare module "*?assets=client" {
   export default assets;
 }
 
+declare module "virtual:undocs/plugins-client" {
+  import type { UndocsClientPlugin } from "@app/plugins/types.ts";
+  export const clientPlugins: UndocsClientPlugin[];
+}
+
 /**
  * `virtual:undocs/app-config` — the client app-config vfs, provided by the
  * `undocs:app-config` plugin in `vite.config.ts` (generated from the docs

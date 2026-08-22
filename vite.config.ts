@@ -7,6 +7,8 @@ import { nitro } from "nitro/vite";
 import tailwindcss from "@tailwindcss/vite";
 import {
   undocsAppConfig,
+  undocsPluginsClient,
+  undocsPluginVite,
   undocsUserTheme,
   undocsBuiltinIcons,
   excludeDocsFromTailwindDev,
@@ -25,7 +27,6 @@ const vueuseCoreDir = dirname(createRequire(import.meta.url).resolve("@vueuse/co
 // Docs directory. Mirrors `nitro.config.ts`: the CLI (`undocs dev|build <dir>`)
 // sets `UNDOCS_DIR`; a bare `pnpm dev` falls back to the repo `./docs`.
 const docsDir = process.env.UNDOCS_DIR ? resolve(process.env.UNDOCS_DIR) : r("./docs");
-const appDir = r("./src/app");
 
 export default defineConfig((configEnv) => ({
   // `import.meta` flags shared by both envs. `server`/`client`
@@ -103,6 +104,10 @@ export default defineConfig((configEnv) => ({
     // undocs theme config (`src/app/app.config.ts`). Replaces the old runtime
     // `/api/docs/config` HTTP fetch.
     undocsAppConfig(docsDir),
+
+    undocsPluginsClient(docsDir),
+
+    undocsPluginVite(docsDir),
 
     // `virtual:undocs/user-{components,pages,layouts}` — the user THEME layer
     // (`<docsDir>/.docs/{components,pages,layouts}`), loaded into the app via the

@@ -2,6 +2,13 @@ import { resolve, basename } from "node:path";
 import { glob, readFile } from "node:fs/promises";
 import type { Plugin, ViteDevServer } from "vite";
 import { generateAppConfig } from "./src/server/app-config.ts";
+import { loadDocsConfig } from "./src/server/docs-config.ts";
+import {
+  resolveClientPluginImport,
+  resolveClientPluginSpecifiers,
+  loadServerPlugins,
+} from "./src/server/plugins/resolve.ts";
+import { pluginContext } from "./src/server/plugins/apply.ts";
 import { DOCS_ICON_ASSET, docsIconFiles, resolveDocsIcon } from "./src/server/docs-public.ts";
 import { BUILTIN_ICONS } from "./src/app/builtin-icons.ts";
 
@@ -127,6 +134,102 @@ export function undocsAppConfig(docsDir: string): Plugin {
       server.watcher.on("change", onChange);
       server.watcher.on("add", onChange);
       server.watcher.on("unlink", onChange);
+    },
+  };
+}
+
+// `virtual:undocs/plugins-client` — statically imports client plugin entries
+// declared in `docs.plugins` so Rollup can bundle them (no runtime dynamic import).
+export function undocsPluginsClient(docsDir: string): Plugin {
+  const VIRTUAL_ID = "virtual:undocs/plugins-client";
+  const RESOLVED_ID = "\0" + VIRTUAL_ID;
+
+  const generate = async (): Promise<string> => {
+    const docs = await loadDocsConfig(docsDir);
+    const specs = resolveClientPluginSpecifiers(docsDir, docs);
+    const resolved = (
+      await Promise.all(
+        specs.map(async (spec) => ({
+          spec,
+          entry: await resolveClientPluginImport(spec, docsDir),
+        })),
+      )
+    ).filter((item): item is { spec: (typeof specs)[number]; entry: string } => item.entry != null);
+    if (!resolved.length) return "export const clientPlugins = [];\n";
+    const imports = resolved.map(({ entry }, i) => {
+      return `import * as __p${i} from ${JSON.stringify(entry)};`;
+    });
+    const pick = (i: number) =>
+      `(__p${i}.default?.client ?? __p${i}.client ?? __p${i}.default ?? __p${i})`;
+    return `${imports.join("\n")}\nexport const clientPlugins = [\n${resolved.map((_, i) => `  ${pick(i)}`).join(",\n")}\n].filter(Boolean);\n`;
+  };
+
+  let cached = "";
+
+  return {
+    name: "undocs:plugins-client",
+
+    resolveId(id) {
+      if (id === VIRTUAL_ID) return RESOLVED_ID;
+      return undefined;
+    },
+
+    async load(id) {
+      if (id !== RESOLVED_ID) return;
+      cached = await generate();
+      return cached;
+    },
+
+    configureServer(server: ViteDevServer) {
+      const configDir = resolve(docsDir, ".config");
+      const regen = async (file: string) => {
+        if (!file.startsWith(configDir)) return;
+        cached = await generate();
+        for (const env of Object.values(server.environments)) {
+          const mod = env.moduleGraph.getModuleById(RESOLVED_ID);
+          if (mod) env.moduleGraph.invalidateModule(mod);
+        }
+        fullReload(server);
+      };
+      server.watcher.on("change", regen);
+      server.watcher.on("add", regen);
+      server.watcher.on("unlink", regen);
+    },
+  };
+}
+
+/** Merge server plugin `vite` hooks (extra plugins + watch dirs). */
+export function undocsPluginVite(docsDir: string): Plugin {
+  let watchDirs: string[] = [];
+
+  return {
+    name: "undocs:plugin-vite",
+
+    async config(config) {
+      const docs = await loadDocsConfig(docsDir);
+      const serverPlugins = await loadServerPlugins(docsDir, docs);
+      const baseCtx = pluginContext(docsDir, docs);
+      watchDirs = [];
+      const extra: Plugin[] = [];
+      for (const plugin of serverPlugins) {
+        if (!plugin.vite) continue;
+        const ctx = { ...baseCtx, options: plugin.options ?? {} };
+        const result = await plugin.vite(ctx);
+        if (result?.plugins?.length) extra.push(...result.plugins);
+        if (result?.watchDirs?.length) {
+          for (const dir of result.watchDirs) {
+            watchDirs.push(resolve(docsDir, dir));
+          }
+        }
+      }
+      if (extra.length) {
+        config.plugins ??= [];
+        config.plugins.push(...extra);
+      }
+    },
+
+    configureServer(server: ViteDevServer) {
+      for (const dir of watchDirs) server.watcher.add(dir);
     },
   };
 }

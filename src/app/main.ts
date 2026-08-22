@@ -28,6 +28,7 @@ import { brandCss, BRAND_STYLE_ID } from "@app/theme-brand.ts";
 import { registerUserComponents } from "@app/user-theme.ts";
 import { installLinkCapture } from "@app/link-capture.ts";
 import { installWebMCPPolyfill } from "./webmcp/polyfill.ts";
+import { pluginHost } from "@app/plugins/host.ts";
 
 // Preserve the server's first-paint brand style; inject only when absent.
 function applyRuntimeBrand(themeColor: unknown): void {
@@ -119,6 +120,16 @@ function bootstrap(): void {
   app.use(head);
 
   app.use(router);
+
+  pluginHost.bootstrap(
+    app,
+    pluginHost.context(
+      useAppConfig().docs,
+      router,
+      router.currentRoute.fullPath,
+      router.currentRoute,
+    ),
+  );
 
   router.isReady().then(() => {
     app.mount("#root");
