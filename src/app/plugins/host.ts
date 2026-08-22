@@ -19,6 +19,7 @@ export class PluginHost {
     this.plugins = plugins.filter(Boolean);
   }
 
+  /** Build the reactive plugin context for the current route. */
   context(
     docs: Record<string, any>,
     router: AppRouter,
@@ -43,6 +44,7 @@ export class PluginHost {
     return this.htmlLang;
   }
 
+  /** Prepend plugin routes before the docs catch-all. */
   routes(base: RouteRecord[], docs: Record<string, any>): RouteRecord[] {
     let out = base;
     const stub = { docs, routePath: "/", router: null as any, route: null as any };
@@ -53,6 +55,7 @@ export class PluginHost {
     return out;
   }
 
+  /** Run the navigation hook pipeline. */
   navigation(
     nav: NavItem[] | null | undefined,
     ctx: UndocsClientPluginContext,
@@ -65,6 +68,7 @@ export class PluginHost {
     return out;
   }
 
+  /** Run the per-route docs-config hook pipeline. */
   docsConfig(docs: DocsConfig, ctx: UndocsClientPluginContext): DocsConfig {
     let out = docs;
     for (const plugin of this.plugins) {
@@ -74,6 +78,7 @@ export class PluginHost {
     return out;
   }
 
+  /** Return false when any plugin rejects a path (search / WebMCP). */
   allowsPath(path: string, ctx: UndocsClientPluginContext): boolean {
     for (const plugin of this.plugins) {
       if (plugin.filterPath && plugin.filterPath(path, ctx) === false) return false;
@@ -81,6 +86,7 @@ export class PluginHost {
     return true;
   }
 
+  /** Merge plugin MDC components after built-ins. */
   mergeMarkdownComponents(base: Record<string, Component>): Record<string, Component> {
     const out = { ...base };
     for (const plugin of this.plugins) {
@@ -92,6 +98,7 @@ export class PluginHost {
     return out;
   }
 
+  /** Collect header action components from all plugins. */
   headerActions(): Component[] {
     const out: Component[] = [];
     for (const plugin of this.plugins) {
@@ -103,6 +110,7 @@ export class PluginHost {
     return out;
   }
 
+  /** Collect raw head entries from all plugins (merged in `mergePluginHead`). */
   head(ctx: UndocsClientPluginContext): Record<string, unknown>[] {
     const out: Record<string, unknown>[] = [];
     for (const plugin of this.plugins) {

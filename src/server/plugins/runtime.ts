@@ -9,6 +9,7 @@ export interface PluginRuntime {
 
 const cache = new Map<string, Promise<PluginRuntime>>();
 
+/** Load and cache server plugins for a docs directory. */
 export function getPluginRuntime(
   docsDir: string,
   docs: Record<string, any>,

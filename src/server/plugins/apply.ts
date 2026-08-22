@@ -4,6 +4,7 @@ import type { BuildOptions } from "../content/builder.ts";
 import type { UndocsPluginContext, UndocsServerPlugin } from "./types.ts";
 import { isWithin } from "../../app/utils/nav.ts";
 
+/** Shared hook context for a docs directory (per-plugin `options` override per call). */
 export function pluginContext(
   docsDir: string,
   docs: Record<string, any>,
@@ -16,6 +17,7 @@ function pluginCtx(base: UndocsPluginContext, plugin: UndocsServerPlugin): Undoc
   return { ...base, options: plugin.options ?? {} };
 }
 
+/** Run `appConfig` hooks in registration order. */
 export async function applyAppConfigPlugins(
   config: UndocsAppConfig,
   plugins: UndocsServerPlugin[],
@@ -29,6 +31,7 @@ export async function applyAppConfigPlugins(
   return out;
 }
 
+/** Run `nitro` hooks in registration order. */
 export async function applyNitroPlugins(
   nitro: NitroConfig,
   plugins: UndocsServerPlugin[],
@@ -40,6 +43,7 @@ export async function applyNitroPlugins(
   }
 }
 
+/** Run `content.buildOptions` hooks before `buildIndex`. */
 export function applyBuildOptionsPlugins(
   opts: BuildOptions,
   plugins: UndocsServerPlugin[],
@@ -59,6 +63,7 @@ export function defaultExcludeFromOrder(path: string): boolean {
   return path === "/blog" || path.startsWith("/blog/") || isWithin(path, "/blog");
 }
 
+/** Whether `path` is excluded from prev/next order (plugin hooks, then default blog rule). */
 export function excludeFromOrder(
   path: string,
   plugins: UndocsServerPlugin[],
@@ -72,6 +77,7 @@ export function excludeFromOrder(
   return defaultExcludeFromOrder(path);
 }
 
+/** Whether `neighborPath` is an acceptable prev/next neighbor for `pagePath`. */
 export function acceptSurroundNeighbor(
   pagePath: string,
   neighborPath: string,
@@ -89,6 +95,7 @@ export function acceptSurroundNeighbor(
   return true;
 }
 
+/** Whether `path` counts as a blog post for `/api/docs/blog.json`. */
 export function isBlogPostPath(
   path: string,
   plugins: UndocsServerPlugin[],

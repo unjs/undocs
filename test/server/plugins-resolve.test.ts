@@ -53,6 +53,15 @@ describe("resolveClientPluginImport", () => {
     expect(entry).toBe(join(tempDir, "client.js"));
   });
 
+  it("resolves extensionless client directory", () => {
+    tempDir = join(tmpdir(), `undocs-plugin-${Date.now()}`);
+    const clientDir = join(tempDir, "client");
+    mkdirSync(clientDir, { recursive: true });
+    writeFileSync(join(clientDir, "index.js"), "export default {};\n");
+    const entry = resolveClientPluginImport({ id: tempDir, options: {} }, tempDir);
+    expect(entry).toBe(join(clientDir, "index.js"));
+  });
+
   it("returns null when no client entry exists", () => {
     tempDir = join(tmpdir(), `undocs-plugin-${Date.now()}`);
     mkdirSync(tempDir, { recursive: true });

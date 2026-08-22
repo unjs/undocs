@@ -6,7 +6,9 @@ import { loadDocsConfig } from "./src/server/docs-config.ts";
 import {
   resolveClientPluginImport,
   resolveClientPluginSpecifiers,
+  loadServerPlugins,
 } from "./src/server/plugins/resolve.ts";
+import { pluginContext } from "./src/server/plugins/apply.ts";
 import { DOCS_ICON_ASSET, docsIconFiles, resolveDocsIcon } from "./src/server/docs-public.ts";
 import { BUILTIN_ICONS } from "./src/app/builtin-icons.ts";
 
@@ -189,6 +191,42 @@ export function undocsPluginsClient(docsDir: string): Plugin {
       server.watcher.on("change", regen);
       server.watcher.on("add", regen);
       server.watcher.on("unlink", regen);
+    },
+  };
+}
+
+/** Merge server plugin `vite` hooks (extra plugins + watch dirs). */
+export function undocsPluginVite(docsDir: string): Plugin {
+  let watchDirs: string[] = [];
+
+  return {
+    name: "undocs:plugin-vite",
+
+    async config(config) {
+      const docs = await loadDocsConfig(docsDir);
+      const serverPlugins = await loadServerPlugins(docsDir, docs);
+      const baseCtx = pluginContext(docsDir, docs);
+      watchDirs = [];
+      const extra: Plugin[] = [];
+      for (const plugin of serverPlugins) {
+        if (!plugin.vite) continue;
+        const ctx = { ...baseCtx, options: plugin.options ?? {} };
+        const result = await plugin.vite(ctx);
+        if (result?.plugins?.length) extra.push(...result.plugins);
+        if (result?.watchDirs?.length) {
+          for (const dir of result.watchDirs) {
+            watchDirs.push(resolve(docsDir, dir));
+          }
+        }
+      }
+      if (extra.length) {
+        config.plugins ??= [];
+        config.plugins.push(...extra);
+      }
+    },
+
+    configureServer(server: ViteDevServer) {
+      for (const dir of watchDirs) server.watcher.add(dir);
     },
   };
 }

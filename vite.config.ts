@@ -8,6 +8,7 @@ import tailwindcss from "@tailwindcss/vite";
 import {
   undocsAppConfig,
   undocsPluginsClient,
+  undocsPluginVite,
   undocsUserTheme,
   undocsBuiltinIcons,
   excludeDocsFromTailwindDev,
@@ -106,6 +107,8 @@ export default defineConfig((configEnv) => ({
     undocsAppConfig(docsDir),
 
     undocsPluginsClient(docsDir),
+
+    undocsPluginVite(docsDir),
 
     // `virtual:undocs/user-{components,pages,layouts}` — the user THEME layer
     // (`<docsDir>/.docs/{components,pages,layouts}`), loaded into the app via the
