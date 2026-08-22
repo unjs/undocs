@@ -145,14 +145,18 @@ export function undocsPluginsClient(docsDir: string): Plugin {
   const generate = async (): Promise<string> => {
     const docs = await loadDocsConfig(docsDir);
     const specs = resolveClientPluginSpecifiers(docsDir, docs);
-    if (!specs.length) return "export const clientPlugins = [];\n";
-    const imports = specs.map((spec, i) => {
-      const entry = resolveClientPluginImport(spec, docsDir);
-      return `import __p${i} from ${JSON.stringify(entry)};`;
+    const resolved = specs
+      .map((spec) => ({ spec, entry: resolveClientPluginImport(spec, docsDir) }))
+      .filter(
+        (item): item is { spec: (typeof specs)[number]; entry: string } => item.entry != null,
+      );
+    if (!resolved.length) return "export const clientPlugins = [];\n";
+    const imports = resolved.map(({ entry }, i) => {
+      return `import * as __p${i} from ${JSON.stringify(entry)};`;
     });
     const pick = (i: number) =>
-      `(__p${i}.default?.client ?? __p${i}.client ?? (__p${i}.default?.name ? undefined : __p${i}.default) ?? __p${i})`;
-    return `${imports.join("\n")}\nexport const clientPlugins = [\n${specs.map((_, i) => `  ${pick(i)}`).join(",\n")}\n].filter(Boolean);\n`;
+      `(__p${i}.default?.client ?? __p${i}.client ?? __p${i}.default ?? __p${i})`;
+    return `${imports.join("\n")}\nexport const clientPlugins = [\n${resolved.map((_, i) => `  ${pick(i)}`).join(",\n")}\n].filter(Boolean);\n`;
   };
 
   let cached = "";

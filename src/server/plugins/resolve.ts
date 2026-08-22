@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { isAbsolute, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -69,7 +70,11 @@ export async function loadServerPlugins(
       console.warn(`[undocs] plugin "${spec.id}" has no server entry — skipped`);
       continue;
     }
-    plugins.push({ ...bundle.server, name: bundle.server.name || spec.id });
+    plugins.push({
+      ...bundle.server,
+      name: bundle.server.name || spec.id,
+      options: spec.options ?? {},
+    });
   }
   return plugins;
 }
@@ -82,16 +87,40 @@ export function resolveClientPluginSpecifiers(
   return normalizePluginSpecs(docs.plugins as PluginSpec[] | undefined);
 }
 
-export function resolveClientPluginImport(spec: ResolvedPluginSpec, docsDir: string): string {
+function localClientCandidates(base: string): string[] {
+  const isFilePath = base.endsWith(".ts") || base.endsWith(".js");
+  const candidates = [
+    `${base}/client.ts`,
+    `${base}/client.js`,
+    `${base}/client/index.ts`,
+    `${base}/client/index.js`,
+  ];
+  if (isFilePath) {
+    candidates.push(base);
+  } else {
+    candidates.push(`${base}/index.ts`, `${base}/index.js`);
+  }
+  return candidates;
+}
+
+/** Pick the client plugin export from a namespace import. */
+export function pickClientPluginExport(mod: Record<string, unknown>): unknown {
+  const d = mod.default as Record<string, unknown> | undefined;
+  return d?.client ?? mod.client ?? d ?? mod;
+}
+
+/** Resolve a client entry path, or `null` when none exists on disk. */
+export function resolveClientPluginImport(
+  spec: ResolvedPluginSpec,
+  docsDir: string,
+): string | null {
   const id = spec.id;
   if (id.startsWith(".") || isAbsolute(id)) {
     const base = resolve(docsDir, id);
-    for (const suffix of ["/client.ts", "/client.js", "/client", ""]) {
-      const candidate = suffix ? base + suffix.replace(/^\//, "/") : base;
-      if (candidate.endsWith(".ts") || candidate.endsWith(".js")) return candidate;
-      if (!suffix) return candidate;
+    for (const candidate of localClientCandidates(base)) {
+      if (existsSync(candidate)) return candidate;
     }
-    return base;
+    return null;
   }
   const req = createRequire(resolve(docsDir, "package.json"));
   for (const suffix of ["/client", ""]) {
@@ -101,5 +130,5 @@ export function resolveClientPluginImport(spec: ResolvedPluginSpec, docsDir: str
       // try next
     }
   }
-  return req.resolve(id);
+  return null;
 }

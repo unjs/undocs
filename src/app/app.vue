@@ -9,6 +9,7 @@ import {
   mergePluginHead,
   usePluginContext,
 } from "@app/plugins/context.ts";
+import { pluginHost } from "@app/plugins/host.ts";
 import { queryNavigation, hintPrerenderRoute } from "@app/composables/useContent.ts";
 import { LANDING_KEY, resolveLanding } from "@app/composables/useLanding.ts";
 import { docsNavTree } from "@app/utils/nav.ts";
@@ -63,7 +64,7 @@ useSeoMeta({
 
 useHead({
   htmlAttrs: {
-    lang: appConfig.docs.lang || "en",
+    lang: pluginHost.htmlLang ?? appConfig.docs.lang ?? "en",
   },
   link: browserTabIcon
     ? [

@@ -131,8 +131,8 @@ const results = computed<ResultRow[]>(() => {
   const q = query.value.trim();
   if (!q) {
     return navSections.value
-      .slice(0, 20)
       .filter((section) => pathAllowed(String(section.id).split("#")[0]!))
+      .slice(0, 20)
       .map((section) => ({ section, terms: [] }));
   }
   // Match all terms first; use the typo-tolerant pass only as a fallback.

@@ -12,6 +12,10 @@ export function pluginContext(
   return { docsDir, docs, options };
 }
 
+function pluginCtx(base: UndocsPluginContext, plugin: UndocsServerPlugin): UndocsPluginContext {
+  return { ...base, options: plugin.options ?? {} };
+}
+
 export async function applyAppConfigPlugins(
   config: UndocsAppConfig,
   plugins: UndocsServerPlugin[],
@@ -20,7 +24,7 @@ export async function applyAppConfigPlugins(
   let out = config;
   for (const plugin of plugins) {
     if (!plugin.appConfig) continue;
-    out = await plugin.appConfig(out, { ...ctx, options: ctx.options });
+    out = await plugin.appConfig(out, pluginCtx(ctx, plugin));
   }
   return out;
 }
@@ -32,7 +36,7 @@ export async function applyNitroPlugins(
 ): Promise<void> {
   for (const plugin of plugins) {
     if (!plugin.nitro) continue;
-    await plugin.nitro(nitro, ctx);
+    await plugin.nitro(nitro, pluginCtx(ctx, plugin));
   }
 }
 
@@ -44,7 +48,7 @@ export function applyBuildOptionsPlugins(
   let out = opts;
   for (const plugin of plugins) {
     if (!plugin.content?.buildOptions) continue;
-    const next = plugin.content.buildOptions(out, ctx);
+    const next = plugin.content.buildOptions(out, pluginCtx(ctx, plugin));
     if (next) out = next;
   }
   return out;
@@ -61,7 +65,7 @@ export function excludeFromOrder(
   ctx: UndocsPluginContext,
 ): boolean {
   for (const plugin of plugins) {
-    const verdict = plugin.content?.excludeFromOrder?.(path, ctx);
+    const verdict = plugin.content?.excludeFromOrder?.(path, pluginCtx(ctx, plugin));
     if (verdict === true) return true;
     if (verdict === false) return false;
   }
@@ -75,7 +79,11 @@ export function acceptSurroundNeighbor(
   ctx: UndocsPluginContext,
 ): boolean {
   for (const plugin of plugins) {
-    const verdict = plugin.content?.acceptSurroundNeighbor?.(pagePath, neighborPath, ctx);
+    const verdict = plugin.content?.acceptSurroundNeighbor?.(
+      pagePath,
+      neighborPath,
+      pluginCtx(ctx, plugin),
+    );
     if (verdict === false) return false;
   }
   return true;
@@ -88,7 +96,7 @@ export function isBlogPostPath(
 ): boolean {
   if (path.startsWith("/blog/")) return true;
   for (const plugin of plugins) {
-    const verdict = plugin.content?.isBlogPost?.(path, ctx);
+    const verdict = plugin.content?.isBlogPost?.(path, pluginCtx(ctx, plugin));
     if (verdict === true) return true;
     if (verdict === false) return false;
   }

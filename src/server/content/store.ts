@@ -5,6 +5,7 @@ import type { ContentIndex } from "./types.ts";
 import { useRuntimeConfig } from "nitro/runtime-config";
 import { loadDocsConfig } from "../docs-config.ts";
 import { getPluginRuntime } from "../plugins/runtime.ts";
+import { applyBuildOptionsPlugins } from "../plugins/apply.ts";
 
 let cache: Promise<ContentIndex> | undefined;
 
@@ -35,11 +36,12 @@ export function getIndex(): Promise<ContentIndex> {
     cache = (async () => {
       const docsConfig = await loadDocsConfig(dir);
       const pluginRuntime = await getPluginRuntime(dir, docsConfig);
-      return buildIndex({
-        dir,
-        automd: docs.automd,
-        pluginRuntime,
-      });
+      const buildOpts = applyBuildOptionsPlugins(
+        { dir, automd: docs.automd, pluginRuntime },
+        pluginRuntime.plugins,
+        pluginRuntime.ctx,
+      );
+      return buildIndex(buildOpts);
     })();
   }
   return cache;

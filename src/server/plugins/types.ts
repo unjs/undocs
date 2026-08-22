@@ -12,6 +12,8 @@ export interface UndocsPluginContext {
 
 export interface UndocsServerPlugin {
   name: string;
+  /** Options from the matching `docs.plugins` entry (set when loaded). */
+  options?: Record<string, unknown>;
 
   /** Transform build-time app config before `virtual:undocs/app-config` emit. */
   appConfig?(

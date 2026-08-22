@@ -119,6 +119,9 @@ async function renderRoot(
   app.use(router);
   app.use(head);
 
+  await router.push(routePath);
+  await router.isReady();
+
   const htmlLang =
     pluginHost.bootstrap(
       app,
@@ -126,9 +129,6 @@ async function renderRoot(
     ) ??
     useAppConfig().docs.lang ??
     "en";
-
-  await router.push(routePath);
-  await router.isReady();
 
   // Run the render inside the AsyncLocalStorage context so the composables and
   // the content `$fetch` resolve against THIS request's per-request store.

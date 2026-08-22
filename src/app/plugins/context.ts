@@ -30,9 +30,26 @@ export function applyPluginDocsConfig(
   return pluginHost.docsConfig(docs, ctx);
 }
 
+const MERGE_ARRAY_HEAD_KEYS = new Set(["meta", "link", "script", "style"]);
+
+/** Merge multiple plugin head entries (meta/link/script arrays concatenate). */
+export function mergeHeadEntries(entries: Record<string, unknown>[]): Record<string, unknown> {
+  if (!entries.length) return {};
+  const out: Record<string, unknown> = {};
+  for (const entry of entries) {
+    for (const [key, value] of Object.entries(entry)) {
+      if (MERGE_ARRAY_HEAD_KEYS.has(key) && Array.isArray(value)) {
+        const prev = out[key];
+        out[key] = [...(Array.isArray(prev) ? prev : []), ...value];
+      } else {
+        out[key] = value;
+      }
+    }
+  }
+  return out;
+}
+
 /** Merge plugin head entries for unhead. */
 export function mergePluginHead(ctx: UndocsClientPluginContext): Record<string, unknown> {
-  const entries = pluginHost.head(ctx);
-  if (!entries.length) return {};
-  return Object.assign({}, ...entries);
+  return mergeHeadEntries(pluginHost.head(ctx));
 }

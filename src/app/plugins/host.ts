@@ -12,6 +12,8 @@ import type { UndocsClientPlugin, UndocsClientPluginContext } from "./types.ts";
 
 export class PluginHost {
   readonly plugins: UndocsClientPlugin[];
+  /** Last `install()` htmlLang from bootstrap (SSR + client). */
+  htmlLang: string | undefined;
 
   constructor(plugins: UndocsClientPlugin[]) {
     this.plugins = plugins.filter(Boolean);
@@ -28,17 +30,17 @@ export class PluginHost {
 
   /** One call from `main.ts` / `entry-server.ts` — install + global component registration. */
   bootstrap(app: App, ctx: UndocsClientPluginContext): string | undefined {
-    let htmlLang: string | undefined;
+    this.htmlLang = undefined;
     for (const plugin of this.plugins) {
       const result = plugin.install?.(app, ctx);
-      if (result?.htmlLang) htmlLang = result.htmlLang;
+      if (result?.htmlLang) this.htmlLang = result.htmlLang;
       if (plugin.components) {
         for (const [name, component] of Object.entries(plugin.components)) {
           app.component(name, component);
         }
       }
     }
-    return htmlLang;
+    return this.htmlLang;
   }
 
   routes(base: RouteRecord[], docs: Record<string, any>): RouteRecord[] {
