@@ -12,4 +12,5 @@ export type {
   UndocsServerPlugin,
 } from "./server/plugins/types.ts";
 
-export type { PluginSpec, ResolvedPluginSpec } from "./shared/plugins/types.ts";
+export type { PluginSpec } from "../schema/config.d.ts";
+export type { ResolvedPluginSpec } from "./shared/plugins/types.ts";

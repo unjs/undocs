@@ -1,7 +1,8 @@
 import type { App, Component } from "vue";
 import type { DocsConfig } from "../../../schema/config.d.ts";
 import type { NavItem } from "@server/content/types.ts";
-import type { AppRouter, RouteLocation } from "@app/router.ts";
+import type { AppRouter, RouteLocation, RouteRecord } from "@app/router.ts";
+import type { UndocsServerPlugin } from "../../server/plugins/types.ts";
 
 export interface UndocsClientPluginContext {
   docs: Record<string, any>;
@@ -17,10 +18,7 @@ export interface UndocsClientPlugin {
   install?(app: App, ctx: UndocsClientPluginContext): void | { htmlLang?: string };
 
   /** Extend the built-in route table (prepended before catch-all matching). */
-  routes?(
-    routes: import("@app/router.ts").RouteRecord[],
-    ctx: Pick<UndocsClientPluginContext, "docs">,
-  ): import("@app/router.ts").RouteRecord[];
+  routes?(routes: RouteRecord[], ctx: Pick<UndocsClientPluginContext, "docs">): RouteRecord[];
 
   /** Transform navigation tree after locale/content filtering. */
   navigation?(
@@ -44,14 +42,14 @@ export interface UndocsClientPlugin {
   headerActions?: Component | Component[];
 }
 
-export function defineUndocsPlugin<
-  T extends UndocsClientPlugin | import("../../server/plugins/types.ts").UndocsServerPlugin,
->(plugin: T): T {
+export function defineUndocsPlugin<T extends UndocsClientPlugin | UndocsServerPlugin>(
+  plugin: T,
+): T {
   return plugin;
 }
 
 export function defineUndocsPluginBundle(bundle: {
-  server?: import("../../server/plugins/types.ts").UndocsServerPlugin;
+  server?: UndocsServerPlugin;
   client?: UndocsClientPlugin;
 }) {
   return bundle;

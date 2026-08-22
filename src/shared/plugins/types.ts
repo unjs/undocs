@@ -1,5 +1,6 @@
-/** Docs config entry: package name or `{ package, options }`. */
-export type PluginSpec = string | { package: string; options?: Record<string, unknown> };
+import type { PluginSpec } from "../../../schema/config.d.ts";
+
+export type { PluginSpec };
 
 export interface ResolvedPluginSpec {
   /** Import specifier (package name or absolute path). */

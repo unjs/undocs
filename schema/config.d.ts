@@ -31,6 +31,9 @@ export interface BannerProps {
   ui?: Record<string, unknown>;
 }
 
+/** Docs config plugin entry: package name or `{ package, options }`. */
+export type PluginSpec = string | { package: string; options?: Record<string, unknown> };
+
 export interface DocsConfig {
   dir?: string;
   /** The name of the documentation site. Defaults to the `name` of the closest `package.json` (searching upwards from the docs directory up to the repository root). */
@@ -71,7 +74,7 @@ export interface DocsConfig {
    * `./server` hook surface and an optional `./client` entry baked into
    * `virtual:undocs/plugins-client` at build time.
    */
-  plugins?: import("../shared/plugins/types.ts").PluginSpec[];
+  plugins?: PluginSpec[];
   buildCache?: boolean;
   /**
    * Expose docs search/navigation to browser AI agents via WebMCP
