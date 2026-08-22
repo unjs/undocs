@@ -27,7 +27,6 @@ const vueuseCoreDir = dirname(createRequire(import.meta.url).resolve("@vueuse/co
 // Docs directory. Mirrors `nitro.config.ts`: the CLI (`undocs dev|build <dir>`)
 // sets `UNDOCS_DIR`; a bare `pnpm dev` falls back to the repo `./docs`.
 const docsDir = process.env.UNDOCS_DIR ? resolve(process.env.UNDOCS_DIR) : r("./docs");
-const appDir = r("./src/app");
 
 export default defineConfig((configEnv) => ({
   // `import.meta` flags shared by both envs. `server`/`client`
