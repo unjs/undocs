@@ -138,8 +138,10 @@ export function undocsAppConfig(docsDir: string): Plugin {
   };
 }
 
-// `virtual:undocs/plugins-client` — statically imports client plugin entries
-// declared in `docs.plugins` so Rollup can bundle them (no runtime dynamic import).
+/**
+ * `virtual:undocs/plugins-client` — statically imports client plugin entries
+ * declared in `docs.plugins` so Rollup can bundle them (no runtime dynamic import).
+ */
 export function undocsPluginsClient(docsDir: string): Plugin {
   const VIRTUAL_ID = "virtual:undocs/plugins-client";
   const RESOLVED_ID = "\0" + VIRTUAL_ID;

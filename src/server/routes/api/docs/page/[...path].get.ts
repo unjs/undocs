@@ -6,6 +6,7 @@ import { getPluginRuntime } from "../../../../plugins/runtime.ts";
 import { acceptSurroundNeighbor } from "../../../../plugins/apply.ts";
 import type { SurroundItem } from "../../../../content/types.ts";
 
+/** Walk `order` from `index` in `direction` until a plugin-accepted neighbor is found. */
 function surroundAt(
   order: string[],
   pagePath: string,

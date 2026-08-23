@@ -27,6 +27,7 @@ import { clampLimit, siteName, textResult } from "./utils.ts";
  */
 let indexPromise: Promise<MiniSearch<SearchDocument> | null> | undefined;
 
+/** Load (and memoize) the MiniSearch index used by the palette and this tool. */
 function searchIndex(): Promise<MiniSearch<SearchDocument> | null> {
   indexPromise ??= (async () => {
     const entry = await useAsyncData("search", () => querySearchIndex());
@@ -104,6 +105,7 @@ function formatHits(query: string, hits: SearchHit[]): string {
     .join("\n\n");
 }
 
+/** WebMCP `search_docs` tool — MiniSearch over the docs, gated by plugin `filterPath`. */
 export function searchDocsTool(router: AppRouter): ModelContextTool {
   return {
     name: "search_docs",

@@ -42,12 +42,14 @@ export interface UndocsClientPlugin {
   headerActions?: Component | Component[];
 }
 
+/** Identity helper for a single server or client plugin export. */
 export function defineUndocsPlugin<T extends UndocsClientPlugin | UndocsServerPlugin>(
   plugin: T,
 ): T {
   return plugin;
 }
 
+/** Identity helper for a `{ server, client }` plugin package export. */
 export function defineUndocsPluginBundle(bundle: {
   server?: UndocsServerPlugin;
   client?: UndocsClientPlugin;

@@ -15,6 +15,7 @@ export class PluginHost {
   /** Last `install()` htmlLang from bootstrap (SSR + client). */
   htmlLang: string | undefined;
 
+  /** Drop falsy entries so a skipped client resolve cannot poison the host. */
   constructor(plugins: UndocsClientPlugin[]) {
     this.plugins = plugins.filter(Boolean);
   }

@@ -13,6 +13,7 @@ export function pluginContext(
   return { docsDir, docs, options };
 }
 
+/** Overlay a plugin's own `options` onto the shared docs context. */
 function pluginCtx(base: UndocsPluginContext, plugin: UndocsServerPlugin): UndocsPluginContext {
   return { ...base, options: plugin.options ?? {} };
 }

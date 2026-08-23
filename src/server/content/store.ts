@@ -9,8 +9,10 @@ import { applyBuildOptionsPlugins } from "../plugins/apply.ts";
 
 let cache: Promise<ContentIndex> | undefined;
 
-// TEMPORARY: fall back from a missing baked build-machine path to bundled docs,
-// resolved against Nitro's entry so relocated output still works.
+/**
+ * Resolve the on-disk docs dir. Falls back from a missing baked build-machine
+ * path to bundled docs under Nitro's entry so relocated output still works.
+ */
 function resolveDir(configuredDir?: string): string {
   if (configuredDir && existsSync(configuredDir)) {
     return configuredDir;
@@ -28,6 +30,7 @@ function resolveDir(configuredDir?: string): string {
   throw new Error("[undocs] content dir is not configured (runtimeConfig.undocs.dir)");
 }
 
+/** Build (or return the cached) content index, applying plugin `buildOptions` first. */
 export function getIndex(): Promise<ContentIndex> {
   if (!cache) {
     const config = useRuntimeConfig();
@@ -47,12 +50,14 @@ export function getIndex(): Promise<ContentIndex> {
   return cache;
 }
 
+/** Absolute path of the configured docs directory. */
 export function getDocsDir(): string {
   const config = useRuntimeConfig();
   const docs = (config.undocs || {}) as { dir?: string };
   return resolveDir(docs.dir);
 }
 
+/** Drop the memoized index so the next `getIndex()` rebuilds. */
 export function invalidateIndex() {
   cache = undefined;
 }

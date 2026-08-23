@@ -13,6 +13,7 @@ import type { UndocsPluginBundle, UndocsServerPlugin } from "./types.ts";
 
 const SERVER_SUFFIXES = ["/server", "/server.js", "/server.ts", ""];
 
+/** Resolve a plugin package/path plus optional `/server` suffix to a file URL path. */
 function resolvePluginEntry(spec: ResolvedPluginSpec, docsDir: string, suffix: string): string {
   const id = spec.id;
   if (id.startsWith(".") || isAbsolute(id)) {
@@ -31,6 +32,7 @@ function resolvePluginEntry(spec: ResolvedPluginSpec, docsDir: string, suffix: s
   return req.resolve(id);
 }
 
+/** Import a plugin module, trying server entry suffixes until one loads. */
 async function importPluginModule(
   spec: ResolvedPluginSpec,
   docsDir: string,
@@ -89,6 +91,7 @@ export function resolveClientPluginSpecifiers(
   return normalizePluginSpecs(docs.plugins as PluginSpec[] | undefined);
 }
 
+/** Candidate filesystem paths for a local plugin's client entry. */
 function localClientCandidates(base: string): string[] {
   const isFilePath = base.endsWith(".ts") || base.endsWith(".js");
   const candidates = [
@@ -126,10 +129,12 @@ export function pickClientPluginExport(mod: Record<string, unknown>): unknown {
   return d?.client ?? mod.client ?? d ?? mod;
 }
 
+/** True when an export object looks like a server plugin (not a client one). */
 function hasServerHooks(o: Record<string, unknown>): boolean {
   return !!(o.appConfig || o.nitro || o.vite || o.content);
 }
 
+/** True when an export object looks like a client plugin. */
 function hasClientHooks(o: Record<string, unknown>): boolean {
   return !!(
     o.install ||
@@ -155,6 +160,7 @@ export function moduleHasClientExport(mod: Record<string, unknown>): boolean {
   return hasClientHooks(o);
 }
 
+/** Dynamically import `entry` and test whether it exposes a client plugin. */
 async function importHasClientExport(entry: string): Promise<boolean> {
   try {
     const mod = await import(pathToFileURL(entry).href);

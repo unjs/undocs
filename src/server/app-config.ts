@@ -13,6 +13,7 @@ export interface UndocsAppConfig {
   ui: { colors: { primary: string } };
 }
 
+/** Build the client-facing app config, then run server `appConfig` plugin hooks. */
 export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfig> {
   const docs = await loadDocsConfig(docsDir);
 
