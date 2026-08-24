@@ -69,6 +69,7 @@ import { isAssetPath } from "@app/assets-base.ts";
 import { DEFAULT_COLOR_MODE } from "@app/color-mode.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { registerUserComponents } from "@app/user-theme.ts";
+import { pluginHost } from "@app/plugins/host.ts";
 
 // Seed the bundled built-in icons into (process-global) Iconify storage once, at
 // module load — so the very first render emits their real SVGs with no Iconify-API
@@ -80,7 +81,7 @@ async function renderRoot(
   routePath: string,
   ctx: UndocsServerContext,
   rootRender: () => unknown,
-): Promise<{ appHtml: string; head: ReturnType<typeof createHead>; error: any }> {
+): Promise<{ appHtml: string; head: ReturnType<typeof createHead>; error: any; htmlLang: string }> {
   const head = createHead();
   head.push({
     link: [
@@ -121,10 +122,18 @@ async function renderRoot(
   await router.push(routePath);
   await router.isReady();
 
+  const htmlLang =
+    pluginHost.bootstrap(
+      app,
+      pluginHost.context(useAppConfig().docs, router, routePath, router.currentRoute),
+    ) ??
+    useAppConfig().docs.lang ??
+    "en";
+
   // Run the render inside the AsyncLocalStorage context so the composables and
   // the content `$fetch` resolve against THIS request's per-request store.
   const appHtml = await runWithServerContext(ctx, () => renderToString(app));
-  return { appHtml, head, error };
+  return { appHtml, head, error, htmlLang };
 }
 
 /** Collect the resolved (successful) async-data entries for the payload. */
@@ -216,9 +225,9 @@ const themeColorScript = /* html */ `<script>${themeColorCode}</script>`;
 // and has to win over the visitor's stored preference.
 const embedThemeScript = /* html */ `<script>${embedThemeCode}</script>`;
 
-function htmlTemplate(appHtml: string, payload: string): string {
+function htmlTemplate(appHtml: string, payload: string, lang = "en"): string {
   return /* html */ `<!DOCTYPE html>
-<html lang="en" dir="ltr" class="${DEFAULT_COLOR_MODE}">
+<html lang="${lang}" dir="ltr" class="${DEFAULT_COLOR_MODE}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -283,10 +292,12 @@ const handler = defineHandler(async (event): Promise<Response> => {
   let head = createHead();
   let error: any;
 
+  let htmlLang = useAppConfig().docs.lang ?? "en";
+
   const appRoot = () => h(Suspense, null, { default: () => h(AppComponent) });
 
   try {
-    ({ appHtml, head, error } = await renderRoot(routePath, ctx, appRoot));
+    ({ appHtml, head, error, htmlLang } = await renderRoot(routePath, ctx, appRoot));
     // Second pass: the first render collected this page's icons into `ctx.icons`
     // but Iconify couldn't resolve their async API loads in time, so they came
     // out as placeholders. Preload the ones still missing (icon storage is
@@ -297,7 +308,7 @@ const handler = defineHandler(async (event): Promise<Response> => {
       if (missing.length) {
         await preloadIcons(missing);
         if (missing.some((n) => iconLoaded(n))) {
-          ({ appHtml, head, error } = await renderRoot(routePath, ctx, appRoot));
+          ({ appHtml, head, error, htmlLang } = await renderRoot(routePath, ctx, appRoot));
         }
       }
     }
@@ -333,7 +344,10 @@ const handler = defineHandler(async (event): Promise<Response> => {
     ...(errorProp ? { error: errorProp } : {}),
   };
 
-  const html = await transformHtmlTemplate(head, htmlTemplate(appHtml, serializePayload(payload)));
+  const html = await transformHtmlTemplate(
+    head,
+    htmlTemplate(appHtml, serializePayload(payload), htmlLang),
+  );
 
   const headers: Record<string, string> = { "content-type": "text/html;charset=utf-8" };
 

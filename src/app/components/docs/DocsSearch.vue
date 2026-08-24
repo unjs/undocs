@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, markRaw, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "@app/router.ts";
+import { usePluginContext } from "@app/plugins/context.ts";
+import { pluginHost } from "@app/plugins/host.ts";
 import { useDocsSearch } from "@app/composables/useDocsSearch.ts";
 import { querySearchIndex } from "@app/composables/useContent.ts";
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
@@ -47,6 +49,12 @@ const props = withDefaults(
 );
 
 const router = useRouter();
+const pluginCtx = usePluginContext();
+
+function pathAllowed(path: string): boolean {
+  return pluginHost.allowsPath(path, pluginCtx.value);
+}
+
 const { open, close } = useDocsSearch();
 
 const query = ref("");
@@ -122,7 +130,10 @@ const indexLoading = computed(() => indexPending.value && navSections.value.leng
 const results = computed<ResultRow[]>(() => {
   const q = query.value.trim();
   if (!q) {
-    return navSections.value.slice(0, 20).map((section) => ({ section, terms: [] }));
+    return navSections.value
+      .filter((section) => pathAllowed(String(section.id).split("#")[0]!))
+      .slice(0, 20)
+      .map((section) => ({ section, terms: [] }));
   }
   // Match all terms first; use the typo-tolerant pass only as a fallback.
   let hits = index.value.search(q, MINISEARCH_SEARCH_OPTIONS);
@@ -132,6 +143,8 @@ const results = computed<ResultRow[]>(() => {
   const rows: ResultRow[] = [];
   for (let i = 0; i < hits.length && rows.length < RESULT_LIMIT; i++) {
     const hit = hits[i] as unknown as SearchDocument & { terms: string[] };
+    const path = String(hit.id).split("#")[0]!;
+    if (!pathAllowed(path)) continue;
     rows.push({
       section: {
         id: hit.id,

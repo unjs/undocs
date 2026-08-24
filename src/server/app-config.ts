@@ -1,6 +1,8 @@
 import { loadDocsConfig } from "./docs-config.ts";
 import { DOCS_ICON_ASSET, resolveDocsIcon } from "./docs-public.ts";
 import { highlightCode } from "./content/highlight.ts";
+import { loadServerPlugins } from "./plugins/resolve.ts";
+import { applyAppConfigPlugins, pluginContext } from "./plugins/apply.ts";
 
 // Build-time source for the virtual config; feature rendering and hero
 // highlighting fail soft.
@@ -11,6 +13,7 @@ export interface UndocsAppConfig {
   ui: { colors: { primary: string } };
 }
 
+/** Build the client-facing app config, then run server `appConfig` plugin hooks. */
 export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfig> {
   const docs = await loadDocsConfig(docsDir);
 
@@ -59,7 +62,7 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
     }
   }
 
-  return {
+  let config: UndocsAppConfig = {
     docs: {
       ...docs,
       dir: undefined,
@@ -76,4 +79,9 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
       },
     },
   };
+
+  const plugins = await loadServerPlugins(docsDir, docs);
+  config = await applyAppConfigPlugins(config, plugins, pluginContext(docsDir, docs));
+
+  return config;
 }

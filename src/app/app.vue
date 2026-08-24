@@ -4,6 +4,12 @@ import { useRoute } from "@app/router.ts";
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { useHead, useSeoMeta } from "@unhead/vue";
+import {
+  applyPluginNavigationTree,
+  mergePluginHead,
+  usePluginContext,
+} from "@app/plugins/context.ts";
+import { pluginHost } from "@app/plugins/host.ts";
 import { queryNavigation, hintPrerenderRoute } from "@app/composables/useContent.ts";
 import { LANDING_KEY, resolveLanding } from "@app/composables/useLanding.ts";
 import { docsNavTree } from "@app/utils/nav.ts";
@@ -23,6 +29,8 @@ import AppLayout from "@app/components/app/AppLayout.ts";
 import AppPage from "@app/components/app/AppPage.ts";
 import { startPrefetch } from "@app/prefetch.ts";
 const appConfig = useAppConfig();
+const route = useRoute();
+const pluginCtx = usePluginContext();
 
 const { data: navigation } = await useAsyncData("navigation", () => queryNavigation());
 
@@ -35,7 +43,11 @@ const landing = computed(() => resolveLanding(appConfig.docs, navigation.value))
 // The tree the chrome renders, shaped for that answer — see `docsNavTree`. Every
 // consumer (sidebar, section tabs, mobile drawer, search, prefetch) reads this
 // one, not the raw response.
-const docsNavigation = computed(() => docsNavTree(navigation.value, landing.value));
+const docsNavigation = computed(() =>
+  applyPluginNavigationTree(docsNavTree(navigation.value, landing.value), pluginCtx.value),
+);
+
+useHead(() => mergePluginHead(pluginCtx.value));
 
 // Bake the global search index (`/api/docs/search`, query-less) too. Unlike
 // navigation it isn't fetched during SSR (search loads lazily on open), so the
@@ -52,7 +64,7 @@ useSeoMeta({
 
 useHead({
   htmlAttrs: {
-    lang: appConfig.docs.lang || "en",
+    lang: pluginHost.htmlLang ?? appConfig.docs.lang ?? "en",
   },
   link: browserTabIcon
     ? [
@@ -69,8 +81,6 @@ useHead({
       ]
     : [],
 });
-
-const route = useRoute();
 
 // The fireplace backdrop belongs to the landing only — other pages, including a
 // no-landing `/`, get a plain background.
