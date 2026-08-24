@@ -61,11 +61,11 @@ export interface DocsConfig {
    * plus a `Cross-Origin-Embedder-Policy`), the precondition for `SharedArrayBuffer`
    * and wasm threads. Off by default.
    *
-   * `true` means `credentialless` — cross-origin subresources load without
-   * credentials, so nothing upstream has to change. `"require-corp"` is the
-   * stricter alternative, valid only when every cross-origin asset sends
-   * `Cross-Origin-Resource-Policy`. Either way a cross-origin iframe must send
-   * COEP of its own or it will not load.
+   * `true` / `"credentialless"` strips credentials from cross-origin **no-cors**
+   * subresource requests (CORS fetches still need a normal CORS response).
+   * `"require-corp"` is stricter and only safe when every cross-origin asset
+   * sends `Cross-Origin-Resource-Policy` (or CORS). A cross-origin iframe must
+   * opt in via its own COEP header or the `credentialless` iframe attribute.
    */
   crossOriginIsolation?: boolean | "credentialless" | "require-corp";
   automd?: unknown;
