@@ -15,6 +15,7 @@ import { transformBody } from "./transforms.ts";
 import { highlightBody } from "./highlight.ts";
 import { resolveIcon } from "./icons.ts";
 import { buildSearch, buildSearchIndex } from "./search.ts";
+import { pmInstallLatest } from "./automd-generators.ts";
 
 import type {
   BuildStats,
@@ -34,6 +35,8 @@ export const EXCLUDE = [/(^|\/)\./, /\/node_modules\//, /\/dist\//, /\/\.docs\//
 export interface BuildOptions {
   dir: string;
   automd?: unknown;
+  /** Canonical site URL, for automd generators that must emit absolute links. */
+  url?: string;
 }
 
 const now = () => performance.now();
@@ -122,7 +125,7 @@ export async function buildIndex(opts: BuildOptions): Promise<ContentIndex> {
 
   const dir = opts.dir;
 
-  const automdTransform = opts.automd ? await createAutomd(dir, opts.automd) : undefined;
+  const automdTransform = opts.automd ? await createAutomd(dir, opts.automd, opts.url) : undefined;
 
   mark = now();
   const scanned: string[] = [];
@@ -508,10 +511,14 @@ function parseNavYml(raw: string): Record<string, unknown> {
  * Automd failures are recoverable but warned: retain the entire original source
  * rather than publishing partial output or generated issue comments.
  */
-async function createAutomd(dir: string, automdConfig: unknown) {
+async function createAutomd(dir: string, automdConfig: unknown, url?: string) {
   try {
     const automd = await import("automd");
     const config = await automd.loadConfig(dir, automdConfig as any);
+    // Registered UNDER the docs project's own generators: a project that defines
+    // `pm-i` itself keeps it, and undocs only fills the name in when it is free.
+    const pmInstall = pmInstallLatest(url);
+    config.generators = { "pm-i": pmInstall, "pm-install": pmInstall, ...config.generators };
     return async (content: string, path: string, rel: string): Promise<string> => {
       try {
         const res = await automd.transform(content, config, pathToFileURL(path).href);

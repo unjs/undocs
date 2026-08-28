@@ -15,6 +15,8 @@ url: "https://undocs.pages.dev"
 redirects:
   "/docs": "/guide"
 automd: true
+# Build the package above this docs directory and serve it at `/latest.tgz`.
+pkg: true
 landing:
   heroLinks:
     stackblitz:

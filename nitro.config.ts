@@ -5,6 +5,7 @@ import { defineNitroConfig } from "nitro/config";
 import { loadDocsConfig } from "./src/server/docs-config.ts";
 import { vercel } from "./src/server/vercel.ts";
 import { bundleDocs } from "./src/server/bundle-docs.ts";
+import { packPkg } from "./src/server/pack-pkg.ts";
 import { rebaseOutput } from "./src/server/rebase-output.ts";
 import { docsPublicDirs, resolveDocsIcon } from "./src/server/docs-public.ts";
 import { normalizeRedirects } from "./src/app/utils/redirects.ts";
@@ -105,7 +106,15 @@ export default defineNitroConfig({
   // so preset output would otherwise land next to undocs; this rebases
   // `output.*` onto `docsDir` instead. Listed first so its `setup` runs before
   // other modules' `compiled` hooks read those paths.
-  modules: [rebaseOutput(docsDir), vercel(vercelLinkDirs), bundleDocs(dir)],
+  //
+  // `packPkg` builds the package selected by `pkg` in production and serves its
+  // tarball at `/latest.tgz`.
+  modules: [
+    rebaseOutput(docsDir),
+    vercel(vercelLinkDirs),
+    bundleDocs(dir),
+    packPkg(docsDir, docs.pkg),
+  ],
 
   // SSR serving: no `renderer.template` or `renderer.handler` is set. With an
   // `ssr` Vite environment present (see `vite.config.ts`), Nitro's vite plugin

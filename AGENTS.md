@@ -506,6 +506,34 @@ NEVER write E2E tests. Ask for it to be tested manually.
   not exist on a deploy; `store.ts`'s `resolveDir` falls back to
   `<nitro-main>/docs`, populated by `bundle-docs.ts`. Keep the two glob/exclude
   rules in sync.
+- **Create the package tarball before Nitro copies public files.** The `pkg`
+  option accepts `true` or a path. Paths are relative to the docs directory,
+  and `true` means `..`. `src/server/pack-pkg.ts` builds the package, runs
+  `npm pack`, and serves the result at `/latest.tgz`. It runs during
+  `build:before` because Nitro copies public files after that hook. Adding the
+  directory later does not copy it. Skip this work in dev. Store only the
+  tarball in `<buildDir>/undocs/pkg` because Nitro mounts that directory at `/`.
+  Do not put it under `output.*`, because Nitro clears the output after this
+  hook. Add a `content-type` route rule for `/latest.tgz`. Nitro does not know
+  the `.tgz` type and would otherwise serve it as `text/plain`. Two guards keep
+  the package's own build from eating its host. `UNDOCS_SKIP_PACK` is set on
+  every child process and checked before any is spawned: a package that ships
+  docs may build them in its `build` script, which would otherwise recurse
+  without bound. And a `pkgDir` equal to `nitro.options.rootDir` means undocs is
+  packing itself (this repo's `docs/`, where `..` is the checkout) — its build
+  script IS this build, sharing `buildDir` and the output dir, so running it
+  nested corrupts the outer build instead of merely repeating it. That case
+  packs without building, which is correct anyway: undocs ships source.
+- **The `pm-i latest` flag delegates everything else back to automd.**
+  `src/server/content/automd-generators.ts` registers a `pm-i`/`pm-install`
+  override (UNDER the docs project's own generators, so a project defining
+  `pm-i` keeps it) whose only new behaviour is `latest`: install commands for
+  the `pkg` tarball at the docs config's canonical `url`, which is why `url` is
+  plumbed through `buildIndex`. A tarball URL needs its OWN command table —
+  automd's installs through `npm:` for deno, a registry specifier a URL cannot
+  follow — but only that table is ours. A block without the flag is re-run
+  against a generator set this override was deleted from, so the registry case
+  has exactly one implementation and it is automd's. Do not reimplement it here.
 - **Config redirects are enforced twice, from one map.**
   `src/app/utils/redirects.ts` (client-safe, no node imports) normalizes the docs
   config's `redirects`; `nitro.config.ts` turns it into `routeRules`

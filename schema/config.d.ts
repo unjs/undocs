@@ -68,6 +68,17 @@ export interface DocsConfig {
   automd?: unknown;
   buildCache?: boolean;
   /**
+   * Build a package and include its tarball with the site.
+   *
+   * Use `true` for the package one level above the docs directory. Use a string
+   * for another path relative to the docs directory.
+   *
+   * In production builds, undocs runs the package's `build` script if it has
+   * one, runs `npm pack`, and serves the tarball at `/latest.tgz`. This option
+   * does nothing in dev.
+   */
+  pkg?: boolean | string;
+  /**
    * Expose docs search/navigation to browser AI agents via WebMCP
    * (https://webmachinelearning.github.io/webmcp/). Enabled by default —
    * browsers without a native `document.modelContext` get a polyfill, so the

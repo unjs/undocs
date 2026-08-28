@@ -28,9 +28,9 @@ function resolveDir(configuredDir?: string): string {
 export function getIndex(): Promise<ContentIndex> {
   if (!cache) {
     const config = useRuntimeConfig();
-    const docs = (config.undocs || {}) as { dir?: string; automd?: unknown };
+    const docs = (config.undocs || {}) as { dir?: string; automd?: unknown; url?: string };
     const dir = resolveDir(docs.dir);
-    cache = buildIndex({ dir, automd: docs.automd });
+    cache = buildIndex({ dir, automd: docs.automd, url: docs.url });
   }
   return cache;
 }

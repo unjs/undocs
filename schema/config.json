@@ -272,6 +272,17 @@
       "type": "boolean",
       "description": "Enable build cache (experimental)"
     },
+    "pkg": {
+      "description": "Build a package and include its tarball with the site. This is off by default.\nUse `true` for the package one level above the docs directory. Use a string for another path relative to the docs directory.\nIn production builds, undocs runs the package's `build` script if it has one, runs `npm pack`, and serves the tarball at `/latest.tgz`. This option does nothing in dev.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
     "webmcp": {
       "type": "boolean",
       "description": "Expose docs search/navigation to browser AI agents via WebMCP (https://webmachinelearning.github.io/webmcp/). Enabled by default — browsers without a native `document.modelContext` get a polyfill, so the tools are reachable today. Set to `false` to opt out."
