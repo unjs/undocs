@@ -92,7 +92,7 @@ function normalizeActionColor(color?: string): "primary" | "neutral" | "white" {
       class="flex flex-1 items-center justify-center gap-1.5 text-center font-medium"
     >
       <Icon v-if="icon" :name="icon" class="size-4 shrink-0" />
-      <span class="truncate">{{ title }}</span>
+      <span class="text-pretty">{{ title }}</span>
     </component>
 
     <div v-if="actions?.length" class="flex shrink-0 items-center gap-1.5">
