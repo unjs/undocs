@@ -11,6 +11,26 @@ export interface UndocsAppConfig {
   ui: { colors: { primary: string } };
 }
 
+// Fails soft: a missing renderer leaves the snippets as they are.
+async function loadMarkdown() {
+  try {
+    const md4x = await import("md4x/wasm");
+    await md4x.init();
+    return md4x;
+  } catch (error) {
+    console.error("[undocs] failed to load the markdown renderer:", error);
+    return undefined;
+  }
+}
+
+// The non-blank notes, or undefined when there is nothing to render.
+function footerNotes(notes: unknown): string[] | undefined {
+  const list = (Array.isArray(notes) ? notes : [notes])
+    .filter((note): note is string => typeof note === "string" && note.trim() !== "")
+    .map((note) => note.trim());
+  return list.length > 0 ? list : undefined;
+}
+
 export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfig> {
   const docs = await loadDocsConfig(docsDir);
 
@@ -30,10 +50,18 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
   // Boolean `landing` is only an on/off switch.
   const landing = typeof docs.landing === "object" ? docs.landing : undefined;
 
-  if (landing?.features) {
+  // Markdown snippets in the config (feature descriptions, footer notes) are
+  // rendered here, once, so the client never loads md4x. Loaded only when one
+  // of them is present.
+  const notes = footerNotes(docs.footer?.notes);
+  if (docs.footer && !notes) {
+    // Blank notes are no notes: the footer falls back to the name line.
+    docs.footer.notes = undefined;
+  }
+  const md4x = landing?.features || notes ? await loadMarkdown() : undefined;
+
+  if (landing?.features && md4x) {
     try {
-      const md4x = await import("md4x/wasm");
-      await md4x.init();
       for (const item of landing.features) {
         if (item.description) {
           item.description = md4x.renderToHtml(item.description);
@@ -41,6 +69,14 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
       }
     } catch (error) {
       console.error("[undocs] failed to render landing feature markdown:", error);
+    }
+  }
+
+  if (notes && md4x) {
+    try {
+      docs.footer.notes = notes.map((note) => md4x.renderToHtml(note));
+    } catch (error) {
+      console.error("[undocs] failed to render footer notes markdown:", error);
     }
   }
 
