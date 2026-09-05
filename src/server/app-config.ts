@@ -11,7 +11,7 @@ export interface UndocsAppConfig {
   ui: { colors: { primary: string } };
 }
 
-// Fails soft: a missing renderer leaves the snippets as they are.
+/** The build-time Markdown renderer. Fails soft: a missing renderer leaves the snippets as they are. */
 async function loadMarkdown() {
   try {
     const md4x = await import("md4x/wasm");
@@ -23,7 +23,7 @@ async function loadMarkdown() {
   }
 }
 
-// The non-blank notes, or undefined when there is nothing to render.
+/** The non-blank, trimmed `footer.notes`, or undefined when there is nothing to render. */
 function footerNotes(notes: unknown): string[] | undefined {
   const list = (Array.isArray(notes) ? notes : [notes])
     .filter((note): note is string => typeof note === "string" && note.trim() !== "")
@@ -54,8 +54,10 @@ export async function generateAppConfig(docsDir: string): Promise<UndocsAppConfi
   // rendered here, once, so the client never loads md4x. Loaded only when one
   // of them is present.
   const notes = footerNotes(docs.footer?.notes);
-  if (docs.footer && !notes) {
-    // Blank notes are no notes: the footer falls back to the name line.
+  if (docs.footer) {
+    // Nothing reaches the footer but rendered HTML: blank notes, a renderer
+    // that failed to load, or a render that threw all leave the name line in
+    // place rather than raw Markdown (or, for a string, one node per character).
     docs.footer.notes = undefined;
   }
   const md4x = landing?.features || notes ? await loadMarkdown() : undefined;
