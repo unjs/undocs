@@ -21,10 +21,10 @@ importers:
         specifier: ^5.3.0
         version: 5.3.0
       '@iconify-json/lucide':
-        specifier: ^1.2.124
+        specifier: ^1.2.129
         version: 1.2.129
       '@iconify-json/vscode-icons':
-        specifier: ^1.2.74
+        specifier: ^1.2.76
         version: 1.2.76
       '@iconify/utils':
         specifier: ^3.1.4
@@ -36,7 +36,7 @@ importers:
         specifier: ^4.3.3
         version: 4.3.3(vite@8.2.2(@types/node@26.4.1)(jiti@2.7.0))
       '@unhead/vue':
-        specifier: ^3.3.2
+        specifier: ^3.4.0
         version: 3.4.0(@oxc-project/types@0.148.0)(lightningcss@1.33.0)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(jiti@2.7.0))(vue@3.5.42(typescript@7.0.2))
       '@vitejs/plugin-vue':
         specifier: ^6.0.8
@@ -99,7 +99,7 @@ importers:
         specifier: ^4.3.3
         version: 4.3.3
       takumi-js:
-        specifier: ^2.10.0
+        specifier: ^2.13.5
         version: 2.13.5(csstype@3.2.3)
       tw-animate-css:
         specifier: ^1.4.0
@@ -111,11 +111,11 @@ importers:
         specifier: latest
         version: 8.2.2(@types/node@26.4.1)(jiti@2.7.0)
       vue:
-        specifier: ^3.5.41
+        specifier: ^3.5.42
         version: 3.5.42(typescript@7.0.2)
     devDependencies:
       '@types/node':
-        specifier: ^26.2.0
+        specifier: ^26.4.1
         version: 26.4.1
       '@vitest/coverage-v8':
         specifier: ^4.1.11
@@ -124,13 +124,13 @@ importers:
         specifier: ^0.6.2
         version: 0.6.2(magicast@0.5.4)
       oxfmt:
-        specifier: '>=0.64.0'
+        specifier: '>=0.66.0'
         version: 0.66.0
       oxlint:
-        specifier: ^1.79.0
+        specifier: ^1.81.0
         version: 1.81.0
       rolldown:
-        specifier: ^1.2.5
+        specifier: ^1.2.7
         version: 1.2.7
       typescript:
         specifier: ^7.0.2
