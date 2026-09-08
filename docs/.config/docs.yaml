@@ -34,3 +34,7 @@ landing:
     - title: "Deploy anywhere"
       icon: "✨"
       description: "The documentation can be hosted on any static hosting."
+footer:
+  notes:
+    - "Released under the [MIT License](https://github.com/unjs/undocs/blob/main/LICENSE)."
+    - "Hosted on [Vercel](https://vercel.com)."
