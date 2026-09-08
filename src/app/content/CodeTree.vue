@@ -2,6 +2,7 @@
 // Selection and expansion are deterministic in setup for hydration parity.
 import { cloneVNode, computed, Fragment, ref, useSlots, type VNode } from "vue";
 import Icon from "@app/components/global/Icon.vue";
+import Button from "@app/components/ui/Button.vue";
 import { useCodeIcon } from "@app/composables/useCodeIcon.ts";
 
 const props = defineProps<{
@@ -92,6 +93,7 @@ const defaultSelected = computed(() =>
     : firstPath.value,
 );
 const selectedOverride = ref<string | null>(null);
+const drawerOpen = ref(false);
 const selected = computed(() =>
   selectedOverride.value && files.value.some((f) => f.path === selectedOverride.value)
     ? selectedOverride.value
@@ -162,8 +164,26 @@ const rows = computed<Row[]>(() => {
 </script>
 
 <template>
-  <div class="code-tree my-4 flex max-h-96 overflow-hidden rounded-lg border border-border bg-card">
-    <div class="w-56 shrink-0 overflow-y-auto border-r border-border bg-muted/40 py-2 text-sm">
+  <div class="code-tree my-4 flex max-h-96 overflow-hidden rounded-lg border border-border bg-card min-h-36 relative @container/code-tree">
+    <!-- Backdrop when drawer opens -->
+    <div
+      class="hidden cursor-pointer @max-xl/code-tree:absolute @max-xl/code-tree:inset-0 @max-xl/code-tree:z-20 @max-xl/code-tree:block @max-xl/code-tree:bg-black/40 @max-xl/code-tree:transition-opacity @max-xl/code-tree:duration-200"
+      :class="
+        drawerOpen
+          ? '@max-xl/code-tree:opacity-100 @max-xl/code-tree:pointer-events-auto'
+          : '@max-xl/code-tree:opacity-0 @max-xl/code-tree:pointer-events-none'
+      "
+      :aria-hidden="!drawerOpen"
+      @click="drawerOpen = false"
+    />
+
+    <!-- Toggleable file tree -->
+    <div
+      class="w-56 shrink-0 overflow-y-auto border-r border-border bg-muted/40 py-2 text-sm @max-xl/code-tree:absolute @max-xl/code-tree:inset-y-0 @max-xl/code-tree:left-0 @max-xl/code-tree:z-30 @max-xl/code-tree:w-[min(75%,14rem)] @max-xl/code-tree:bg-card @max-xl/code-tree:shadow-menu @max-xl/code-tree:transition-transform @max-xl/code-tree:duration-200"
+      :class="
+        drawerOpen ? '@max-xl/code-tree:translate-x-0' : '@max-xl/code-tree:-translate-x-full'
+      "
+    >
       <div
         v-for="({ node, depth }, i) in rows"
         :key="i"
@@ -174,7 +194,7 @@ const rows = computed<Row[]>(() => {
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         "
         :style="{ paddingLeft: `${0.5 + depth * 0.75}rem` }"
-        @click="node.type === 'folder' ? toggle(node.path) : (selectedOverride = node.path)"
+        @click="node.type === 'folder' ? toggle(node.path) : ((selectedOverride = node.path), (drawerOpen = false))"
       >
         <template v-if="node.type === 'folder'">
           <Icon
@@ -197,6 +217,24 @@ const rows = computed<Row[]>(() => {
 
     <!-- The selected pre owns scrolling and stretches through the flex chain. -->
     <div class="code-tree-body flex min-h-0 min-w-0 flex-1 flex-col">
+      <!-- File tree toggle -->
+      <div class="hidden @max-xl/code-tree:relative @max-xl/code-tree:flex @max-xl/code-tree:items-center @max-xl/code-tree:gap-2 @max-xl/code-tree:border-b @max-xl/code-tree:border-border @max-xl/code-tree:px-3 @max-xl/code-tree:py-2 @max-xl/code-tree:text-foreground @max-xl/code-tree:bg-card @max-xl/code-tree:transition-colors @max-xl/code-tree:hover:bg-muted">
+        <Icon name="i-lucide-folder-tree" class="size-4 shrink-0" />
+        
+        <!-- Vertical separator -->
+        <span class="h-full w-0.5 rounded-full bg-border" aria-hidden="true"></span>
+        
+        <span class="text-sm">{{ selectedFile?.path }}</span>
+
+        <Button
+          type="button"
+          class="absolute inset-0 opacity-0 cursor-pointer"
+          :aria-label="drawerOpen ? 'Close file tree' : 'Open file tree'"
+          :aria-expanded="drawerOpen"
+          @click="drawerOpen = !drawerOpen"
+        />
+      </div>
+
       <component :is="selectedVNode" v-if="selectedVNode" />
     </div>
   </div>
