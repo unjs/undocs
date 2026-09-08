@@ -164,7 +164,9 @@ const rows = computed<Row[]>(() => {
 </script>
 
 <template>
-  <div class="code-tree my-4 flex max-h-96 overflow-hidden rounded-lg border border-border bg-card min-h-36 relative @container/code-tree">
+  <div
+    class="code-tree my-4 flex max-h-96 overflow-hidden rounded-lg border border-border bg-card min-h-36 relative @container/code-tree"
+  >
     <!-- Backdrop when drawer opens -->
     <div
       class="hidden cursor-pointer @max-xl/code-tree:absolute @max-xl/code-tree:inset-0 @max-xl/code-tree:z-20 @max-xl/code-tree:block @max-xl/code-tree:bg-black/40 @max-xl/code-tree:transition-opacity @max-xl/code-tree:duration-200"
@@ -194,7 +196,11 @@ const rows = computed<Row[]>(() => {
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         "
         :style="{ paddingLeft: `${0.5 + depth * 0.75}rem` }"
-        @click="node.type === 'folder' ? toggle(node.path) : ((selectedOverride = node.path), (drawerOpen = false))"
+        @click="
+          node.type === 'folder'
+            ? toggle(node.path)
+            : ((selectedOverride = node.path), (drawerOpen = false))
+        "
       >
         <template v-if="node.type === 'folder'">
           <Icon
@@ -218,12 +224,14 @@ const rows = computed<Row[]>(() => {
     <!-- The selected pre owns scrolling and stretches through the flex chain. -->
     <div class="code-tree-body flex min-h-0 min-w-0 flex-1 flex-col">
       <!-- File tree toggle -->
-      <div class="hidden @max-xl/code-tree:relative @max-xl/code-tree:flex @max-xl/code-tree:items-center @max-xl/code-tree:gap-2 @max-xl/code-tree:border-b @max-xl/code-tree:border-border @max-xl/code-tree:px-3 @max-xl/code-tree:py-2 @max-xl/code-tree:text-foreground @max-xl/code-tree:bg-card @max-xl/code-tree:transition-colors @max-xl/code-tree:hover:bg-muted">
+      <div
+        class="hidden @max-xl/code-tree:relative @max-xl/code-tree:flex @max-xl/code-tree:items-center @max-xl/code-tree:gap-2 @max-xl/code-tree:border-b @max-xl/code-tree:border-border @max-xl/code-tree:px-3 @max-xl/code-tree:py-2 @max-xl/code-tree:text-foreground @max-xl/code-tree:bg-card @max-xl/code-tree:transition-colors @max-xl/code-tree:hover:bg-muted"
+      >
         <Icon name="i-lucide-folder-tree" class="size-4 shrink-0" />
-        
+
         <!-- Vertical separator -->
         <span class="h-full w-0.5 rounded-full bg-border" aria-hidden="true"></span>
-        
+
         <span class="text-sm">{{ selectedFile?.path }}</span>
 
         <Button
