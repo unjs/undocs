@@ -239,6 +239,17 @@
         }
       }
     },
+    "footer": {
+      "type": "object",
+      "description": "Footer configuration",
+      "additionalProperties": false,
+      "properties": {
+        "notes": {
+          "description": "One or more lines of Markdown shown in the footer in place of the site name and short description, for a license, a hosting credit or similar. Each entry is rendered at build time and becomes one line.",
+          "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }]
+        }
+      }
+    },
     "versions": {
       "type": "array",
       "description": "The versions of the documentation site.",

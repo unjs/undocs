@@ -49,6 +49,10 @@ export interface DocsConfig {
   };
   branch?: string;
   banner?: BannerProps;
+  footer?: {
+    /** One or more lines of Markdown shown in the footer in place of the site name and short description, for a license, a hosting credit or similar. Each entry is rendered at build time and becomes one line. */
+    notes?: string | string[];
+  };
   versions?: { label: string; to: string; active?: boolean }[];
   /** The accent color of the documentation site, default `mono`: `mono` (no accent — the monochrome default), a Geist hue (blue, red, amber, green, teal, purple, pink), a Tailwind palette name mapped onto the nearest Geist hue, a neutral name as a synonym for `mono`, or any CSS color. Tints links, active navigation and icons; solid buttons stay monochrome. */
   themeColor?: string;
