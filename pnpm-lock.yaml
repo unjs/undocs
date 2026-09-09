@@ -21,14 +21,14 @@ importers:
         specifier: ^5.3.0
         version: 5.3.0
       '@iconify-json/lucide':
-        specifier: ^1.2.124
+        specifier: ^1.2.129
         version: 1.2.129
       '@iconify-json/vscode-icons':
-        specifier: ^1.2.74
+        specifier: ^1.2.76
         version: 1.2.76
       '@iconify/utils':
-        specifier: ^3.1.4
-        version: 3.1.4
+        specifier: ^3.1.6
+        version: 3.1.7
       '@iconify/vue':
         specifier: ^5.0.1
         version: 5.0.1(vue@3.5.42(typescript@7.0.2))
@@ -36,7 +36,7 @@ importers:
         specifier: ^4.3.3
         version: 4.3.3(vite@8.2.2(@types/node@26.4.1)(jiti@2.7.0))
       '@unhead/vue':
-        specifier: ^3.3.2
+        specifier: ^3.4.0
         version: 3.4.0(@oxc-project/types@0.148.0)(lightningcss@1.33.0)(rolldown@1.2.7)(vite@8.2.2(@types/node@26.4.1)(jiti@2.7.0))(vue@3.5.42(typescript@7.0.2))
       '@vitejs/plugin-vue':
         specifier: ^6.0.8
@@ -48,8 +48,8 @@ importers:
         specifier: ^0.4.3
         version: 0.4.3(magicast@0.5.4)
       c12:
-        specifier: 4.0.0-beta.5
-        version: 4.0.0-beta.5(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4)
+        specifier: 4.0.0-rc.1
+        version: 4.0.0-rc.1(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4)
       citty:
         specifier: ^0.2.2
         version: 0.2.2
@@ -75,8 +75,8 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0
       motion-v:
-        specifier: ^2.4.0
-        version: 2.4.0(@vueuse/core@14.4.0(vue@3.5.42(typescript@7.0.2)))(vue@3.5.42(typescript@7.0.2))
+        specifier: ^2.4.2
+        version: 2.4.2(@vueuse/core@14.4.0(vue@3.5.42(typescript@7.0.2)))(vue@3.5.42(typescript@7.0.2))
       nitro:
         specifier: ^3.0.260903-beta
         version: 3.0.260903-beta
@@ -99,8 +99,8 @@ importers:
         specifier: ^4.3.3
         version: 4.3.3
       takumi-js:
-        specifier: ^2.10.0
-        version: 2.13.5(csstype@3.2.3)
+        specifier: ^2.13.6
+        version: 2.13.7(csstype@3.2.3)
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
@@ -111,11 +111,11 @@ importers:
         specifier: latest
         version: 8.2.2(@types/node@26.4.1)(jiti@2.7.0)
       vue:
-        specifier: ^3.5.41
+        specifier: ^3.5.42
         version: 3.5.42(typescript@7.0.2)
     devDependencies:
       '@types/node':
-        specifier: ^26.2.0
+        specifier: ^26.4.1
         version: 26.4.1
       '@vitest/coverage-v8':
         specifier: ^4.1.11
@@ -124,13 +124,13 @@ importers:
         specifier: ^0.6.2
         version: 0.6.2(magicast@0.5.4)
       oxfmt:
-        specifier: '>=0.64.0'
+        specifier: '>=0.66.0'
         version: 0.66.0
       oxlint:
-        specifier: ^1.79.0
+        specifier: ^1.81.0
         version: 1.81.0
       rolldown:
-        specifier: ^1.2.5
+        specifier: ^1.2.7
         version: 1.2.7
       typescript:
         specifier: ^7.0.2
@@ -153,8 +153,8 @@ importers:
 
 packages:
 
-  '@antfu/install-pkg@1.1.0':
-    resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
+  '@antfu/install-pkg@2.0.1':
+    resolution: {integrity: sha512-iCKVQcIC0e3oDxEfs3SHQGW+ovhBMZmS1TE+bTk50rVyMCBmCfClv7Qi3HQKlumYwvjb/iIMeWCW2i67q6kFfQ==}
 
   '@babel/helper-string-parser@7.29.7':
     resolution: {integrity: sha512-Pb5ijPrZ89GDH8223L4UP8i6QApWxs04RbPQJTeWDV0/keR2E36MeKnyr6LYmUUvqRRI+Iv87SuF1W6ErINzYw==}
@@ -205,8 +205,8 @@ packages:
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
 
-  '@iconify/utils@3.1.4':
-    resolution: {integrity: sha512-b1S7B1k9ohZ+iNTi2ATxbRYG9fTrJmUT0rc46bvVnNxqNRGW7dyo/vRREwyniI5IRN2RSJHDcm+s3BjWrSAjHw==}
+  '@iconify/utils@3.1.7':
+    resolution: {integrity: sha512-JZHlwdID+dy+lTgbYC8NEC4zeugqeYsc6jewvzb4c58kHauJn+X7rNwQjxz5p2qSjqaEeQoLkCIQ9v/H4PK0/w==}
 
   '@iconify/vue@5.0.1':
     resolution: {integrity: sha512-aumwwooJlFJ5H5qYWB6ZTAyM0C8hpfcSVLB9/a3qnH1GGvIJ+FEbpEs4s/HfErYe/M5qZeLjwmESR5fFm3lXEw==}
@@ -754,60 +754,60 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
-  '@takumi-rs/core-darwin-arm64@2.13.5':
-    resolution: {integrity: sha512-o4ZGtb8OQH5rODzm6Pa/k2Jzu/CSo/1MvfafvETLTaYlOZUujMTeR9eUS1XWbBF0sKLO97cyARHYnCkgWHVbCw==}
+  '@takumi-rs/core-darwin-arm64@2.13.7':
+    resolution: {integrity: sha512-Jbe1ik4bcVOOHDpa5RCjm5fe+LfJjjyebvvPBMekhEKXg6hlTbIEFmhr/GCxMOKUfaNsvb4amZ/bVCo0NDSCjA==}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [darwin]
 
-  '@takumi-rs/core-darwin-x64@2.13.5':
-    resolution: {integrity: sha512-LkiHNZs0vU7sEouksXJxgS90lZLG7ze4kc4mwIR083ffLUO+xnIJS2KzqTFF9QBcRXq7jVh7Gme3J0COTUs4UQ==}
+  '@takumi-rs/core-darwin-x64@2.13.7':
+    resolution: {integrity: sha512-PvmSmhjbSosM3XaHZ9VhFm1x7Xc9oZ5GqXlskiwZblKIi5S4EI43buhUd28xzcBlKkB/vC3c15Cj417XjnUk4g==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [darwin]
 
-  '@takumi-rs/core-linux-arm64-gnu@2.13.5':
-    resolution: {integrity: sha512-hYhbvMr3aSwZllclTwJ++j/lKpU33T7wcXMxTaboBHj/fmVVLQghWf+ppKE8q1F/Uaw0Y1sn6JY6Iv6CYdjl3w==}
+  '@takumi-rs/core-linux-arm64-gnu@2.13.7':
+    resolution: {integrity: sha512-TGvDidIF3dtb7TMoJRF+0BET/v6eAuQxV8AXo/57GqO3TM9wjLt3AbkrFkzxSsaIRXlBQxCfb+GsS0YdGnpo4w==}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@takumi-rs/core-linux-arm64-musl@2.13.5':
-    resolution: {integrity: sha512-pPeI+3Ex9iWQ4OfxGkX1njfdV2OVPgjQKJ19haT4cLizGk/txoj5QGR91XTQjF3y2n09QJJvW/UodeYTMEMBhQ==}
+  '@takumi-rs/core-linux-arm64-musl@2.13.7':
+    resolution: {integrity: sha512-CL92+JeFbqlPfWI2SSQqLtcjWpxEsPYQ+wNhaqUWLnlTMfZfj+Fl3ERFLbmK+lYnGs7bzpPXLisd3GJQ37rTYw==}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@takumi-rs/core-linux-x64-gnu@2.13.5':
-    resolution: {integrity: sha512-8/Egq49ieXh/u0cXUgqELIFUPVkrWk6fR2hPX8giD40D61G36ZErQyJR4W9GUlQctP/buwqLwD6FzYT0OsZ0Gw==}
+  '@takumi-rs/core-linux-x64-gnu@2.13.7':
+    resolution: {integrity: sha512-ZxoapyUDlInik93WIA9+Sk/ByOb3QGO7GaL9PA7OOdIlK5ovK9v9q88tZb1cvfxtIVzdE9HPBUhb5quNMcuXWg==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@takumi-rs/core-linux-x64-musl@2.13.5':
-    resolution: {integrity: sha512-Fuv6Q52H7OwyESW25ovG6A0ZI4eyvqPjmGaDsAsgOV6MgANwiee74pS6cSR+5cJyxplVWbghiy9ajs9E2SORfg==}
+  '@takumi-rs/core-linux-x64-musl@2.13.7':
+    resolution: {integrity: sha512-OqoVTd7mrlIwjKYYFizUwz+3zpnVsbrpLFPXFC+BmUxdFYNZwKa0R+Pk56EslyBZS3CuBy+RnBusHCvNC7+09g==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@takumi-rs/core-win32-arm64-msvc@2.13.5':
-    resolution: {integrity: sha512-nsF5mo6Vgb4dJSOqmTJ/lX6xlwKoJ63X6fEFKh0OfHAZXvvQzUjYsNYc/NRWRbD7gBvxfLKPTtmSTFdaZ0rToQ==}
+  '@takumi-rs/core-win32-arm64-msvc@2.13.7':
+    resolution: {integrity: sha512-evSyi/y3uV03U+PJfLeG2V3aRsmmWJ6elrFpkLtHebWwi49kXazTL5TYsCkPj5hA4i+rNs6z/t/BygLj1Krp8Q==}
     engines: {node: '>=18'}
     cpu: [arm64]
     os: [win32]
 
-  '@takumi-rs/core-win32-x64-msvc@2.13.5':
-    resolution: {integrity: sha512-21LlzKViiUACIiVKd1P/b57HiKw0bkALoBbzG4HJ2fQckv/b0iQaRq0AtRVtbdWuBel/PvDOu5vd2Uwrd5wLSg==}
+  '@takumi-rs/core-win32-x64-msvc@2.13.7':
+    resolution: {integrity: sha512-GawtljFxuJemQynlF5wryxtSLv18XNuKSjMt52xf66WMaBKt4eN6/b7yIZp9QqKPof8ip8uqFOt7fWVSUN+gHQ==}
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
 
-  '@takumi-rs/core@2.13.5':
-    resolution: {integrity: sha512-aQSKB00nvgXP1V10XmFwzuQJ5Cis6U70C4MZ07enxNmg5fqikqOUJShUdHtK8PJX+3zUqpRza3Qnlcw3uaoHdw==}
+  '@takumi-rs/core@2.13.7':
+    resolution: {integrity: sha512-FBkglt8kGBZwT2CHr+kppN+FH72Oy8gLIZz1BIbD9vNcocLrvtLsh1Y0nB18mOPmaROKGUVUXLPnIuWo49CRng==}
     engines: {node: '>=18'}
     peerDependencies:
       csstype: '*'
@@ -815,8 +815,8 @@ packages:
       csstype:
         optional: true
 
-  '@takumi-rs/helpers@2.13.5':
-    resolution: {integrity: sha512-ZuIVNJ258DocE8Wd05gC69vQJoArVpdpYMj+kp9/8pWyci6oyTFtKSrR50zDDTVwpObRHEU3uB9OHeSDHYUVQQ==}
+  '@takumi-rs/helpers@2.13.7':
+    resolution: {integrity: sha512-6AKk/ixuvoCEZD9/LPAz3kxTcwWHeZh15quhHIHYiVxFRl4x2LyKN8j6eZngiepYYsORXAuJ5YlTGA7uIRfeMQ==}
     engines: {node: '>=18'}
     peerDependencies:
       preact: ^10.0.0
@@ -827,8 +827,8 @@ packages:
       react:
         optional: true
 
-  '@takumi-rs/wasm@2.13.5':
-    resolution: {integrity: sha512-ZyIgbJJUqCtqyrH6/g6MpXrubUd63QMlUeeWS1dP1mxx4OtqZKHB8zipE5LZPERT+68ldQHqKnifFoLlIV0lfw==}
+  '@takumi-rs/wasm@2.13.7':
+    resolution: {integrity: sha512-tc2IFETJ9HtZpS94cL3qSTiecJhhR4RUTXbb3E8cyz6WKdyoZSFkL2r67xnidVtcv22RKTyfVJ2gxV7eWvF+mA==}
     engines: {node: '>=20.19'}
     peerDependencies:
       csstype: '*'
@@ -1126,12 +1126,12 @@ packages:
       magicast:
         optional: true
 
-  c12@4.0.0-beta.5:
-    resolution: {integrity: sha512-yWGCPCQGJeFq4R0mFg5HOhC3Rg+B0PCdM+ldXWUhughoGgeeq8/tjRmXh4/lmhKWyhf+KOFxB/JMXf0Yv1Fd5A==}
+  c12@4.0.0-rc.1:
+    resolution: {integrity: sha512-08UYGAVLTLqgiCzWNMNdBHdiWKzhIVwcapySI11mFTBacL5bP0dj1Vr7IcwOH0wcUTgMzm1VCh+by922viKWig==}
     peerDependencies:
       chokidar: ^5
       dotenv: '*'
-      giget: '*'
+      giget: '>=3.1.0'
       jiti: '*'
       magicast: '*'
     peerDependenciesMeta:
@@ -1176,6 +1176,9 @@ packages:
 
   confbox@0.2.4:
     resolution: {integrity: sha512-ysOGlgTFbN2/Y6Cg3Iye8YKulHw+R2fNXHrgSmXISQdMnomY6eNDprVdW9R5xBguEqI954+S6709UyiO7B+6OQ==}
+
+  confbox@0.3.1:
+    resolution: {integrity: sha512-cKUSoKa8YxFZZSmraVi7onONx3amu77ngK3kGpsYHDH7drPwCRkQE1RYMPlLRrMtnciRj274XNRxcHxnKmDSnA==}
 
   consola@3.4.2:
     resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
@@ -1560,8 +1563,8 @@ packages:
   motion-utils@13.0.0:
     resolution: {integrity: sha512-7DnN7TmbLcYXcG4RVadXIihWlyuM9afoUww8Y5Agg431kGKiuL2/OMyP4mJ5wLz+pvN3t5ySClLOaVXJ+wekRQ==}
 
-  motion-v@2.4.0:
-    resolution: {integrity: sha512-kRDGMAZk3nvdjEO36Wo6pezSEIStGXGhVFiwo1QkUDsUg8mB5igjYPXyece8wtu2DrHhmFfA6Y1nOz07+5QH4A==}
+  motion-v@2.4.2:
+    resolution: {integrity: sha512-I3+pa3s1iCtk1hS7En7+ZYH1E165FQHAC4ZRjv6wsQPkd7wqyE+ooOPqal3FXQOCCYesmUs5BS6KLx4Fz83m+A==}
     peerDependencies:
       '@vueuse/core': '>=10.0.0'
       vue: '>=3.0.0'
@@ -1673,6 +1676,9 @@ packages:
   pkg-types@2.3.1:
     resolution: {integrity: sha512-y+ichcgc2LrADuhLNAx8DFjVfgz91pRxfZdI3UDhxHvcVEZsenLO+7XaU5vOp0u/7V/wZ+plyuQxtrDlZJ+yeg==}
 
+  pkg-types@2.3.3:
+    resolution: {integrity: sha512-j/lCFdcppV0JxWpCEITdbDltBxPP6cHT+yNJ6Go2OgoSA9518X847X9z0p6LtA4Nc16+eQzCZjRrWanTGvHJ5w==}
+
   postcss@8.5.26:
     resolution: {integrity: sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==}
     engines: {node: ^10 || ^12 || >=14}
@@ -1744,8 +1750,8 @@ packages:
   tailwindcss@4.3.3:
     resolution: {integrity: sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==}
 
-  takumi-js@2.13.5:
-    resolution: {integrity: sha512-d2TyFXSA3a3hoSGfwwP54Y/TjfFJsLKvKpThI50Ya8b1lekSLthDJj6cRGX8NOshRcnbmaX+df99/Eg2CpwC5A==}
+  takumi-js@2.13.7:
+    resolution: {integrity: sha512-6CuATUv1O6X/aD3T0OQIkv0nyesefJibamskfQxcQqKVl2CCk6kIX9E0e+glMTILTJC2I1IcrcFEPlmDlcexgQ==}
     engines: {node: '>=20.19'}
 
   tapable@2.3.3:
@@ -1945,7 +1951,7 @@ packages:
 
 snapshots:
 
-  '@antfu/install-pkg@1.1.0':
+  '@antfu/install-pkg@2.0.1':
     dependencies:
       package-manager-detector: 1.8.0
       tinyexec: 1.3.0
@@ -1992,9 +1998,9 @@ snapshots:
 
   '@iconify/types@2.0.0': {}
 
-  '@iconify/utils@3.1.4':
+  '@iconify/utils@3.1.7':
     dependencies:
-      '@antfu/install-pkg': 1.1.0
+      '@antfu/install-pkg': 2.0.1
       '@iconify/types': 2.0.0
       import-meta-resolve: 4.2.0
 
@@ -2311,52 +2317,52 @@ snapshots:
       tailwindcss: 4.3.3
       vite: 8.2.2(@types/node@26.4.1)(jiti@2.7.0)
 
-  '@takumi-rs/core-darwin-arm64@2.13.5':
+  '@takumi-rs/core-darwin-arm64@2.13.7':
     optional: true
 
-  '@takumi-rs/core-darwin-x64@2.13.5':
+  '@takumi-rs/core-darwin-x64@2.13.7':
     optional: true
 
-  '@takumi-rs/core-linux-arm64-gnu@2.13.5':
+  '@takumi-rs/core-linux-arm64-gnu@2.13.7':
     optional: true
 
-  '@takumi-rs/core-linux-arm64-musl@2.13.5':
+  '@takumi-rs/core-linux-arm64-musl@2.13.7':
     optional: true
 
-  '@takumi-rs/core-linux-x64-gnu@2.13.5':
+  '@takumi-rs/core-linux-x64-gnu@2.13.7':
     optional: true
 
-  '@takumi-rs/core-linux-x64-musl@2.13.5':
+  '@takumi-rs/core-linux-x64-musl@2.13.7':
     optional: true
 
-  '@takumi-rs/core-win32-arm64-msvc@2.13.5':
+  '@takumi-rs/core-win32-arm64-msvc@2.13.7':
     optional: true
 
-  '@takumi-rs/core-win32-x64-msvc@2.13.5':
+  '@takumi-rs/core-win32-x64-msvc@2.13.7':
     optional: true
 
-  '@takumi-rs/core@2.13.5(csstype@3.2.3)':
+  '@takumi-rs/core@2.13.7(csstype@3.2.3)':
     dependencies:
-      '@takumi-rs/helpers': 2.13.5
+      '@takumi-rs/helpers': 2.13.7
     optionalDependencies:
-      '@takumi-rs/core-darwin-arm64': 2.13.5
-      '@takumi-rs/core-darwin-x64': 2.13.5
-      '@takumi-rs/core-linux-arm64-gnu': 2.13.5
-      '@takumi-rs/core-linux-arm64-musl': 2.13.5
-      '@takumi-rs/core-linux-x64-gnu': 2.13.5
-      '@takumi-rs/core-linux-x64-musl': 2.13.5
-      '@takumi-rs/core-win32-arm64-msvc': 2.13.5
-      '@takumi-rs/core-win32-x64-msvc': 2.13.5
+      '@takumi-rs/core-darwin-arm64': 2.13.7
+      '@takumi-rs/core-darwin-x64': 2.13.7
+      '@takumi-rs/core-linux-arm64-gnu': 2.13.7
+      '@takumi-rs/core-linux-arm64-musl': 2.13.7
+      '@takumi-rs/core-linux-x64-gnu': 2.13.7
+      '@takumi-rs/core-linux-x64-musl': 2.13.7
+      '@takumi-rs/core-win32-arm64-msvc': 2.13.7
+      '@takumi-rs/core-win32-x64-msvc': 2.13.7
       csstype: 3.2.3
     transitivePeerDependencies:
       - preact
       - react
 
-  '@takumi-rs/helpers@2.13.5': {}
+  '@takumi-rs/helpers@2.13.7': {}
 
-  '@takumi-rs/wasm@2.13.5(csstype@3.2.3)':
+  '@takumi-rs/wasm@2.13.7(csstype@3.2.3)':
     dependencies:
-      '@takumi-rs/helpers': 2.13.5
+      '@takumi-rs/helpers': 2.13.7
     optionalDependencies:
       csstype: 3.2.3
     transitivePeerDependencies:
@@ -2660,13 +2666,13 @@ snapshots:
     optionalDependencies:
       magicast: 0.5.4
 
-  c12@4.0.0-beta.5(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4):
+  c12@4.0.0-rc.1(chokidar@5.0.0)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magicast@0.5.4):
     dependencies:
-      confbox: 0.2.4
+      confbox: 0.3.1
       defu: 6.1.7
       exsolve: 1.1.1
       pathe: 2.0.3
-      pkg-types: 2.3.1
+      pkg-types: 2.3.3
       rc9: 3.1.0
     optionalDependencies:
       chokidar: 5.0.0
@@ -2714,6 +2720,8 @@ snapshots:
   confbox@0.1.8: {}
 
   confbox@0.2.4: {}
+
+  confbox@0.3.1: {}
 
   consola@3.4.2: {}
 
@@ -2999,7 +3007,7 @@ snapshots:
 
   motion-utils@13.0.0: {}
 
-  motion-v@2.4.0(@vueuse/core@14.4.0(vue@3.5.42(typescript@7.0.2)))(vue@3.5.42(typescript@7.0.2)):
+  motion-v@2.4.2(@vueuse/core@14.4.0(vue@3.5.42(typescript@7.0.2)))(vue@3.5.42(typescript@7.0.2)):
     dependencies:
       '@vueuse/core': 14.4.0(vue@3.5.42(typescript@7.0.2))
       framer-motion: 13.2.0
@@ -3135,6 +3143,12 @@ snapshots:
       exsolve: 1.1.1
       pathe: 2.0.3
 
+  pkg-types@2.3.3:
+    dependencies:
+      confbox: 0.3.1
+      exsolve: 1.1.1
+      pathe: 2.0.3
+
   postcss@8.5.26:
     dependencies:
       nanoid: 3.3.18
@@ -3201,11 +3215,11 @@ snapshots:
 
   tailwindcss@4.3.3: {}
 
-  takumi-js@2.13.5(csstype@3.2.3):
+  takumi-js@2.13.7(csstype@3.2.3):
     dependencies:
-      '@takumi-rs/core': 2.13.5(csstype@3.2.3)
-      '@takumi-rs/helpers': 2.13.5
-      '@takumi-rs/wasm': 2.13.5(csstype@3.2.3)
+      '@takumi-rs/core': 2.13.7(csstype@3.2.3)
+      '@takumi-rs/helpers': 2.13.7
+      '@takumi-rs/wasm': 2.13.7(csstype@3.2.3)
     transitivePeerDependencies:
       - csstype
       - preact
