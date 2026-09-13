@@ -287,6 +287,42 @@
       "type": "boolean",
       "description": "Expose docs search/navigation to browser AI agents via WebMCP (https://webmachinelearning.github.io/webmcp/). Enabled by default — browsers without a native `document.modelContext` get a polyfill, so the tools are reachable today. Set to `false` to opt out."
     },
+    "chat": {
+      "description": "An AI chat assistant beside the docs, backed by [agentak](https://agentak.dev) and answering from the site's own WebMCP tools.\n\nEnabled by default. Set to `false` to opt out, or pass an object to configure it. The library is fetched from a CDN the first time a reader opens the chat, so nothing is installed and a reader who never takes the button downloads none of it.",
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "label": {
+              "type": "string",
+              "description": "The words on the button, which are also its accessible name.",
+              "default": "Ask AI"
+            },
+            "prompts": {
+              "type": "array",
+              "description": "The suggestions offered by an empty chat.",
+              "default": ["Summarize this page"],
+              "items": {
+                "type": "string"
+              }
+            },
+            "prompt": {
+              "type": "string",
+              "description": "Instructions added to the built-in ones, for what the project knows about itself. They follow the built-in text rather than replacing it."
+            },
+            "cdn": {
+              "type": "string",
+              "description": "Where the `agentak` modules are loaded from; the `/pi` subpath is requested beside it. Pin a version (`https://esm.sh/agentak@1.2.3`) or point at a copy you host.",
+              "default": "https://esm.sh/agentak"
+            }
+          }
+        }
+      ]
+    },
     "redirects": {
       "description": "Redirects for the documentation site, as `from: to` paths (e.g. `/docs: /guide`). A `/old/**` key redirects the whole subtree; when the target also ends with `/**`, the matched tail is preserved.",
       "type": "object",

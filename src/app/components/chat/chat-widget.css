@@ -1,0 +1,334 @@
+/* The chat button of the documentation site, and the surface it opens.
+   See `ChatWidget.vue`.
+
+   ## The stylesheet holds both defaults
+
+   The panel, the room it takes and the button are placed here alone, with no
+   class from the component: the chat is folded away in both layouts — the rail
+   off the right edge above `lg`, the sheet into the button below it — and the
+   button is the way in. That is what the server renders and what the browser
+   paints first, so the page is served at its full width and nothing shifts when
+   the script arrives.
+
+   `html:has(.chat-panel.is-open)` is what pads the page for the rail. The rule
+   reaches the root element, but only while the reader has the chat open, so a
+   page they have not asked keeps its full width.
+
+   Script only says what the READER changed: `is-open` and `is-closed` arrive on
+   mount, and each one moves the panel away from the default its layout carries.
+
+   Not scoped, and not Tailwind: the padding that makes room for the rail belongs
+   to the root element, which is nobody's child, and the rest of the file is the
+   two layouts one element moves between. It reads undocs's own tokens
+   (`assets/tokens.css`), so the widget is drawn in the site's colours. */
+
+:root {
+  --chat-rail: clamp(20rem, 26vw, 28rem);
+  --chat-move: 260ms;
+  /* The middle of the button, which is where the sheet grows from: the pill is
+     `2.5rem` tall at `1rem`, and about `6rem` wide from the same edge. */
+  --chat-origin: calc(100% - 4rem) calc(100% - 2.25rem);
+}
+
+.chat-panel {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--background);
+}
+
+/* The element the preact island is rendered into — vue owns it and never touches
+   what is inside it, which is what keeps the two renderers off each other's
+   nodes.
+
+   `:empty` is what stands it down before the chat arrives: the div is on the
+   page from the first render so the mount has somewhere to go, and takes no room
+   until there is something in it. `mountChat` writes `display: flex` on the
+   element as an inline style, in the same call that fills it, so the rule stops
+   applying exactly when it stops being true. */
+.chat-surface {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.chat-surface:empty {
+  display: none;
+}
+
+/* The edge the rail is dragged by, along the border it is docked at. The rail
+   only: the sheet below `lg` is the whole screen, and a screen has no edge to
+   give — so it is drawn in the wide layout alone, and is out of the tab order
+   everywhere else, because `display: none` takes an element off the page.
+
+   Inside the panel, because the panel clips what it holds. Nothing is drawn at
+   rest: the border it lies on is the line, and the rail's own colour marks it
+   only once it is pointed at or taken. */
+.chat-resize {
+  position: absolute;
+  z-index: 1;
+  display: none;
+  inset: 0 auto 0 0;
+  width: 0.5rem;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: col-resize;
+  /* The drag is the browser's to give up: a rail is not scrolled sideways. */
+  touch-action: none;
+}
+
+.chat-resize::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 1px;
+  background: var(--brand);
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+
+.chat-resize:hover::before,
+.chat-resize:focus-visible::before,
+.chat-resizing .chat-resize::before {
+  opacity: 1;
+}
+
+.chat-resize:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+/* The placeholder, which is the panel the server can draw: three hairlines at
+   the chat's own measurements — the title bar's rule (`2rem` of buttons in
+   `0.375rem` of padding), the rule the composer sits above, and the box a
+   message is typed into, with the status bar's row of its own under it.
+   Nothing else; the transcript between them is what the chat has yet to say. */
+.chat-ghost {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.chat-ghost-head {
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-ghost-body {
+  flex: 1 1 auto;
+}
+
+.chat-ghost-foot {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  padding: 0.5rem 0.5rem 0.375rem;
+}
+
+.chat-ghost-foot > div {
+  height: 6rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+}
+
+/* The status bar under the composer: the model, the meter and the collapse
+   button. Only its height is drawn — what it says arrives with the chat. */
+.chat-ghost-bar {
+  height: 1.875rem;
+  flex-shrink: 0;
+}
+
+/* A pill that says what it opens, rather than a circle the reader must read an
+   icon out of. The brain is the mark the chat gives its own thinking.
+
+   The bottom-right corner is its place at every width. The top-right one is the
+   site's navigation on a narrow screen and the rail's own header on a wide one,
+   so a button that moved between them would be looked for in the corner it had
+   left. It stays where the sheet grows from, which is `--chat-origin`. */
+.chat-button {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 60;
+  display: inline-flex;
+  height: 2.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.875rem;
+  border-radius: 9999px;
+  background: var(--brand);
+  color: var(--brand-foreground);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow: var(--shadow-modal);
+  cursor: pointer;
+  transition:
+    opacity 150ms ease-out,
+    transform 150ms ease-out,
+    visibility 0s;
+}
+
+.chat-button:hover {
+  opacity: 0.9;
+}
+
+.chat-button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.chat-button > svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* An open chat is its own way back, in either layout: the rail heads itself and
+   the sheet covers the screen, so the button steps aside until it is minimised. */
+.chat-button.is-open {
+  visibility: hidden;
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity 150ms ease-in,
+    transform 150ms ease-in,
+    visibility 0s 150ms;
+}
+
+/* The sheet, below `lg`: the whole screen, folded into the button until the
+   reader takes it. `clip-path` is the morph — a circle the size of the button,
+   at the button, opening into the whole panel.
+
+   An ANIMATION and not a transition, so the clip is on the panel for the 260ms
+   it is moving and gone the moment it has arrived. A clip left on an open panel
+   is a mask over the whole screen, and every repaint under it is a repaint
+   through that mask: on a phone the caret in the composer pays for it, once per
+   letter, on the device least able to. The morph is the same either way — a
+   transition needs both ends declared as state, an animation carries them
+   itself and leaves nothing behind.
+
+   `is-closed` arrives on mount as well as on a close, so the closing morph runs
+   once against a hidden panel. It paints nothing there. */
+@media (max-width: 63.999rem) {
+  .chat-panel {
+    inset: 0;
+    visibility: hidden;
+    transition: visibility 0s var(--chat-move);
+  }
+
+  .chat-panel.is-open {
+    visibility: visible;
+    transition: visibility 0s;
+    animation: chat-sheet-open var(--chat-move) ease-out;
+  }
+
+  .chat-panel.is-closed {
+    animation: chat-sheet-close var(--chat-move) ease-out;
+  }
+
+  @keyframes chat-sheet-open {
+    from {
+      clip-path: circle(1.25rem at var(--chat-origin));
+    }
+
+    to {
+      clip-path: circle(150% at var(--chat-origin));
+    }
+  }
+
+  @keyframes chat-sheet-close {
+    from {
+      clip-path: circle(150% at var(--chat-origin));
+    }
+
+    to {
+      clip-path: circle(1.25rem at var(--chat-origin));
+    }
+  }
+}
+
+/* The rail, `lg` and up: docked to the right edge, folded out past it until the
+   reader opens the chat. It slides rather than morphs — a rail comes in from the
+   edge it is docked to. */
+@media (min-width: 64rem) {
+  /* The room the rail takes, given up only while it is open: the page is SERVED
+     at its full width, and narrows for the reader who asks. `:has` is what keeps
+     the rule to the sites this widget is on. */
+  html:has(.chat-panel.is-open) {
+    padding-right: var(--chat-rail);
+  }
+
+  /* The page moves only for the READER: the width is animated once one of the
+     state classes is on the panel, and those arrive on mount. */
+  html:has(.chat-panel.is-open),
+  html:has(.chat-panel.is-closed) {
+    transition: padding-right var(--chat-move) ease-out;
+  }
+
+  .chat-panel {
+    inset: 0 0 0 auto;
+    width: var(--chat-rail);
+    border-left: 1px solid var(--border);
+    visibility: hidden;
+    transform: translateX(100%);
+    clip-path: none;
+    transition:
+      transform var(--chat-move) ease-out,
+      visibility 0s var(--chat-move);
+  }
+
+  .chat-panel.is-open {
+    visibility: visible;
+    transform: none;
+    transition: transform var(--chat-move) ease-out;
+  }
+
+  .chat-resize {
+    display: block;
+  }
+}
+
+/* A rail under the pointer, for as long as the drag lasts. The width is written
+   frame by frame, so the transition that carries an open or a close would leave
+   the rail and the page it narrows 260ms behind the hand. And the pointer is
+   dragging a border, so nothing beside it is selected on the way.
+
+   Named against the open state rather than beside it: the rules above are
+   matched on specificity, and `is-open` is what holds the transition. */
+html.chat-resizing:has(.chat-panel.is-open),
+html.chat-resizing .chat-panel.is-open {
+  transition: none;
+}
+
+html.chat-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* Each state is named again, so that the rules above are matched on specificity
+   rather than left to win it. */
+@media (prefers-reduced-motion: reduce) {
+  html,
+  html:has(.chat-panel.is-open),
+  html:has(.chat-panel.is-closed),
+  .chat-panel,
+  .chat-panel.is-open,
+  .chat-panel.is-closed,
+  .chat-button,
+  .chat-button.is-open,
+  .chat-resize::before {
+    transition: none;
+  }
+
+  .chat-panel,
+  .chat-panel.is-open,
+  .chat-panel.is-closed {
+    animation: none;
+    clip-path: none;
+  }
+}

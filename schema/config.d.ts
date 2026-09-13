@@ -31,6 +31,34 @@ export interface BannerProps {
   ui?: Record<string, unknown>;
 }
 
+/**
+ * The docs assistant: a chat button beside the documentation, backed by
+ * [agentak](https://agentak.dev).
+ *
+ * The library is fetched from a CDN the first time a reader OPENS the chat, so a
+ * docs project installs nothing and a reader who never takes the button
+ * downloads none of it. The assistant answers from the site's own WebMCP tools
+ * (`webmcp`), so it reads the documentation before it answers rather than
+ * answering from memory.
+ */
+export interface ChatConfig {
+  /** The words on the button, which are also its accessible name. Default `"Ask AI"`. */
+  label?: string;
+  /** The suggestions offered by an empty chat. Default `["Summarize this page"]`. */
+  prompts?: string[];
+  /**
+   * Instructions added to the built-in ones, for what the project knows about
+   * itself. They follow the built-in text rather than replacing it.
+   */
+  prompt?: string;
+  /**
+   * Where the `agentak` modules are loaded from. Default
+   * `"https://esm.sh/agentak"`; the `/pi` subpath is requested beside it. Pin a
+   * version (`https://esm.sh/agentak@1.2.3`) or point at a copy you host.
+   */
+  cdn?: string;
+}
+
 export interface DocsConfig {
   dir?: string;
   /** The name of the documentation site. Defaults to the `name` of the closest `package.json` (searching upwards from the docs directory up to the repository root). */
@@ -85,6 +113,14 @@ export interface DocsConfig {
    * tools are reachable today. Set to `false` to opt out.
    */
   webmcp?: boolean;
+  /**
+   * An AI chat assistant beside the docs, answering from the site's own WebMCP
+   * tools. Enabled by default — agentak is fetched from a CDN only when a reader
+   * first opens the chat, so a reader who never takes the button downloads none
+   * of it. Set to `false` to opt out, or pass an object to configure it. See
+   * `ChatConfig`.
+   */
+  chat?: boolean | ChatConfig;
   sponsors?: { api: string };
   /**
    * The landing page shown at `/`.

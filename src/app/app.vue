@@ -21,8 +21,16 @@ import NavLoadingBar from "@app/components/NavLoadingBar.vue";
 import ClientOnly from "@app/components/app/ClientOnly.ts";
 import AppLayout from "@app/components/app/AppLayout.ts";
 import AppPage from "@app/components/app/AppPage.ts";
+import ChatWidget from "@app/components/chat/ChatWidget.vue";
+import { useChatConfig } from "@app/components/chat/config.ts";
 import { startPrefetch } from "@app/prefetch.ts";
 const appConfig = useAppConfig();
+
+// The docs assistant, on unless the docs project set `docs.chat: false`. It is
+// site chrome rather than page content — one widget for the landing and every
+// docs page — so it is rendered here, outside the layouts, and keeps its
+// transcript across client navigations.
+const chat = useChatConfig();
 
 const { data: navigation } = await useAsyncData("navigation", () => queryNavigation());
 
@@ -143,6 +151,12 @@ provide(LANDING_KEY, landing);
       <ClientOnly>
         <DocsSearch :navigation="docsNavigation" shortcut="meta_k" />
       </ClientOnly>
+
+      <!-- Server rendered, folded away and empty: the panel is fixed, so it
+           moves nothing while it is closed, and the reader's rail is restored
+           into markup that is already there. agentak itself is fetched only
+           when the chat is first opened. -->
+      <ChatWidget v-if="chat" :config="chat" />
     </div>
   </AppProvider>
 </template>

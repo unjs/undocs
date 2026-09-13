@@ -66,6 +66,17 @@ NEVER write E2E tests. Ask for it to be tested manually.
   same map and same one hop as `router.ts`) — agents work from old links far
   more than visitors do; `navigate` still pushes the path the agent ASKED for,
   leaving the redirect for the router to execute.
+- `src/app/components/chat/` — the docs assistant, ON by default (`docs.chat`,
+  `false` to opt out) exactly as `webmcp` is. It is the ONE place undocs runs
+  code it does not ship: agentak is fetched by URL from a CDN the first time a
+  reader OPENS the chat, so undocs takes no dependency on it, a docs project
+  installs nothing, and a reader who never takes the button downloads none of
+  it — which is what makes on-by-default affordable, since what a page carries
+  at load is the folded-away panel, the button and their stylesheet. Rendered
+  once from `app.vue`, outside the layouts, so the landing and every docs page
+  share one panel and one transcript. It answers through the WebMCP tools above
+  rather than a second data path — the chat is in the document they are
+  registered in.
 - `pnpm test`, `pnpm typecheck` (bare tsc, so `.vue` imports don't resolve),
   `pnpm lint` / `pnpm fmt` (oxlint + oxfmt — run before finishing),
   `pnpm build:inline` after touching `src/app/inline/*.ts`.
@@ -371,6 +382,35 @@ NEVER write E2E tests. Ask for it to be tested manually.
   stringified with it: the stringification is compatibility owed to consumers
   that already parse that one field, and a field nothing has ever read takes
   MCP's own shape instead.
+- **The chat is a CDN import and a preact island, and both are deliberate.**
+  `components/chat/agentak.ts` imports agentak by URL with `/* @vite-ignore */`
+  — without it the build tries to resolve `https://…` as a module of its own and
+  fails, and with it the specifier survives into the bundle as a runtime import.
+  It mounts the FRAMEWORK-FREE entry (`mountChat`), never `agentak/vue`: a vue
+  build off a CDN arrives with a vue of its own, and two vue runtimes in one page
+  do not share the instance a lifecycle hook is registered against. `mountChat`
+  renders preact into `ChatWidget.vue`'s one `.chat-surface` div, which the
+  template gives NO children — vue owns the element, preact owns what is inside
+  it, and neither patches the other's nodes. `.chat-surface:empty` is what keeps
+  that div out of the layout before the mount: `mountChat` writes
+  `display: flex` on the element inline in the same call that fills it, so the
+  rule stops applying exactly when it stops being true. Types for the two modules
+  are STRUCTURAL (`chat/types.ts`) because there is no package here to import
+  from. The library's own `--*` tokens are shadcn's, unprefixed, and it PREPENDS
+  them to `<head>`, so every name `tokens.css` declares wins and the chat is
+  drawn in the site's colours; only the names undocs has no opinion about come
+  from the library.
+- **The chat panel is served folded away, and script only says what the READER
+  changed.** `chat-widget.css` holds both layouts' defaults — the rail off the
+  right edge above `lg`, the sheet folded into the button below it — so the
+  server renders the panel with no state class at all and hydration moves
+  nothing. `is-open`/`is-closed` arrive on mount (`use-chat-shell.ts`'s
+  `mounted` ref), which is also what carries the transition before the first
+  open. Both cookies (`undocs-chat`, `undocs-chat-rail`) are read and written on
+  mount alone, never during a render — the render is shared by every visitor and
+  may be prerendered, so a cookie must never reach it. The rail's width is
+  written to `--chat-rail` on the ROOT element, where both the rail and the
+  `html:has(.chat-panel.is-open)` padding that makes room for it read it.
 - **An agent-supplied path never touches the docs page's cache key.** The docs
   page keys its `useAsyncData` by `kebabCase(route.path)`, which is lossy
   (`/guide/deploy`, `/guide-deploy` and `/Guide/Deploy` collapse onto ONE entry),
