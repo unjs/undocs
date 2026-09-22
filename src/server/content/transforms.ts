@@ -17,6 +17,7 @@ export function transformBody(nodes: MarkNode[], rel?: string): MarkNode[] {
     normalizeAlert(node);
   }
   liftRawHtml(value);
+  inlineBreaks(value);
   return value;
 }
 
@@ -237,6 +238,33 @@ function closingIndex(nodes: MarkNode[], open: number): number {
     else if (htmlSource(node).startsWith("</") && --depth === 0) return i;
   }
   return -1;
+}
+
+// md4x parses `:br{}` but leaves a bare `:br` (MDC's inline line break, common in
+// `::field` bodies) as text. Split it out of text nodes, never code: only a
+// standalone token counts, so `a:br` and `:brand` stay literal.
+const INLINE_BR = /(?<![\w:/]):br(?![\w{[-])/;
+
+function inlineBreaks(nodes: MarkNode[], start = 0): void {
+  for (let i = start; i < nodes.length; i++) {
+    const child = nodes[i];
+    if (typeof child === "string") {
+      if (!INLINE_BR.test(child)) continue;
+      const parts: MarkNode[] = [];
+      for (const [j, text] of child.split(new RegExp(INLINE_BR, "g")).entries()) {
+        if (j > 0) parts.push(["br", {}]);
+        if (text) parts.push(text);
+      }
+      nodes.splice(i, 1, ...parts);
+      i += parts.length - 1;
+      continue;
+    }
+    if (!isEl(child)) continue;
+    const tag = child[0];
+    if (tag && RAW_SKIP.has(tag)) continue;
+    // Recurse from tuple children, after tag and props.
+    inlineBreaks(child as unknown as MarkNode[], 2);
+  }
 }
 
 // Normalize container alert types to md4x's lowercase GitHub-alert casing.

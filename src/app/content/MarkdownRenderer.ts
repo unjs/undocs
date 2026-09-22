@@ -14,6 +14,8 @@ import Tabs from "./Tabs.vue";
 import Tab from "./Tab.vue";
 import Card from "./Card.vue";
 import CardGroup from "./CardGroup.vue";
+import Field from "./Field.vue";
+import FieldGroup from "./FieldGroup.vue";
 import Mermaid from "../components/global/Mermaid.vue";
 import ReadMore from "../components/global/ReadMore.vue";
 import PmInstall from "../components/global/Pm-Install.vue";
@@ -36,6 +38,8 @@ const COMPONENTS: Record<string, Component> = {
   tab: Tab,
   card: Card,
   "card-group": CardGroup,
+  field: Field,
+  "field-group": FieldGroup,
   mermaid: Mermaid,
   "read-more": ReadMore,
   "pm-install": PmInstall,
@@ -180,7 +184,7 @@ function renderNode(node: MarkNode, _parentTag: string | null): VNode | string |
   }
 
   // Do not mutate the cached source AST.
-  const props: Record<string, any> = { ...rawProps };
+  const props = bindProps(rawProps);
 
   // Preserve parser IDs shared with the TOC; slugify only ad-hoc ASTs lacking one.
   if (HEADINGS.has(tag) && !props.id) {
@@ -235,6 +239,24 @@ function renderNode(node: MarkNode, _parentTag: string | null): VNode | string |
   }
 
   return h("div", props, renderChildren());
+}
+
+// md4x keeps MDC bindings (`{required}`, `{:cols="3"}`) as `":name": "<json>"`;
+// decode them the way MDC does, keeping the raw string when it is not JSON.
+function bindProps(rawProps: Record<string, any> | undefined): Record<string, any> {
+  const props: Record<string, any> = {};
+  for (const [key, value] of Object.entries(rawProps || {})) {
+    if (key.length > 1 && key[0] === ":" && typeof value === "string") {
+      try {
+        props[key.slice(1)] = JSON.parse(value);
+      } catch {
+        props[key.slice(1)] = value;
+      }
+    } else {
+      props[key] = value;
+    }
+  }
+  return props;
 }
 
 function resolveNodes(value: unknown, body: MarkNode[] | undefined): MarkNode[] {

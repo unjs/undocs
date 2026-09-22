@@ -1,9 +1,12 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+import vue from "@vitejs/plugin-vue";
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
+  // Compiles `.vue` so the markdown renderer's built-ins can be SSR-rendered.
+  plugins: [vue()],
   // Mirror the `@app`/`@server` aliases from vite.config.ts so server code
   // pulled into tests (e.g. builder → `@app/utils/search`) resolves.
   resolve: {
@@ -17,6 +20,8 @@ export default defineConfig({
       // Same deal for the user-pages vfs, which `router.ts` and `webmcp/tools/`
       // (its "is this a real route?" check) both read.
       "virtual:undocs/user-pages": r("./test/stubs/user-pages.ts"),
+      "virtual:undocs/user-components": r("./test/stubs/user-components.ts"),
+      "virtual:undocs/builtin-icons": r("./test/stubs/builtin-icons.ts"),
     },
   },
   test: {
