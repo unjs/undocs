@@ -8,15 +8,17 @@ export function rebaseOutput(docsDir: string): NitroModule {
     setup(nitro) {
       const from = nitro.options.rootDir.replace(/\\/g, "/").replace(/\/$/, "");
       const to = docsDir.replace(/\\/g, "/").replace(/\/$/, "");
-      if (from === to) {
-        return;
-      }
 
       for (const key of ["dir", "publicDir", "serverDir"] as const) {
         const raw = nitro.options.output[key];
-        const p = raw ? raw.replace(/\\/g, "/") : "";
-        if (p && (p === from || p.startsWith(from + "/"))) {
+        if (!raw) {
+          continue;
+        }
+        const p = raw.replace(/\\/g, "/");
+        if (from !== to && (p === from || p.startsWith(from + "/"))) {
           nitro.options.output[key] = to + p.slice(from.length);
+        } else {
+          nitro.options.output[key] = p;
         }
       }
     },

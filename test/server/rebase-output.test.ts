@@ -62,22 +62,23 @@ describe("rebaseOutput", () => {
     expect(nitro.options.output.serverDir).toBe("C:/projects/my-docs/.output/server");
   });
 
-  it("does nothing when rootDir equals docsDir", () => {
+  it("normalizes output paths when rootDir equals docsDir", () => {
     const nitro = {
       options: {
-        rootDir: "/projects/docs",
+        rootDir: "C:\\projects\\docs",
         output: {
-          dir: "/projects/docs/.output",
-          publicDir: "/projects/docs/.output/public",
-          serverDir: "/projects/docs/.output/server",
+          dir: "C:\\projects\\docs\\.output",
+          publicDir: "C:\\projects\\docs\\.output\\public",
+          serverDir: "C:\\projects\\docs\\.output\\server",
         },
       },
     } as any;
 
-    const mod = rebaseOutput("/projects/docs");
+    const mod = rebaseOutput("C:/projects/docs");
     mod.setup?.(nitro);
 
-    expect(nitro.options.output.dir).toBe("/projects/docs/.output");
-    expect(nitro.options.output.publicDir).toBe("/projects/docs/.output/public");
+    expect(nitro.options.output.dir).toBe("C:/projects/docs/.output");
+    expect(nitro.options.output.publicDir).toBe("C:/projects/docs/.output/public");
+    expect(nitro.options.output.serverDir).toBe("C:/projects/docs/.output/server");
   });
 });
