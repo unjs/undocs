@@ -48,7 +48,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "@unhead/vue": "^3.4.0",
     "@vitejs/plugin-vue": "^6.0.8",
-    "@vueuse/core": "^14.4.0",
+    "@vueuse/core": "^15.0.0",
     "automd": "^0.4.3",
     "c12": "4.0.0-rc.1",
     "citty": "^0.2.2",
