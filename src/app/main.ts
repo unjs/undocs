@@ -17,7 +17,7 @@ import AppComponent from "@app/app.vue";
 import ErrorPage from "@app/error.vue";
 
 import { createAppRouter, useRoute } from "./router.ts";
-import type { AppError } from "@app/composables/createError.ts";
+import { redirectLocation, type AppError } from "@app/composables/createError.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { useColorMode } from "@app/composables/useColorMode.ts";
 import { hydrateAsyncData } from "@app/composables/useAsyncData.ts";
@@ -87,6 +87,13 @@ function bootstrap(): void {
       const err = shallowRef<AppError | null>(payload.error ?? null);
 
       onErrorCaptured((e: any) => {
+        // Client half of `entry-server.ts`'s 302: same target, and the query and
+        // hash ride along, since only a server redirect gets them for free.
+        if (e?.redirect) {
+          const { query, hash } = router.currentRoute;
+          void router.replace(redirectLocation(e.redirect, query, hash));
+          return false;
+        }
         if (e?.fatal || e?.statusCode) {
           err.value = e;
           return false; // handled — stop propagation

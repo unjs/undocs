@@ -68,6 +68,7 @@ import themeColorCode from "@app/inline/theme-color.js?raw";
 import { isAssetPath } from "@app/assets-base.ts";
 import { DEFAULT_COLOR_MODE } from "@app/color-mode.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
+import { redirectLocation } from "@app/composables/createError.ts";
 import { registerUserComponents } from "@app/user-theme.ts";
 
 // Seed the bundled built-in icons into (process-global) Iconify storage once, at
@@ -307,6 +308,15 @@ const handler = defineHandler(async (event): Promise<Response> => {
     error = thrown;
   }
 
+  // A 404 the server could resolve (`pageNotFound`): answer with the page it
+  // meant rather than an error page. A 302, because it is a guess, not a move.
+  if (error?.redirect) {
+    return new Response(null, {
+      status: 302,
+      headers: { location: redirectLocation(error.redirect, url.search) },
+    });
+  }
+
   let errorProp: UndocsPayload["error"];
   if (error?.statusCode || error?.fatal) {
     status = Number(error.statusCode) || 500;
@@ -317,6 +327,7 @@ const handler = defineHandler(async (event): Promise<Response> => {
       statusCode: status,
       statusMessage: error.statusMessage,
       message: error.message,
+      ...(error.data ? { data: error.data } : {}),
     };
     const errorRoot = () =>
       h(Suspense, null, { default: () => h(ErrorPage, { error: errorProp }) });

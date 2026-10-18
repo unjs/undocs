@@ -165,6 +165,12 @@ export default defineNitroConfig({
       handler: r("./src/server/routes/api/docs/page/[...path].get.ts"),
     },
     {
+      // Where a 404 should have gone: a redirect target or search results.
+      route: "/api/docs/suggest/**:path",
+      method: "GET",
+      handler: r("./src/server/routes/api/docs/suggest/[...path].get.ts"),
+    },
+    {
       // `.json` suffix: these param-less routes bake to static files at
       // prerender, and Vercel serves extensionless static files as
       // `application/octet-stream` (ofetch gets a Blob, not JSON). The

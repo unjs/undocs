@@ -34,6 +34,8 @@ export interface UndocsPayload {
     statusCode?: number;
     statusMessage?: string;
     message?: string;
+    /** E.g. a 404's suggestions (`NotFoundData`), which `error.vue` renders. */
+    data?: unknown;
   };
 }
 

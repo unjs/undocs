@@ -1,6 +1,8 @@
 import { $fetch } from "ofetch";
 import type { AsPlainObject } from "minisearch";
+import { createError, type AppError } from "@app/composables/createError.ts";
 import type { DocPage, NavItem } from "@server/content/types.ts";
+import type { PageSuggestion, Suggestions } from "@server/content/suggest.ts";
 
 /**
  * The `$fetch` to use for `/api/docs/*`. These are relative, same-origin URLs.
@@ -80,6 +82,41 @@ export async function queryPage(path: string): Promise<DocPage | null> {
     if (error?.statusCode === 404 || error?.response?.status === 404) return null;
     throw error;
   }
+}
+
+/** What a 404 should become; `/api/docs/suggest/*` documents the tiers. */
+export function querySuggestions(path: string): Promise<Suggestions> {
+  const slug = path === "/" ? "_index" : path.replace(/^\//, "");
+  return docFetch()<Suggestions>(`/api/docs/suggest/${slug}.json`);
+}
+
+/** `error.vue`'s `data` for a 404 that has somewhere better to point. */
+export interface NotFoundData {
+  path: string;
+  suggestions: PageSuggestion[];
+}
+
+/**
+ * The error a page throws when `path` has no page: a redirect when the server
+ * is confident what was meant, a 404 carrying the candidates otherwise.
+ *
+ * Fetched outside `useAsyncData` on purpose. The path is whatever the visitor
+ * (usually an agent) typed, so a cache entry per guess would only accumulate —
+ * and none is needed: the server renders the error page from the thrown
+ * error's `data`, which the payload carries to hydration as-is.
+ */
+export async function pageNotFound(path: string): Promise<Error & AppError<NotFoundData>> {
+  const suggestions = await querySuggestions(path).catch(() => undefined);
+  if (suggestions?.redirect && suggestions.redirect.split("#")[0] !== path) {
+    return createError({ statusCode: 302, redirect: suggestions.redirect, fatal: true });
+  }
+  return createError({
+    statusCode: 404,
+    statusMessage: "Page not found",
+    message: `${path} does not exist`,
+    fatal: true,
+    data: { path, suggestions: suggestions?.results ?? [] },
+  });
 }
 
 export function queryNavigation(): Promise<NavItem[]> {
