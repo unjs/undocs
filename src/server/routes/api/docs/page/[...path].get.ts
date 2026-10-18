@@ -5,10 +5,12 @@ import type { SurroundItem } from "../../../../content/types.ts";
 
 export default defineEventHandler(async (event) => {
   // `.json` disambiguates a page artifact from the directory needed by nested pages.
-  const slug = (
-    getRouterParam(event, "path") ||
-    decodeURIComponent(event.url.pathname).replace(/^\/api\/docs\/page\//, "")
-  ).replace(/\.json$/, "");
+  const slug = // Decoded: a page path is its filename, so `Getting%20Started` must find
+    // `Getting Started`.
+    (
+      getRouterParam(event, "path", { decode: true }) ||
+      decodeURIComponent(event.url.pathname).replace(/^\/api\/docs\/page\//, "")
+    ).replace(/\.json$/, "");
 
   // Preserve root and legacy trailing-slash aliases.
   const path = !slug || slug === "_index" ? "/" : withLeadingSlash(slug).replace(/\/$/, "") || "/";

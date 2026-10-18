@@ -74,6 +74,7 @@ const ROUTES: Record<string, () => Promise<{ default: unknown }>> = {
   navigation: () => import("../src/server/routes/api/docs/navigation.get.ts"),
   search: () => import("../src/server/routes/api/docs/search.get.ts"),
   page: () => import("../src/server/routes/api/docs/page/[...path].get.ts"),
+  suggest: () => import("../src/server/routes/api/docs/suggest/[...path].get.ts"),
   sponsors: () => import("../src/server/routes/api/docs/sponsors.get.ts"),
   contributors: () => import("../src/server/routes/api/docs/contributors.get.ts"),
   content: () => import("../src/server/routes/api/_content.get.ts"),
@@ -151,6 +152,27 @@ describe("/api/docs/search", () => {
     expect(ms.documentCount).toBeGreaterThan(3);
     const hits = ms.search("setup", MINISEARCH_SEARCH_OPTIONS);
     expect(hits.some((h) => h.id === "/guide#setup")).toBe(true);
+  });
+});
+
+describe("/api/docs/suggest/[...path]", () => {
+  it("names the page a respelled path meant", async () => {
+    const res = await (await load("suggest")).fetch(req("/api/docs/suggest/1.guide/2.usage.json"));
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { redirect?: string }).redirect).toBe("/guide/usage");
+  });
+
+  it("reads `_index` as the root, as `page/` does", async () => {
+    const res = await (await load("suggest")).fetch(req("/api/docs/suggest/_index.json"));
+    expect(((await res.json()) as { redirect?: string }).redirect).toBe("/");
+  });
+
+  it("returns candidates without a redirect when nothing is certain", async () => {
+    const res = await (await load("suggest")).fetch(req("/api/docs/suggest/qqqq.json"));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { redirect?: string; results: unknown[] };
+    expect(body.redirect).toBeUndefined();
+    expect(Array.isArray(body.results)).toBe(true);
   });
 });
 

@@ -2,10 +2,9 @@
 import { computed, inject, type Ref } from "vue";
 import { useRoute } from "@app/router.ts";
 import { useAsyncData } from "@app/composables/useAsyncData.ts";
-import { createError } from "@app/composables/createError.ts";
 import { useAppConfig } from "@app/composables/useAppConfig.ts";
 import { useHead } from "@unhead/vue";
-import { queryPage, hintPrerenderRoute } from "@app/composables/useContent.ts";
+import { queryPage, hintPrerenderRoute, pageNotFound } from "@app/composables/useContent.ts";
 import { usePageSEO } from "@app/composables/usePageSEO.ts";
 import Breadcrumb from "@app/components/ui/Breadcrumb.vue";
 import Button from "@app/components/ui/Button.vue";
@@ -28,12 +27,7 @@ const route = useRoute();
 
 const { data: page } = await useAsyncData(kebabCase(route.path), () => queryPage(route.path));
 if (!page.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: "Page not found",
-    message: `${route.path} does not exist`,
-    fatal: true,
-  });
+  throw await pageNotFound(route.path);
 }
 
 // Prev/next comes embedded in the page payload (single request per navigation).

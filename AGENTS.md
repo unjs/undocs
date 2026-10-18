@@ -387,6 +387,28 @@ NEVER write E2E tests. Ask for it to be tested manually.
   per hovered page in a store that never evicts. Its cache is an
   instance-local `Map` — instance, not module, so "never written during SSR"
   holds by construction rather than by comment.
+- **A 404 is a guess to resolve, not a dead end.** Agents guess URLs, so a
+  page that 404s throws `pageNotFound(path)` (`useContent.ts`), which asks
+  `/api/docs/suggest/<path>.json` (`content/suggest.ts`) before deciding.
+  When one page is the confident answer, the thrown error carries `redirect`:
+  `entry-server.ts` answers with a 302 (a GUESS, so never the 301 that config
+  `redirects` use) and `main.ts` does a `router.replace`. Anything less certain
+  becomes a 404 whose `data.suggestions` `error.vue` renders as a results list.
+  `/raw/*.md` gets the same second chance, with a markdown 404 body. The tiers
+  all refuse a TIE, because a coin-flip redirect is worse than a list: the
+  agent cannot tell it was a guess. They also score typos on the last segment
+  only, since a shared parent like `/api/utils/` makes two different pages look
+  87% alike. Full-text may only redirect on an exact TITLE match. Body text
+  with prefix/fuzzy matching finds SOME page for almost any word, which made
+  `/vercel` redirect to a passing mention. The input is any URL, so it is
+  bounded (`MAX_GUESS`/`MAX_SLUG`/`MAX_WORDS`) before the O(n·m) edit distance
+  runs. `redirect` is URI-encoded, because a page path is its filename and a
+  `Location` header must be ASCII. Callers compare it to the request path
+  DECODED, or a page the routes fail to find redirects to itself. The client
+  drops a redirect whose `redirectFrom` is no longer the current route: a slow
+  page can reject after the visitor has navigated away. The suggestions are fetched OUTSIDE `useAsyncData`: the path is
+  agent-typed, and the error's `data` already reaches hydration through the
+  payload.
 - **The search preview renders the page's OWN AST, and the pane is `inert`.**
   `DocsSearchPreview.vue` slices the fetched `body.value` from the matched
   heading (`utils/search-preview.ts`'s `previewNodes`) and hands it to

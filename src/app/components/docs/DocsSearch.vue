@@ -47,7 +47,7 @@ const props = withDefaults(
 );
 
 const router = useRouter();
-const { open, close } = useDocsSearch();
+const { open, close, initialQuery } = useDocsSearch();
 
 const query = ref("");
 const activeIndex = ref(0);
@@ -159,6 +159,11 @@ function applySuggestion() {
 
 watch(open, (value) => {
   if (value) {
+    // A pre-flush watcher, so this lands before the dialog's input mounts.
+    if (initialQuery.value) {
+      query.value = initialQuery.value;
+      initialQuery.value = "";
+    }
     loadIndex();
   } else {
     query.value = "";
