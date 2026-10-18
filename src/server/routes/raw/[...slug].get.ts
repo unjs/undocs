@@ -21,8 +21,12 @@ export default defineEventHandler(async (event) => {
     // No body: h3's `redirect()` answers with an HTML meta-refresh page, which
     // is the wrong thing to hand a client that asked for markdown.
     if (suggestions.redirect) {
-      const location = rawPath(suggestions.redirect.split("#")[0]!) + event.url.search;
-      return new Response(null, { status: 302, headers: { location } });
+      const { search } = event.url;
+      const location = rawPath(suggestions.redirect.split("#")[0]!) + search;
+      // Cached per path (ISR), so never store one visitor's query in it.
+      const headers: Record<string, string> = { location };
+      if (search) headers["cache-control"] = "no-store";
+      return new Response(null, { status: 302, headers });
     }
     return new Response(notFoundMarkdown(path, suggestions), {
       status: 404,

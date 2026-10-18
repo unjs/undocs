@@ -310,10 +310,15 @@ const handler = defineHandler(async (event): Promise<Response> => {
 
   // A 404 the server could resolve (`pageNotFound`): answer with the page it
   // meant rather than an error page. A 302, because it is a guess, not a move.
+  // The `/**` ISR rule caches per path, so a Location carrying THIS request's
+  // query must not be stored and handed to the next visitor.
   if (error?.redirect) {
     return new Response(null, {
       status: 302,
-      headers: { location: redirectLocation(error.redirect, url.search) },
+      headers: {
+        location: redirectLocation(error.redirect, url.search),
+        ...(url.search ? { "cache-control": "no-store" } : {}),
+      },
     });
   }
 
