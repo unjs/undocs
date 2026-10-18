@@ -29,7 +29,7 @@ vi.mock("nitro/storage", () => {
     const { readFile } = await import("node:fs/promises");
     const { join: joinPath } = await import("node:path");
     try {
-      return await readFile(joinPath(process.cwd(), dir, key), raw ? undefined : "utf8");
+      return await readFile(joinPath(process.cwd(), dir, key), raw ? null : "utf8");
     } catch {
       return null;
     }
