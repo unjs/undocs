@@ -81,4 +81,36 @@ describe("rebaseOutput", () => {
     expect(nitro.options.output.publicDir).toBe("C:/projects/docs/.output/public");
     expect(nitro.options.output.serverDir).toBe("C:/projects/docs/.output/server");
   });
+
+  it("uppercases a lowercase drive letter the way Nitro's join does", () => {
+    const nitro = {
+      options: {
+        rootDir: "C:/projects/my-docs/node_modules/undocs",
+        output: {
+          publicDir: "C:/projects/my-docs/node_modules/undocs/.output/public/",
+        },
+      },
+    } as any;
+
+    const mod = rebaseOutput("c:\\projects\\my-docs");
+    mod.setup?.(nitro);
+
+    // Nitro's prerender `join`s route files under this and writes one only when
+    // the result still `startsWith` it — and pathe's `join` uppercases the drive.
+    expect(nitro.options.output.publicDir).toBe("C:/projects/my-docs/.output/public/");
+  });
+
+  it("matches rootDir and docsDir across drive-letter case", () => {
+    const nitro = {
+      options: {
+        rootDir: "C:/projects/docs",
+        output: { dir: "C:/projects/docs/.output" },
+      },
+    } as any;
+
+    const mod = rebaseOutput("c:\\projects\\docs");
+    mod.setup?.(nitro);
+
+    expect(nitro.options.output.dir).toBe("C:/projects/docs/.output");
+  });
 });
