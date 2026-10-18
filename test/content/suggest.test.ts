@@ -3,7 +3,12 @@ import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildIndex } from "../../src/server/content/builder.ts";
-import { normalizeGuess, similarity, suggestPages } from "../../src/server/content/suggest.ts";
+import {
+  normalizeGuess,
+  notFoundMarkdown,
+  similarity,
+  suggestPages,
+} from "../../src/server/content/suggest.ts";
 import type { ContentIndex } from "../../src/server/content/types.ts";
 
 // The 404's second chance. Each tier is pinned on BOTH sides: a guess it should
@@ -136,6 +141,29 @@ describe("suggestPages", () => {
     const { redirect, results } = suggestPages(index, "/nothing-like-it");
     expect(redirect).toBeUndefined();
     expect(new Set(results.map((r) => r.path)).size).toBe(results.length);
+  });
+
+  it("renders the markdown 404 as short, fetchable rows", () => {
+    const md = notFoundMarkdown("/nope", {
+      results: [
+        {
+          path: "/guide/deploy",
+          hash: "#vercel",
+          title: "Vercel",
+          breadcrumb: "Deploy",
+          preview: "Zero config. More text after the first sentence.",
+        },
+        { path: "/api/Getting Help", title: "Getting [Help]", preview: `${"word ".repeat(40)}` },
+      ],
+    });
+    // A section names its page; `/raw` serves the whole page, so no anchor.
+    expect(md).toContain("- [Deploy › Vercel](</raw/guide/deploy.md>) — Zero config.\n");
+    const help = md.split("\n").find((l) => l.includes("Getting"))!;
+    expect(help).toMatch(
+      /^- \[Getting \\\[Help\\\]\]\(<\/raw\/api\/Getting%20Help\.md>\) — (word )+word…$/,
+    );
+    expect(help.split(" — ")[1]!.length).toBeLessThanOrEqual(121);
+    expect(notFoundMarkdown("/", { results: [] })).not.toContain("Closest");
   });
 
   it("only ever redirects to a page that exists", () => {

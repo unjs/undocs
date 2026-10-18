@@ -192,6 +192,47 @@ export function suggestPages(index: ContentIndex, path: string): Suggestions {
   return { results };
 }
 
+/** `path` as its raw URL; pass it encoded (`redirect` is) or it is encoded here. */
+export function rawPath(path: string, encode = false): string {
+  const raw = `/raw${path === "/" ? "/index" : path}.md`;
+  return encode ? encodeURI(raw) : raw;
+}
+
+/** How long a list row's summary may run before it is cut at a word. */
+const SUMMARY_MAX = 120;
+
+/**
+ * The markdown 404 `/raw/*.md` answers with. Each row is a link the agent can
+ * fetch next, so it has to say WHAT it is in a few words: a section names its
+ * page (`/raw` serves whole pages, so the anchor cannot), and the preview is cut
+ * to its first sentence — the full one is 300 characters of flattened prose and
+ * code per row.
+ */
+export function notFoundMarkdown(path: string, { results }: Suggestions): string {
+  const lines = [`# Page not found`, "", `\`${path}\` does not exist.`];
+  if (results.length) {
+    lines.push("", "Closest pages:", "");
+    for (const r of results) {
+      const label = [...(r.breadcrumb ? r.breadcrumb.split(" > ") : []), r.title]
+        .map((t) => t.replaceAll(/[\\[\]]/g, "\\$&"))
+        .join(" › ");
+      const about = summary(r.preview);
+      lines.push(`- [${label}](<${rawPath(r.path, true)}>)${about ? ` — ${about}` : ""}`);
+    }
+  }
+  lines.push("", "Every page is listed in [/llms.txt](/llms.txt).", "");
+  return lines.join("\n");
+}
+
+function summary(preview: string): string {
+  const text = preview.replaceAll(/\s+/g, " ").trim();
+  const sentence = text.match(/^.+?[.!?](?=\s|$)/)?.[0] ?? text;
+  if (sentence.length <= SUMMARY_MAX) return sentence;
+  const cut = sentence.slice(0, SUMMARY_MAX);
+  const word = cut.lastIndexOf(" ");
+  return (word > 0 ? cut.slice(0, word) : cut).replace(/[\s,;:]+$/, "") + "…";
+}
+
 function toSuggestion(page: DocPage): PageSuggestion {
   return { path: page.path, title: page.title, preview: page.description || "" };
 }

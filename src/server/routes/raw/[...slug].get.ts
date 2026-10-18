@@ -2,7 +2,7 @@ import { defineEventHandler, getRouterParam, HTTPError } from "nitro/h3";
 import { withLeadingSlash } from "ufo";
 import { pageSource } from "../../content/source.ts";
 import { getIndex } from "../../content/store.ts";
-import { suggestPages, type Suggestions } from "../../content/suggest.ts";
+import { notFoundMarkdown, rawPath, suggestPages } from "../../content/suggest.ts";
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, "slug", { decode: true });
@@ -33,23 +33,3 @@ export default defineEventHandler(async (event) => {
   event.res.headers.set("Content-Type", "text/markdown; charset=utf-8");
   return await pageSource(page);
 });
-
-/** `path` as its raw URL; pass it encoded (`redirect` is) or it is encoded here. */
-function rawPath(path: string, encode = false): string {
-  const raw = `/raw${path === "/" ? "/index" : path}.md`;
-  return encode ? encodeURI(raw) : raw;
-}
-
-function notFoundMarkdown(path: string, { results }: Suggestions): string {
-  const lines = [`# Page not found`, "", `\`${path}\` does not exist.`];
-  if (results.length) {
-    lines.push("", "Closest pages:", "");
-    for (const r of results) {
-      const about = r.preview ? ` — ${r.preview.replaceAll(/\s+/g, " ").trim()}` : "";
-      const title = r.title.replaceAll(/[\\[\]]/g, "\\$&");
-      lines.push(`- [${title}](<${rawPath(r.path, true)}>)${about}`);
-    }
-  }
-  lines.push("", "Every page is listed in [/llms.txt](/llms.txt).", "");
-  return lines.join("\n");
-}
