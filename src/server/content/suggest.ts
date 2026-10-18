@@ -10,8 +10,10 @@
  *
  *   - `redirect` — the guess is unambiguous, so the caller sends the client
  *     there (a 302: a GUESS, not a move, so nothing should canonicalize it the
- *     way the config `redirects` 301s are meant to be). Only ever a path from the
- *     index, so following it can never 404 and loop.
+ *     way the config `redirects` 301s are meant to be). Always a page from the
+ *     index, URI-ENCODED (a page path is its filename, spaces and all, and a
+ *     `Location` header must be ASCII) — so callers compare it to the request
+ *     path decoded, or a page the routes fail to find would redirect to itself.
  *   - `results` — candidates for a search-results 404.
  *
  * Confidence comes in four tiers, cheapest and most certain first:
@@ -21,20 +23,26 @@
  *   2. a last segment that exactly one page shares (`/deploy` → `/guide/deploy`);
  *   3. a last segment close enough to be a typo of one page's, with a clear
  *      margin over the runner-up;
- *   4. a strict full-text search on the path's words whose hits all land on ONE
- *      page.
+ *   4. the path's words matching a page or heading TITLE exactly, on one page
+ *      only (`/vercel` → `/guide/deploy#vercel`). Titles, and whole words:
+ *      body text with prefix/fuzzy matching puts a word on SOME page for almost
+ *      any guess, so one passing mention would decide the redirect.
  *
  * Every tier refuses to redirect when two pages tie: a coin-flip redirect is
  * worse than a results page, because the agent cannot see it was a guess.
+ *
+ * The input is attacker-sized (any URL), so it is bounded before any work:
+ * past `MAX_GUESS` there is nothing to suggest, the slug is only edit-distanced
+ * up to `MAX_SLUG`, and the query is at most `MAX_WORDS` words.
  */
-import MiniSearch from "minisearch";
+import MiniSearch, { type SearchOptions } from "minisearch";
 import {
   MINISEARCH_FUZZY_SEARCH_OPTIONS,
   MINISEARCH_OPTIONS,
   MINISEARCH_SEARCH_OPTIONS,
   type SearchDocument,
 } from "./search-options.ts";
-import type { ContentIndex } from "./types.ts";
+import type { ContentIndex, DocPage } from "./types.ts";
 
 export interface PageSuggestion {
   /** Route path of the page, e.g. `/guide/deploy`. */
@@ -55,11 +63,27 @@ export interface Suggestions {
 
 export const SUGGEST_LIMIT = 8;
 
-/** Last-segment similarity a tier-3 redirect needs, and its lead over the runner-up. */
+/**
+ * Last-segment similarity a tier-3 redirect must EXCEED, and its lead over the
+ * runner-up. Exceed, because exactly 0.8 is one letter of five — `/books` is not
+ * a typo of `/hooks`.
+ */
 const TYPO_MIN = 0.8;
 const TYPO_MARGIN = 0.1;
 /** Below this a slug is not close enough to be listed on similarity alone. */
 const LIST_MIN = 0.6;
+
+const MAX_GUESS = 256;
+const MAX_SLUG = 64;
+const MAX_WORDS = 8;
+
+/** Tier 4: whole words, titles only — see the header. */
+const TITLE_MATCH: SearchOptions = {
+  fields: ["title"],
+  prefix: false,
+  fuzzy: false,
+  combineWith: "AND",
+};
 
 /** Normalize a path's spelling so near-identical guesses compare equal. */
 export function normalizeGuess(path: string): string {
@@ -83,72 +107,72 @@ export function normalizeGuess(path: string): string {
 
 export function suggestPages(index: ContentIndex, path: string): Suggestions {
   const guess = normalizeGuess(path);
+  if (guess.length > MAX_GUESS) return { results: [] };
   const pages = index.pages.map((page) => ({ page, norm: normalizeGuess(page.path) }));
+  const redirectTo = (page: DocPage, hash = ""): Suggestions => ({
+    redirect: encodeURI(page.path + hash),
+    results: [toSuggestion(page)],
+  });
 
   // Tier 1: the same path, spelled differently. `/docs/x` is the commonest
   // cross-site guess; the literal path is tried first, so a real `/docs` section
-  // still wins.
+  // still wins. Two pages can normalize alike (`foo_bar`, `foo-bar`) — a tie.
   const bare = guess.replace(/^\/docs(?=\/|$)/, "") || "/";
-  const exact =
-    pages.find((c) => c.norm === guess) ??
-    (bare === guess ? undefined : pages.find((c) => c.norm === bare));
-  if (exact) {
-    return { redirect: exact.page.path, results: [toSuggestion(exact.page)] };
-  }
+  let exact = pages.filter((c) => c.norm === guess);
+  if (!exact.length && bare !== guess) exact = pages.filter((c) => c.norm === bare);
+  if (exact.length === 1) return redirectTo(exact[0]!.page);
 
   // Tier 2: a last segment exactly one page shares.
   const last = lastSegment(guess);
-  if (last) {
+  if (last && !exact.length) {
     const sameLast = pages.filter((c) => lastSegment(c.norm) === last);
-    if (sameLast.length === 1) {
-      return { redirect: sameLast[0]!.page.path, results: [toSuggestion(sameLast[0]!.page)] };
-    }
+    if (sameLast.length === 1) return redirectTo(sameLast[0]!.page);
   }
 
   // Tier 3: a typo of a slug. Scored on the last segment alone, never the whole
   // path: a shared `/api/utils/` prefix makes `/api/utils/hash` look 87% like
   // `/api/utils/path`, which is two different pages, not a typo.
+  const slug = last.length <= MAX_SLUG ? last : "";
   const ranked = pages
-    .map((c) => ({ ...c, score: last ? similarity(last, lastSegment(c.norm)) : 0 }))
+    .map((c) => ({ ...c, score: slug ? similarity(slug, lastSegment(c.norm), LIST_MIN) : 0 }))
     .sort((a, b) => b.score - a.score);
   const [best, second] = ranked;
-  if (best && best.score >= TYPO_MIN && best.score - (second?.score ?? 0) >= TYPO_MARGIN) {
-    return { redirect: best.page.path, results: [toSuggestion(best.page)] };
+  if (
+    !exact.length &&
+    best &&
+    best.score > TYPO_MIN &&
+    best.score - (second?.score ?? 0) >= TYPO_MARGIN
+  ) {
+    return redirectTo(best.page);
   }
 
-  // Tier 4: the path's words as a query — all of them, then the last segment's
-  // alone, since a guessed parent (`/reference/…`) rarely appears in the prose
-  // and the AND query would fail on it. Only these STRICT passes may redirect:
-  // the fuzzy fallback trades precision for recall, which suits a list and not
-  // a jump.
+  // Tier 4: the path's words against titles — all of them, then the last
+  // segment's alone, since a guessed parent (`/reference/…`) is rarely in the
+  // title it was meant to find.
   const query = words(bare);
+  const slugQuery = words(last);
   const ms = searchIndex(index);
+  // Only with the slug's own words in play: a parent alone (`/guide/<junk>`)
+  // says where the guess was, not what it was for.
+  if (!exact.length && slugQuery) {
+    let titled = ms.search(query, TITLE_MATCH);
+    if (!titled.length && slugQuery && slugQuery !== query) {
+      titled = ms.search(slugQuery, TITLE_MATCH);
+    }
+    const onePage = titled.length > 0 && new Set(titled.map((h) => pageOf(h.id))).size === 1;
+    if (onePage) {
+      const top = toHit(titled[0] as unknown as SearchDocument);
+      const page = index.byPath.get(top.path);
+      if (page) return { ...redirectTo(page, top.hash), results: [top] };
+    }
+  }
+
+  // The list: the full query with the palette's own ranking, then — OR-combined,
+  // so on the slug alone, or a section name in the path (`guide`) would match
+  // nearly every page — the typo-tolerant pass.
   let hits = query ? ms.search(query, MINISEARCH_SEARCH_OPTIONS) : [];
-  if (!hits.length && last && words(last) !== query) {
-    hits = ms.search(words(last), MINISEARCH_SEARCH_OPTIONS);
-  }
-  const strict = hits.length > 0;
-  // OR-combined, so it searches the slug alone: a section name in the path
-  // (`guide`) would otherwise match nearly every page and outrank the one word
-  // that says what was wanted.
-  if (!strict && query) hits = ms.search(words(last) || query, MINISEARCH_FUZZY_SEARCH_OPTIONS);
-
-  const searched = hits.map((hit) => {
-    const doc = hit as unknown as SearchDocument;
-    const [pagePath, anchor] = doc.id.split("#");
-    return {
-      path: pagePath!,
-      ...(anchor ? { hash: `#${anchor}` } : {}),
-      title: doc.title,
-      ...(doc.titles?.length ? { breadcrumb: doc.titles.join(" > ") } : {}),
-      preview: doc.preview || "",
-    } satisfies PageSuggestion;
-  });
-
-  if (strict && new Set(searched.map((s) => s.path)).size === 1) {
-    const top = searched[0]!;
-    return { redirect: top.path + (top.hash ?? ""), results: [top] };
-  }
+  if (!hits.length && slugQuery) hits = ms.search(slugQuery, MINISEARCH_FUZZY_SEARCH_OPTIONS);
+  const searched = hits.map((hit) => toHit(hit as unknown as SearchDocument));
 
   // Results: close slugs first (what the agent most likely meant), then the
   // text hits; one row per page, since a second hit on the same page adds a
@@ -168,23 +192,49 @@ export function suggestPages(index: ContentIndex, path: string): Suggestions {
   return { results };
 }
 
-function toSuggestion(page: ContentIndex["pages"][number]): PageSuggestion {
+function toSuggestion(page: DocPage): PageSuggestion {
   return { path: page.path, title: page.title, preview: page.description || "" };
 }
 
+function toHit(doc: SearchDocument): PageSuggestion {
+  const [path, anchor] = doc.id.split("#");
+  return {
+    path: path!,
+    ...(anchor ? { hash: `#${anchor}` } : {}),
+    title: doc.title,
+    ...(doc.titles?.length ? { breadcrumb: doc.titles.join(" > ") } : {}),
+    preview: doc.preview || "",
+  };
+}
+
+function pageOf(id: string): string {
+  return id.split("#")[0]!;
+}
+
 function words(norm: string): string {
-  return norm.replaceAll(/[/-]+/g, " ").trim();
+  return norm
+    .split(/[/-]+/)
+    .filter((w) => w && w.length <= MAX_SLUG)
+    .slice(0, MAX_WORDS)
+    .join(" ");
 }
 
 function lastSegment(norm: string): string {
   return norm.slice(norm.lastIndexOf("/") + 1);
 }
 
-/** `1 - edit distance / longer length`: 1 for equal strings, 0 for nothing shared. */
-export function similarity(a: string, b: string): number {
+/**
+ * `1 - edit distance / longer length`: 1 for equal strings, 0 for nothing shared.
+ * Below `floor` the exact value is not needed, so a length gap that already
+ * rules it out answers from the lengths alone, without the O(n·m) table.
+ */
+export function similarity(a: string, b: string, floor = 0): number {
   if (a === b) return 1;
   const longer = Math.max(a.length, b.length);
-  return longer === 0 ? 1 : 1 - editDistance(a, b) / longer;
+  if (longer === 0) return 1;
+  const ceiling = 1 - Math.abs(a.length - b.length) / longer;
+  if (ceiling < floor) return ceiling;
+  return 1 - editDistance(a, b) / longer;
 }
 
 /**

@@ -398,7 +398,15 @@ NEVER write E2E tests. Ask for it to be tested manually.
   all refuse a TIE, because a coin-flip redirect is worse than a list: the
   agent cannot tell it was a guess. They also score typos on the last segment
   only, since a shared parent like `/api/utils/` makes two different pages look
-  87% alike. The suggestions are fetched OUTSIDE `useAsyncData`: the path is
+  87% alike. Full-text may only redirect on an exact TITLE match. Body text
+  with prefix/fuzzy matching finds SOME page for almost any word, which made
+  `/vercel` redirect to a passing mention. The input is any URL, so it is
+  bounded (`MAX_GUESS`/`MAX_SLUG`/`MAX_WORDS`) before the O(n·m) edit distance
+  runs. `redirect` is URI-encoded, because a page path is its filename and a
+  `Location` header must be ASCII. Callers compare it to the request path
+  DECODED, or a page the routes fail to find redirects to itself. The client
+  drops a redirect whose `redirectFrom` is no longer the current route: a slow
+  page can reject after the visitor has navigated away. The suggestions are fetched OUTSIDE `useAsyncData`: the path is
   agent-typed, and the error's `data` already reaches hydration through the
   payload.
 - **The search preview renders the page's OWN AST, and the pane is `inert`.**

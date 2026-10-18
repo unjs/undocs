@@ -90,8 +90,10 @@ function bootstrap(): void {
         // Client half of `entry-server.ts`'s 302: same target, and the query and
         // hash ride along, since only a server redirect gets them for free.
         if (e?.redirect) {
-          const { query, hash } = router.currentRoute;
-          void router.replace(redirectLocation(e.redirect, query, hash));
+          const { path, query, hash } = router.currentRoute;
+          if (e.redirectFrom === undefined || e.redirectFrom === path) {
+            void router.replace(redirectLocation(e.redirect, query, hash));
+          }
           return false;
         }
         if (e?.fatal || e?.statusCode) {

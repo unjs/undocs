@@ -7,7 +7,10 @@ import { suggestPages } from "../../../../content/suggest.ts";
 // a `passQuery` entry. The client asks only after a page 404s.
 export default defineEventHandler(async (event) => {
   const slug = (
-    getRouterParam(event, "path") || event.url.pathname.replace(/^\/api\/docs\/suggest\//, "")
+    getRouterParam(event, "path", { decode: true }) ||
+    // Left encoded: `suggestPages` decodes, and tolerates a malformed `%`.
+    event.url.pathname.replace(/^\/api\/docs\/suggest\//, "")
   ).replace(/\.json$/, "");
-  return suggestPages(await getIndex(), withLeadingSlash(slug));
+  // `_index` is the root, as in `page/`.
+  return suggestPages(await getIndex(), slug === "_index" ? "/" : withLeadingSlash(slug));
 });

@@ -30,6 +30,11 @@ beforeAll(async () => {
   await writeFile(join(dir, "2.api", "2.storage.md"), "# Storage\n\nKey-value storage.\n");
   await mkdir(join(dir, "2.api", "3.utils"), { recursive: true });
   await writeFile(join(dir, "2.api", "3.utils", "1.path.md"), "# Path\n\nJoin segments.\n");
+  // Two pages one respelling apart: a tie for tier 1.
+  await writeFile(join(dir, "2.api", "4.key_value.md"), "# Key Value\n\nUnderscored.\n");
+  await writeFile(join(dir, "2.api", "5.key-value.md"), "# Key-Value\n\nDashed.\n");
+  await writeFile(join(dir, "2.api", "6.hooks.md"), "# Hooks\n\nLifecycle.\n");
+  await writeFile(join(dir, "2.api", "7.Getting Help.md"), "# Getting Help\n\nAsk.\n");
   index = await buildIndex({ dir });
 }, 60_000);
 
@@ -56,6 +61,20 @@ describe("similarity", () => {
 });
 
 describe("suggestPages", () => {
+  it("refuses a respelling two pages share", () => {
+    const { redirect, results } = suggestPages(index, "/api/Key_Value");
+    expect(redirect).toBeUndefined();
+    expect(results.map((r) => r.path)).toEqual(
+      expect.arrayContaining(["/api/key_value", "/api/key-value"]),
+    );
+  });
+
+  it("hands the redirect out URI-encoded", () => {
+    // A page path is its filename; a `Location` header must be ASCII.
+    expect(suggestPages(index, "/getting help").redirect).toBe("/api/Getting%20Help");
+    expect(suggestPages(index, "/api/getting%20help").redirect).toBe("/api/Getting%20Help");
+  });
+
   it("redirects a respelling of a real path", () => {
     expect(suggestPages(index, "/1.guide/3.deploy").redirect).toBe("/guide/deploy");
     expect(suggestPages(index, "/guide/deploy.html").redirect).toBe("/guide/deploy");
@@ -82,13 +101,35 @@ describe("suggestPages", () => {
     expect(suggestPages(index, "/storages").redirect).toBe("/api/storage");
   });
 
+  it("does not call one letter in five a typo", () => {
+    expect(suggestPages(index, "/books").redirect).toBeUndefined();
+  });
+
   it("does not mistake a shared parent for a typo", () => {
     // As whole paths these are 87% alike — all of it the `/api/utils/` prefix.
     expect(suggestPages(index, "/api/utils/hash").redirect).toBeUndefined();
   });
 
-  it("redirects when the strict search lands on one page, to the matched section", () => {
-    expect(suggestPages(index, "/hosting/zeitplatform").redirect).toBe("/guide/deploy#vercel");
+  it("redirects when a title on one page matches, to the matched section", () => {
+    expect(suggestPages(index, "/hosting/vercel").redirect).toBe("/guide/deploy#vercel");
+  });
+
+  it("never redirects on a word only the body text mentions", () => {
+    const { redirect, results } = suggestPages(index, "/zeitplatform");
+    expect(redirect).toBeUndefined();
+    expect(results.map((r) => r.path)).toContain("/guide/deploy");
+  });
+
+  it("bounds the work an oversized guess can cause", () => {
+    const start = performance.now();
+    expect(suggestPages(index, `/${"a".repeat(16_000)}`)).toEqual({ results: [] });
+    const many = suggestPages(
+      index,
+      `/${Array.from({ length: 2000 }, (_, i) => `w${i}`).join("/")}`,
+    );
+    expect(many.redirect).toBeUndefined();
+    expect(suggestPages(index, `/guide/${"x".repeat(200)}`).redirect).toBeUndefined();
+    expect(performance.now() - start).toBeLessThan(500);
   });
 
   it("falls back to a deduplicated results list", () => {

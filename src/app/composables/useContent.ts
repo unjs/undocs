@@ -107,8 +107,18 @@ export interface NotFoundData {
  */
 export async function pageNotFound(path: string): Promise<Error & AppError<NotFoundData>> {
   const suggestions = await querySuggestions(path).catch(() => undefined);
-  if (suggestions?.redirect && suggestions.redirect.split("#")[0] !== path) {
-    return createError({ statusCode: 302, redirect: suggestions.redirect, fatal: true });
+  // Compared decoded: `redirect` is encoded and `path` arrives however the URL
+  // spelled it, and a page the routes cannot serve must not redirect to itself.
+  if (
+    suggestions?.redirect &&
+    safeDecode(suggestions.redirect.split("#")[0]!) !== safeDecode(path)
+  ) {
+    return createError({
+      statusCode: 302,
+      redirect: suggestions.redirect,
+      redirectFrom: path,
+      fatal: true,
+    });
   }
   return createError({
     statusCode: 404,
@@ -117,6 +127,14 @@ export async function pageNotFound(path: string): Promise<Error & AppError<NotFo
     fatal: true,
     data: { path, suggestions: suggestions?.results ?? [] },
   });
+}
+
+function safeDecode(path: string): string {
+  try {
+    return decodeURI(path);
+  } catch {
+    return path;
+  }
 }
 
 export function queryNavigation(): Promise<NavItem[]> {

@@ -16,6 +16,11 @@ export interface AppError<DataT = unknown> {
    * hash) carry over.
    */
   redirect?: string;
+  /**
+   * The `route.path` that threw it. An async page can reject after the visitor
+   * has moved on, and a redirect for a page they left must not yank them back.
+   */
+  redirectFrom?: string;
 }
 
 /**

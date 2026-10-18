@@ -162,6 +162,11 @@ describe("/api/docs/suggest/[...path]", () => {
     expect(((await res.json()) as { redirect?: string }).redirect).toBe("/guide/usage");
   });
 
+  it("reads `_index` as the root, as `page/` does", async () => {
+    const res = await (await load("suggest")).fetch(req("/api/docs/suggest/_index.json"));
+    expect(((await res.json()) as { redirect?: string }).redirect).toBe("/");
+  });
+
   it("returns candidates without a redirect when nothing is certain", async () => {
     const res = await (await load("suggest")).fetch(req("/api/docs/suggest/qqqq.json"));
     expect(res.status).toBe(200);
