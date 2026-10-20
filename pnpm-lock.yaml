@@ -107,6 +107,9 @@ importers:
       ufo:
         specifier: ^1.6.4
         version: 1.6.4
+      unstorage:
+        specifier: 2.0.0-alpha.11
+        version: 2.0.0-alpha.11
       vite:
         specifier: latest
         version: 8.3.4(@types/node@26.6.5)(jiti@2.7.0)
