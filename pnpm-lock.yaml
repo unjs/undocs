@@ -79,7 +79,7 @@ importers:
         version: 2.8.0(@vueuse/core@15.0.0(vue@3.5.44(typescript@7.0.2)))(vue@3.5.44(typescript@7.0.2))
       nitro:
         specifier: npm:nitro-nightly@latest
-        version: nitro-nightly@3.0.1-20261018-020411-3421ed57
+        version: nitro-nightly@3.0.1-20261020-034952-cf950f28(ocache@0.3.0)
       nypm:
         specifier: ^0.6.10
         version: 0.6.10
@@ -126,6 +126,9 @@ importers:
       changelogen:
         specifier: ^0.6.2
         version: 0.6.2(magicast@0.5.5)
+      giget:
+        specifier: ^3.3.1
+        version: 3.3.1
       oxfmt:
         specifier: '>=0.73.0'
         version: 0.73.0
@@ -1191,9 +1194,6 @@ packages:
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
-  db0@0.4.1:
-    resolution: {integrity: sha512-6RBY/bSn42UrqATwsiULj2uYFyEykB3XeA/NLIVQeHNXlYV6D4Idxx3/aa6k5Y45Dwzx7sygeLotnqHWSeURYA==}
-
   default-browser-id@5.0.1:
     resolution: {integrity: sha512-x1VCxdX4t+8wVfd1so/9w+vQ4vx7lKd2Qp5tDRutErwmR85OgmfX7RlLRMWafRMY7hbEiXIbudNrjOAPa/hL8Q==}
     engines: {node: '>=18'}
@@ -1232,8 +1232,8 @@ packages:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
     engines: {node: '>=0.12'}
 
-  env-runner@0.3.4:
-    resolution: {integrity: sha512-zP3dtlJZUn++g7N/rL2aiWkzqxsqCNCRTt8d3Gf3+iSCCIoSgBdWMSY1fz+dQ4+kH37kJ5etnEeJ4BouqIS1yQ==}
+  env-runner@0.3.6:
+    resolution: {integrity: sha512-2peJPuinI46B3zeHyTjVhiK+LGb53M2vmM4tGIwPYfPZ+/FBfPOsaCYawLoc+9GTa/y/fYhhtZh8obPZAmHUCQ==}
     hasBin: true
 
   es-module-lexer@2.3.2:
@@ -1288,8 +1288,8 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
-  h3@2.0.3:
-    resolution: {integrity: sha512-4vCJUR90OSGLITLit4WWpB4cj0rzd5eM8w3CHmi4ulh3LdaUICYy3FIaGpBibgtt+AB3cDiyql3ApgcLRGrClA==}
+  h3@2.0.5:
+    resolution: {integrity: sha512-AkTYaK8XhWlAAOhzEz8I6FAkhFPMrDYVq/PIV3GvJxtKiFmVyVDAAdGuNGMTHRrI3A6up3s1bND/dDPlQHlx6w==}
     engines: {node: '>=20.19.0'}
     hasBin: true
     peerDependencies:
@@ -1542,11 +1542,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nf3@0.4.2:
-    resolution: {integrity: sha512-6kPsyCzvzb8gnFQFzxuQc/hU9HWEMwn0v9j41Mv7LezeUmgS0qgsGjDbtdrOfqV+kkM8KpYS+aZ6Y0wkWzJzLQ==}
-
-  nitro-nightly@3.0.1-20261018-020411-3421ed57:
-    resolution: {integrity: sha512-Gbas8X4gy8EWc40Ez7wVuCz/xxkfYYgFR7QRny0z2oB40Y4jC9GOZOHm2qhTBGFbrsbwozoNfZMGv5rtUipcHA==}
+  nitro-nightly@3.0.1-20261020-034952-cf950f28:
+    resolution: {integrity: sha512-FcSnvlfu1nOZoE58itOr+hke/Jo82Bdd9MpzYDVokjfJ3v3KpdjAuwagd67Gg4IMLtehSQ3rjvdDWooc+YoTbA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
@@ -2657,8 +2654,6 @@ snapshots:
 
   csstype@3.2.3: {}
 
-  db0@0.4.1: {}
-
   default-browser-id@5.0.1: {}
 
   default-browser@5.5.1:
@@ -2689,7 +2684,7 @@ snapshots:
 
   entities@7.0.1: {}
 
-  env-runner@0.3.4:
+  env-runner@0.3.6:
     dependencies:
       crossws: 0.4.15(srvx@1.0.6)
       srvx: 1.0.6
@@ -2725,7 +2720,7 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  h3@2.0.3(crossws@0.4.15(srvx@1.0.6))(ocache@0.3.0):
+  h3@2.0.5(crossws@0.4.15(srvx@1.0.6))(ocache@0.3.0):
     dependencies:
       rou3: 1.0.0
       srvx: 1.0.6
@@ -2916,18 +2911,15 @@ snapshots:
 
   nanoid@3.3.20: {}
 
-  nf3@0.4.2: {}
-
-  nitro-nightly@3.0.1-20261018-020411-3421ed57:
+  nitro-nightly@3.0.1-20261020-034952-cf950f28(ocache@0.3.0):
     dependencies:
       crossws: 0.4.15(srvx@1.0.6)
-      db0: 0.4.1
-      env-runner: 0.3.4
-      h3: 2.0.3(crossws@0.4.15(srvx@1.0.6))(ocache@0.3.0)
-      nf3: 0.4.2
-      ocache: 0.3.0
+      env-runner: 0.3.6
+      h3: 2.0.5(crossws@0.4.15(srvx@1.0.6))(ocache@0.3.0)
+      rou3: 1.0.0
       srvx: 1.0.6
-      unstorage: 2.0.0-alpha.11
+    transitivePeerDependencies:
+      - ocache
 
   node-addon-api@7.1.1: {}
 
@@ -2941,7 +2933,8 @@ snapshots:
 
   obug@3.0.0: {}
 
-  ocache@0.3.0: {}
+  ocache@0.3.0:
+    optional: true
 
   ofetch@1.5.1:
     dependencies:

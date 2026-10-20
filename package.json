@@ -32,7 +32,8 @@
     "profile:cpu": "rm -rf .profile && node --cpu-prof --diagnostic-dir ../.profile cli/main.mjs dev docs",
     "release": "pnpm run lint && changelogen --release && npm publish && git push --follow-tags",
     "start": "node docs/.output/server/index.mjs",
-    "test": "vitest run --coverage",
+    "test": "vitest run --project unit --coverage",
+    "bench": "vitest run --project bench --silent=false",
     "typecheck": "tsc --noEmit",
     "template:dev": "node ./cli/main.mjs dev template",
     "undocs": "./cli/main.mjs"
@@ -78,6 +79,7 @@
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.5",
     "changelogen": "^0.6.2",
+    "giget": "^3.3.1",
     "oxfmt": ">=0.73.0",
     "oxlint": "^1.88.0",
     "rolldown": "^1.2.14",

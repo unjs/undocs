@@ -66,7 +66,9 @@ NEVER write E2E tests. Ask for it to be tested manually.
   same map and same one hop as `router.ts`) — agents work from old links far
   more than visitors do; `navigate` still pushes the path the agent ASKED for,
   leaving the redirect for the router to execute.
-- `pnpm test`, `pnpm typecheck` (bare tsc, so `.vue` imports don't resolve),
+- `pnpm test`, `pnpm bench` (the search-relevance harness; fetches Nitro's
+  docs on first run, so `pnpm test` leaves it out),
+  `pnpm typecheck` (bare tsc, so `.vue` imports don't resolve),
   `pnpm lint` / `pnpm fmt` (oxlint + oxfmt — run before finishing),
   `pnpm build:inline` after touching `src/app/inline/*.ts`.
 

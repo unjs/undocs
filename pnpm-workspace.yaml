@@ -22,7 +22,7 @@ minimumReleaseAgeExclude:
   - "nitro-nightly*"
   - crossws@0.4.12
   - db0@0.4.0 || 0.4.1
-  - env-runner@0.2.0
+  - env-runner@0.2.0 || 0.3.6
   - h3@2.0.1-rc.29 || 2.0.1-rc.31 || 2.0.3
   - srvx@0.12.7 || 1.0.3 || 1.0.6
   - unstorage@2.0.0-alpha.9 || 2.0.0-alpha.10

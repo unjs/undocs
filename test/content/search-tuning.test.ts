@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
+import { rename, rm } from "node:fs/promises";
+import { join } from "node:path";
 import MiniSearch from "minisearch";
 import type { Options, SearchOptions, SearchResult } from "minisearch";
 import { buildIndex } from "../../src/server/content/builder.ts";
@@ -15,8 +17,8 @@ import type { SearchSection } from "../../src/server/content/types.ts";
 // ============================================================================
 // Search-relevance tuning harness (NOT a pass/fail unit test — a benchmark).
 //
-// It builds the real content index for Nitro's shipped docs
-// (`node_modules/nitro/dist/docs`), then runs a corpus of realistic queries
+// It builds the real content index for Nitro's docs (fetched from GitHub on
+// first run, see `ensureNitroDocs`), then runs a corpus of realistic queries
 // through a MATRIX of {index-build profile} × {client-search profile} and
 // scores each combination against hand-labelled ground truth. The point is to
 // see, on real prose, which knobs actually move relevance — before committing a
@@ -36,10 +38,30 @@ import type { SearchSection } from "../../src/server/content/types.ts";
 //                            (the headline number; higher = better).
 //
 // Tune by editing the three arrays below (SCENARIOS / INDEX_PROFILES /
-// SEARCH_PROFILES) and reading the printed tables. `pnpm test search-tuning`.
+// SEARCH_PROFILES) and reading the printed tables. `pnpm bench` (it is the
+// `bench` vitest project, so `pnpm test` skips it).
 // ============================================================================
 
-const NITRO_DOCS = fileURLToPath(new URL("../../node_modules/nitro/dist/docs", import.meta.url));
+// Nitro stopped shipping its docs in the package (nitrojs/nitro#4836), so the
+// corpus is fetched with giget on first run and cached. Pinned to the commit of
+// the last nightly that shipped them, so the hand-labelled targets below keep
+// meaning the same pages; `9.blog` is dropped, as that bundled copy did.
+const NITRO_DOCS_REF = "3421ed57eb5d427439cd6e680e2fb9e5849ce659";
+const NITRO_DOCS = fileURLToPath(
+  new URL(`../../node_modules/.cache/undocs/nitro-docs-${NITRO_DOCS_REF}`, import.meta.url),
+);
+
+async function ensureNitroDocs() {
+  if (existsSync(NITRO_DOCS)) return;
+  // Download beside the cache dir and rename into place, so an interrupted
+  // fetch never leaves a partial corpus that looks cached.
+  const tmp = `${NITRO_DOCS}.tmp`;
+  await rm(tmp, { recursive: true, force: true });
+  const { downloadTemplate } = await import("giget");
+  await downloadTemplate(`gh:nitrojs/nitro/docs#${NITRO_DOCS_REF}`, { dir: tmp });
+  await rm(join(tmp, "9.blog"), { recursive: true, force: true });
+  await rename(tmp, NITRO_DOCS);
+}
 
 // --- ground-truth corpus -----------------------------------------------------
 // Each scenario: a query a real user might type, the page path(s) that would
@@ -298,9 +320,7 @@ describe("search relevance tuning (Nitro docs corpus)", () => {
   const indexes = new Map<string, MiniSearch<SearchDocument>>();
 
   beforeAll(async () => {
-    if (!existsSync(NITRO_DOCS)) {
-      throw new Error(`Nitro docs not found at ${NITRO_DOCS} — run \`pnpm install\`.`);
-    }
+    await ensureNitroDocs();
     const index = await buildIndex({ dir: NITRO_DOCS });
     sections = index.search;
     for (const p of INDEX_PROFILES) indexes.set(p.name, buildRehydrated(sections, p));

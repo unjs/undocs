@@ -27,7 +27,23 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["test/**/*.test.ts"],
     environment: "node",
+    // `pnpm test` runs `unit`; `pnpm bench` runs `bench`, the search-relevance
+    // harness, which fetches its corpus over the network and prints a report
+    // rather than guarding behaviour.
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "unit",
+          include: ["test/**/*.test.ts"],
+          exclude: ["test/content/search-tuning.test.ts"],
+        },
+      },
+      {
+        extends: true,
+        test: { name: "bench", include: ["test/content/search-tuning.test.ts"] },
+      },
+    ],
   },
 });
