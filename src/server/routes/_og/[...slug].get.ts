@@ -1,10 +1,22 @@
-import { defineLazyEventHandler, defineEventHandler, getRouterParam, HTTPError } from "nitro/h3";
-import { useStorage } from "nitro/storage";
+import { defineEventHandler, getRouterParam, HTTPError } from "nitro/h3";
 import { useRuntimeConfig } from "nitro/runtime-config";
 import { withLeadingSlash } from "ufo";
 import { render } from "takumi-js";
 import { container, image, text } from "takumi-js/helpers";
 import { getIndex } from "../../content/store.ts";
+// Inlined into the server bundle at build time, so a missing font fails the
+// build rather than the first card.
+import publicSans400 from "../../og-assets/fonts/public-sans-400.ttf" with { type: "bytes" };
+import publicSans700 from "../../og-assets/fonts/public-sans-700.ttf" with { type: "bytes" };
+// The docs project's own mark, or "": undocs ships no default logo, and a
+// fallback mark here would put someone else's brand on every card. Generated in
+// `nitro.config.ts`, because the path is the docs project's and may not exist.
+import iconSvg from "#undocs/og-icon";
+
+const fonts = [
+  { name: "Public Sans", weight: 400, data: publicSans400 },
+  { name: "Public Sans", weight: 700, data: publicSans700 },
+];
 
 // Cards are always dark, so map names to dark-mode accents; neutral spellings
 // must resolve to the site's foreground rather than CSS mid-grey.
@@ -36,72 +48,48 @@ const themeColorMap: Record<string, string> = {
   rose: "#ff637e",
 };
 
-export default defineLazyEventHandler(async () => {
-  // The docs project's own mark, or none: undocs ships no default logo, and a
-  // fallback mark here would put someone else's brand on every card.
-  const ogImage = useStorage("assets/og-image");
-  const docsPublic = useStorage("assets/og-docs");
+export default defineEventHandler(async (event) => {
+  // Trust indexed page metadata, not query input; `_index` uses site metadata.
+  const slug =
+    getRouterParam(event, "slug") || decodeURIComponent(event.url.pathname).replace(/^\/_og\//, "");
+  if (!slug.endsWith(".png")) {
+    throw new HTTPError({ status: 404, statusText: "Not found" });
+  }
 
-  const iconSvg = (await docsPublic.getItem<string>("icon.svg").catch(() => null)) || "";
+  const undocs = useRuntimeConfig().undocs || {};
+  const siteName = (undocs.name as string) || "";
+  const siteDescription = (undocs.description as string) || "";
 
-  // Lazy handler caches bundled fonts without a network dependency.
-  const loadFont = async (file: string, weight: number) => {
-    const data = (await ogImage.getItemRaw(`fonts/${file}`)) as Uint8Array | Buffer | null;
-    if (!data) {
-      throw new Error(`[og-image] missing bundled font asset: fonts/${file}`);
+  let title = siteName;
+  let description = siteDescription;
+
+  const raw = slug.replace(/\.png$/, "");
+  if (raw !== "_index") {
+    const path = withLeadingSlash(raw);
+    const index = await getIndex();
+    const page = index.byPath.get(path) || index.byPath.get(path + "/");
+    if (!page) {
+      throw new HTTPError({ status: 404, statusText: "Page not found", message: path });
     }
-    return { name: "Public Sans", weight, data };
-  };
+    title = page.title || siteName;
+    description = page.description || siteDescription;
+  }
 
-  const fonts = await Promise.all([
-    loadFont("public-sans-400.ttf", 400),
-    loadFont("public-sans-700.ttf", 700),
-  ]);
+  const themeColor = (undocs.themeColor as string) || "mono";
+  // Match names case-insensitively; preserve custom CSS colors verbatim.
+  const themeColorValue = themeColorMap[themeColor.toLowerCase()] || themeColor;
 
-  return defineEventHandler(async (event) => {
-    // Trust indexed page metadata, not query input; `_index` uses site metadata.
-    const slug =
-      getRouterParam(event, "slug") ||
-      decodeURIComponent(event.url.pathname).replace(/^\/_og\//, "");
-    if (!slug.endsWith(".png")) {
-      throw new HTTPError({ status: 404, statusText: "Not found" });
-    }
+  const meta = { name: siteName, title, description };
 
-    const undocs = useRuntimeConfig().undocs || {};
-    const siteName = (undocs.name as string) || "";
-    const siteDescription = (undocs.description as string) || "";
-
-    let title = siteName;
-    let description = siteDescription;
-
-    const raw = slug.replace(/\.png$/, "");
-    if (raw !== "_index") {
-      const path = withLeadingSlash(raw);
-      const index = await getIndex();
-      const page = index.byPath.get(path) || index.byPath.get(path + "/");
-      if (!page) {
-        throw new HTTPError({ status: 404, statusText: "Page not found", message: path });
-      }
-      title = page.title || siteName;
-      description = page.description || siteDescription;
-    }
-
-    const themeColor = (undocs.themeColor as string) || "mono";
-    // Match names case-insensitively; preserve custom CSS colors verbatim.
-    const themeColorValue = themeColorMap[themeColor.toLowerCase()] || themeColor;
-
-    const meta = { name: siteName, title, description };
-
-    const png = await render(template({ ...meta, themeColor: themeColorValue, icon: iconSvg }), {
-      width: 1200,
-      height: 630,
-      format: "png",
-      fonts,
-    });
-
-    event.res.headers.set("Content-Type", "image/png");
-    return Buffer.from(png);
+  const png = await render(template({ ...meta, themeColor: themeColorValue, icon: iconSvg }), {
+    width: 1200,
+    height: 630,
+    format: "png",
+    fonts,
   });
+
+  event.res.headers.set("Content-Type", "image/png");
+  return Buffer.from(png);
 });
 
 function withAlpha(color: string, alpha: number) {

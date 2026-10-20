@@ -1,6 +1,6 @@
 import { fileURLToPath } from "node:url";
-import { existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { defineNitroConfig } from "nitro/config";
 import { loadDocsConfig } from "./src/server/docs-config.ts";
 import { vercel } from "./src/server/vercel.ts";
@@ -73,17 +73,18 @@ const publicAssets = [...docsPublicDirs(docsDir), r("./src/app/public")]
   .filter((dir) => existsSync(dir))
   .map((dir) => ({ dir, maxAge: 0 }));
 
-// Server assets for the dynamic OG-image route (`/_og/**`): Public Sans fonts
-// (`og-image`) plus the docs public dir the project's `icon.svg` actually lives
-// in (`og-docs`) so the card can draw a project's own mark — it draws none
-// without one. That mount exists for the icon alone, so it FOLLOWS the icon
-// rather than pinning one dir. Storage mounts (`assets/<baseName>`), distinct
-// from `publicAssets`.
+// `#undocs/og-icon`, read by the OG-image route (`/_og/**`): the docs project's
+// own `icon.svg` markup, or "" when it has none (the card then draws no mark).
+// The route's fonts are plain `with { type: "bytes" }` imports, but this path is
+// the docs project's and may not exist, which no static import can say — so
+// the module is generated, with the markup inlined. Not as a re-export of the
+// file `with { type: "text" }`: Nitro's attribute transform only scans
+// `.js`/`.ts` ids, and this one is virtual.
 const docsIconFile = resolveDocsIcon(docsDir);
-const serverAssets = [
-  { baseName: "og-image", dir: r("./src/server/og-assets") },
-  ...(docsIconFile ? [{ baseName: "og-docs", dir: dirname(docsIconFile) }] : []),
-];
+const virtual = {
+  "#undocs/og-icon": () =>
+    `export default ${JSON.stringify(docsIconFile ? readFileSync(docsIconFile, "utf8") : "")};`,
+};
 
 export default defineNitroConfig({
   // No hardcoded preset: Nitro auto-detects from the environment (`NITRO_PRESET`
@@ -127,9 +128,8 @@ export default defineNitroConfig({
   // node-server preset.
   publicAssets,
 
-  // Bundled asset dirs for the OG-image route, mounted as `assets/<baseName>`
-  // storage (fonts, fallback mark, public icon overrides). See above.
-  serverAssets,
+  // The OG-image route's docs icon module. See above.
+  virtual,
 
   // NOTE: no `rollupConfig.external`/`traceDeps` for md4x/automd — their
   // WASM entries are bundled inline by Nitro's unwasm plugin, keeping

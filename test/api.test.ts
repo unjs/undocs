@@ -11,34 +11,21 @@ import {
   MINISEARCH_SEARCH_OPTIONS,
 } from "../src/server/content/search-options.ts";
 
-// og.get pulls its fonts from Nitro asset storage (`useStorage("assets/og-*")`),
-// which only exists in a built server. Back those bases with the real on-disk
-// asset dirs so the route can render a genuine PNG:
-//   assets/og-image → src/server/og-assets  (bundled fonts)
-//   assets/og-docs   → (absent — the docs override dir, the only icon source;
-//                       the card renders without a mark)
-// The factory is hoisted above imports, so it may not close over module-scope
-// vars: it resolves dirs from process.cwd() and imports node:fs lazily at call time.
-vi.mock("nitro/storage", () => {
-  const dirs: Record<string, string> = {
-    "assets/og-image": "src/server/og-assets",
-  };
-  const read = async (base: string, key: string, raw: boolean) => {
-    const dir = dirs[base];
-    if (!dir) return null;
-    const { readFile } = await import("node:fs/promises");
-    const { join: joinPath } = await import("node:path");
-    try {
-      return await readFile(joinPath(process.cwd(), dir, key), raw ? null : "utf8");
-    } catch {
-      return null;
-    }
-  };
+// og.get imports its fonts `with { type: "bytes" }`, which only Nitro's build
+// inlines. Back each with the real file so the route can render a genuine PNG
+// (its `#undocs/og-icon` is aliased to an empty stub in vitest.config.ts). The
+// factories are hoisted above imports, so they may not close over module-scope
+// vars: they resolve from process.cwd() and import node:fs lazily.
+vi.mock("../src/server/og-assets/fonts/public-sans-400.ttf", async () => {
+  const { readFile } = await import("node:fs/promises");
   return {
-    useStorage: (base: string) => ({
-      getItem: (key: string) => read(base, key, false),
-      getItemRaw: (key: string) => read(base, key, true),
-    }),
+    default: new Uint8Array(await readFile("src/server/og-assets/fonts/public-sans-400.ttf")),
+  };
+});
+vi.mock("../src/server/og-assets/fonts/public-sans-700.ttf", async () => {
+  const { readFile } = await import("node:fs/promises");
+  return {
+    default: new Uint8Array(await readFile("src/server/og-assets/fonts/public-sans-700.ttf")),
   };
 });
 
@@ -299,9 +286,9 @@ describe("/api/docs/sponsors", () => {
   });
 });
 
-// og.get renders a PNG via takumi from bundled fonts + the icon svg. Those live
-// in Nitro asset storage (`useStorage("assets/og-*")`), mocked above to read the
-// real on-disk asset dirs, so the route renders an actual image here.
+// og.get renders a PNG via takumi from bundled fonts + the icon svg. The font
+// imports are mocked above to read the real files, so the route renders an
+// actual image here.
 describe("/_og/**", () => {
   it("renders a PNG og image, loading meta from the content path", async () => {
     const res = await (await load("og")).fetch(req("/_og/guide.png"));
