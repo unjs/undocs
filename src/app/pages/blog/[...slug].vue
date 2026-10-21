@@ -51,7 +51,8 @@ useHead({
 </script>
 
 <template>
-  <Page v-if="page">
+  <!-- No side tracks to bound the measure (as on docs pages), so cap it here. -->
+  <Page v-if="page" class="mx-auto max-w-3xl">
     <PageHeader v-bind="page" :ui="{ headline: 'flex flex-col gap-y-8 items-start' }">
       <template #headline>
         <Breadcrumb
