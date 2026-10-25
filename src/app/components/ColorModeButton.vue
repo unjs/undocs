@@ -27,15 +27,28 @@ onMounted(() => {
   mounted.value = true;
 });
 
-const isDark = computed(() => (mounted.value ? cm.value === "dark" : true));
+const icon = computed(() => {
+  if (!mounted.value || cm.preference === "dark") return "i-lucide-moon";
+  if (cm.preference === "light") return "i-lucide-sun";
+  return "i-lucide-monitor";
+});
 
-const label = computed(() => (isDark.value ? "Switch to light mode" : "Switch to dark mode"));
+const nextPreference = computed(() => {
+  if (cm.preference === "dark") return "light";
+  if (cm.preference === "light") return "system";
+  return "dark";
+});
+
+const label = computed(
+  () =>
+    `Color mode: ${mounted.value ? cm.preference : "dark"}. Switch to ${nextPreference.value} mode`,
+);
 
 // `forced` is client-only, so preserve the SSR shape until mount.
 const hidden = computed(() => mounted.value && cm.forced);
 
 function toggle() {
-  cm.preference = isDark.value ? "light" : "dark";
+  cm.preference = nextPreference.value;
 }
 </script>
 
@@ -43,7 +56,7 @@ function toggle() {
   <Button
     v-if="!hidden"
     :aria-label="label"
-    :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"
+    :icon="icon"
     size="lg"
     variant="ghost"
     :class="cn(accentGlow && '[&_svg]:drop-shadow-[0_0_6px_var(--brand)]', props.class)"
