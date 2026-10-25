@@ -41,7 +41,7 @@ const nextPreference = computed(() => {
 
 const label = computed(
   () =>
-    `Color mode: ${mounted.value ? cm.preference : "dark"}. Switch to ${nextPreference.value} mode`,
+    `Color mode: ${mounted.value ? cm.preference : "dark"}. Switch to ${mounted.value ? nextPreference.value : "light"} mode`,
 );
 
 // `forced` is client-only, so preserve the SSR shape until mount.
