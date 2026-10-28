@@ -32,6 +32,7 @@ import { FORCED_MODE_GLOBAL } from "@app/embed-theme.ts";
 import {
   COLOR_MODE_STORAGE_KEY as STORAGE_KEY,
   DEFAULT_COLOR_MODE,
+  isColorModePreference,
   type ColorModePreference,
   type ColorModeValue,
 } from "@app/color-mode.ts";
@@ -79,8 +80,10 @@ function init(): void {
     return;
   }
 
-  const stored = window.localStorage.getItem(STORAGE_KEY) as ColorModePreference | null;
-  if (stored) state.preference = stored;
+  // Validated like the inline program does: an unknown value falls back to the
+  // default instead of becoming a preference the UI cannot represent.
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  if (isColorModePreference(stored)) state.preference = stored;
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", () => state.preference === "system" && apply());
