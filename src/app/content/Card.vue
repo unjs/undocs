@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { cn } from "@app/utils/cn.ts";
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
+import { isEmojiIcon } from "@app/utils/icons.ts";
 
 /**
  * `::card` — a prose card usable inline in Markdown (and grouped by
@@ -18,7 +19,7 @@ const props = defineProps<{
   [key: string]: unknown;
 }>();
 
-const isEmoji = computed(() => Boolean(props.icon && /\p{Emoji}/u.test(props.icon)));
+const isEmoji = computed(() => isEmojiIcon(props.icon));
 </script>
 
 <template>

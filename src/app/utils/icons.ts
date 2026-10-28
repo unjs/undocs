@@ -73,9 +73,15 @@ const COLORED_COLLECTIONS = new Set([
   "cif",
 ]);
 
-/** Matches the loose emoji test the icon-rendering blocks share. */
+// NOT `\p{Emoji}`: that property includes the ASCII digits, `#` and `*` (they
+// are keycap bases), so an Iconify name like `ri:image-2-line` would read as an
+// emoji and render as text. Flags are regional-indicator pairs and keycaps end
+// in U+20E3, neither of which is Extended_Pictographic.
+const EMOJI_RE = /\p{Extended_Pictographic}|\p{Regional_Indicator}|⃣/u;
+
+/** Whether an `icon` prop is an emoji (rendered as text) rather than an Iconify name. */
 export function isEmojiIcon(icon?: string): boolean {
-  return Boolean(icon && /\p{Emoji}/u.test(icon));
+  return Boolean(icon && EMOJI_RE.test(icon));
 }
 
 /**
