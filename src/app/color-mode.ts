@@ -24,3 +24,8 @@ export const COLOR_MODE_STORAGE_KEY = "undocs-color-mode";
  * flash-free without any client work.
  */
 export const DEFAULT_COLOR_MODE: ColorModeValue = "dark";
+
+/** Narrows an untrusted string (e.g. a stored value) to a `ColorModePreference`. */
+export function isColorModePreference(value: unknown): value is ColorModePreference {
+  return value === "light" || value === "dark" || value === "system";
+}

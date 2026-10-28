@@ -47,6 +47,7 @@ export const BUILTIN_ICONS: Record<string, string[]> = {
     "loader-2",
     "loader-circle",
     "message-square-warning",
+    "monitor",
     "moon",
     "octagon-alert",
     "play",

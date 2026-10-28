@@ -77,7 +77,13 @@ export function useMermaid(source: WatchSource<string>): Ref<string | null> {
     // Re-render on both content and color-mode changes; the mode is part of the
     // cache key so a switch back to a previously-rendered mode is instant.
     [source, () => colorMode.value] as const,
-    async ([value, mode]) => {
+    async ([value, mode], _, onCleanup) => {
+      // A render still in flight when the source or mode changes again must not
+      // land: a later cache hit may already be showing the current mode.
+      let stale = false;
+      onCleanup(() => {
+        stale = true;
+      });
       if (!source || import.meta.server) {
         svg.value = null;
         return;
@@ -114,8 +120,9 @@ export function useMermaid(source: WatchSource<string>): Ref<string | null> {
         });
         const res = await mermaid.render(`mermaid-${id}`, value);
         cache[key] = res.svg;
-        svg.value = res.svg;
+        if (!stale) svg.value = res.svg;
       } catch (error) {
+        if (stale) return;
         console.error("Error rendering mermaid diagram:", error);
         svg.value = `<!-- Error rendering mermaid diagram: ${error} -->`;
       }
