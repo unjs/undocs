@@ -14,14 +14,18 @@
  * class is also what `main.css` maps to CSS `color-scheme`, so this fixes the
  * `light-dark()` resolution of syntax-highlighted tokens at the same time.
  *
+ * It also leaves the PREFERENCE on `<html>` (`COLOR_MODE_ATTRIBUTE`), which is
+ * what `ColorModeButton` picks its glyph from in CSS — so a light or system
+ * visitor's first paint already shows the sun or the monitor, not the SSR
+ * default's moon.
+ *
  * This only touches `<html>`, OUTSIDE Vue's hydration root (`#root`), so it
- * cannot cause a hydration mismatch — see the note in `useColorMode.ts` about
- * why the toggle still renders the SSR default on its first client render.
+ * cannot cause a hydration mismatch.
  *
  * Runs BEFORE `inline/embed-theme.ts`, whose `m` key pins the mode for an
  * embedder and must therefore win over the visitor's own preference.
  */
-import { COLOR_MODE_STORAGE_KEY, DEFAULT_COLOR_MODE } from "../color-mode.ts";
+import { COLOR_MODE_ATTRIBUTE, COLOR_MODE_STORAGE_KEY, DEFAULT_COLOR_MODE } from "../color-mode.ts";
 
 let preference: string | null = null;
 try {
@@ -42,3 +46,8 @@ const resolved =
 const root = document.documentElement;
 root.classList.toggle("dark", resolved === "dark");
 root.classList.toggle("light", resolved === "light");
+// Only a valid stored preference (`resolved` equals it for light/dark); a
+// visitor who never chose gets no attribute, which shows the default's glyph.
+if (resolved === preference || preference === "system") {
+  root.setAttribute(COLOR_MODE_ATTRIBUTE, preference);
+}

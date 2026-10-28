@@ -41,6 +41,7 @@
  */
 import { reactive, watch } from "vue";
 import { EMBED_STYLE_ID } from "@app/embed-theme.ts";
+import { readStorage, writeStorage } from "@app/utils/storage.ts";
 import {
   isThemeColor,
   userBrandCss,
@@ -105,17 +106,14 @@ function init(): void {
     return;
   }
 
-  const stored = window.localStorage.getItem(STORAGE_KEY);
+  const stored = readStorage(STORAGE_KEY);
   if (isThemeColor(stored)) state.value = stored;
 
   // Persistence follows the COMMITTED pick only — a preview the visitor walked
   // away from must leave no trace in storage.
   watch(
     () => state.value,
-    (value) => {
-      if (value) window.localStorage.setItem(STORAGE_KEY, value);
-      else window.localStorage.removeItem(STORAGE_KEY);
-    },
+    (value) => writeStorage(STORAGE_KEY, value),
   );
 
   // Application follows whichever of the two is on top. Not `immediate`: the

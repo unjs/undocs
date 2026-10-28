@@ -5,10 +5,11 @@
  * (and `.light`) class on `document.documentElement` and persists the
  * preference to `localStorage` (key `undocs-color-mode`).
  *
- * Shape: `{ preference, value, forced }`. Consumers read/set
+ * Shape: `{ preference, value, system, forced }`. Consumers read/set
  * `.preference` (`"light" | "dark" | "system"`); `.value` is the resolved
- * concrete mode (`"light" | "dark"`). Setting `.preference` re-applies the
- * class and re-persists (reactive watcher). `.forced` is set when an embedder
+ * concrete mode (`"light" | "dark"`) and `.system` is what the OS asks for.
+ * Setting `.preference` re-applies the class and persists it (reactive
+ * watcher); nothing is stored until the visitor first changes it. `.forced` is set when an embedder
  * pinned the mode via the URL fragment — the preference is then fixed and the
  * UI hides its toggle (`ColorModeButton.vue`, in the header at `md+` and at the
  * foot of the mobile drawer below it).
@@ -23,13 +24,16 @@
  * storage and so reaches the same answer; this is the durable owner of the
  * state, the toggle and persistence. What the inline program cannot fix is the
  * SSR-rendered DOM: the server always renders the default mode, so anything
- * rendering FROM the mode (`ColorModeButton.vue`) must still show the default
- * on its first client render and correct itself `onMounted`, or hydration
- * mismatches.
+ * rendering FROM the mode must still show the default on its first client
+ * render and correct itself `onMounted`, or hydration mismatches. The one way
+ * round that is CSS: `ColorModeButton` renders every glyph and lets the
+ * `COLOR_MODE_ATTRIBUTE` both programs keep on `<html>` pick which one shows.
  */
 import { reactive, watch } from "vue";
 import { FORCED_MODE_GLOBAL } from "@app/embed-theme.ts";
+import { readStorage, writeStorage } from "@app/utils/storage.ts";
 import {
+  COLOR_MODE_ATTRIBUTE,
   COLOR_MODE_STORAGE_KEY as STORAGE_KEY,
   DEFAULT_COLOR_MODE,
   isColorModePreference,
@@ -40,25 +44,20 @@ import {
 const state = reactive({
   preference: DEFAULT_COLOR_MODE as ColorModePreference,
   value: DEFAULT_COLOR_MODE as ColorModeValue,
+  /** What the OS asks for — what `system` resolves to, and what the toggle's cycle order turns on. */
+  system: DEFAULT_COLOR_MODE as ColorModeValue,
   forced: false,
 });
 
 let _initialized = false;
 
-function systemPrefersDark(): boolean {
-  return typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches;
-}
-
-function resolveValue(): ColorModeValue {
-  if (state.preference === "system") return systemPrefersDark() ? "dark" : "light";
-  return state.preference;
-}
-
 function apply(): void {
-  state.value = resolveValue();
+  state.value = state.preference === "system" ? state.system : state.preference;
   if (typeof document !== "undefined") {
-    document.documentElement.classList.toggle("dark", state.value === "dark");
-    document.documentElement.classList.toggle("light", state.value === "light");
+    const root = document.documentElement;
+    root.classList.toggle("dark", state.value === "dark");
+    root.classList.toggle("light", state.value === "light");
+    root.setAttribute(COLOR_MODE_ATTRIBUTE, state.preference);
   }
 }
 
@@ -81,19 +80,30 @@ function init(): void {
   }
 
   // Validated like the inline program does: an unknown value falls back to the
-  // default instead of becoming a preference the UI cannot represent.
-  const stored = window.localStorage.getItem(STORAGE_KEY);
+  // default instead of becoming a preference the UI cannot represent. Read
+  // through `readStorage`, because blocked storage throws here, during
+  // `bootstrap()`, and the app would never mount.
+  const stored = readStorage(STORAGE_KEY);
   if (isColorModePreference(stored)) state.preference = stored;
-  window
-    .matchMedia("(prefers-color-scheme: dark)")
-    .addEventListener("change", () => state.preference === "system" && apply());
+
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  state.system = media.matches ? "dark" : "light";
+  media.addEventListener("change", (event) => {
+    state.system = event.matches ? "dark" : "light";
+    apply();
+  });
+  apply();
+
+  // Persist only what the visitor CHOSE. Not `immediate`, so a first visit
+  // stores nothing: "never chose" stays distinguishable from "chose the
+  // default", and a later change to `DEFAULT_COLOR_MODE` reaches every visitor
+  // who never picked one.
   watch(
     () => state.preference,
     (pref) => {
-      window.localStorage.setItem(STORAGE_KEY, pref);
+      writeStorage(STORAGE_KEY, pref);
       apply();
     },
-    { immediate: true },
   );
 }
 

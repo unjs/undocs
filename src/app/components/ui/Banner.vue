@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { cn } from "@app/utils/cn.ts";
+import { readStorage, writeStorage } from "@app/utils/storage.ts";
 import Button from "@app/components/ui/Button.vue";
 import Icon from "@app/components/global/Icon.vue";
 import AppLink from "@app/components/app/AppLink.ts";
@@ -40,14 +41,12 @@ const STORAGE_KEY = computed(() => `undocs-banner-${props.id ?? props.title ?? "
 // Read persisted dismissal after mount to preserve hydration parity.
 const dismissed = ref(false);
 onMounted(() => {
-  if (window.localStorage.getItem(STORAGE_KEY.value) === "1") dismissed.value = true;
+  if (readStorage(STORAGE_KEY.value) === "1") dismissed.value = true;
 });
 
 function dismiss(): void {
   dismissed.value = true;
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(STORAGE_KEY.value, "1");
-  }
+  writeStorage(STORAGE_KEY.value, "1");
 }
 
 // Pair each status text with its derived tint; `primary` maps to the brand tint.

@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { COLOR_MODE_STORAGE_KEY, DEFAULT_COLOR_MODE } from "../../src/app/color-mode.ts";
+import {
+  COLOR_MODE_ATTRIBUTE,
+  COLOR_MODE_STORAGE_KEY,
+  DEFAULT_COLOR_MODE,
+} from "../../src/app/color-mode.ts";
 
 /**
  * Exercises the COMPILED `inline/color-mode.js` — the exact bytes
@@ -27,6 +31,7 @@ const SCRIPT = readFileSync(
  */
 function run(stored: string | null | "throw", systemDark = false) {
   const classes = new Set<string>([DEFAULT_COLOR_MODE]);
+  const attributes: Record<string, string> = {};
   let readKey: string | undefined;
   let mediaQuery: string | undefined;
 
@@ -37,6 +42,9 @@ function run(stored: string | null | "throw", systemDark = false) {
           if (force) classes.add(name);
           else classes.delete(name);
         },
+      },
+      setAttribute(name: string, value: string) {
+        attributes[name] = value;
       },
     },
   };
@@ -57,7 +65,12 @@ function run(stored: string | null | "throw", systemDark = false) {
   const fn = new Function("document", "localStorage", "matchMedia", SCRIPT);
   fn(document, localStorage, matchMedia);
 
-  return { classes: [...classes].sort(), readKey, mediaQuery };
+  return {
+    classes: [...classes].sort(),
+    preference: attributes[COLOR_MODE_ATTRIBUTE],
+    readKey,
+    mediaQuery,
+  };
 }
 
 describe("color-mode inline script", () => {
@@ -92,5 +105,18 @@ describe("color-mode inline script", () => {
     // A stale/corrupt entry must not leave `<html>` with neither class — that
     // would break the `color-scheme` mapping and every `light-dark()` token.
     expect(run("sepia").classes).toEqual([DEFAULT_COLOR_MODE]);
+  });
+
+  it("leaves the stored preference on <html> for the toggle's glyph", () => {
+    expect(run("light").preference).toBe("light");
+    expect(run("dark").preference).toBe("dark");
+    expect(run("system", true).preference).toBe("system");
+  });
+
+  it("sets no preference attribute unless one was validly stored", () => {
+    // Absent is what shows the default's glyph in CSS.
+    expect(run(null).preference).toBeUndefined();
+    expect(run("throw").preference).toBeUndefined();
+    expect(run("sepia").preference).toBeUndefined();
   });
 });

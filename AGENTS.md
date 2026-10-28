@@ -96,9 +96,14 @@ NEVER write E2E tests. Ask for it to be tested manually.
   `seedClientIcons`) MUST run before `createSSRApp`. The inline `<head>` programs
   are the one exception, and only because they stay OUTSIDE the hydration root:
   `inline/color-mode.ts` reads `localStorage` before first paint but only touches
-  `<html>`'s class. Anything that RENDERS from the mode (`ColorModeButton.vue`)
-  must still show `DEFAULT_COLOR_MODE` on its first client render and correct
-  itself `onMounted` — the server always rendered the default.
+  `<html>` (its class and `data-color-preference`). Anything that RENDERS from
+  the mode must still show `DEFAULT_COLOR_MODE` on its first client render and
+  correct itself `onMounted` — the server always rendered the default. The way
+  round that is CSS keyed on `<html>`: `ColorModeButton.vue` renders all three
+  glyphs and lets the attribute pick one, so the first paint is already right;
+  only its `aria-label` waits for mount. Every `localStorage` access in the app
+  goes through `utils/storage.ts`, because blocked storage throws and a throw
+  during `bootstrap()` stops the app from mounting.
 - **The project's own mark is a build INPUT, in two forms.** `app-config.ts`
   parks the `DOCS_ICON_ASSET` marker in `docs.logo` when the logo is the docs
   project's own detected `icon.svg`, and the `virtual:undocs/app-config` plugin
