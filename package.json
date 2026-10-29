@@ -42,7 +42,7 @@
     "@floating-ui/dom": "^1.8.0",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
-    "@iconify-json/lucide": "^1.2.147",
+    "@iconify-json/lucide": "^1.2.148",
     "@iconify-json/vscode-icons": "^1.2.94",
     "@iconify/utils": "^3.1.7",
     "@iconify/vue": "^5.0.4",
@@ -51,7 +51,7 @@
     "@vitejs/plugin-vue": "^6.0.10",
     "@vueuse/core": "^15.0.0",
     "automd": "^0.4.3",
-    "c12": "4.0.0-rc.3",
+    "c12": "4.0.0-rc.4",
     "citty": "^0.2.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -80,11 +80,11 @@
     "@vitest/coverage-v8": "^5.0.5",
     "changelogen": "^0.6.2",
     "giget": "^3.3.1",
-    "oxfmt": ">=0.74.0",
-    "oxlint": "^1.89.0",
+    "oxfmt": ">=0.75.0",
+    "oxlint": "^1.90.0",
     "rolldown": "^1.2.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
   },
-  "packageManager": "pnpm@12.15.0"
+  "packageManager": "pnpm@12.16.1"
 }
