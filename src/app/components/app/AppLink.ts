@@ -3,7 +3,7 @@ import { useRouter, type RouteTarget } from "@app/router.ts";
 import { isPlainLinkClick } from "@app/link-capture.ts";
 import { isAppRoute } from "@app/utils/routes.ts";
 
-const EXTERNAL_RE = /^(https?:)?\/\/|^(?:mailto|tel):|^#/;
+const EXTERNAL_RE = /^(https?:)?\/\/|^(?:mailto|tel):/;
 
 function href(to: RouteTarget): string {
   return typeof to === "string" ? to : to.path + (to.hash ?? "");
@@ -42,6 +42,14 @@ export default defineComponent({
           ),
           slots.default?.(),
         );
+      }
+
+      // A bare `#anchor` is an in-page scroll: the browser does it natively (and
+      // `link-capture.ts` leaves it alone), so it is a plain same-tab anchor —
+      // never the external branch's `_blank`, and never `router.push`, which
+      // would resolve it against no base and land on `/`.
+      if (typeof to === "string" && to.startsWith("#")) {
+        return h("a", mergeProps({ href: to, target: props.target }, attrs), slots.default?.());
       }
 
       // A ROOTED path the app does not render (`/llms.txt`, `/raw/x.md`, a file
