@@ -72,10 +72,12 @@ body {
 }
 
 /* Preflight removes native typography. Bare markdown elements read the same
- * `@theme static` Geist steps that generate the utility classes. */
+ * `@theme static` Geist steps that generate the utility classes. Long-form
+ * prose departs on leading only: copy-16's 24px is a UI step, and at 24px the
+ * bordered inline-code chips below nearly touch the line beneath them. */
 .md {
   font-size: var(--text-copy-16);
-  line-height: var(--text-copy-16--line-height);
+  line-height: 1.75rem;
   color: var(--foreground);
 }
 
@@ -271,7 +273,7 @@ body {
   margin-bottom: 1.5rem;
   border-collapse: collapse;
   font-size: var(--text-copy-14);
-  line-height: var(--text-copy-14--line-height);
+  line-height: 1.5rem;
 }
 
 .md th,
@@ -301,7 +303,7 @@ body {
  * specificity, later wins. */
 .md-preview {
   font-size: var(--text-copy-14);
-  line-height: var(--text-copy-14--line-height);
+  line-height: 1.375rem;
 }
 
 .md-preview h1 {
