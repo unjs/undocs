@@ -61,7 +61,7 @@
     "mermaid-compact": "^0.0.1",
     "minisearch": "^7.2.0",
     "motion-v": "^2.8.0",
-    "nitro": "npm:nitro-nightly@latest",
+    "nitro": "^3.0.261029-rc",
     "nypm": "^0.6.12",
     "ofetch": "^1.5.1",
     "rangi": "2.2.0",
