@@ -45,14 +45,16 @@ describe("crossOriginIsolationHeaders", () => {
     expect(crossOriginIsolationHeaders(false)).toBeUndefined();
   });
 
-  it("pairs COOP with the resolved COEP — both are required to isolate", () => {
+  it("pairs COOP with the resolved COEP — both are required to isolate — and allows cross-origin embedding", () => {
     expect(crossOriginIsolationHeaders(true)).toEqual({
       "cross-origin-opener-policy": "same-origin",
       "cross-origin-embedder-policy": "credentialless",
+      "cross-origin-resource-policy": "cross-origin",
     });
     expect(crossOriginIsolationHeaders("require-corp")).toEqual({
       "cross-origin-opener-policy": "same-origin",
       "cross-origin-embedder-policy": "require-corp",
+      "cross-origin-resource-policy": "cross-origin",
     });
   });
 });

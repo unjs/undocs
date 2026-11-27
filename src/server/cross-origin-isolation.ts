@@ -2,6 +2,9 @@
  * Opt-in COOP/COEP for SharedArrayBuffer and wasm threads. `credentialless`
  * strips credentials from cross-origin no-cors loads; `require-corp` blocks
  * resources without CORP/CORS. Either mode can break cross-origin iframes.
+ * CORP `cross-origin` comes with them, so another cross-origin isolated page
+ * can still embed the docs in an iframe (it needs both the frame's COEP and
+ * its CORP).
  */
 
 export type CoepPolicy = "credentialless" | "require-corp";
@@ -42,5 +45,8 @@ export function crossOriginIsolationHeaders(input: unknown): Record<string, stri
     // COOP alone does not isolate.
     "cross-origin-opener-policy": "same-origin",
     "cross-origin-embedder-policy": coep,
+    // An isolated embedder (COEP require-corp) loads a cross-origin frame only
+    // with this; the docs are public, so any origin may.
+    "cross-origin-resource-policy": "cross-origin",
   };
 }

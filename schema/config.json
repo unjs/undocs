@@ -306,7 +306,7 @@
       }
     },
     "crossOriginIsolation": {
-      "description": "Serve the documentation site cross-origin isolated, so pages may use `SharedArrayBuffer` and wasm threads. Off by default.\n`true` sends `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: credentialless`, which loads cross-origin subresources without credentials and so needs no cooperation from the servers hosting them.\n`\"require-corp\"` is the stricter alternative: use it only when every cross-origin asset the docs load sends `Cross-Origin-Resource-Policy` (or CORS), since anything that does not is blocked.\nUnder either value a cross-origin iframe must send `Cross-Origin-Embedder-Policy` of its own, so third-party embeds (playgrounds, video) can stop loading.",
+      "description": "Serve the documentation site cross-origin isolated, so pages may use `SharedArrayBuffer` and wasm threads. Off by default.\n`true` sends `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: credentialless` (with `Cross-Origin-Resource-Policy: cross-origin`, so another cross-origin isolated page can still embed the docs in an iframe), which loads cross-origin subresources without credentials and so needs no cooperation from the servers hosting them.\n`\"require-corp\"` is the stricter alternative: use it only when every cross-origin asset the docs load sends `Cross-Origin-Resource-Policy` (or CORS), since anything that does not is blocked.\nUnder either value a cross-origin iframe must send `Cross-Origin-Embedder-Policy` of its own, so third-party embeds (playgrounds, video) can stop loading.",
       "anyOf": [
         { "type": "boolean" },
         { "type": "string", "enum": ["credentialless", "require-corp"] }

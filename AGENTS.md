@@ -577,7 +577,8 @@ NEVER write E2E tests. Ask for it to be tested manually.
 - **Cross-origin isolation is opt-in and lives on the `/**` rule.**
   `crossOriginIsolation` (`src/server/cross-origin-isolation.ts`) resolves to a
   COOP/COEP pair — `true` means `credentialless`, `require-corp` is the strict
-  alternative — that `nitro.config.ts` folds INTO the existing `/**` ISR rule, not
+  alternative — plus CORP `cross-origin` (so an isolated page can still iframe
+  the docs), that `nitro.config.ts` folds INTO the existing `/**` ISR rule, not
   a second `/**` key, which would replace it on spread. One declaration covers dev
   and the built server. It is not narrowed to HTML routes because a route rule can
   add a header but not remove one; COOP/COEP are inert on the JSON/markdown/PNG
