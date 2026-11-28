@@ -61,6 +61,8 @@ export default defineAppConfig({
         bun: "vscode-icons:file-type-bun",
         node: "vscode-icons:file-type-node",
         deno: "vscode-icons:file-type-deno",
+        vlt: "vscode-icons:file-type-vlt2",
+        vlx: "vscode-icons:file-type-vlt2",
         yml: "vscode-icons:file-type-yaml",
         terminal: "i-lucide-terminal",
       },
