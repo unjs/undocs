@@ -84,6 +84,7 @@ export const BUILTIN_ICONS: Record<string, string[]> = {
     "file-type-tailwind",
     "file-type-tsconfig",
     "file-type-typescript",
+    "file-type-vlt2",
     "file-type-vscode",
     "file-type-yaml",
     "file-type-yarn",

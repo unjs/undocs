@@ -4,5 +4,6 @@ export const packageManagers = [
   { name: "pnpm", command: "pnpm", install: "i ", run: "", x: "pnpm dlx " },
   { name: "bun", command: "bun", install: "i ", run: "run ", x: "bunx " },
   { name: "deno", command: "deno", install: "i npm:", run: "run ", x: "deno run -A npm:" },
+  { name: "vlt", command: "vlt", install: "i ", run: "run ", x: "vlx " },
   // { name: 'auto', command: 'npx nypm', install: 'i ', run: 'run ', x: 'npx ' },
 ] as const;
